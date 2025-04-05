@@ -1,25 +1,29 @@
 cmake_minimum_required(VERSION 3.10)
-project(TankGame)
+project(MyProject)
 
-# Create directories if they don't exist
-file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/build)
-file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/test/test_files)
+set(CMAKE_CXX_STANDARD 17)
 
-# Add include directory for your project
-include_directories(${CMAKE_SOURCE_DIR}/include)
+add_subdirectory(third_party/googletest)
+enable_testing()
 
-# Add subdirectory for tests
-add_subdirectory(test)
+file(GLOB_RECURSE PROJECT_SOURCES "src/*.cpp")
+file(GLOB_RECURSE PROJECT_HEADERS "include/*.h")
 
-# Source files for the library
-file(GLOB LIB_SRCS "src/*.cpp")
+add_library(mylibrary ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+target_include_directories(mylibrary
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
-# Create a library
-add_library(tank_game ${LIB_SRCS})
+file(GLOB_RECURSE TEST_SOURCES "test/*.cpp")
+add_executable(mytests ${TEST_SOURCES})
+target_include_directories(mytests
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+target_link_libraries(mytests mylibrary gtest gtest_main)
+add_test(NAME UnitTests COMMAND mytests)
 
-# Optionally, an executable
-file(GLOB EXEC_SRCS "app/*.cpp") # Assuming you have an app directory
-if (EXEC_SRCS)
-    add_executable(tank_game_app ${EXEC_SRCS})
-    target_link_libraries(tank_game_app tank_game)
-endif()
+install(TARGETS mylibrary
+    PUBLIC_HEADER DESTINATION include
+)

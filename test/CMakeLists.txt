@@ -1,19 +1,21 @@
-cmake_minimum_required(VERSION 3.10)
-project(TankGameTests)
+# Create the test executable
+add_executable(run_tests 
+    test_main.cpp
+    CalculatorTest.cpp
+    ${CMAKE_SOURCE_DIR}/src/Calculator.cpp
+)
 
-# Point to Google Test include directory
-include_directories(${CMAKE_SOURCE_DIR}/../extern/googletest/googletest/include)
-# Point to Google Test lib directory (if built separately)
-link_directories(${CMAKE_SOURCE_DIR}/../extern/googletest/googletest/lib)
+# Link with Google Test
+target_link_libraries(run_tests PRIVATE 
+    gtest 
+    gtest_main
+)
 
-# Find your project's library
-add_library(tank_game SHARED ${CMAKE_SOURCE_DIR}/../src/GameBoard.cpp)
+# Add include directories
+target_include_directories(run_tests PRIVATE 
+    ${CMAKE_SOURCE_DIR}/include
+)
 
-# List test files
-file(GLOB TEST_SRCS "test_files/*.cpp")
-
-# Create test executable
-add_executable(tank_game_tests ${TEST_SRCS})
-
-# Link Google Test and your library
-target_link_libraries(tank_game_tests gtest gtest_main tank_game)
+# Discover tests
+include(GoogleTest)
+gtest_discover_tests(run_tests)
