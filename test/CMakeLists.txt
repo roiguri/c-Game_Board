@@ -1,8 +1,8 @@
 # Create the test executable
 add_executable(run_tests 
     test_main.cpp
-    CalculatorTest.cpp
-    ${CMAKE_SOURCE_DIR}/src/Calculator.cpp
+    point.cpp
+    ${CMAKE_SOURCE_DIR}/src/point.cpp
 )
 
 # Link with Google Test
