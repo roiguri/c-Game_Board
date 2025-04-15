@@ -154,22 +154,37 @@ bool Tank::shoot() {
 }
 
 bool Tank::rotateLeft(bool quarterTurn) {
+  if (m_backwardCounter > 0) {
+    return false;
+  }
+  
   m_direction = ::rotateLeft(m_direction, quarterTurn);
+  m_continuousBackward = false;
   return true;
 }
 
 bool Tank::rotateRight(bool quarterTurn) {
+  if (m_backwardCounter > 0) {
+    return false;
+  }
+  
   m_direction = ::rotateRight(m_direction, quarterTurn);
+  m_continuousBackward = false; // TODO: is this needed?
   return true;
 }
 
 bool Tank::shoot() {
+  if (m_backwardCounter > 0) {
+    return false;
+  }
+
   if (!canShoot()) {
       return false;
   }
   
   decrementShells();
   m_shootCooldown = SHOOT_COOLDOWN;
+  m_continuousBackward = false;
   return true;
 }
 
