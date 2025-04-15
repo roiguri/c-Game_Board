@@ -24,6 +24,36 @@ public:
      * Destructor.
      */
     ~Shell();
+
+    // State accessors
+    
+    /**
+     * Gets the ID of the player who fired this shell.
+     * 
+     * @return The player ID
+     */
+    int getPlayerId() const;
+    
+    /**
+     * Gets the current position of the shell.
+     * 
+     * @return The current position
+     */
+    Point getPosition() const;
+    
+    /**
+     * Gets the direction in which the shell is moving.
+     * 
+     * @return The movement direction
+     */
+    Direction getDirection() const;
+    
+    /**
+     * Checks if the shell has been destroyed.
+     * 
+     * @return true if the shell has been destroyed, false otherwise
+     */
+    bool isDestroyed() const;
     
 private:
     int m_playerId;
