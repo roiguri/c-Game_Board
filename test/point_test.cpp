@@ -50,6 +50,26 @@ TEST(PointTest, SubtractionOperator) {
     EXPECT_EQ(7, result.y);
 }
 
+TEST(PointTest, LessThanOperator) {
+  // Test x coordinate comparison
+  Point p1(3, 5);
+  Point p2(4, 2);  // Larger x-coordinate
+  EXPECT_TRUE(p1 < p2);
+  EXPECT_FALSE(p2 < p1);
+  
+  // Test y coordinate comparison when x is the same
+  Point p3(3, 5);
+  Point p4(3, 7);  // Same x, larger y-coordinate
+  EXPECT_TRUE(p3 < p4);
+  EXPECT_FALSE(p4 < p3);
+  
+  // Test equality case (neither is less than the other)
+  Point p5(3, 5);
+  Point p6(3, 5);
+  EXPECT_FALSE(p5 < p6);
+  EXPECT_FALSE(p6 < p5);
+}
+
 TEST(PointTest, ToString) {
     Point p(7, -3);
     EXPECT_EQ("(7,-3)", p.toString());
