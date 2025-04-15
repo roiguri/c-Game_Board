@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tank Battle Visualization</title>
+    <style>
+      {{STYLE_CONTENT}}
+    </style>
+</head>
+<body>
+    <div class="visualization-container">
+        <h1>Tank Battle Visualization</h1>
+        <div class="controls">
+            <button id="btnFirst">⏮ First</button>
+            <button id="btnPrev">◀ Previous</button>
+            <button id="btnPlay">▶ Play</button>
+            <button id="btnPause" style="display: none;">⏸ Pause</button>
+            <button id="btnNext">Next ▶</button>
+            <button id="btnLast">Last ⏭</button>
+            <div class="speed-control">
+                <label for="speedSlider">Speed:</label>
+                <input type="range" id="speedSlider" min="100" max="1000" step="100" value="500">
+            </div>
+        </div>
+        <div class="status">
+            <span id="stepDisplay">Step: 0 / {{TOTAL_STEPS}}</span>
+            <span id="messageDisplay"></span>
+        </div>
+        <div class="board-container">
+            <div id="gameBoard" class="game-board"></div>
+        </div>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-color wall"></div>Wall</div>
+            <div class="legend-item"><div class="legend-color tank1"></div>Tank 1</div>
+            <div class="legend-item"><div class="legend-color tank2"></div>Tank 2</div>
+            <div class="legend-item"><div class="legend-color mine"></div>Mine</div>
+            <div class="legend-item"><div class="legend-color shell"></div>Shell</div>
+        </div>
+        <div class="stats-container">
+            <div id="player1Stats" class="player-stats player1">
+                <h3>Player 1</h3>
+                <div>Status: <span id="player1Status">Active</span></div>
+                <div>Shells: <span id="player1Shells">0</span></div>
+            </div>
+            <div id="player2Stats" class="player-stats player2">
+                <h3>Player 2</h3>
+                <div>Status: <span id="player2Status">Active</span></div>
+                <div>Shells: <span id="player2Shells">0</span></div>
+            </div>
+        </div>
+    </div>
+    <script>
+    // Game data
+{{GAME_DATA}}
+
+    // Visualization logic
+{{JS_CONTENT}}
+    </script>
+</body>
+</html>
