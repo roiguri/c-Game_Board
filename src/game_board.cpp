@@ -253,7 +253,3 @@ std::string GameBoard::toString() const {
     
     return ss.str();
 }
-
-bool GameBoard::isValidPosition(int x, int y) const {
-    return x >= 0 && x < m_width && y >= 0 && y < m_height;
-}

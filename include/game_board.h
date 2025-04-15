@@ -48,6 +48,4 @@ private:
     std::map<Point, int> m_wallHealth;
     int m_width;
     int m_height;
-    
-    bool isValidPosition(int x, int y) const;
 };
