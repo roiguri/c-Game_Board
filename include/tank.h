@@ -78,13 +78,26 @@ public:
     void destroy();
 
     // Tank Actions
-    
     /**
      * @brief Move the tank forward to the given position
      * @param newPosition The new position after movement
      * @return true if the move was successful, false otherwise
      */
     bool moveForward(const Point& newPosition);
+
+    /**
+     * @brief Rotate the tank left
+     * @param quarterTurn If true, rotate by 90 degrees (1/4 turn), otherwise 45 degrees (1/8 turn)
+     * @return true if the rotation was successful, false otherwise
+     */
+    bool rotateLeft(bool quarterTurn);
+    
+    /**
+     * @brief Rotate the tank right
+     * @param quarterTurn If true, rotate by 90 degrees (1/4 turn), otherwise 45 degrees (1/8 turn)
+     * @return true if the rotation was successful, false otherwise
+     */
+    bool rotateRight(bool quarterTurn);
     
     // Utility methods
     /**
