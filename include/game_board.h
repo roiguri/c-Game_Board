@@ -2,7 +2,7 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "point.h"
+#include "utils/point.h"
 
 class GameBoard {
 public:

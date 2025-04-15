@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
-#include "direction.h"
-#include "point.h"
+#include "utils/direction.h"
+#include "utils/point.h"
 
 TEST(DirectionTest, DirectionToString) {
     EXPECT_EQ(directionToString(Direction::Up), "Up");

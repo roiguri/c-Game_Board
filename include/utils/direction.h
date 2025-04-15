@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "point.h"
+#include "utils/point.h"
 
 /**
  * Represents the 8 possible directions for tank movement and shooting.

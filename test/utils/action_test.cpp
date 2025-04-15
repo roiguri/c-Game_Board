@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "action.h"
+#include "utils/action.h"
 
 TEST(ActionTest, ActionToString) {
     EXPECT_EQ(actionToString(Action::MoveForward), "Move Forward");

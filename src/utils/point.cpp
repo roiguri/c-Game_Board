@@ -1,4 +1,4 @@
-#include "point.h"
+#include "utils/point.h"
 #include <cmath>
 
 Point::Point() : x(0), y(0) {}

@@ -1,4 +1,4 @@
-#include "direction.h"
+#include "utils/direction.h"
 
 std::string directionToString(Direction direction) {
     switch (direction) {
