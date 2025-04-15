@@ -11,6 +11,7 @@
 #include "bonus/visualization/core/game_snapshot.h"
 #include "bonus/visualization/core/visualizer_base.h"
 #include "bonus/visualization/core/visualization_manager.h"
+#include "bonus/visualization/visualizers/html_visualizer/html_visualizer.h"
 
 // Forward declarations for concrete visualizers
 // When implementing these classes, uncomment these lines
@@ -29,9 +30,7 @@
 inline std::unique_ptr<VisualizationManager> createVisualizationManager(bool enableLiveVisualization = false) {
     auto manager = std::make_unique<VisualizationManager>();
     
-    // When concrete visualizers are implemented, add them here
-    // manager->addVisualizer(std::make_unique<HTMLVisualizer>());
-    // manager->addVisualizer(std::make_unique<TerminalVisualizer>());
+    manager->addVisualizer(std::make_unique<HTMLVisualizer>());
     
     manager->setLiveVisualizationEnabled(enableLiveVisualization);
     

@@ -80,6 +80,7 @@ button:disabled {
   width: 30px;
   height: 30px;
   background-color: #fff;
+  border: 1px solid black;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -111,19 +112,10 @@ button:disabled {
 }
 
 .shell {
-  position: absolute;
   width: 10px;
   height: 10px;
   border-radius: 50%;
   z-index: 10;
-}
-
-.shell1 {
-  background-color: #64b5f6;
-}
-
-.shell2 {
-  background-color: #e57373;
 }
 
 .legend {

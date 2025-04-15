@@ -19,10 +19,6 @@ target_include_directories(tank_battle_lib
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-# Copy visualization templates to build directory
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/bonus/visualization/visualizers/html_visualizer/templates/
-     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/templates)
-
 # Add the main executable
 # add_executable(tanks_game src/main.cpp)
 # target_link_libraries(tanks_game PRIVATE tank_battle_lib)
@@ -36,3 +32,13 @@ target_link_libraries(tank_battle_tests PRIVATE tank_battle_lib gtest gtest_main
 # Discover tests
 include(GoogleTest)
 gtest_discover_tests(tank_battle_tests)
+
+# Visualization
+# Add visualization demo executable 
+add_executable(viz_demo examples/visualization/html_visualizer_demo.cpp)
+target_include_directories(viz_demo PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(viz_demo PRIVATE tank_battle_lib)
+
+# Copy visualization templates to build directory for the demo
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/bonus/visualization/visualizers/html_visualizer/templates/
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/templates)

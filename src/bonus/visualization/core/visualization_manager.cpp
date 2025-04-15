@@ -33,7 +33,6 @@ void VisualizationManager::captureGameState(
 
 bool VisualizationManager::generateOutputs(const std::string& basePath) {
     bool allSucceeded = true;
-    
     for (size_t i = 0; i < m_visualizers.size(); ++i) {
         // Create a unique output path for each visualizer
         std::string outputPath = basePath;
