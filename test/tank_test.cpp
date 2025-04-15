@@ -73,6 +73,50 @@ TEST_F(TankTest, MoveForward_UpdatesPosition) {
   EXPECT_EQ(tank->getPosition(), newPosition);
 }
 
+TEST_F(TankTest, RotateLeft_EighthTurn) {
+  Direction initialDirection = Direction::Right;
+  tank->setDirection(initialDirection);
+  
+  EXPECT_TRUE(tank->rotateLeft(/*quarterTurn=*/false));
+  EXPECT_EQ(tank->getDirection(), Direction::UpRight);
+  
+  EXPECT_TRUE(tank->rotateLeft(/*quarterTurn=*/false));
+  EXPECT_EQ(tank->getDirection(), Direction::Up);
+}
+
+TEST_F(TankTest, RotateLeft_QuarterTurn) {
+  Direction initialDirection = Direction::Right;
+  tank->setDirection(initialDirection);
+  
+  EXPECT_TRUE(tank->rotateLeft(/*quarterTurn=*/true));
+  EXPECT_EQ(tank->getDirection(), Direction::Up);
+  
+  EXPECT_TRUE(tank->rotateLeft(/*quarterTurn=*/true));
+  EXPECT_EQ(tank->getDirection(), Direction::Left);
+}
+
+TEST_F(TankTest, RotateRight_EighthTurn) {
+  Direction initialDirection = Direction::Right;
+  tank->setDirection(initialDirection);
+  
+  EXPECT_TRUE(tank->rotateRight(/*quarterTurn=*/false));
+  EXPECT_EQ(tank->getDirection(), Direction::DownRight);
+  
+  EXPECT_TRUE(tank->rotateRight(/*quarterTurn=*/false));
+  EXPECT_EQ(tank->getDirection(), Direction::Down);
+}
+
+TEST_F(TankTest, RotateRight_QuarterTurn) {
+  Direction initialDirection = Direction::Right;
+  tank->setDirection(initialDirection);
+  
+  EXPECT_TRUE(tank->rotateRight(/*quarterTurn=*/true));
+  EXPECT_EQ(tank->getDirection(), Direction::Down);
+  
+  EXPECT_TRUE(tank->rotateRight(/*quarterTurn=*/true));
+  EXPECT_EQ(tank->getDirection(), Direction::Left);
+}
+
 TEST_F(TankTest, GetNextForwardPosition) {
   // Initial position is (3, 4) and initial direction is Right
   EXPECT_EQ(tank->getNextForwardPosition(), Point(4, 4));
