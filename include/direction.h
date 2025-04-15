@@ -1,5 +1,4 @@
-#ifndef DIRECTION_H
-#define DIRECTION_H
+#pragma once
 
 #include <string>
 #include "point.h"
@@ -52,5 +51,3 @@ Direction rotateRight(Direction direction, bool quarterTurn = false);
  * @return A Point representing the delta movement in x,y coordinates
  */
 Point getDirectionDelta(Direction direction, int magnitude = 1);
-
-#endif // DIRECTION_H

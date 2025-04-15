@@ -1,5 +1,4 @@
-#ifndef ACTION_H
-#define ACTION_H
+#pragma once
 
 #include <string>
 
@@ -21,5 +20,3 @@ enum class Action {
  * @return A string representation of the action
  */
 std::string actionToString(Action action);
-
-#endif // ACTION_H

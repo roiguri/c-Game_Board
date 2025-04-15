@@ -1,5 +1,5 @@
-#ifndef POINT_H
-#define POINT_H
+#pragma once
+
 #include <string>
 #include <cmath>
 
@@ -20,5 +20,3 @@ class Point {
       static int manhattanDistance(const Point& a, const Point& b);
       static double euclideanDistance(const Point& a, const Point& b);
   };
-
-#endif // POINT_H
