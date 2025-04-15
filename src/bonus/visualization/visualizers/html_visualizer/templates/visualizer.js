@@ -127,7 +127,78 @@ function renderSnapshot(index) {
             // Add cannon
             const cannon = document.createElement('div');
             cannon.className = 'cannon';
-            cannon.style.transform = `rotate(${directionAngles[tank.direction]}deg)`;
+            
+            // Center coordinates (relative to cell)
+            const centerX = 15;
+            const centerY = 15;
+
+            // Direction-specific styling
+            switch(tank.direction) {
+              case 0: // Up
+                cannon.style.width = '4px';
+                cannon.style.height = '15px';
+                cannon.style.left = `${centerX - 2}px`; // Center the 4px width
+                cannon.style.top = '0px'; // Start from top of cell
+                break;
+                
+              case 1: // UpRight
+                // For diagonal, create a longer cannon to account for the diagonal distance
+                cannon.style.width = '21px'; // ~15px * √2 (diagonal)
+                cannon.style.height = '4px';
+                cannon.style.transformOrigin = 'left center';
+                cannon.style.transform = 'rotate(-45deg)';
+                cannon.style.left = `${centerX}px`;
+                cannon.style.top = `${centerY - 2}px`; // Center the 4px height
+                break;
+                
+              case 2: // Right
+                cannon.style.width = '15px';
+                cannon.style.height = '4px';
+                cannon.style.left = `${centerX}px`; // Start from center
+                cannon.style.top = `${centerY - 2}px`; // Center the 4px height
+                break;
+                
+              case 3: // DownRight
+                cannon.style.width = '21px'; // ~15px * √2 (diagonal)
+                cannon.style.height = '4px';
+                cannon.style.transformOrigin = 'left center';
+                cannon.style.transform = 'rotate(45deg)';
+                cannon.style.left = `${centerX}px`;
+                cannon.style.top = `${centerY - 2}px`; // Center the 4px height
+                break;
+                
+              case 4: // Down
+                cannon.style.width = '4px';
+                cannon.style.height = '15px';
+                cannon.style.left = `${centerX - 2}px`; // Center the 4px width
+                cannon.style.top = `${centerY}px`; // Start from center
+                break;
+                
+              case 5: // DownLeft
+                cannon.style.width = '21px'; // ~15px * √2 (diagonal)
+                cannon.style.height = '4px';
+                cannon.style.transformOrigin = 'right center';
+                cannon.style.transform = 'rotate(-45deg)';
+                cannon.style.left = `${centerX - 21}px`; // Position so right edge is at center
+                cannon.style.top = `${centerY - 2}px`; // Center the 4px height
+                break;
+                
+              case 6: // Left
+                cannon.style.width = '15px';
+                cannon.style.height = '4px';
+                cannon.style.left = `${centerX - 15}px`; // End at center
+                cannon.style.top = `${centerY - 2}px`; // Center the 4px height
+                break;
+                
+              case 7: // UpLeft
+                cannon.style.width = '21px'; // ~15px * √2 (diagonal)
+                cannon.style.height = '4px';
+                cannon.style.transformOrigin = 'right center';
+                cannon.style.transform = 'rotate(45deg)';
+                cannon.style.left = `${centerX - 21}px`; // Position so right edge is at center
+                cannon.style.top = `${centerY - 2}px`; // Center the 4px height
+                break;
+            }
             cell.appendChild(cannon);
         }
         
