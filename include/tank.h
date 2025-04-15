@@ -255,6 +255,28 @@ public:
      */
     void destroy();
 
+    // Tank Actions
+    
+    /**
+     * @brief Move the tank forward to the given position
+     * @param newPosition The new position after movement
+     * @return true if the move was successful, false otherwise
+     */
+    bool moveForward(const Point& newPosition);
+    
+    // Utility methods
+    /**
+     * @brief Calculate the next position for forward movement
+     * @return The next position if the tank would move forward
+     */
+    Point getNextForwardPosition() const;
+    
+    /**
+     * @brief Calculate the next position for backward movement
+     * @return The next position if the tank would move backward
+     */
+    Point getNextBackwardPosition() const;
+
 private:
     int m_playerId;
     Point m_position;
