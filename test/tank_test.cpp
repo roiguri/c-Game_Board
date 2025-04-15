@@ -138,3 +138,64 @@ TEST_F(TankTest, GetNextBackwardPosition) {
   tank->setDirection(Direction::UpLeft);
   EXPECT_EQ(tank->getNextBackwardPosition(), Point(4, 5));
 }
+
+// Shooting Tests
+TEST_F(TankTest, CanShoot_InitiallyTrue) {
+  EXPECT_TRUE(tank->canShoot());
+}
+
+TEST_F(TankTest, CanShoot_FalseWhenDestroyed) {
+  tank->destroy();
+  EXPECT_FALSE(tank->canShoot());
+}
+
+TEST_F(TankTest, CanShoot_FalseWhenNoShells) {
+  // Use all shells
+  for (int i = 0; i < Tank::INITIAL_SHELLS; i++) {
+      tank->decrementShells();
+  }
+  EXPECT_FALSE(tank->canShoot());
+}
+
+TEST_F(TankTest, Shoot_SuccessfulShot) {
+  int initialShells = tank->getRemainingShells();
+  EXPECT_TRUE(tank->shoot());
+  EXPECT_EQ(tank->getRemainingShells(), initialShells - 1);
+  EXPECT_FALSE(tank->canShoot());
+}
+
+TEST_F(TankTest, Shoot_FailsOnCooldown) {
+  EXPECT_TRUE(tank->shoot());
+  
+  int shellsAfterFirstShot = tank->getRemainingShells();
+  EXPECT_FALSE(tank->shoot());
+  EXPECT_EQ(tank->getRemainingShells(), shellsAfterFirstShot);
+}
+
+TEST_F(TankTest, UpdateCooldowns_DecrementsCooldown) {
+  // Activate cooldown
+  EXPECT_TRUE(tank->shoot());
+  EXPECT_FALSE(tank->canShoot());
+  
+  // Update cooldowns Tank::SHOOT_COOLDOWN times
+  for (int i = 0; i < Tank::SHOOT_COOLDOWN; i++) {
+      EXPECT_FALSE(tank->canShoot());
+      tank->updateCooldowns();
+  }
+  
+  EXPECT_TRUE(tank->canShoot());
+}
+
+TEST_F(TankTest, Shoot_FailsWhenNoShells) {
+  // Use all shells
+  for (int i = 0; i < Tank::INITIAL_SHELLS; i++) {
+      tank->decrementShells();
+  }
+  
+  EXPECT_FALSE(tank->shoot());
+}
+
+TEST_F(TankTest, Shoot_FailsWhenDestroyed) {
+  tank->destroy();
+  EXPECT_FALSE(tank->shoot());
+}
