@@ -153,6 +153,16 @@ bool Tank::shoot() {
   return true;
 }
 
+bool Tank::rotateLeft(bool quarterTurn) {
+  m_direction = ::rotateLeft(m_direction, quarterTurn);
+  return true;
+}
+
+bool Tank::rotateRight(bool quarterTurn) {
+  m_direction = ::rotateRight(m_direction, quarterTurn);
+  return true;
+}
+
 Point Tank::getNextForwardPosition() const {
   return m_position + getDirectionDelta(m_direction);
 }
