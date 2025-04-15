@@ -1,4 +1,3 @@
-// GameBoard.h
 #pragma once
 #include <vector>
 #include <map>
@@ -7,6 +6,8 @@
 
 class GameBoard {
 public:
+    static constexpr int WALL_STARTING_HEALTH = 2;
+
     enum class CellType {
         Empty,
         Wall,
@@ -19,7 +20,7 @@ public:
     GameBoard(int width, int height);
     ~GameBoard();
     
-    bool initialize(const std::vector<std::string>& boardLines);
+    bool initialize(const std::vector<std::string>& boardLines, std::vector<std::string>& errors);
     
     // Board access
     CellType getCellType(int x, int y) const;
