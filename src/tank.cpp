@@ -49,3 +49,17 @@ void Tank::decrementShells() {
 void Tank::destroy() {
   m_destroyed = true;
 }
+
+bool Tank::moveForward(const Point& newPosition) {
+  m_position = newPosition;
+  return true;
+}
+
+Point Tank::getNextForwardPosition() const {
+  return m_position + getDirectionDelta(m_direction);
+}
+
+Point Tank::getNextBackwardPosition() const {
+  // Backward movement is in the opposite direction of the tank's cannon
+  return m_position - getDirectionDelta(m_direction);
+}
