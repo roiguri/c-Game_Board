@@ -188,6 +188,7 @@ private:
 class Tank {
 public:
     static constexpr int INITIAL_SHELLS = 16;
+    static constexpr int SHOOT_COOLDOWN = 4;
 
     /**
      * @brief Constructs a new Tank object
@@ -232,6 +233,12 @@ public:
      * @return true if destroyed, false otherwise
      */
     bool isDestroyed() const;
+
+    /**
+     * @brief Check if the tank can shoot
+     * @return true if the tank can shoot, false otherwise
+     */
+    bool canShoot() const;
     
     /**
      * @brief Set the position of the tank
@@ -255,6 +262,11 @@ public:
      */
     void destroy();
 
+    /**
+     * @brief Update cooldown timers after each game step
+     */
+    void updateCooldowns();
+
     // Tank Actions
     /**
      * @brief Move the tank forward to the given position
@@ -276,6 +288,12 @@ public:
      * @return true if the rotation was successful, false otherwise
      */
     bool rotateRight(bool quarterTurn);
+
+    /**
+     * @brief Shoot a shell in the direction the tank is facing
+     * @return true if the shot was successful, false if the tank can't shoot
+     */
+    bool shoot();
     
     // Utility methods
     /**
@@ -296,4 +314,5 @@ private:
     Direction m_direction;
     int m_remainingShells;
     bool m_destroyed;
+    int m_shootCooldown;
 };

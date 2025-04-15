@@ -163,6 +163,16 @@ bool Tank::rotateRight(bool quarterTurn) {
   return true;
 }
 
+bool Tank::shoot() {
+  if (!canShoot()) {
+      return false;
+  }
+  
+  decrementShells();
+  m_shootCooldown = SHOOT_COOLDOWN;
+  return true;
+}
+
 Point Tank::getNextForwardPosition() const {
   return m_position + getDirectionDelta(m_direction);
 }
