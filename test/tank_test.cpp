@@ -27,6 +27,8 @@ TEST_F(TankTest, Constructor_InitializesCorrectly) {
     EXPECT_EQ(tank->getPlayerId(), playerId);
     EXPECT_EQ(tank->getPosition(), position);
     EXPECT_EQ(tank->getDirection(), direction);
+    EXPECT_EQ(tank->getRemainingShells(), Tank::INITIAL_SHELLS);
+    EXPECT_FALSE(tank->isDestroyed());
 }
 
 // State Mutator Tests
@@ -40,4 +42,27 @@ TEST_F(TankTest, SetDirection_ChangesDirection) {
     Direction newDirection = Direction::Down;
     tank->setDirection(newDirection);
     EXPECT_EQ(tank->getDirection(), newDirection);
+}
+
+TEST_F(TankTest, DecrementShells_ReducesShellCount) {
+  int initialShells = tank->getRemainingShells();
+  tank->decrementShells();
+  EXPECT_EQ(tank->getRemainingShells(), initialShells - 1);
+}
+
+TEST_F(TankTest, DecrementShells_StopsAtZero) {
+  // Empty all shells
+  for (int i = 0; i < Tank::INITIAL_SHELLS; i++) {
+      tank->decrementShells();
+  }
+  EXPECT_EQ(tank->getRemainingShells(), 0);
+  
+  // Try to decrement again
+  tank->decrementShells();
+  EXPECT_EQ(tank->getRemainingShells(), 0);
+}
+
+TEST_F(TankTest, Destroy_MarksTankAsDestroyed) {
+  tank->destroy();
+  EXPECT_TRUE(tank->isDestroyed());
 }

@@ -9,6 +9,8 @@
  */
 class Tank {
 public:
+    static constexpr int INITIAL_SHELLS = 16;
+
     /**
      * @brief Constructs a new Tank object
      * 
@@ -40,6 +42,18 @@ public:
      * @return The direction
      */
     Direction getDirection() const;
+
+    /**
+     * @brief Get the number of remaining shells
+     * @return The shell count
+     */
+    int getRemainingShells() const;
+    
+    /**
+     * @brief Check if the tank is destroyed
+     * @return true if destroyed, false otherwise
+     */
+    bool isDestroyed() const;
     
     /**
      * @brief Set the position of the tank
@@ -53,8 +67,20 @@ public:
      */
     void setDirection(Direction direction);
 
+    /**
+     * @brief Decrement the number of shells
+     */
+    void decrementShells();
+    
+    /**
+     * @brief Mark the tank as destroyed
+     */
+    void destroy();
+
 private:
     int m_playerId;
     Point m_position;
     Direction m_direction;
+    int m_remainingShells;
+    bool m_destroyed;
 };
