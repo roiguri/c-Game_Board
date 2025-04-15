@@ -63,3 +63,7 @@ set_target_properties(tank_battle_tests
 # Discover tests
 include(GoogleTest)
 gtest_discover_tests(tank_battle_tests)
+
+# Visualization
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/bonus/visualization/visualizers/html_visualizer/templates/
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/templates)
