@@ -66,3 +66,31 @@ TEST_F(TankTest, Destroy_MarksTankAsDestroyed) {
   tank->destroy();
   EXPECT_TRUE(tank->isDestroyed());
 }
+
+TEST_F(TankTest, MoveForward_UpdatesPosition) {
+  Point newPosition(4, 4);
+  EXPECT_TRUE(tank->moveForward(newPosition));
+  EXPECT_EQ(tank->getPosition(), newPosition);
+}
+
+TEST_F(TankTest, GetNextForwardPosition) {
+  // Initial position is (3, 4) and initial direction is Right
+  EXPECT_EQ(tank->getNextForwardPosition(), Point(4, 4));
+  
+  tank->setDirection(Direction::Down);
+  EXPECT_EQ(tank->getNextForwardPosition(), Point(3, 5));
+  
+  tank->setDirection(Direction::UpLeft);
+  EXPECT_EQ(tank->getNextForwardPosition(), Point(2, 3));
+}
+
+TEST_F(TankTest, GetNextBackwardPosition) {
+  // Initial position is (3, 4) and initial direction is Right
+  EXPECT_EQ(tank->getNextBackwardPosition(), Point(2, 4));
+  
+  tank->setDirection(Direction::Down);
+  EXPECT_EQ(tank->getNextBackwardPosition(), Point(3, 3));
+  
+  tank->setDirection(Direction::UpLeft);
+  EXPECT_EQ(tank->getNextBackwardPosition(), Point(4, 5));
+}
