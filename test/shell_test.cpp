@@ -81,3 +81,31 @@ TEST_F(ShellTest, Destroy) {
   shell->destroy();
   EXPECT_TRUE(shell->isDestroyed());
 }
+
+TEST_F(ShellTest, GetNextPosition) {
+  // Test horizontal/vertical directions
+  Shell rightShell(1, Point(5, 5), Direction::Right);
+  EXPECT_EQ(rightShell.getNextPosition(), Point(6, 5)); // +1 in x
+
+  Shell leftShell(1, Point(5, 5), Direction::Left);
+  EXPECT_EQ(leftShell.getNextPosition(), Point(4, 5)); // -1 in x
+
+  Shell upShell(1, Point(5, 5), Direction::Up);
+  EXPECT_EQ(upShell.getNextPosition(), Point(5, 4)); // -1 in y (up is negative in y)
+
+  Shell downShell(1, Point(5, 5), Direction::Down);
+  EXPECT_EQ(downShell.getNextPosition(), Point(5, 6)); // +1 in y
+  
+  // Test diagonal directions
+  Shell upRightShell(1, Point(5, 5), Direction::UpRight);
+  EXPECT_EQ(upRightShell.getNextPosition(), Point(6, 4)); // +1 in x, -1 in y
+
+  Shell downRightShell(1, Point(5, 5), Direction::DownRight);
+  EXPECT_EQ(downRightShell.getNextPosition(), Point(6, 6)); // +1 in x, +1 in y
+
+  Shell downLeftShell(1, Point(5, 5), Direction::DownLeft);
+  EXPECT_EQ(downLeftShell.getNextPosition(), Point(4, 6)); // -1 in x, +1 in y
+
+  Shell upLeftShell(1, Point(5, 5), Direction::UpLeft);
+  EXPECT_EQ(upLeftShell.getNextPosition(), Point(4, 4)); // -1 in x, -1 in y
+}
