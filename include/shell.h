@@ -68,6 +68,14 @@ public:
      * Marks the shell as destroyed, typically after a collision.
      */
     void destroy();
+
+    /**
+     * Calculates the next position of the shell based on its direction.
+     * Shells move at a pace of 2 units per step.
+     * 
+     * @return The next position of the shell
+     */
+    Point getNextPosition() const;
     
 private:
     int m_playerId;

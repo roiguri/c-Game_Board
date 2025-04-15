@@ -35,3 +35,8 @@ void Shell::setPosition(const Point& position) {
 void Shell::destroy() {
   m_destroyed = true;
 }
+
+Point Shell::getNextPosition() const {
+  // Shells move at a pace of 2 per game step
+  return m_position + getDirectionDelta(m_direction, 2);
+}
