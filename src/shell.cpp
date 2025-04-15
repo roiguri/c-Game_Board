@@ -26,3 +26,12 @@ Direction Shell::getDirection() const {
 bool Shell::isDestroyed() const {
   return m_destroyed;
 }
+
+
+void Shell::setPosition(const Point& position) {
+  m_position = position;
+}
+
+void Shell::destroy() {
+  m_destroyed = true;
+}

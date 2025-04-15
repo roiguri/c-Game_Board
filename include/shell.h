@@ -54,6 +54,20 @@ public:
      * @return true if the shell has been destroyed, false otherwise
      */
     bool isDestroyed() const;
+
+    // State mutators
+    
+    /**
+     * Sets the position of the shell.
+     * 
+     * @param position The new position
+     */
+    void setPosition(const Point& position);
+    
+    /**
+     * Marks the shell as destroyed, typically after a collision.
+     */
+    void destroy();
     
 private:
     int m_playerId;
