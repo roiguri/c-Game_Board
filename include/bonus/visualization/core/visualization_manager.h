@@ -45,6 +45,7 @@ public:
      * @param board Current board state
      * @param tanks Current tank states
      * @param shells Current shell states
+     * @param countdown The countdown timer value (if active, -1 otherwise)
      * @param message Optional message describing the step
      */
     void captureGameState(
@@ -52,6 +53,7 @@ public:
         const GameBoard& board,
         const std::vector<Tank>& tanks,
         const std::vector<Shell>& shells,
+        int countdown = -1,
         const std::string& message = ""
     );
     

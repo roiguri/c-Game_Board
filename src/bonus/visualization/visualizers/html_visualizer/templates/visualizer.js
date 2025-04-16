@@ -8,6 +8,7 @@ const btnNext = document.getElementById('btnNext');
 const btnLast = document.getElementById('btnLast');
 const speedSlider = document.getElementById('speedSlider');
 const stepDisplay = document.getElementById('stepDisplay');
+const countdownDisplay = document.getElementById('countdownDisplay');
 const messageDisplay = document.getElementById('messageDisplay');
 const player1Status = document.getElementById('player1Status');
 const player1Shells = document.getElementById('player1Shells');
@@ -19,18 +20,6 @@ let currentSnapshotIndex = 0;
 let playIntervalId = null;
 let playSpeed = parseInt(speedSlider.value);
 let initialized = false;
-
-// Direction angle mapping (in degrees)
-const directionAngles = {
-    [gameData.directions.UP]: 270,
-    [gameData.directions.UP_RIGHT]: 315,
-    [gameData.directions.RIGHT]: 0,
-    [gameData.directions.DOWN_RIGHT]: 45,
-    [gameData.directions.DOWN]: 90,
-    [gameData.directions.DOWN_LEFT]: 135,
-    [gameData.directions.LEFT]: 180,
-    [gameData.directions.UP_LEFT]: 225
-};
 
 // Initialize the visualization
 function initialize() {
@@ -85,12 +74,29 @@ function renderSnapshot(index) {
     stepDisplay.textContent = `Step: ${snapshot.step} / ${gameData.snapshots[gameData.snapshots.length - 1].step}`;
     messageDisplay.textContent = snapshot.message;
     
+    // Update countdown display
+    if (snapshot.countdown > 0) {
+        countdownDisplay.textContent = `Countdown: ${snapshot.countdown}`;
+        countdownDisplay.classList.add('active');
+    } else {
+        countdownDisplay.textContent = '';
+        countdownDisplay.classList.remove('active');
+    }
+    
     // Clear previous state
     const cells = gameBoard.querySelectorAll('.cell');
     cells.forEach(cell => {
         cell.className = 'cell';
         cell.innerHTML = '';
     });
+
+    // Create a wall health lookup map for easy access
+    const wallHealthMap = {};
+    if (snapshot.wallHealth) {
+        snapshot.wallHealth.forEach(wall => {
+            wallHealthMap[`${wall.x},${wall.y}`] = wall.health;
+        });
+    }
     
     // Render board
     const board = snapshot.board;
@@ -104,6 +110,9 @@ function renderSnapshot(index) {
             switch (cellType) {
                 case gameData.cellTypes.WALL:
                     cell.classList.add('wall');
+                    const key = `${x},${y}`;
+                    const health = wallHealthMap[key] || 2; // Default to full health if not found
+                    cell.classList.add(`wall-health-${health}`);
                     break;
                 case gameData.cellTypes.MINE:
                     cell.classList.add('mine');

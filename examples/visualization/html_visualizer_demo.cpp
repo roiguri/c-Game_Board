@@ -31,6 +31,7 @@ int main() {
     // Create visualization manager
     auto visualizationManager = createVisualizationManager();
     std::vector<Shell> shells;
+    int countdown = -1;
     
     // Generate a few snapshots of "game play"
     for (int step = 0; step < 10; step++) {
@@ -55,8 +56,30 @@ int main() {
         }
         
         // Create a shell for odd numbered steps
-        if (step % 2 == 1) {
-            shells.emplace_back(1, Point(step,step), tanks[0].getDirection());
+        if (step == 2) {
+            shells.emplace_back(1, tanks[1].getPosition(), tanks[1].getDirection());
+        } else if (step > 2) {
+            // Move the shell
+            Point shellPos = shells[0].getPosition();
+            Point nextShellPos = shells[0].getNextPosition();
+            shells[0].setPosition(nextShellPos);
+        }
+
+        if (step == 5) {
+          countdown = 10;
+        } else if (step > 5) {
+          countdown--;
+        }
+
+        if (step == 3 || step == 6) {
+          // hit all walls
+          for (int i = 0; i < board.getWidth(); i++) {
+            for (int j = 0; j < board.getHeight(); j++) {
+              if (board.isWall(Point(i, j))) {
+                board.damageWall(Point(i, j));
+              }
+            }
+          }
         }
         
         // Capture the game state
@@ -64,7 +87,8 @@ int main() {
             step, 
             board, 
             tanks, 
-            shells, 
+            shells,
+            countdown, 
             "Demo Step " + std::to_string(step)
         );
     }

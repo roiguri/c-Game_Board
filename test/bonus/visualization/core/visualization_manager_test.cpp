@@ -86,6 +86,9 @@ protected:
         
         std::vector<std::string> errors;
         board.initialize(boardData, errors);
+
+        // Damage one wall to test wall health
+        board.damageWall(Point(0, 0));
         
         // Create test tanks
         tanks.push_back(Tank(1, Point(1, 1), Direction::Right));
@@ -132,7 +135,7 @@ TEST_F(VisualizationManagerTest, CaptureGameState) {
     manager->addVisualizer(std::unique_ptr<VisualizerBase>(mockVisualizer));
     
     // Capture a game state
-    manager->captureGameState(42, board, tanks, shells, "Test message");
+    manager->captureGameState(42, board, tanks, shells, -1, "Test message");
     
     // Verify that the snapshot was processed
     EXPECT_EQ(mockVisualizer->getProcessedSnapshotCount(), 1);
@@ -143,9 +146,17 @@ TEST_F(VisualizationManagerTest, CaptureGameState) {
     EXPECT_EQ(lastSnapshot.getMessage(), "Test message");
     EXPECT_EQ(lastSnapshot.getTanks().size(), 2);
     EXPECT_EQ(lastSnapshot.getShells().size(), 1);
+    EXPECT_EQ(lastSnapshot.getCountdown(), -1);
+
+    // Verify wall health was captured
+    const auto& wallHealth = lastSnapshot.getWallHealth();
+    EXPECT_FALSE(wallHealth.empty());
+    auto it = wallHealth.find(Point(0, 0));
+    EXPECT_NE(it, wallHealth.end());
+    EXPECT_EQ(it->second, 1);  // Damaged wall
     
     // Capture another game state
-    manager->captureGameState(43, board, tanks, shells, "Next step");
+    manager->captureGameState(43, board, tanks, shells, 30, "Next step");
     
     // Verify the snapshot count
     EXPECT_EQ(mockVisualizer->getProcessedSnapshotCount(), 2);
@@ -154,6 +165,7 @@ TEST_F(VisualizationManagerTest, CaptureGameState) {
     lastSnapshot = mockVisualizer->getLastSnapshot();
     EXPECT_EQ(lastSnapshot.getStepNumber(), 43);
     EXPECT_EQ(lastSnapshot.getMessage(), "Next step");
+    EXPECT_EQ(lastSnapshot.getCountdown(), 30);
 }
 
 TEST_F(VisualizationManagerTest, CaptureGameStateMultipleVisualizers) {
@@ -165,7 +177,7 @@ TEST_F(VisualizationManagerTest, CaptureGameStateMultipleVisualizers) {
     manager->addVisualizer(std::unique_ptr<VisualizerBase>(mockVisualizer2));
     
     // Capture a game state
-    manager->captureGameState(42, board, tanks, shells, "Test message");
+    manager->captureGameState(42, board, tanks, shells, 25, "Test message");
     
     // Verify that both received the snapshot
     EXPECT_EQ(mockVisualizer1->getProcessedSnapshotCount(), 1);

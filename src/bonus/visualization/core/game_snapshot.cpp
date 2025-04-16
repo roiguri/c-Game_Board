@@ -22,8 +22,9 @@ GameSnapshot::GameSnapshot(
     const GameBoard& board,
     const std::vector<Tank>& tanks,
     const std::vector<Shell>& shells,
+    int countdown,
     const std::string& message
-) : m_stepNumber(step), m_message(message) {
+) : m_stepNumber(step), m_countdown(countdown), m_message(message) {
     // Copy board state
     int width = board.getWidth();
     int height = board.getHeight();
@@ -33,6 +34,11 @@ GameSnapshot::GameSnapshot(
         m_boardState[y].resize(width);
         for (int x = 0; x < width; ++x) {
             m_boardState[y][x] = board.getCellType(x, y);
+
+            if (board.getCellType(x, y) == GameBoard::CellType::Wall) {
+              Point pos(x, y);
+              m_wallHealth[pos] = board.getWallHealth(pos);
+            }
         }
     }
     
