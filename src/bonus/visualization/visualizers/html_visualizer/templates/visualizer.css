@@ -63,6 +63,21 @@ button:disabled {
   border-radius: 4px;
 }
 
+.countdown-display {
+  font-weight: bold;
+  color: #f44336;
+}
+
+.countdown-display.active {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
 .board-container {
   display: flex;
   justify-content: center;
@@ -89,6 +104,16 @@ button:disabled {
 
 .wall {
   background-color: #8d6e63;
+}
+
+.wall-health-2 {
+  background-color: #8d6e63;
+}
+
+.wall-health-1 {
+  background-color: #bcaaa4;
+  background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.3) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.3) 75%, transparent 75%, transparent);
+  background-size: 10px 10px;
 }
 
 .mine {

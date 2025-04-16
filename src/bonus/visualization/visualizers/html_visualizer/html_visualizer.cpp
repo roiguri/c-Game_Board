@@ -151,6 +151,7 @@ std::string HTMLVisualizer::generateGameDataJS() const {
         
         js << "\n        {\n";
         js << "            step: " << snapshot.getStepNumber() << ",\n";
+        js << "            countdown: " << snapshot.getCountdown() << ",\n";
         js << "            message: \"" << snapshot.getMessage() << "\",\n";
         
         // Board state
@@ -168,6 +169,26 @@ std::string HTMLVisualizer::generateGameDataJS() const {
             if (y < boardState.size() - 1) {
                 js << ",";
             }
+            js << "\n";
+        }
+        js << "            ],\n";
+
+        // Wall health
+        js << "            wallHealth: [\n";
+        const auto& wallHealth = snapshot.getWallHealth();
+        size_t wallCount = 0;
+        for (const auto& [position, health] : wallHealth) {
+            if (wallCount > 0) {
+                js << ",\n";
+            }
+            js << "                {\n";
+            js << "                    x: " << position.x << ",\n";
+            js << "                    y: " << position.y << ",\n";
+            js << "                    health: " << health << "\n";
+            js << "                }";
+            wallCount++;
+        }
+        if (wallCount > 0) {
             js << "\n";
         }
         js << "            ],\n";

@@ -25,13 +25,15 @@
         </div>
         <div class="status">
             <span id="stepDisplay">Step: 0 / {{TOTAL_STEPS}}</span>
+            <span id="countdownDisplay" class="countdown-display"></span>
             <span id="messageDisplay"></span>
         </div>
         <div class="board-container">
             <div id="gameBoard" class="game-board"></div>
         </div>
         <div class="legend">
-            <div class="legend-item"><div class="legend-color wall"></div><div class="legend-text">Wall</div></div>
+            <div class="legend-item"><div class="legend-color wall wall-health-2"></div><div class="legend-text">Wall (Full Health)</div></div>
+            <div class="legend-item"><div class="legend-color wall wall-health-1"></div><div class="legend-text">Wall (Damaged)</div></div>
             <div class="legend-item"><div class="legend-color tank1"></div><div class="legend-text">Tank 1</div></div>
             <div class="legend-item"><div class="legend-color tank2"></div><div class="legend-text">Tank 2</div></div>
             <div class="legend-item"><div class="legend-color mine"></div><div class="legend-text">Mine</div></div>

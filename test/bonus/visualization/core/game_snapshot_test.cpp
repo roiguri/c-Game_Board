@@ -20,6 +20,9 @@ protected:
         
         std::vector<std::string> errors;
         board.initialize(boardData, errors);
+
+        // Damage one wall to test wall health
+        board.damageWall(Point(0, 1));
         
         // Create test tanks
         tanks.push_back(Tank(1, Point(1, 1), Direction::Right));
@@ -40,16 +43,21 @@ TEST_F(GameSnapshotTest, DefaultConstructor) {
     EXPECT_TRUE(snapshot.getMessage().empty());
     EXPECT_TRUE(snapshot.getBoardState().empty());
     EXPECT_TRUE(snapshot.getTanks().empty());
+    EXPECT_TRUE(snapshot.getWallHealth().empty());
     EXPECT_TRUE(snapshot.getShells().empty());
+    EXPECT_EQ(snapshot.getCountdown(), -1);
 }
 
 TEST_F(GameSnapshotTest, ParameterizedConstructor) {
+    int countdownValue = 15;
+  
     // Create a snapshot
-    GameSnapshot snapshot(42, board, tanks, shells, "Test message");
+    GameSnapshot snapshot(42, board, tanks, shells, countdownValue, "Test message");
     
     // Check basic properties
     EXPECT_EQ(snapshot.getStepNumber(), 42);
     EXPECT_EQ(snapshot.getMessage(), "Test message");
+    EXPECT_EQ(snapshot.getCountdown(), countdownValue);
     
     // Check board dimensions
     const auto& boardState = snapshot.getBoardState();
@@ -61,6 +69,20 @@ TEST_F(GameSnapshotTest, ParameterizedConstructor) {
     EXPECT_EQ(boardState[1][1], GameBoard::CellType::Tank1);
     EXPECT_EQ(boardState[1][3], GameBoard::CellType::Tank2);
     EXPECT_EQ(boardState[3][2], GameBoard::CellType::Mine);
+
+    // Check wall health
+    const auto& wallHealth = snapshot.getWallHealth();
+    EXPECT_FALSE(wallHealth.empty());
+    
+    // Check the damaged wall
+    auto it = wallHealth.find(Point(0, 1));
+    EXPECT_NE(it, wallHealth.end());
+    EXPECT_EQ(it->second, 1);  // Should be damaged (health = 1)
+    
+    // Check undamaged wall
+    it = wallHealth.find(Point(0, 0));
+    EXPECT_NE(it, wallHealth.end());
+    EXPECT_EQ(it->second, 2);  // Should be full health (health = 2)
     
     // Check tanks
     const auto& tankStates = snapshot.getTanks();
@@ -124,7 +146,8 @@ TEST_F(GameSnapshotTest, ShellStateConstructor) {
 
 TEST_F(GameSnapshotTest, JsonSerialization) {
     // Create a snapshot
-    GameSnapshot snapshot(42, board, tanks, shells, "Test message");
+    int countdownValue = 15;
+    GameSnapshot snapshot(42, board, tanks, shells, countdownValue, "Test message");
     
     // Convert to JSON
     std::string json = snapshot.toJson();
@@ -134,6 +157,12 @@ TEST_F(GameSnapshotTest, JsonSerialization) {
     EXPECT_NE(json.find("\"message\": \"Test message\""), std::string::npos);
     EXPECT_NE(json.find("\"width\": 5"), std::string::npos);
     EXPECT_NE(json.find("\"height\": 5"), std::string::npos);
+    EXPECT_NE(json.find("\"countdown\": 15"), std::string::npos);
+    
+    // Check for wall health data
+    EXPECT_NE(json.find("\"wallHealth\""), std::string::npos);
+    EXPECT_NE(json.find("\"health\": 1"), std::string::npos);  // Damaged wall
+    EXPECT_NE(json.find("\"health\": 2"), std::string::npos);  // Full health wall
     
     // Check for tank data
     EXPECT_NE(json.find("\"playerId\": 1"), std::string::npos);
@@ -146,7 +175,7 @@ TEST_F(GameSnapshotTest, JsonSerialization) {
 // Note: This test is incomplete since the fromJson implementation is a placeholder
 TEST_F(GameSnapshotTest, JsonDeserialization) {
     // Create a snapshot
-    GameSnapshot original(42, board, tanks, shells, "Test message");
+    GameSnapshot original(42, board, tanks, shells, 15, "Test message");
     
     // Convert to JSON
     std::string json = original.toJson();
