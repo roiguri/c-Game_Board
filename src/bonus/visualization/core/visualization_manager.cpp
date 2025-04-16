@@ -20,10 +20,11 @@ void VisualizationManager::captureGameState(
     const GameBoard& board,
     const std::vector<Tank>& tanks,
     const std::vector<Shell>& shells,
+    int countdown,
     const std::string& message
 ) {
     // Create a snapshot of the current state
-    GameSnapshot snapshot(step, board, tanks, shells, message);
+    GameSnapshot snapshot(step, board, tanks, shells, countdown, message);
     
     // Process the snapshot in all visualizers
     for (auto& visualizer : m_visualizers) {
