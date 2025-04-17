@@ -18,12 +18,21 @@ public:
         return Action::None;
     }
 
-    bool testHasDirectLineOfSight(
+    Direction* testHasDirectLineOfSight(
       const GameBoard& gameBoard,
       const Point& from,
       const Point& to
     ) const {
         return hasDirectLineOfSight(gameBoard, from, to);
+    }
+
+    bool testHasLineOfSightInDirection(
+      const GameBoard& gameBoard,
+      const Point& from,
+      const Point& to,
+      Direction direction
+    ) const {
+        return hasLineOfSightInDirection(gameBoard, from, to, direction);
     }
 
     bool testIsInDangerFromShells(
@@ -96,9 +105,14 @@ TEST_F(AlgorithmTest, HasDirectLineOfSight_BasicClear) {
     };
     GameBoard board = create5X5TestBoard(boardLines);
     
-    EXPECT_TRUE(mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 1)));
-    EXPECT_TRUE(mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(1, 3)));
-    EXPECT_FALSE(mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 2)));
+    Direction* dir1 = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 1));
+    EXPECT_NE(dir1, nullptr);
+    EXPECT_EQ(*dir1, Direction::Right);
+    delete dir1;
+    
+    // No line of sight
+    Direction* dir3 = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 2));
+    EXPECT_EQ(dir3, nullptr);
 }
 
 TEST_F(AlgorithmTest, HasDirectLineOfSight_BlockedHorizontal) {
@@ -111,8 +125,8 @@ TEST_F(AlgorithmTest, HasDirectLineOfSight_BlockedHorizontal) {
     };
     GameBoard board = create5X5TestBoard(boardLines);
     
-    EXPECT_FALSE(mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 1)));
-    EXPECT_FALSE(mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 3), Point(3, 3)));
+    Direction* dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 1));
+    EXPECT_EQ(dir, nullptr);
 }
 
 TEST_F(AlgorithmTest, HasDirectLineOfSight_BlockedVertical) {
@@ -125,8 +139,8 @@ TEST_F(AlgorithmTest, HasDirectLineOfSight_BlockedVertical) {
     };
     GameBoard board = create5X5TestBoard(boardLines);
     
-    EXPECT_FALSE(mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(1, 3)));
-    EXPECT_FALSE(mockAlgorithm->testHasDirectLineOfSight(board, Point(3, 1), Point(3, 3)));
+    Direction* dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(1, 3));
+    EXPECT_EQ(dir, nullptr);
 }
 
 TEST_F(AlgorithmTest, HasDirectLineOfSight_BlockedDiagonal) {
@@ -139,8 +153,8 @@ TEST_F(AlgorithmTest, HasDirectLineOfSight_BlockedDiagonal) {
     };
     GameBoard board = create5X5TestBoard(boardLines);
     
-    EXPECT_FALSE(mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 3)));
-    EXPECT_FALSE(mockAlgorithm->testHasDirectLineOfSight(board, Point(3, 1), Point(1, 3)));
+    Direction* dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 3));
+    EXPECT_EQ(dir, nullptr);
 }
 
 TEST_F(AlgorithmTest, HasDirectLineOfSight_WrappingHorizontal) {
@@ -153,33 +167,119 @@ TEST_F(AlgorithmTest, HasDirectLineOfSight_WrappingHorizontal) {
     };
     GameBoard board = create5X5TestBoard(boardLines);
     
-    EXPECT_TRUE(mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 2), Point(3, 2)));
+    Direction* dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 2), Point(3, 2));
+    EXPECT_NE(dir, nullptr);
+    EXPECT_EQ(*dir, Direction::Left);
+    delete dir;
 }
 
 TEST_F(AlgorithmTest, HasDirectLineOfSight_WrappingVertical) {
-    std::vector<std::string> boardLines = {
-        "## ##",
-        "## ##",
-        "#####",
-        "## ##",
-        "## ##"
-    };
-    GameBoard board = create5X5TestBoard(boardLines);
-    
-    EXPECT_TRUE(mockAlgorithm->testHasDirectLineOfSight(board, Point(2, 1), Point(2, 3)));
+  std::vector<std::string> boardLines = {
+      "## ##",
+      "## ##",
+      "#####",
+      "## ##",
+      "## ##"
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  
+  Direction* dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(2, 1), Point(2, 3));
+  EXPECT_NE(dir, nullptr);
+  EXPECT_EQ(*dir, Direction::Up);
+  delete dir;
 }
 
 TEST_F(AlgorithmTest, HasDirectLineOfSight_WrappingDiagonal) {
-    std::vector<std::string> boardLines = {
-      "#### ",
-      "### #",
+  std::vector<std::string> boardLines = {
+    "#### ",
+    "### #",
+    "#####",
+    "# ###",
+    " ####"
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  
+  Direction* dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(3, 1), Point(1, 3));
+  EXPECT_NE(dir, nullptr);
+  EXPECT_EQ(*dir, Direction::UpRight);
+  delete dir;
+}
+
+TEST_F(AlgorithmTest, HasLineOfSightInDirection_CorrectDirection) {
+  std::vector<std::string> boardLines = {
       "#####",
-      "# ###",
-      " ####"
-    };
-    GameBoard board = create5X5TestBoard(boardLines);
-    
-    EXPECT_TRUE(mockAlgorithm->testHasDirectLineOfSight(board, Point(3, 1), Point(1, 3)));
+      "#   #",
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  
+  // Test with correct directions
+  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(1, 2), Point(3, 2), Direction::Right));
+  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(2, 1), Point(2, 3), Direction::Down));
+  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(1, 1), Point(3, 3), Direction::DownRight));
+}
+
+TEST_F(AlgorithmTest, HasLineOfSightInDirection_WrongDirection) {
+  std::vector<std::string> boardLines = {
+      "#####",
+      "#   #",
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  
+  EXPECT_FALSE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(1, 2), Point(3, 2), Direction::Left));
+  EXPECT_FALSE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(2, 1), Point(2, 3), Direction::Up));
+  EXPECT_FALSE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(1, 1), Point(3, 3), Direction::UpRight));
+}
+
+TEST_F(AlgorithmTest, HasLineOfSightInDirection_BlockedPath) {
+  std::vector<std::string> boardLines = {
+      "#####",
+      "#   #",
+      "# # #",
+      "#   #",
+      "#####"
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  
+  EXPECT_FALSE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(1, 2), Point(3, 2), Direction::Right));
+  EXPECT_FALSE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(2, 1), Point(2, 3), Direction::Down));
+  EXPECT_FALSE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(1, 1), Point(3, 3), Direction::DownRight));
+}
+
+TEST_F(AlgorithmTest, HasLineOfSightInDirection_Wrapping) {
+  // Create a 5x5 board with no walls
+  std::vector<std::string> boardLines = {
+      "     ",
+      "     ",
+      "     ",
+      "     ",
+      "     "
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  
+  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(4, 2), Point(0, 2), Direction::Right));
+  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(2, 4), Point(2, 0), Direction::Down));
+  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(4, 4), Point(0, 0), Direction::DownRight));
+}
+
+TEST_F(AlgorithmTest, HasLineOfSightInDirection_SamePoint) {
+  std::vector<std::string> boardLines = {
+      "#####",
+      "#   #",
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  
+  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(2, 2), Point(2, 2), Direction::Right));
+  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(2, 2), Point(2, 2), Direction::Down));
+  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(2, 2), Point(2, 2), Direction::UpLeft));
 }
 
 TEST_F(AlgorithmTest, IsInDangerFromShells_NoShells) {
