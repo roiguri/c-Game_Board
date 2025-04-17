@@ -377,6 +377,133 @@ TEST_F(CollisionHandlerTest, ResolveCollisions_TankNotOnMine_Survives) {
     EXPECT_FALSE(result);
 }
 
+TEST_F(CollisionHandlerTest, ResolveCollisions_AllTypesInOneStep) {
+    // Shell-shell + tank-tank + shell-tank + tank-mine + mine in explosion area
+    board.setCellType(Point(1, 1), GameBoard::CellType::Mine);       // tank-mine
+    board.setCellType(Point(2, 2), GameBoard::CellType::Mine);       // explosion target
+
+    std::vector<Shell> shells = {
+        Shell(1, Point(0, 0), Direction::Right),     // part of explosion
+        Shell(2, Point(3, 3), Direction::Left),      // part of explosion
+        Shell(1, Point(2, 2), Direction::Up),        // part of explosion
+        Shell(2, Point(2, 2), Direction::Down)       // part of explosion
+    };
+
+    std::vector<Tank> tanks = {
+        Tank(1, Point(0, 0), Direction::Down),       // part of explosion
+        Tank(1, Point(1, 1), Direction::Up),         // dies to mine
+        Tank(2, Point(1, 1), Direction::Down),       // dies to tank-mine
+        Tank(1, Point(2, 2), Direction::Up),         // dies to explosion
+        Tank(2, Point(3, 3), Direction::Down),       // dies to explosion
+        Tank(1, Point(4, 4), Direction::Left),       // 
+        Tank(2, Point(4, 4), Direction::Right)       // tank-tank collision
+    };
+
+    bool result = CollisionHandler::resolveAllCollisions(board, shells, tanks);
+
+    // Shells
+    EXPECT_TRUE(shells[0].isDestroyed());
+    EXPECT_TRUE(shells[1].isDestroyed());
+    EXPECT_TRUE(shells[2].isDestroyed());
+    EXPECT_TRUE(shells[3].isDestroyed());
+
+    // Tanks
+    EXPECT_TRUE(tanks[0].isDestroyed());
+    EXPECT_TRUE(tanks[1].isDestroyed());  // tank on mine
+    EXPECT_TRUE(tanks[2].isDestroyed());  // tank on mine
+    EXPECT_TRUE(tanks[3].isDestroyed());  // exploded
+    EXPECT_TRUE(tanks[4].isDestroyed());
+    EXPECT_TRUE(tanks[5].isDestroyed());  // tank-tank
+    EXPECT_TRUE(tanks[6].isDestroyed());  // tank-tank
+
+    // Mines destroyed
+    EXPECT_EQ(board.getCellType(Point(1, 1)), GameBoard::CellType::Empty);
+    EXPECT_EQ(board.getCellType(Point(2, 2)), GameBoard::CellType::Empty);
+
+    EXPECT_TRUE(result);  // some tank was destroyed
+}
+
+TEST_F(CollisionHandlerTest, ResolveCollisions_EverythingSurvives) {
+    board.setCellType(Point(3, 3), GameBoard::CellType::Mine); // not touched
+
+    std::vector<Shell> shells = {
+        Shell(1, Point(0, 0), Direction::Right),
+        Shell(2, Point(1, 0), Direction::Left)
+    };
+
+    std::vector<Tank> tanks = {
+        Tank(1, Point(4, 4), Direction::Up),
+        Tank(2, Point(2, 3), Direction::Down)
+    };
+
+    bool result = CollisionHandler::resolveAllCollisions(board, shells, tanks);
+
+    // Nothing should be destroyed
+    EXPECT_FALSE(shells[0].isDestroyed());
+    EXPECT_FALSE(shells[1].isDestroyed());
+    EXPECT_FALSE(tanks[0].isDestroyed());
+    EXPECT_FALSE(tanks[1].isDestroyed());
+
+    EXPECT_EQ(board.getCellType(Point(3, 3)), GameBoard::CellType::Mine);
+    EXPECT_FALSE(result);
+}
+
+TEST_F(CollisionHandlerTest, ResolveCollisions_ExplosionChainDestroysMineAndTank) {
+    Point explosionCenter = Point(2, 2);
+    board.setCellType(explosionCenter, GameBoard::CellType::Mine);
+
+    std::vector<Shell> shells = {
+        Shell(1, explosionCenter, Direction::Up),
+        Shell(2, explosionCenter, Direction::Down)
+    };
+
+    std::vector<Tank> tanks = {
+        Tank(1, explosionCenter, Direction::Left)  // tank + mine + shell-shell
+    };
+
+    bool result = CollisionHandler::resolveAllCollisions(board, shells, tanks);
+
+    EXPECT_TRUE(shells[0].isDestroyed());
+    EXPECT_TRUE(shells[1].isDestroyed());
+    EXPECT_TRUE(tanks[0].isDestroyed());
+    EXPECT_EQ(board.getCellType(explosionCenter), GameBoard::CellType::Empty);
+    EXPECT_TRUE(result);
+}
+
+TEST_F(CollisionHandlerTest, ResolveCollisions_MixedSurvivorsAndCasualties) {
+    board.setCellType(Point(2, 2), GameBoard::CellType::Mine);  // Will explode
+    board.setCellType(Point(4, 4), GameBoard::CellType::Mine);  // Should remain
+
+    std::vector<Shell> shells = {
+        Shell(1, Point(0, 0), Direction::Right),     // survives
+        Shell(2, Point(2, 2), Direction::Left),      // part of explosion
+        Shell(1, Point(3, 3), Direction::Up)         // survives
+    };
+
+    std::vector<Tank> tanks = {
+        Tank(1, Point(2, 2), Direction::Down),       // on mine — dies
+        Tank(2, Point(2, 2), Direction::Up),         // tank-tank with one above — dies
+        Tank(1, Point(1, 1), Direction::Right),      // survives
+        Tank(2, Point(4, 4), Direction::Left)        // dies
+    };
+
+    bool result = CollisionHandler::resolveAllCollisions(board, shells, tanks);
+
+    EXPECT_FALSE(shells[0].isDestroyed());
+    EXPECT_FALSE(shells[2].isDestroyed());
+    EXPECT_FALSE(tanks[2].isDestroyed());
+    
+    EXPECT_TRUE(shells[1].isDestroyed());
+    EXPECT_TRUE(tanks[0].isDestroyed());
+    EXPECT_TRUE(tanks[1].isDestroyed());
+    EXPECT_TRUE(tanks[3].isDestroyed());
+
+    EXPECT_EQ(board.getCellType(Point(2, 2)), GameBoard::CellType::Empty);
+    EXPECT_EQ(board.getCellType(Point(4, 4)), GameBoard::CellType::Empty);
+
+    EXPECT_TRUE(result);
+}
+
 
 
 
