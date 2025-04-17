@@ -1,6 +1,17 @@
 #include "collision_handler.h"
 #include <map>
 
+bool CollisionHandler::resolveAllCollisions(GameBoard& board, std::vector<Shell>& shells, std::vector<Tank>& tanks) {
+    std::vector<Point> explosionPositions;
+    bool tankDestroyed = false;
+
+    tankDestroyed |= checkShellCollisions(board, shells, tanks, explosionPositions);
+    tankDestroyed |= checkTankCollisions(tanks, explosionPositions);
+    tankDestroyed |= checkTankMineCollisions(board, tanks, explosionPositions);
+
+    applyExplosions(explosionPositions, shells, tanks, board);
+    return tankDestroyed;
+}
 
 bool CollisionHandler::checkShellWallCollision(GameBoard& board, Shell& shell) {
     // If the shell is already destroyed, no need to check for collisions
@@ -57,7 +68,6 @@ bool CollisionHandler::checkShellShellCollision(Shell& shell, std::vector<Shell>
             // Don't break - continue checking all shells to destroy all at this position
         }
     }
-    
     // If a collision was detected, destroy the original shell too
     if (collisionDetected) {
         shell.destroy();
@@ -94,23 +104,47 @@ bool CollisionHandler::checkShellTankCollision(Shell& shell, std::vector<Tank>& 
 
 
 
+bool CollisionHandler::checkShellCollisions(GameBoard& board, std::vector<Shell>& shells, std::vector<Tank>& tanks, std::vector<Point>& explosionPositions) {
+    bool tankDestroyed = false;
 
+    for (auto& shell : shells) {
+        if (shell.isDestroyed()) continue;
 
-bool CollisionHandler::checkShellCollisions(GameBoard& board, std::vector<Shell>& shells, std::vector<Tank>& tanks) {
-    // To be implemented  
-    return false;
+        checkShellShellCollision(shell, shells, explosionPositions);
+        if (shell.isDestroyed()) continue;
+
+        bool hitTank = checkShellTankCollision(shell, tanks, explosionPositions);
+        tankDestroyed |= hitTank;
+    }
+
+    applyExplosions(explosionPositions, shells, tanks, board);
+
+    for (const auto& tank : tanks) {
+        if (tank.isDestroyed()) {
+            tankDestroyed = true;
+            break;
+        }
+    }
+    return tankDestroyed;  
 }
 
-bool CollisionHandler::checkTankCollisions(std::vector<Tank>& tanks) {
+
+
+bool CollisionHandler::checkTankCollisions(std::vector<Tank>& tanks, std::vector<Point>& explosionPositions) {
     // To be implemented
     return false;
 }
 
-bool CollisionHandler::checkTankMineCollisions(GameBoard& board, std::vector<Tank>& tanks) {
+
+
+bool CollisionHandler::checkTankMineCollisions(GameBoard& board, std::vector<Tank>& tanks, std::vector<Point>& explosionPositions) {
     // To be implemented
     return false;
 }
 
+
+
+//Helper Functions
 
 void CollisionHandler::markExplosionAt(const Point& position, std::vector<Point>& explosionPositions) {
     // Check if this position is already marked
@@ -125,21 +159,23 @@ void CollisionHandler::markExplosionAt(const Point& position, std::vector<Point>
 }
 
 
-
-void CollisionHandler::applyExplosions(const std::vector<Point>& explosionPositions, std::vector<Shell>& shells, std::vector<Tank>& tanks) {
+void CollisionHandler::applyExplosions(const std::vector<Point>& explosionPositions, std::vector<Shell>& shells, std::vector<Tank>& tanks, GameBoard& board) {
     for (const Point& pos : explosionPositions) {
-        // Destroy all shells at this position
         for (auto& shell : shells) {
             if (!shell.isDestroyed() && shell.getPosition() == pos) {
                 shell.destroy();
             }
         }
 
-        // Destroy all tanks at this position
         for (auto& tank : tanks) {
             if (!tank.isDestroyed() && tank.getPosition() == pos) {
                 tank.destroy();
             }
         }
+
+        if (board.getCellType(pos) == GameBoard::CellType::Mine) {
+            board.setCellType(pos, GameBoard::CellType::Empty);
+        }
     }
 }
+
