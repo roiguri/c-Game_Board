@@ -1,6 +1,8 @@
 #pragma once
 
 #include "utils/action.h"
+#include "utils/point.h"
+#include "utils/direction.h"
 #include "game_board.h"
 #include "tank.h"
 #include "shell.h"
@@ -49,7 +51,22 @@ public:
      * @return Pointer to the new algorithm instance
      */
     static Algorithm* createAlgorithm(const std::string& type);
-
-private:
-    // TODO: private members will be added in future commits
+protected:
+    /**
+     * @brief Checks for a direct, unobstructed line of sight along the 8 primary directions.
+     *
+     * Determines if there is a clear path between 'from' and 'to' strictly along
+     * horizontal, vertical, or 45-degree diagonal lines by checking each direction outwards.
+     * Considers board wrapping and obstacles (Walls).
+     *
+     * @param gameBoard The game board containing layout and obstacles.
+     * @param from The starting point.
+     * @param to The target point.
+     * @return true if a clear line of sight exists along one of the 8 directions, false otherwise.
+     */
+    bool hasDirectLineOfSight(
+      const GameBoard& gameBoard,
+      const Point& from,
+      const Point& to
+  ) const;
 };
