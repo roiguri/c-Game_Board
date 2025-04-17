@@ -150,17 +150,28 @@ bool CollisionHandler::checkTankCollisions(std::vector<Tank>& tanks, std::vector
             anyDestroyed = true;
         }
     }
-
     return anyDestroyed;
 }
 
 
 
-
 bool CollisionHandler::checkTankMineCollisions(GameBoard& board, std::vector<Tank>& tanks, std::vector<Point>& explosionPositions) {
-    // To be implemented
-    return false;
+    bool tankDestroyed = false;
+
+    for (auto& tank : tanks) {
+        if (tank.isDestroyed()) continue;
+
+        Point pos = tank.getPosition();
+        if (board.getCellType(pos) == GameBoard::CellType::Mine) {
+            tank.destroy();
+            board.setCellType(pos, GameBoard::CellType::Empty);  // remove the mine
+            markExplosionAt(pos, explosionPositions);
+            tankDestroyed = true;
+        }
+    }
+    return tankDestroyed;
 }
+
 
 
 
@@ -173,7 +184,6 @@ void CollisionHandler::markExplosionAt(const Point& position, std::vector<Point>
             return; // Position already marked
         }
     }
-    
     // Add this position to the list of explosion positions
     explosionPositions.push_back(position);
 }
