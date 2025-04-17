@@ -51,8 +51,6 @@ bool CollisionHandler::checkShellShellCollision(Shell& shell, std::vector<Shell>
         if (otherShell.getPosition() == shellPosition) {
             // Collision detected - destroy the other shell
             otherShell.destroy();
-            printf("Shell destroyed at position: (%d, %d)\n", shellPosition.x, shellPosition.y);
-            printf("is shell2 destroyed: %d", otherShell.isDestroyed());
             collisionDetected = true;
             // Mark this position as having an explosion
             markExplosionAt(shellPosition, explosionPositions);
@@ -70,10 +68,30 @@ bool CollisionHandler::checkShellShellCollision(Shell& shell, std::vector<Shell>
 
 
 
-bool CollisionHandler::checkShellTankCollision(Shell& shell, std::vector<Tank>& tanks) {
-    // To be implemented
-    return false;
+bool CollisionHandler::checkShellTankCollision(Shell& shell, std::vector<Tank>& tanks, std::vector<Point>& explosionPositions) {
+    if (shell.isDestroyed()) {
+        return false;
+    }
+
+    Point shellPosition = shell.getPosition();
+    bool tankDestroyed = false;
+
+    for (auto& tank : tanks) {
+        if (tank.isDestroyed()) {
+            continue;
+        }
+
+        if (tank.getPosition() == shellPosition) {
+            shell.destroy();
+            tank.destroy();
+            markExplosionAt(shellPosition, explosionPositions);
+            tankDestroyed = true;
+            // Continue checking other tanks in case of stacking
+        }
+    }
+    return tankDestroyed;
 }
+
 
 
 
