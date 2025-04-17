@@ -89,7 +89,6 @@ protected:
       Direction direction
     ) const;
 
-    // TODO: consider changing to be point based (not tank)
     /**
      * @brief Determines if a tank is in danger from any shells
      * 
@@ -97,14 +96,14 @@ protected:
      * by predicting shell trajectories and accounting for board wrapping.
      * 
      * @param gameBoard The game board for checking wall collisions
-     * @param tank The tank to check for danger
+     * @param position The position to check for danger
      * @param shells All active shells on the board
      * @param stepsToCheck Number of future steps to check for collisions (default: 3)
      * @return true if the tank is in danger, false otherwise
      */
-    bool isInDangerFromShells(
+    bool isPositionInDangerFromShells(
       const GameBoard& gameBoard,
-      const Tank& tank,
+      const Point& position,
       const std::vector<Shell>& shells,
       int stepsToCheck = 3
     ) const;
