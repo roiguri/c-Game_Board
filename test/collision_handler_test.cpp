@@ -315,6 +315,37 @@ TEST_F(CollisionHandlerTest, ResolveCollisions_MixedDestructionAtOneTile) {
     EXPECT_TRUE(result);
 }
 
+TEST_F(CollisionHandlerTest, ResolveCollisions_TankTankCollision_BothDestroyed) {
+    Tank t1(1, Point(2, 2), Direction::Up);
+    Tank t2(2, Point(2, 2), Direction::Down);
+
+    std::vector<Shell> shells = {};  // No shells
+    std::vector<Tank> tanks = {t1, t2};
+
+    bool result = CollisionHandler::resolveAllCollisions(board, shells, tanks);
+
+    EXPECT_TRUE(tanks[0].isDestroyed());
+    EXPECT_TRUE(tanks[1].isDestroyed());
+    EXPECT_TRUE(result);
+}
+
+TEST_F(CollisionHandlerTest, ResolveCollisions_ThreeTankCollision_AllDestroyed) {
+    Tank t1(1, Point(1, 1), Direction::Up);
+    Tank t2(2, Point(1, 1), Direction::Down);
+    Tank t3(1, Point(1, 1), Direction::Left);
+
+    std::vector<Shell> shells = {};
+    std::vector<Tank> tanks = {t1, t2, t3};
+
+    bool result = CollisionHandler::resolveAllCollisions(board, shells, tanks);
+
+    for (const auto& tank : tanks) {
+        EXPECT_TRUE(tank.isDestroyed());
+    }
+
+    EXPECT_TRUE(result);
+}
+
 
 
 

@@ -131,9 +131,29 @@ bool CollisionHandler::checkShellCollisions(GameBoard& board, std::vector<Shell>
 
 
 bool CollisionHandler::checkTankCollisions(std::vector<Tank>& tanks, std::vector<Point>& explosionPositions) {
-    // To be implemented
-    return false;
+    std::map<Point, std::vector<Tank*>> tanksByPosition;
+
+    for (auto& tank : tanks) {
+        if (!tank.isDestroyed()) {
+            tanksByPosition[tank.getPosition()].push_back(&tank);
+        }
+    }
+
+    bool anyDestroyed = false;
+
+    for (const auto& [pos, tankList] : tanksByPosition) {
+        if (tankList.size() > 1) {
+            for (auto* tank : tankList) {
+                tank->destroy();
+            }
+            markExplosionAt(pos, explosionPositions);
+            anyDestroyed = true;
+        }
+    }
+
+    return anyDestroyed;
 }
+
 
 
 
