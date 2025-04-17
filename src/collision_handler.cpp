@@ -1,45 +1,48 @@
 #include "collision_handler.h"
+#include <map>
 
-bool CollisionHandler::checkShellCollisions(GameBoard& board,
-                                          std::vector<Shell>& shells,
-                                          std::vector<Tank>& tanks) {
-    // This method will be implemented in a future commit
-    return false;
-}
-
-bool CollisionHandler::checkTankCollisions(std::vector<Tank>& tanks) {
-    // This method will be implemented in a future commit
-    return false;
-}
-
-bool CollisionHandler::checkTankMineCollisions(GameBoard& board,
-                                             std::vector<Tank>& tanks) {
-    // This method will be implemented in a future commit
-    return false;
-}
-
-
-
-//TODO decide what to do with 2 shells & wall collision. currently, it if the first one destroys the wall, the second survives
-// returns true if tank was destroyed
 bool CollisionHandler::checkShellWallCollision(GameBoard& board, Shell& shell) {
-
+    // If the shell is already destroyed, no need to check for collisions
     if (shell.isDestroyed()) {
         return false;
     }
     
-    Point position = shell.getPosition();
+    // Get the shell's position
+    Point shellPosition = shell.getPosition();
     
-    if (board.isWall(position)) {
-        shell.destroy();  
-        board.damageWall(position);
-        return false; // No tank was destroyed in this collision
+    // Check if there's a wall at the shell's position
+    if (board.isWall(shellPosition)) {
+        // Destroy the shell
+        shell.destroy();
+        
+        // Damage the wall and return whether it was destroyed
+        return board.damageWall(shellPosition);
     }
     
-    return false; // No tank was destroyed in this collision
+    return false; // No wall collision
+}
+
+bool CollisionHandler::checkShellCollisions(GameBoard& board, std::vector<Shell>& shells, std::vector<Tank>& tanks) {
+    // To be implemented  
+    return false;
+}
+
+bool CollisionHandler::checkTankCollisions(std::vector<Tank>& tanks) {
+    // To be implemented
+    return false;
+}
+
+bool CollisionHandler::checkTankMineCollisions(GameBoard& board, std::vector<Tank>& tanks) {
+    // To be implemented
+    return false;
+}
+
+bool CollisionHandler::checkShellShellCollision(Shell& shell, std::vector<Shell>& otherShells) {
+    // To be implemented
+    return false;
 }
 
 bool CollisionHandler::checkShellTankCollision(Shell& shell, std::vector<Tank>& tanks) {
-    // This method will be implemented in a future commit
+    // To be implemented
     return false;
 }

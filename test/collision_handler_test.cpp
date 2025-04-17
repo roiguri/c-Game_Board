@@ -1,139 +1,113 @@
 #include "gtest/gtest.h"
 #include "collision_handler.h"
 #include "game_board.h"
-#include "tank.h"
 #include "shell.h"
+#include "tank.h"
+#include <vector>
 
+// Test fixture for CollisionHandler tests
 class CollisionHandlerTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        // Create a test board of 5x5
-        testBoard = GameBoard(5, 5);
+        // Create a default 5x5 board for testing
+        board = GameBoard(5, 5);
         
-        // Initialize with some walls and mines for testing
-        std::vector<std::string> boardLines = {
-            "#####",
-            "#1 2#",
-            "#   #",
-            "# @ #",
-            "#####"
-        };
-        
-        std::vector<std::string> errors;
-        testBoard.initialize(boardLines, errors);
-        
-        // Add tanks to the tanks vector
-        tanks.push_back(Tank(1, Point(1, 1), Direction::Right));
-        tanks.push_back(Tank(2, Point(3, 1), Direction::Left));
+        // Add some walls to the board
+        board.setCellType(1, 1, GameBoard::CellType::Wall);
+        board.setCellType(3, 3, GameBoard::CellType::Wall);
     }
     
-    // Test objects
-    GameBoard testBoard;
-    std::vector<Shell> shells;
-    std::vector<Tank> tanks;
+    GameBoard board;
 };
 
-// Basic test to ensure the test fixture is set up correctly
-TEST_F(CollisionHandlerTest, TestFixtureSetup) {
-    EXPECT_EQ(testBoard.getWidth(), 5);
-    EXPECT_EQ(testBoard.getHeight(), 5);
-    EXPECT_EQ(tanks.size(), 2);
-    EXPECT_EQ(tanks[0].getPlayerId(), 1);
-    EXPECT_EQ(tanks[1].getPlayerId(), 2);
+// Test shell-wall collision when there is a wall
+TEST_F(CollisionHandlerTest, ShellWallCollision_HitsWall) {
+    // Create a shell at a wall position
+    Point wallPosition(1, 1);
+    Shell shell(1, wallPosition, Direction::Right);
     
-    // Verify the board layout
-    EXPECT_EQ(testBoard.getCellType(Point(0, 0)), GameBoard::CellType::Wall);
-    EXPECT_EQ(testBoard.getCellType(Point(2, 3)), GameBoard::CellType::Mine);
-}
-
-
-TEST_F(CollisionHandlerTest, ShellWallCollision_ShellDestroyed) {
-    // Place a shell on a wall position
-    Point wallPos(0, 0);
-    ASSERT_TRUE(testBoard.isWall(wallPos));
-    
-    Shell shell(1, wallPos, Direction::Right);
+    // Verify there's a wall at the position and shell is active
+    EXPECT_TRUE(board.isWall(wallPosition));
     EXPECT_FALSE(shell.isDestroyed());
     
-    // Check collision
-    bool result = CollisionHandler::checkShellWallCollision(testBoard, shell);
+    // Check the initial wall health
+    EXPECT_EQ(board.getWallHealth(wallPosition), GameBoard::WALL_STARTING_HEALTH);
     
-    // Shell should be destroyed
+    // Execute the collision check
+    bool wallDestroyed = CollisionHandler::checkShellWallCollision(board, shell);
+    
+    // Verify the shell was destroyed
     EXPECT_TRUE(shell.isDestroyed());
-    // Wall should be damaged but not destroyed yet
-    EXPECT_TRUE(testBoard.isWall(wallPos));
-    // No tank was destroyed
-    EXPECT_FALSE(result);
     
-    // Wall health should be reduced
-    EXPECT_EQ(testBoard.getWallHealth(wallPos), GameBoard::WALL_STARTING_HEALTH - 1);
+    // Verify the wall was damaged but not destroyed (assuming starting health > 1)
+    EXPECT_FALSE(wallDestroyed);
+    EXPECT_EQ(board.getWallHealth(wallPosition), GameBoard::WALL_STARTING_HEALTH - 1);
+    EXPECT_TRUE(board.isWall(wallPosition));
 }
 
+// Test shell-wall collision when there is no wall
+TEST_F(CollisionHandlerTest, ShellWallCollision_NoWall) {
+    // Create a shell at a non-wall position
+    Point emptyPosition(2, 2);
+    Shell shell(1, emptyPosition, Direction::Right);
+    
+    // Verify there's no wall at the position and shell is active
+    EXPECT_FALSE(board.isWall(emptyPosition));
+    EXPECT_FALSE(shell.isDestroyed());
+    
+    // Execute the collision check
+    bool wallDestroyed = CollisionHandler::checkShellWallCollision(board, shell);
+    
+    // Verify the shell wasn't destroyed
+    EXPECT_FALSE(shell.isDestroyed());
+    
+    // Verify no wall was affected
+    EXPECT_FALSE(wallDestroyed);
+}
+
+// Test shell-wall collision for an already destroyed shell
+TEST_F(CollisionHandlerTest, ShellWallCollision_ShellAlreadyDestroyed) {
+    // Create a shell at a wall position but mark it as already destroyed
+    Point wallPosition(1, 1);
+    Shell shell(1, wallPosition, Direction::Right);
+    shell.destroy();
+    
+    // Verify there's a wall at the position but shell is inactive
+    EXPECT_TRUE(board.isWall(wallPosition));
+    EXPECT_TRUE(shell.isDestroyed());
+    
+    // Check the initial wall health
+    int initialHealth = board.getWallHealth(wallPosition);
+    
+    // Execute the collision check
+    bool wallDestroyed = CollisionHandler::checkShellWallCollision(board, shell);
+    
+    // Verify the wall wasn't damaged
+    EXPECT_FALSE(wallDestroyed);
+    EXPECT_EQ(board.getWallHealth(wallPosition), initialHealth);
+}
+
+// Test shell-wall collision that destroys the wall
 TEST_F(CollisionHandlerTest, ShellWallCollision_WallDestroyed) {
-    // Place a shell on a wall position
-    Point wallPos(0, 0);
-    ASSERT_TRUE(testBoard.isWall(wallPos));
+    // Create a shell at a wall position
+    Point wallPosition(1, 1);
+    Shell shell(1, wallPosition, Direction::Right);
     
-    // Damage the wall first so it's down to 1 health
-    testBoard.damageWall(wallPos);
-    EXPECT_EQ(testBoard.getWallHealth(wallPos), 1);
+    // Damage the wall to leave it with 1 health
+    board.damageWall(wallPosition);
     
-    Shell shell(1, wallPos, Direction::Right);
+    // Verify there's a wall at the position with 1 health
+    EXPECT_TRUE(board.isWall(wallPosition));
+    EXPECT_EQ(board.getWallHealth(wallPosition), 1);
     
-    // Check collision
-    bool result = CollisionHandler::checkShellWallCollision(testBoard, shell);
+    // Execute the collision check
+    bool wallDestroyed = CollisionHandler::checkShellWallCollision(board, shell);
     
-    // Shell should be destroyed
+    // Verify the shell was destroyed
     EXPECT_TRUE(shell.isDestroyed());
-    // Wall should be destroyed
-    EXPECT_FALSE(testBoard.isWall(wallPos));
-    // No tank was destroyed
-    EXPECT_FALSE(result);
     
-    // Cell should now be empty
-    EXPECT_EQ(testBoard.getCellType(wallPos), GameBoard::CellType::Empty);
-}
-
-TEST_F(CollisionHandlerTest, ShellWallCollision_NoCollision) {
-    // Place a shell on an empty position
-    Point emptyPos(2, 2);
-    ASSERT_EQ(testBoard.getCellType(emptyPos), GameBoard::CellType::Empty);
-    
-    Shell shell(1, emptyPos, Direction::Right);
-    
-    // Check collision
-    bool result = CollisionHandler::checkShellWallCollision(testBoard, shell);
-    
-    // Shell should not be destroyed
-    EXPECT_FALSE(shell.isDestroyed());
-    // No tank was destroyed
-    EXPECT_FALSE(result);
-}
-
-TEST_F(CollisionHandlerTest, MultipleShellsOnWall_CumulativeDamage) {
-    // Place two shells on the same wall
-    Point wallPos(0, 0);
-    ASSERT_TRUE(testBoard.isWall(wallPos));
-    
-    // Verify initial wall health
-    EXPECT_EQ(testBoard.getWallHealth(wallPos), GameBoard::WALL_STARTING_HEALTH);
-    
-    Shell shell1(1, wallPos, Direction::Right);
-    Shell shell2(2, wallPos, Direction::Left);
-    
-    // Check both shells for wall collision
-    bool result1 = CollisionHandler::checkShellWallCollision(testBoard, shell1);
-    bool result2 = CollisionHandler::checkShellWallCollision(testBoard, shell2);
-    
-    // Both shells should be destroyed
-    EXPECT_TRUE(shell1.isDestroyed());
-    EXPECT_TRUE(shell2.isDestroyed());
-    
-    // Wall should have received 2 damage and be destroyed
-    EXPECT_FALSE(testBoard.isWall(wallPos));
-    EXPECT_EQ(testBoard.getCellType(wallPos), GameBoard::CellType::Empty);
-    
-    // No tanks destroyed in these collisions
-    EXPECT_FALSE(result1);
-    EXPECT_FALSE(result2);
+    // Verify the wall was destroyed
+    EXPECT_TRUE(wallDestroyed);
+    EXPECT_FALSE(board.isWall(wallPosition));
+    EXPECT_EQ(board.getCellType(wallPosition), GameBoard::CellType::Empty);
 }
