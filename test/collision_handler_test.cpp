@@ -111,3 +111,49 @@ TEST_F(CollisionHandlerTest, ShellWallCollision_WallDestroyed) {
     EXPECT_FALSE(board.isWall(wallPosition));
     EXPECT_EQ(board.getCellType(wallPosition), GameBoard::CellType::Empty);
 }
+
+
+// Test shell-shell collision when shells are at the same position
+TEST_F(CollisionHandlerTest, ShellShellCollision_SamePosition) {
+    // Shell1 lives outside the vector
+    Shell shell1(1, Point(2, 2), Direction::Right);
+
+    // Shell2 lives inside the vector, like gameplay
+    std::vector<Shell> shells;
+    shells.emplace_back(2, Point(2, 2), Direction::Left);
+    Shell& shell2 = shells.back();  // reference to actual Shell in vector
+
+    std::vector<Point> explosionPositions;
+
+    bool tankDestroyed = CollisionHandler::checkShellShellCollision(shell1, shells, explosionPositions);
+
+    EXPECT_TRUE(shell1.isDestroyed());
+    EXPECT_TRUE(shell2.isDestroyed());  // ✅ this works now!
+    EXPECT_FALSE(tankDestroyed);
+
+    EXPECT_EQ(explosionPositions.size(), 1);
+    EXPECT_EQ(explosionPositions[0], Point(2, 2));
+}
+
+// Test shell-shell collision when shells are at different positions
+TEST_F(CollisionHandlerTest, ShellShellCollision_DifferentPositions) {
+    // Create two shells at different positions
+    Shell shell1(1, Point(2, 2), Direction::Right);
+    Shell shell2(2, Point(3, 3), Direction::Left);
+    
+    std::vector<Shell> shells = {shell2};
+    std::vector<Point> explosionPositions;
+    
+    // Check for collision
+    bool tankDestroyed = CollisionHandler::checkShellShellCollision(shell1, shells, explosionPositions);
+    
+    // Verify no shells were destroyed
+    EXPECT_FALSE(shell1.isDestroyed());
+    EXPECT_FALSE(shell2.isDestroyed());
+    EXPECT_FALSE(tankDestroyed);
+    
+    // Verify no explosion positions were tracked
+    EXPECT_TRUE(explosionPositions.empty());
+}
+
+
