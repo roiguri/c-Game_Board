@@ -54,3 +54,51 @@ bool Algorithm::hasDirectLineOfSight(
   return false;
 }
 
+bool Algorithm::isInDangerFromShells(
+  const GameBoard& gameBoard,
+  const Tank& tank,
+  const std::vector<Shell>& shells,
+  int stepsToCheck) const
+{
+  if (tank.isDestroyed() || shells.empty()) {
+      return false;
+  }
+
+  Point tankPosition = tank.getPosition();
+  // TODO: consider moving to next shell if shell belongs to the same tank
+  for (const Shell& shell : shells) {
+      if (shell.isDestroyed()) {
+          continue;
+      }
+
+      if (shell.getPosition() == tankPosition) {
+          return true;
+      }
+
+      Point shellPosition = shell.getPosition();
+      Direction shellDirection = shell.getDirection();
+      Point shellDelta = getDirectionDelta(shellDirection);
+
+      for (int step = 0; step < stepsToCheck; ++step) {
+          for (int pace = 0; pace < 2; ++pace) {
+              shellPosition = shellPosition + shellDelta;
+              shellPosition = gameBoard.wrapPosition(shellPosition);
+
+              // Check if shell hits a wall
+              if (gameBoard.isWall(shellPosition)) {
+                  // Shell would be destroyed by the wall
+                  goto next_shell;
+              }
+
+              // Check if shell hits the tank
+              if (shellPosition == tankPosition) {
+                  return true;
+              }
+          }
+      }
+      next_shell:;
+  }
+
+  return false;
+}
+
