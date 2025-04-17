@@ -18,7 +18,7 @@ public:
 
     // Check for shell-tank collisions
     // Returns true if any tank was destroyed
-    static bool checkShellTankCollision(Shell& shell, std::vector<Tank>& tanks);
+    static bool checkShellTankCollision(Shell& shell, std::vector<Tank>& tanks, std::vector<Point>& explosionPositions);
 
     // Check and handle all shell collisions (shell-shell and shell-tank)
     // Returns true if any tank was destroyed

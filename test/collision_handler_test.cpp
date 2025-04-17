@@ -157,3 +157,75 @@ TEST_F(CollisionHandlerTest, ShellShellCollision_DifferentPositions) {
 }
 
 
+// Test shell-tank collision when shell and tank are at the same position
+TEST_F(CollisionHandlerTest, ShellTankCollision_SamePosition) {
+    Shell shell(1, Point(2, 2), Direction::Right);
+    Tank tank(2, Point(2, 2), Direction::Left);
+
+    std::vector<Tank> tanks = {tank};
+    std::vector<Point> explosionPositions;
+
+    bool result = CollisionHandler::checkShellTankCollision(shell, tanks, explosionPositions);
+
+    EXPECT_TRUE(shell.isDestroyed());
+    EXPECT_TRUE(tanks[0].isDestroyed());
+    EXPECT_TRUE(result);
+
+    ASSERT_EQ(explosionPositions.size(), 1);
+    EXPECT_EQ(explosionPositions[0], Point(2, 2));
+}
+
+// Test shell-tank collision when shell and tank are at different positions
+TEST_F(CollisionHandlerTest, ShellTankCollision_DifferentPosition) {
+    Shell shell(1, Point(2, 2), Direction::Right);
+    Tank tank(2, Point(3, 3), Direction::Left);
+
+    std::vector<Tank> tanks = {tank};
+    std::vector<Point> explosionPositions;
+
+    bool result = CollisionHandler::checkShellTankCollision(shell, tanks, explosionPositions);
+
+    EXPECT_FALSE(shell.isDestroyed());
+    EXPECT_FALSE(tanks[0].isDestroyed());
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(explosionPositions.empty());
+}
+
+// Test shell-tank collision when shell is already destroyed
+TEST_F(CollisionHandlerTest, ShellTankCollision_ShellAlreadyDestroyed) {
+    Shell shell(1, Point(2, 2), Direction::Right);
+    shell.destroy();
+
+    Tank tank(2, Point(2, 2), Direction::Left);
+    std::vector<Tank> tanks = {tank};
+    std::vector<Point> explosionPositions;
+
+    bool result = CollisionHandler::checkShellTankCollision(shell, tanks, explosionPositions);
+
+    EXPECT_TRUE(shell.isDestroyed());
+    EXPECT_FALSE(tanks[0].isDestroyed());  // no collision happened
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(explosionPositions.empty());
+}
+
+// Test shell-tank collision with multiple tanks at same position
+TEST_F(CollisionHandlerTest, ShellTankCollision_MultipleTanksSamePosition) {
+    Shell shell(1, Point(2, 2), Direction::Right);
+    Tank tank1(2, Point(2, 2), Direction::Left);
+    Tank tank2(2, Point(2, 2), Direction::Down);
+
+    std::vector<Tank> tanks = {tank1, tank2};
+    std::vector<Point> explosionPositions;
+
+    bool result = CollisionHandler::checkShellTankCollision(shell, tanks, explosionPositions);
+
+    EXPECT_TRUE(shell.isDestroyed());
+    EXPECT_TRUE(tanks[0].isDestroyed());
+    EXPECT_TRUE(tanks[1].isDestroyed());
+    EXPECT_TRUE(result);
+    ASSERT_EQ(explosionPositions.size(), 1);
+    EXPECT_EQ(explosionPositions[0], Point(2, 2));
+}
+
+
+
