@@ -72,24 +72,23 @@ bool Algorithm::hasLineOfSightInDirection(
   }
 }
 
-bool Algorithm::isInDangerFromShells(
+bool Algorithm::isPositionInDangerFromShells(
   const GameBoard& gameBoard,
-  const Tank& tank,
+  const Point& position,
   const std::vector<Shell>& shells,
   int stepsToCheck) const
 {
-  if (tank.isDestroyed() || shells.empty()) {
+  if (shells.empty()) {
       return false;
   }
 
-  Point tankPosition = tank.getPosition();
   // TODO: consider moving to next shell if shell belongs to the same tank
   for (const Shell& shell : shells) {
       if (shell.isDestroyed()) {
           continue;
       }
 
-      if (shell.getPosition() == tankPosition) {
+      if (shell.getPosition() == position) {
           return true;
       }
 
@@ -108,8 +107,7 @@ bool Algorithm::isInDangerFromShells(
                   goto next_shell;
               }
 
-              // Check if shell hits the tank
-              if (shellPosition == tankPosition) {
+              if (shellPosition == position) {
                   return true;
               }
           }

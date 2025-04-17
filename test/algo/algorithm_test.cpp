@@ -35,13 +35,13 @@ public:
         return hasLineOfSightInDirection(gameBoard, from, to, direction);
     }
 
-    bool testIsInDangerFromShells(
+    bool testIsPositionInDangerFromShells(
       const GameBoard& gameBoard,
-      const Tank& tank,
+      const Point& position,
       const std::vector<Shell>& shells,
       int stepsToCheck = 3
     ) const {
-        return isInDangerFromShells(gameBoard, tank, shells, stepsToCheck);
+        return isPositionInDangerFromShells(gameBoard, position, shells, stepsToCheck);
     }
 };
 
@@ -282,7 +282,7 @@ TEST_F(AlgorithmTest, HasLineOfSightInDirection_SamePoint) {
   EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(2, 2), Point(2, 2), Direction::UpLeft));
 }
 
-TEST_F(AlgorithmTest, IsInDangerFromShells_NoShells) {
+TEST_F(AlgorithmTest, IsPositionInDangerFromShells_NoShells) {
   std::vector<std::string> boardLines = {
       "#####",
       "#   #",
@@ -291,13 +291,13 @@ TEST_F(AlgorithmTest, IsInDangerFromShells_NoShells) {
       "#####"
   };
   GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 2), Direction::Right);
+  Point position(2, 2);
   std::vector<Shell> shells;
   
-  EXPECT_FALSE(mockAlgorithm->testIsInDangerFromShells(board, tank, shells));
+  EXPECT_FALSE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells));
 }
 
-TEST_F(AlgorithmTest, IsInDangerFromShells_DestroyedTank) {
+TEST_F(AlgorithmTest, IsPositionInDangerFromShells_DestroyedShell) {
   std::vector<std::string> boardLines = {
       "#####",
       "#   #",
@@ -306,35 +306,17 @@ TEST_F(AlgorithmTest, IsInDangerFromShells_DestroyedTank) {
       "#####"
   };
   GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 2), Direction::Right);
-  tank.destroy();
-  
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(3, 2), Direction::Left));
-  
-  EXPECT_FALSE(mockAlgorithm->testIsInDangerFromShells(board, tank, shells));
-}
-
-TEST_F(AlgorithmTest, IsInDangerFromShells_DestroyedShell) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#   #",
-      "#   #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 2), Direction::Right);
+  Point position(2, 2);
   
   std::vector<Shell> shells;
   Shell shell(2, Point(3, 2), Direction::Left);
   shell.destroy();
   shells.push_back(shell);
   
-  EXPECT_FALSE(mockAlgorithm->testIsInDangerFromShells(board, tank, shells));
+  EXPECT_FALSE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells));
 }
 
-TEST_F(AlgorithmTest, IsInDangerFromShells_DirectHit) {
+TEST_F(AlgorithmTest, IsPositionInDangerFromShells_DirectHit) {
   std::vector<std::string> boardLines = {
       "#####",
       "#   #",
@@ -343,15 +325,15 @@ TEST_F(AlgorithmTest, IsInDangerFromShells_DirectHit) {
       "#####"
   };
   GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 2), Direction::Right);
+  Point position(2, 2);
   
   std::vector<Shell> shells;
   shells.push_back(Shell(2, Point(2, 2), Direction::Left)); // Shell at same position as tank
   
-  EXPECT_TRUE(mockAlgorithm->testIsInDangerFromShells(board, tank, shells));
+  EXPECT_TRUE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells));
 }
 
-TEST_F(AlgorithmTest, IsInDangerFromShells_ImmediateImpact) {
+TEST_F(AlgorithmTest, IsPositionInDangerFromShells_ImmediateImpact) {
   std::vector<std::string> boardLines = {
       "#####",
       "#   #",
@@ -360,15 +342,15 @@ TEST_F(AlgorithmTest, IsInDangerFromShells_ImmediateImpact) {
       "#####"
   };
   GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 2), Direction::Right);
+  Point position(2, 2);
   
   std::vector<Shell> shells;
   shells.push_back(Shell(2, Point(3, 2), Direction::Left));
   
-  EXPECT_TRUE(mockAlgorithm->testIsInDangerFromShells(board, tank, shells, 1));
+  EXPECT_TRUE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells, 1));
 }
 
-TEST_F(AlgorithmTest, IsInDangerFromShells_FutureImpact) {
+TEST_F(AlgorithmTest, IsPositionInDangerFromShells_FutureImpact) {
   std::vector<std::string> boardLines = {
       "#####",
       "#   #",
@@ -377,16 +359,16 @@ TEST_F(AlgorithmTest, IsInDangerFromShells_FutureImpact) {
       "#####"
   };
   GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 2), Direction::Right);
+  Point position(2, 2);
   
   std::vector<Shell> shells;
   shells.push_back(Shell(2, Point(1, 2), Direction::Right));
   
-  EXPECT_FALSE(mockAlgorithm->testIsInDangerFromShells(board, tank, shells, 0));
-  EXPECT_TRUE(mockAlgorithm->testIsInDangerFromShells(board, tank, shells, 1));
+  EXPECT_FALSE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells, 0));
+  EXPECT_TRUE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells, 1));
 }
 
-TEST_F(AlgorithmTest, IsInDangerFromShells_DiagonalApproach) {
+TEST_F(AlgorithmTest, IsPositionInDangerFromShells_DiagonalApproach) {
   std::vector<std::string> boardLines = {
       "#####",
       "#   #",
@@ -395,15 +377,15 @@ TEST_F(AlgorithmTest, IsInDangerFromShells_DiagonalApproach) {
       "#####"
   };
   GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 2), Direction::Right);
+  Point position(2, 2);
   
   std::vector<Shell> shells;
   shells.push_back(Shell(2, Point(3, 3), Direction::UpLeft));
   
-  EXPECT_TRUE(mockAlgorithm->testIsInDangerFromShells(board, tank, shells, 2));
+  EXPECT_TRUE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells, 2));
 }
 
-TEST_F(AlgorithmTest, IsInDangerFromShells_ShellHitsWall) {
+TEST_F(AlgorithmTest, IsPositionInDangerFromShells_ShellHitsWall) {
   std::vector<std::string> boardLines = {
       "#####",
       "#   #",
@@ -412,15 +394,15 @@ TEST_F(AlgorithmTest, IsInDangerFromShells_ShellHitsWall) {
       "#####"
   };
   GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(1, 2), Direction::Right);
+  Point position(2, 2);
   
   std::vector<Shell> shells;
   shells.push_back(Shell(2, Point(3, 2), Direction::Left));
   
-  EXPECT_FALSE(mockAlgorithm->testIsInDangerFromShells(board, tank, shells, 3));
+  EXPECT_FALSE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells, 3));
 }
 
-TEST_F(AlgorithmTest, IsInDangerFromShells_ShellWrapsAround) {
+TEST_F(AlgorithmTest, IsPositionInDangerFromShells_ShellWrapsAround) {
   std::vector<std::string> boardLines = {
       "     ",
       "     ",
@@ -429,15 +411,15 @@ TEST_F(AlgorithmTest, IsInDangerFromShells_ShellWrapsAround) {
       "     "
   };
   GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(1, 2), Direction::Right);
+  Point position(2, 2);
   
   std::vector<Shell> shells;
   shells.push_back(Shell(2, Point(0, 2), Direction::Left));
   
-  EXPECT_TRUE(mockAlgorithm->testIsInDangerFromShells(board, tank, shells, 3));
+  EXPECT_TRUE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells, 3));
 }
 
-TEST_F(AlgorithmTest, IsInDangerFromShells_MultipleShells) {
+TEST_F(AlgorithmTest, IsPositionInDangerFromShells_MultipleShells) {
   std::vector<std::string> boardLines = {
       "#####",
       "#   #",
@@ -446,11 +428,11 @@ TEST_F(AlgorithmTest, IsInDangerFromShells_MultipleShells) {
       "#####"
   };
   GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 2), Direction::Right);
+  Point position(2, 2);
   
   std::vector<Shell> shells;
   shells.push_back(Shell(2, Point(4, 2), Direction::Left));
   shells.push_back(Shell(2, Point(2, 0), Direction::Down));
   
-  EXPECT_TRUE(mockAlgorithm->testIsInDangerFromShells(board, tank, shells, 2));
+  EXPECT_TRUE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells, 2));
 }
