@@ -21,37 +21,54 @@ Algorithm* Algorithm::createAlgorithm(const std::string& type) {
     return nullptr;
 }
 
-bool Algorithm::hasDirectLineOfSight(
+Direction* Algorithm::hasDirectLineOfSight(
   const GameBoard& gameBoard,
   const Point& from,
   const Point& to) const
 {
   if (from == to) {
+      return new Direction(Direction::Up); // Any direction is fine when points are the same
+  }
+
+  // TODO: replace with enum iteration if possible
+  for (int i = 0; i < NUM_DIRECTIONS; ++i) {
+      Direction current_dir = ALL_DIRECTIONS[i];
+      if (hasLineOfSightInDirection(gameBoard, from, to, current_dir)) {
+          return new Direction(current_dir);
+      }
+  }
+  return nullptr;
+}
+
+bool Algorithm::hasLineOfSightInDirection(
+  const GameBoard& gameBoard,
+  const Point& from,
+  const Point& to,
+  Direction direction) const
+{
+  if (from == to) {
       return true;
   }
 
-  for (int i = 0; i < NUM_DIRECTIONS; ++i) {
-      Direction current_dir = ALL_DIRECTIONS[i];
-      Point stepDelta = getDirectionDelta(current_dir);
-
-      Point currentPoint = from;
-      while (true) {
-          currentPoint = currentPoint + stepDelta; 
-          currentPoint = gameBoard.wrapPosition(currentPoint);
-
-          if (currentPoint == to) {
-              return true;
-          }
-          if (gameBoard.isWall(currentPoint)) {
-              break;
-          }
-          
-          if (currentPoint == from) {
-               break;
-          }
+  Point stepDelta = getDirectionDelta(direction);
+  Point currentPoint = from;
+  
+  while (true) {
+      currentPoint = currentPoint + stepDelta;
+      currentPoint = gameBoard.wrapPosition(currentPoint);
+      
+      if (currentPoint == to) {
+          return true;
+      }
+      if (gameBoard.isWall(currentPoint)) {
+          return false;
+      }
+      
+      if (currentPoint == from) {
+          // Back to the start without hitting a wall or reaching the target
+          return false;
       }
   }
-  return false;
 }
 
 bool Algorithm::isInDangerFromShells(

@@ -52,7 +52,6 @@ public:
      */
     static Algorithm* createAlgorithm(const std::string& type);
 protected:
-    // TODO: consider changing to be direction based.
     /**
      * @brief Checks for a direct, unobstructed line of sight along the 8 primary directions.
      *
@@ -63,12 +62,31 @@ protected:
      * @param gameBoard The game board containing layout and obstacles.
      * @param from The starting point.
      * @param to The target point.
-     * @return true if a clear line of sight exists along one of the 8 directions, false otherwise.
+     * @return Direction of the line of sight if exists, nullptr if no line of sight.
      */
-    bool hasDirectLineOfSight(
+    Direction* hasDirectLineOfSight(
       const GameBoard& gameBoard,
       const Point& from,
       const Point& to
+    ) const;
+
+    /**
+     * @brief Checks for a direct, unobstructed line of sight in a specific direction.
+     *
+     * Determines if there is a clear path between 'from' and 'to' strictly along
+     * the specified direction. Considers board wrapping and obstacles (Walls).
+     *
+     * @param gameBoard The game board containing layout and obstacles.
+     * @param from The starting point.
+     * @param to The target point.
+     * @param direction The specific direction to check.
+     * @return true if a clear line of sight exists in the specified direction, false otherwise.
+     */
+    bool hasLineOfSightInDirection(
+      const GameBoard& gameBoard,
+      const Point& from,
+      const Point& to,
+      Direction direction
     ) const;
 
     // TODO: consider changing to be point based (not tank)
