@@ -21,6 +21,7 @@ Algorithm* Algorithm::createAlgorithm(const std::string& type) {
     return nullptr;
 }
 
+// TODO: consider changing to return boolean
 Direction* Algorithm::hasDirectLineOfSight(
   const GameBoard& gameBoard,
   const Point& from,
