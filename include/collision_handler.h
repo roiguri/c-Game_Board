@@ -50,8 +50,7 @@ public:
      */
     static bool checkTankMineCollisions(GameBoard& board,
                                       std::vector<Tank>& tanks);
-
-private:
+    
     /**
      * @brief Check and handle shell-wall collision
      * 

@@ -18,14 +18,25 @@ bool CollisionHandler::checkTankMineCollisions(GameBoard& board,
     return false;
 }
 
-bool CollisionHandler::checkShellWallCollision(GameBoard& board, Shell& shell) {
-    // This method will be implemented in a future commit
-    return false;
-}
 
-bool CollisionHandler::checkShellShellCollision(Shell& shell, std::vector<Shell>& otherShells) {
-    // This method will be implemented in a future commit
-    return false;
+
+//TODO decide what to do with 2 shells & wall collision. currently, it if the first one destroys the wall, the second survives
+// returns true if tank was destroyed
+bool CollisionHandler::checkShellWallCollision(GameBoard& board, Shell& shell) {
+
+    if (shell.isDestroyed()) {
+        return false;
+    }
+    
+    Point position = shell.getPosition();
+    
+    if (board.isWall(position)) {
+        shell.destroy();  
+        board.damageWall(position);
+        return false; // No tank was destroyed in this collision
+    }
+    
+    return false; // No tank was destroyed in this collision
 }
 
 bool CollisionHandler::checkShellTankCollision(Shell& shell, std::vector<Tank>& tanks) {
