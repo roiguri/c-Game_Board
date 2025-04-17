@@ -346,6 +346,37 @@ TEST_F(CollisionHandlerTest, ResolveCollisions_ThreeTankCollision_AllDestroyed) 
     EXPECT_TRUE(result);
 }
 
+TEST_F(CollisionHandlerTest, ResolveCollisions_TankStepsOnMine) {
+    Point pos = Point(3, 3);
+    board.setCellType(pos, GameBoard::CellType::Mine);
+
+    Tank t1(1, pos, Direction::Up);
+    std::vector<Shell> shells = {};
+    std::vector<Tank> tanks = {t1};
+
+    bool result = CollisionHandler::resolveAllCollisions(board, shells, tanks);
+
+    EXPECT_TRUE(tanks[0].isDestroyed());
+    EXPECT_EQ(board.getCellType(pos), GameBoard::CellType::Empty);  // mine gone
+    EXPECT_TRUE(result);
+}
+
+TEST_F(CollisionHandlerTest, ResolveCollisions_TankNotOnMine_Survives) {
+    Point minePos = Point(1, 1);
+    Point tankPos = Point(2, 2);
+    board.setCellType(minePos, GameBoard::CellType::Mine);
+
+    Tank t1(1, tankPos, Direction::Right);
+    std::vector<Shell> shells = {};
+    std::vector<Tank> tanks = {t1};
+
+    bool result = CollisionHandler::resolveAllCollisions(board, shells, tanks);
+
+    EXPECT_FALSE(tanks[0].isDestroyed());
+    EXPECT_EQ(board.getCellType(minePos), GameBoard::CellType::Mine);
+    EXPECT_FALSE(result);
+}
+
 
 
 
