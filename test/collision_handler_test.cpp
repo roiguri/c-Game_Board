@@ -227,6 +227,98 @@ TEST_F(CollisionHandlerTest, ShellTankCollision_MultipleTanksSamePosition) {
     EXPECT_EQ(explosionPositions[0], Point(2, 2));
 }
 
+TEST_F(CollisionHandlerTest, ResolveCollisions_ExplosionAtSamePositionKillsAll) {
+    Shell s1(1, Point(2, 2), Direction::Right);
+    Shell s2(2, Point(2, 2), Direction::Left);
+    Tank t1(1, Point(2, 2), Direction::Up);
+
+    std::vector<Shell> shells = {s1, s2};
+    std::vector<Tank> tanks = {t1};
+
+    bool result = CollisionHandler::resolveAllCollisions(board, shells, tanks);
+
+    EXPECT_TRUE(shells[0].isDestroyed());
+    EXPECT_TRUE(shells[1].isDestroyed());
+    EXPECT_TRUE(tanks[0].isDestroyed());
+    EXPECT_TRUE(result);
+}
+
+TEST_F(CollisionHandlerTest, ResolveCollisions_ShellKillsTankDirectly) {
+    Shell s1(1, Point(1, 1), Direction::Right);
+    Tank t1(2, Point(1, 1), Direction::Up);
+
+    std::vector<Shell> shells = {s1};
+    std::vector<Tank> tanks = {t1};
+
+    bool result = CollisionHandler::resolveAllCollisions(board, shells, tanks);
+
+    EXPECT_TRUE(shells[0].isDestroyed());
+    EXPECT_TRUE(tanks[0].isDestroyed());
+    EXPECT_TRUE(result);
+}
+
+TEST_F(CollisionHandlerTest, ResolveCollisions_ExplosionDestroysMine) {
+    Point pos(3, 3);
+    board.setCellType(pos, GameBoard::CellType::Mine);
+
+    Shell s1(1, pos, Direction::Right);
+    Shell s2(2, pos, Direction::Left);
+
+    std::vector<Shell> shells = {s1, s2};
+    std::vector<Tank> tanks = {};
+
+    bool result = CollisionHandler::resolveAllCollisions(board, shells, tanks);
+
+    EXPECT_TRUE(shells[0].isDestroyed());
+    EXPECT_TRUE(shells[1].isDestroyed());
+    EXPECT_FALSE(result);
+    EXPECT_EQ(board.getCellType(pos), GameBoard::CellType::Empty);  // mine removed
+}
+
+TEST_F(CollisionHandlerTest, ResolveCollisions_NoOverlap_NoDestruction) {
+    Shell s1(1, Point(0, 0), Direction::Right);
+    Shell s2(2, Point(4, 4), Direction::Left);
+    Tank t1(1, Point(1, 2), Direction::Up);
+    Tank t2(2, Point(3, 3), Direction::Down);
+
+    std::vector<Shell> shells = {s1, s2};
+    std::vector<Tank> tanks = {t1, t2};
+
+    bool result = CollisionHandler::resolveAllCollisions(board, shells, tanks);
+
+    EXPECT_FALSE(shells[0].isDestroyed());
+    EXPECT_FALSE(shells[1].isDestroyed());
+    EXPECT_FALSE(tanks[0].isDestroyed());
+    EXPECT_FALSE(tanks[1].isDestroyed());
+    EXPECT_FALSE(result);
+}
+
+TEST_F(CollisionHandlerTest, ResolveCollisions_MixedDestructionAtOneTile) {
+    Point chaos = Point(2, 2);
+    board.setCellType(chaos, GameBoard::CellType::Mine);
+
+    Shell s1(1, chaos, Direction::Right);
+    Shell s2(2, chaos, Direction::Left);
+    Tank t1(1, chaos, Direction::Up);
+    Tank t2(2, chaos, Direction::Down);
+
+    std::vector<Shell> shells = {s1, s2};
+    std::vector<Tank> tanks = {t1, t2};
+
+    bool result = CollisionHandler::resolveAllCollisions(board, shells, tanks);
+
+    EXPECT_TRUE(shells[0].isDestroyed());
+    EXPECT_TRUE(shells[1].isDestroyed());
+    EXPECT_TRUE(tanks[0].isDestroyed());
+    EXPECT_TRUE(tanks[1].isDestroyed());
+    EXPECT_EQ(board.getCellType(chaos), GameBoard::CellType::Empty);  // mine destroyed
+    EXPECT_TRUE(result);
+}
+
+
+
+
+
 
 
 
