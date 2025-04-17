@@ -52,6 +52,7 @@ public:
      */
     static Algorithm* createAlgorithm(const std::string& type);
 protected:
+    // TODO: consider changing to be direction based.
     /**
      * @brief Checks for a direct, unobstructed line of sight along the 8 primary directions.
      *
@@ -68,5 +69,25 @@ protected:
       const GameBoard& gameBoard,
       const Point& from,
       const Point& to
-  ) const;
+    ) const;
+
+    // TODO: consider changing to be point based (not tank)
+    /**
+     * @brief Determines if a tank is in danger from any shells
+     * 
+     * Checks if any shells will hit the tank in the specified number of game steps
+     * by predicting shell trajectories and accounting for board wrapping.
+     * 
+     * @param gameBoard The game board for checking wall collisions
+     * @param tank The tank to check for danger
+     * @param shells All active shells on the board
+     * @param stepsToCheck Number of future steps to check for collisions (default: 3)
+     * @return true if the tank is in danger, false otherwise
+     */
+    bool isInDangerFromShells(
+      const GameBoard& gameBoard,
+      const Tank& tank,
+      const std::vector<Shell>& shells,
+      int stepsToCheck = 3
+    ) const;
 };
