@@ -123,3 +123,23 @@ void CollisionHandler::markExplosionAt(const Point& position, std::vector<Point>
     // Add this position to the list of explosion positions
     explosionPositions.push_back(position);
 }
+
+
+
+void CollisionHandler::applyExplosions(const std::vector<Point>& explosionPositions, std::vector<Shell>& shells, std::vector<Tank>& tanks) {
+    for (const Point& pos : explosionPositions) {
+        // Destroy all shells at this position
+        for (auto& shell : shells) {
+            if (!shell.isDestroyed() && shell.getPosition() == pos) {
+                shell.destroy();
+            }
+        }
+
+        // Destroy all tanks at this position
+        for (auto& tank : tanks) {
+            if (!tank.isDestroyed() && tank.getPosition() == pos) {
+                tank.destroy();
+            }
+        }
+    }
+}
