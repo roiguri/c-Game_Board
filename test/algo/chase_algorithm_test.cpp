@@ -510,7 +510,8 @@ TEST_F(ChaseAlgorithmTest, GetNextAction_Evasion_SafePosition) {
   std::vector<Shell> shells; // No shells
 
   // TODO: fix when chase is added
-  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
+  EXPECT_NE(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
+  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::RotateLeftEighth);
 }
 
 TEST_F(ChaseAlgorithmTest, GetNextAction_Evasion_DangerMoveForwardSafe) {
@@ -558,7 +559,8 @@ TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_CannotShootCooldown) {
 
   myTank.shoot(); // Simulate cooldown
   // TODO: fix when chase is added
-  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
+  EXPECT_NE(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
+  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::RotateLeftEighth);
 }
 
 TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_CannotShootObstacle) {
@@ -573,9 +575,10 @@ TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_CannotShootObstacle) {
   Tank enemyTank(2, Point(2, 3), Direction::Up);
   std::vector<Shell> shells;
 
-  // TODO: fix when chase is added
-  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
+  EXPECT_NE(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
+  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::RotateLeftEighth);
 }
+
 
 TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_NeedsRotation) {
    GameBoard board = create5X5TestBoard({
@@ -589,8 +592,8 @@ TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_NeedsRotation) {
   Tank enemyTank(2, Point(2, 3), Direction::Up);
   std::vector<Shell> shells;
 
-  // TODO: fix when chase is added
-  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
+  EXPECT_NE(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
+  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::RotateRightEighth);
 }
 
 TEST_F(ChaseAlgorithmTest, UpdateAndValidatePath_NewPathNeeded_PathEmpty) {
@@ -683,4 +686,64 @@ TEST_F(ChaseAlgorithmTest, UpdateAndValidatePath_PathValid_NextStepClear) {
   // Verify using getters
   EXPECT_EQ(getCurrentPathForTesting(), existingPath);
   EXPECT_EQ(getLastTargetPositionForTesting(), enemyTank.getPosition());
+}
+
+TEST_F(ChaseAlgorithmTest, GetNextAction_PathFollowing_NeedsRotation) {
+  GameBoard board = create5X5TestBoard({ // Empty board
+      "     ",
+      "  1  ", // Tank 1 at (2,1) facing UP
+      "     ", // Path wants to go Right to (3,1)
+      "   2 ", // Tank 2 at (3,3) - target pos
+      "     "
+  });
+  Tank myTank(1, Point(2, 1), Direction::Up); // Facing Up
+  Tank enemyTank(2, Point(3, 3), Direction::Up);
+  std::vector<Shell> shells; // No danger
+
+  // Setup path state: path requires moving Right to (3,1) first
+  std::vector<Point> path = { Point(3, 1), Point(3, 2), Point(3, 3) };
+  setCurrentPathForTesting(path);
+  setLastTargetPositionForTesting(enemyTank.getPosition());
+
+  Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
+
+  EXPECT_EQ(action, Action::RotateRightQuarter);
+  EXPECT_EQ(getCurrentPathForTesting(), path);
+}
+
+TEST_F(ChaseAlgorithmTest, GetNextAction_PathFollowing_MoveForwardAligned) {
+  GameBoard board = create5X5TestBoard({ // Empty board
+      "     ",
+      "  1  ", // Tank 1 at (2,1) facing RIGHT
+      "     ", // Path wants to go Right to (3,1)
+      "   2 ", // Tank 2 at (3,3)
+      "     "
+  });
+  Tank myTank(1, Point(2, 1), Direction::Right); // Facing Right
+  Tank enemyTank(2, Point(3, 3), Direction::Up);
+  std::vector<Shell> shells;
+  std::vector<Point> initialPath = { Point(3, 1), Point(3, 2), Point(3, 3) };
+  setCurrentPathForTesting(initialPath);
+  setLastTargetPositionForTesting(enemyTank.getPosition());
+
+  Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
+
+  EXPECT_EQ(action, Action::MoveForward);
+  std::vector<Point> expectedRemainingPath = { Point(3, 2), Point(3, 3) };
+  EXPECT_EQ(getCurrentPathForTesting(), expectedRemainingPath);
+}
+
+TEST_F(ChaseAlgorithmTest, GetNextAction_PathFollowing_EmptyPath) {
+  GameBoard board = create5X5TestBoard({ /* ... empty ... */ });
+  Tank myTank(1, Point(2, 1), Direction::Up);
+  Tank enemyTank(2, Point(3, 3), Direction::Up);
+  std::vector<Shell> shells;
+
+  // Setup empty path
+  setCurrentPathForTesting({});
+  setLastTargetPositionForTesting(enemyTank.getPosition()); // Target doesn't matter here
+
+  // Expect None because path following logic requires non-empty path
+  Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
+  EXPECT_EQ(action, Action::None);
 }
