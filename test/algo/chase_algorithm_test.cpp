@@ -43,23 +43,6 @@ TEST_F(ChaseAlgorithmTest, Constructor) {
     EXPECT_NE(algorithm, nullptr);
 }
 
-TEST_F(ChaseAlgorithmTest, GetNextAction_ReturnNoneNotImlemented) {
-    std::vector<std::string> boardLines = {
-        "#####",
-        "#1 2#",
-        "#   #",
-        "#   #",
-        "#####"
-    };
-    GameBoard board = create5X5TestBoard(boardLines);
-    
-    Tank myTank(1, Point(1, 1), Direction::Right);
-    Tank enemyTank(2, Point(3, 1), Direction::Left);
-    std::vector<Shell> shells;
-  
-    EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
-}
-
 TEST_F(ChaseAlgorithmTest, GetValidNeighbors_EmptyBoardCenter) {
   GameBoard board = create5X5TestBoard({
       "     ",
@@ -494,4 +477,100 @@ TEST_F(ChaseAlgorithmTest, CalculatePathBFS_WrapPathY) {
   std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
   EXPECT_EQ(actualPath.size(), expectedLength);
   EXPECT_EQ(actualPath, expectedPath);
+}
+
+TEST_F(ChaseAlgorithmTest, GetNextAction_Evasion_SafePosition) {
+  GameBoard board = create5X5TestBoard({
+      "     ",
+      "  1  ", // Tank 1 at (2,1)
+      "     ",
+      "   2 ", // Tank 2 at (3,3)
+      "     "
+  });
+  Tank myTank(1, Point(2, 1), Direction::Down);
+  Tank enemyTank(2, Point(3, 3), Direction::Up);
+  std::vector<Shell> shells; // No shells
+
+  // TODO: fix when chase is added
+  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
+}
+
+TEST_F(ChaseAlgorithmTest, GetNextAction_Evasion_DangerMoveForwardSafe) {
+  GameBoard board = create5X5TestBoard({
+      "     ",
+      "  S  ", // Shell moving down towards (2,2)
+      "  1  ", // Tank 1 at (2,2) facing DownRight
+      "     ", // Position (2,3) is safe
+      "    2"
+  });
+  Tank myTank(1, Point(2, 2), Direction::DownRight);
+  Tank enemyTank(2, Point(4, 4), Direction::Up);
+  std::vector<Shell> shells = { Shell(2, Point(2, 1), Direction::Down) };
+
+  // findSafeAction should identify moving forward (to 2,3) as safe.
+  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::MoveForward);
+}
+
+TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_CanShootAligned) {
+  GameBoard board = create5X5TestBoard({
+      "     ",
+      "  1  ", // Tank 1 at (2,1) facing Down
+      "     ",
+      "  2  ", // Tank 2 at (2,3)
+      "     "
+  });
+  Tank myTank(1, Point(2, 1), Direction::Down);
+  Tank enemyTank(2, Point(2, 3), Direction::Up);
+  std::vector<Shell> shells;
+
+  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::Shoot);
+}
+
+TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_CannotShootCooldown) {
+  GameBoard board = create5X5TestBoard({
+      "     ",
+      "  1  ", // Tank 1 at (2,1) facing Down
+      "     ",
+      "  2  ", // Tank 2 at (2,3)
+      "     "
+  });
+  Tank myTank(1, Point(2, 1), Direction::Down);
+  Tank enemyTank(2, Point(2, 3), Direction::Up);
+  std::vector<Shell> shells;
+
+  myTank.shoot(); // Simulate cooldown
+  // TODO: fix when chase is added
+  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
+}
+
+TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_CannotShootObstacle) {
+  GameBoard board = create5X5TestBoard({
+      "     ",
+      "  1  ", // Tank 1 at (2,1) facing Down
+      "  #  ", // Wall obstruction
+      "  2  ", // Tank 2 at (2,3)
+      "     "
+  });
+  Tank myTank = Tank(1, Point(2, 1), Direction::Down);
+  Tank enemyTank(2, Point(2, 3), Direction::Up);
+  std::vector<Shell> shells;
+
+  // TODO: fix when chase is added
+  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
+}
+
+TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_NeedsRotation) {
+   GameBoard board = create5X5TestBoard({
+      "     ",
+      "  1  ", // Tank 1 at (2,1) facing Right
+      "     ",
+      "  2  ", // Tank 2 at (2,3)
+      "     "
+  });
+  Tank myTank(1, Point(2, 1), Direction::Right);
+  Tank enemyTank(2, Point(2, 3), Direction::Up);
+  std::vector<Shell> shells;
+
+  // TODO: fix when chase is added
+  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
 }
