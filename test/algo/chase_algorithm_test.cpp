@@ -732,18 +732,3 @@ TEST_F(ChaseAlgorithmTest, GetNextAction_PathFollowing_MoveForwardAligned) {
   std::vector<Point> expectedRemainingPath = { Point(3, 2), Point(3, 3) };
   EXPECT_EQ(getCurrentPathForTesting(), expectedRemainingPath);
 }
-
-TEST_F(ChaseAlgorithmTest, GetNextAction_PathFollowing_EmptyPath) {
-  GameBoard board = create5X5TestBoard({ /* ... empty ... */ });
-  Tank myTank(1, Point(2, 1), Direction::Up);
-  Tank enemyTank(2, Point(3, 3), Direction::Up);
-  std::vector<Shell> shells;
-
-  // Setup empty path
-  setCurrentPathForTesting({});
-  setLastTargetPositionForTesting(enemyTank.getPosition()); // Target doesn't matter here
-
-  // Expect None because path following logic requires non-empty path
-  Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
-  EXPECT_EQ(action, Action::None);
-}

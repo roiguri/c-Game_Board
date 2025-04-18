@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
 #include "algo/algorithm.h"
+#include "algo/chase_algorithm.h"
+#include "algo/defensive_algorithm.h"
 #include "game_board.h"
 #include "tank.h"
 #include "shell.h"
@@ -87,15 +89,24 @@ TEST_F(AlgorithmTest, Constructor) {
     delete testAlgorithm;
 }
 
-TEST_F(AlgorithmTest, CreateAlgorithmNotImplemented) {
-    Algorithm* algorithm = Algorithm::createAlgorithm("chase");
-    EXPECT_EQ(algorithm, nullptr);
-    
-    algorithm = Algorithm::createAlgorithm("defensive");
-    EXPECT_EQ(algorithm, nullptr);
-    
-    algorithm = Algorithm::createAlgorithm("invalid");
-    EXPECT_EQ(algorithm, nullptr);
+TEST_F(AlgorithmTest, CreateAlgorithm_ValidTypes) {
+  Algorithm* chaseAlgo = Algorithm::createAlgorithm("chase");
+  EXPECT_NE(chaseAlgo, nullptr);
+  EXPECT_TRUE(dynamic_cast<ChaseAlgorithm*>(chaseAlgo) != nullptr);
+  EXPECT_TRUE(dynamic_cast<DefensiveAlgorithm*>(chaseAlgo) == nullptr);
+  delete chaseAlgo;
+  
+  Algorithm* defensiveAlgo = Algorithm::createAlgorithm("defensive");
+  EXPECT_NE(defensiveAlgo, nullptr);
+  EXPECT_TRUE(dynamic_cast<ChaseAlgorithm*>(defensiveAlgo) == nullptr);
+  EXPECT_TRUE(dynamic_cast<DefensiveAlgorithm*>(defensiveAlgo) != nullptr);
+  delete defensiveAlgo;
+}
+
+TEST_F(AlgorithmTest, CreateAlgorithm_UnknownType) {
+  Algorithm* unknownAlgo = Algorithm::createAlgorithm("unknown_type");
+  
+  EXPECT_EQ(unknownAlgo, nullptr);
 }
 
 TEST_F(AlgorithmTest, GetNextAction) {
