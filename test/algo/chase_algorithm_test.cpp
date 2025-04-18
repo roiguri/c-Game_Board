@@ -27,6 +27,10 @@ protected:
     std::vector<Point> testGetValidNeighbors(const Point& current, const GameBoard& gameBoard) {
         return algorithm->getValidNeighbors(current, gameBoard);
     }
+
+    std::vector<Point> testReconstructPath(const std::map<Point, Point>& came_from, const Point& start, const Point& end) {
+        return algorithm->reconstructPath(came_from, start, end);
+    }
 };
 
 using ::testing::UnorderedElementsAreArray;
@@ -224,4 +228,90 @@ TEST_F(ChaseAlgorithmTest, GetValidNeighbors_WrapCornerBottomRight) {
 
   std::vector<Point> actualNeighbors = testGetValidNeighbors(corner, board);
   EXPECT_THAT(actualNeighbors, UnorderedElementsAreArray(expectedNeighbors));
+}
+
+TEST_F(ChaseAlgorithmTest, ReconstructPath_StraightLine) {
+  Point start(1, 1);
+  Point end(1, 4);
+  std::map<Point, Point> came_from;
+
+  // Path: (1,1) -> (1,2) -> (1,3) -> (1,4)
+  came_from[Point(1, 2)] = Point(1, 1);
+  came_from[Point(1, 3)] = Point(1, 2);
+  came_from[Point(1, 4)] = Point(1, 3);
+
+  std::vector<Point> expectedPath = { Point(1, 2), Point(1, 3), Point(1, 4) };
+  std::vector<Point> actualPath = testReconstructPath(came_from, start, end);
+
+  EXPECT_EQ(actualPath, expectedPath);
+}
+
+TEST_F(ChaseAlgorithmTest, ReconstructPath_DiagonalLine) {
+  Point start(0, 0);
+  Point end(3, 3);
+  std::map<Point, Point> came_from;
+
+  // Path: (0,0) -> (1,1) -> (2,2) -> (3,3)
+  came_from[Point(1, 1)] = Point(0, 0);
+  came_from[Point(2, 2)] = Point(1, 1);
+  came_from[Point(3, 3)] = Point(2, 2);
+
+  std::vector<Point> expectedPath = { Point(1, 1), Point(2, 2), Point(3, 3) };
+  std::vector<Point> actualPath = testReconstructPath(came_from, start, end);
+  EXPECT_EQ(actualPath, expectedPath);
+}
+
+TEST_F(ChaseAlgorithmTest, ReconstructPath_LShape) {
+  Point start(1, 1);
+  Point end(3, 3);
+  std::map<Point, Point> came_from;
+
+  // Path: (1,1) -> (1,2) -> (1,3) -> (2,3) -> (3,3)
+  came_from[Point(1, 2)] = Point(1, 1);
+  came_from[Point(1, 3)] = Point(1, 2);
+  came_from[Point(2, 3)] = Point(1, 3);
+  came_from[Point(3, 3)] = Point(2, 3);
+
+  std::vector<Point> expectedPath = { Point(1, 2), Point(1, 3), Point(2, 3), Point(3, 3) };
+  std::vector<Point> actualPath = testReconstructPath(came_from, start, end);
+
+  EXPECT_EQ(actualPath, expectedPath);
+}
+
+TEST_F(ChaseAlgorithmTest, ReconstructPath_StartEqualsEnd) {
+  Point start(2, 2);
+  Point end(2, 2);
+  std::map<Point, Point> came_from;
+
+
+  std::vector<Point> expectedPath = {};
+  std::vector<Point> actualPath = testReconstructPath(came_from, start, end);
+
+  EXPECT_EQ(actualPath, expectedPath);
+}
+
+TEST_F(ChaseAlgorithmTest, ReconstructPath_EndNotReached) {
+  Point start(1, 1);
+  Point end(5, 5);
+  std::map<Point, Point> came_from;
+
+  // Path: (1,1) -> (1,2) -> (2,1)
+  came_from[Point(1, 2)] = Point(1, 1);
+  came_from[Point(2, 1)] = Point(1, 1);
+
+  std::vector<Point> expectedPath = {};
+  std::vector<Point> actualPath = testReconstructPath(came_from, start, end);
+
+  EXPECT_EQ(actualPath, expectedPath);
+}
+
+TEST_F(ChaseAlgorithmTest, ReconstructPath_EmptyCameFrom) {
+  Point start(1, 1);
+  Point end(5, 5);
+  std::map<Point, Point> came_from;
+
+  std::vector<Point> expectedPath = {};
+  std::vector<Point> actualPath = testReconstructPath(came_from, start, end);
+
+  EXPECT_EQ(actualPath, expectedPath);
 }

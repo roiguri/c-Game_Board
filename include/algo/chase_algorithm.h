@@ -55,4 +55,21 @@ private:
      * @return A vector of valid neighbor points.
      */
     std::vector<Point> getValidNeighbors(const Point& current, const GameBoard& gameBoard) const;
+
+    /**
+     * @brief Reconstructs the path found by BFS.
+     *
+     * Traces back from the end point to the start point using the predecessor map
+     * generated during the BFS search.
+     *
+     * @param came_from A map where came_from[p] is the point from which BFS reached p.
+     * @param start The starting point of the BFS search.
+     * @param end The target end point found by BFS.
+     * @return A vector of points representing the path from start (exclusive) to end (inclusive),
+     * or an empty vector if the path cannot be reconstructed.
+     */
+    std::vector<Point> reconstructPath(
+      const std::map<Point, Point>& came_from,
+      const Point& start,
+      const Point& end) const;
 };
