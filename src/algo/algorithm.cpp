@@ -21,7 +21,7 @@ Algorithm* Algorithm::createAlgorithm(const std::string& type) {
     return nullptr;
 }
 
-// TODO: consider changing to return boolean
+// TODO: delete if not used. if used return optional instead of pointer
 Direction* Algorithm::hasDirectLineOfSight(
   const GameBoard& gameBoard,
   const Point& from,
@@ -83,6 +83,7 @@ bool Algorithm::isPositionInDangerFromShells(
   }
 
   // TODO: consider moving to next shell if shell belongs to the same tank
+  // TODO: remove use of goto
   for (const Shell& shell : shells) {
       if (shell.isDestroyed()) {
           continue;
