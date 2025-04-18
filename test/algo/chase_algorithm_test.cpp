@@ -35,6 +35,24 @@ protected:
     std::vector<Point> testCalculatePathBFS(const Point& start, const Point& end, const GameBoard& gameBoard) {
         return algorithm->calculatePathBFS(start, end, gameBoard);
     }
+
+    void testUpdateAndValidatePath(const GameBoard& gameBoard, const Tank& myTank, const Tank& enemyTank) {
+        algorithm->updateAndValidatePath(gameBoard, myTank, enemyTank);
+    }
+
+    const std::vector<Point>& getCurrentPathForTesting() const {
+        return algorithm->m_currentPath;
+    }
+    void setCurrentPathForTesting(const std::vector<Point>& path) {
+        algorithm->m_currentPath = path;
+    }
+
+    Point getLastTargetPositionForTesting() const {
+        return algorithm->m_lastTargetPosition;
+    }
+    void setLastTargetPositionForTesting(const Point& position) {
+        algorithm->m_lastTargetPosition = position;
+    }
 };
 
 using ::testing::UnorderedElementsAreArray;
@@ -573,4 +591,96 @@ TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_NeedsRotation) {
 
   // TODO: fix when chase is added
   EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
+}
+
+TEST_F(ChaseAlgorithmTest, UpdateAndValidatePath_NewPathNeeded_PathEmpty) {
+  GameBoard board = create5X5TestBoard({ /* ... empty ... */ });
+  Tank myTank(1, Point(2, 1), Direction::Down);
+  Tank enemyTank(2, Point(3, 3), Direction::Up);
+
+  // Setup initial state using setters
+  setCurrentPathForTesting({}); // Empty path
+  setLastTargetPositionForTesting(Point(-1, -1));
+
+  // Call the method
+  testUpdateAndValidatePath(board, myTank, enemyTank);
+
+  // Verify using getters
+  std::vector<Point> expectedPath = { Point(3, 2), Point(3, 3) };
+  EXPECT_EQ(getCurrentPathForTesting(), expectedPath);
+  EXPECT_EQ(getLastTargetPositionForTesting(), enemyTank.getPosition());
+  EXPECT_FALSE(getCurrentPathForTesting().empty());
+}
+
+TEST_F(ChaseAlgorithmTest, UpdateAndValidatePath_NewPathNeeded_EnemyMoved) {
+  GameBoard board = create5X5TestBoard({ /* ... empty ... */ });
+  Tank myTank(1, Point(2, 1), Direction::Down);
+  std::vector<Point> currentPath = { Point(3, 2), Point(3, 3) };
+  Point enemyTankPosition(3, 3);
+  setCurrentPathForTesting(currentPath);
+  setLastTargetPositionForTesting(enemyTankPosition);
+
+  Tank enemyTank(2, Point(3, 4), Direction::Up); // Enemy moved to (3,4)
+  testUpdateAndValidatePath(board, myTank, enemyTank);
+
+  std::vector<Point> expectedNewPath = { Point(3, 2), Point(3, 3), Point(3, 4) };
+  EXPECT_NE(getCurrentPathForTesting(), currentPath);
+  EXPECT_NE(getLastTargetPositionForTesting(), enemyTankPosition);
+}
+
+TEST_F(ChaseAlgorithmTest, UpdateAndValidatePath_PathStillValid_EnemyNotMoved) {
+  GameBoard board = create5X5TestBoard({ /* ... empty ... */ });
+  Tank myTank(1, Point(2, 1), Direction::Down);
+  Tank enemyTank(2, Point(3, 3), Direction::Up); // Enemy at same position
+
+  // Setup initial state using setters
+  std::vector<Point> existingPath = { Point(3, 2), Point(3, 3) };
+  setCurrentPathForTesting(existingPath);
+  setLastTargetPositionForTesting(enemyTank.getPosition());
+
+  // Call the method
+  testUpdateAndValidatePath(board, myTank, enemyTank);
+
+  // Verify using getters
+  EXPECT_EQ(getCurrentPathForTesting(), existingPath);
+  EXPECT_EQ(getLastTargetPositionForTesting(), enemyTank.getPosition());
+}
+
+TEST_F(ChaseAlgorithmTest, UpdateAndValidatePath_PathInvalidated_NextStepBlocked) {
+  GameBoard board = create5X5TestBoard({ /* ... empty ... */ });
+  Tank myTank(1, Point(2, 1), Direction::Down);
+  Tank enemyTank(2, Point(3, 3), Direction::Up);
+
+  // Setup initial state using setters
+  std::vector<Point> existingPath = { Point(3, 2), Point(3, 3) }; // Next step is (3,2)
+  setCurrentPathForTesting(existingPath);
+  setLastTargetPositionForTesting(enemyTank.getPosition());
+
+  // Block the next step
+  board.setCellType(Point(3, 2), GameBoard::CellType::Wall); //
+
+  // Call the method
+  testUpdateAndValidatePath(board, myTank, enemyTank);
+
+  // Verify using getters
+  EXPECT_TRUE(getCurrentPathForTesting().empty());
+  EXPECT_EQ(getLastTargetPositionForTesting(), Point(-1,-1));
+}
+
+TEST_F(ChaseAlgorithmTest, UpdateAndValidatePath_PathValid_NextStepClear) {
+  GameBoard board = create5X5TestBoard({ /* ... empty ... */ });
+  Tank myTank(1, Point(2, 1), Direction::Down);
+  Tank enemyTank(2, Point(3, 3), Direction::Up);
+
+  // Setup initial state using setters
+  std::vector<Point> existingPath = { Point(3, 2), Point(3, 3) }; // Next step is (3,2)
+  setCurrentPathForTesting(existingPath);
+  setLastTargetPositionForTesting(enemyTank.getPosition());
+
+  // Call the method
+  testUpdateAndValidatePath(board, myTank, enemyTank);
+
+  // Verify using getters
+  EXPECT_EQ(getCurrentPathForTesting(), existingPath);
+  EXPECT_EQ(getLastTargetPositionForTesting(), enemyTank.getPosition());
 }

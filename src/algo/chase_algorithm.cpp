@@ -109,3 +109,20 @@ std::vector<Point> ChaseAlgorithm::calculatePathBFS(
   }
   return {};
 }
+
+void ChaseAlgorithm::updateAndValidatePath(const GameBoard& gameBoard, const Tank& myTank, const Tank& enemyTank) {
+  // TODO: consider changing sensitivity to enemy tank movement / walls position
+  bool needsNewPath = m_currentPath.empty() || (enemyTank.getPosition() != m_lastTargetPosition);
+  if (needsNewPath) {
+      m_currentPath = calculatePathBFS(myTank.getPosition(), enemyTank.getPosition(), gameBoard);
+      m_lastTargetPosition = enemyTank.getPosition();
+  }
+
+  if (!m_currentPath.empty()) {
+      const Point& nextStep = m_currentPath.front();
+      if (!gameBoard.canMoveTo(nextStep)) {
+          m_currentPath.clear();
+          m_lastTargetPosition = Point(-1, -1);
+      }
+  }
+}
