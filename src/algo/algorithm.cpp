@@ -1,5 +1,7 @@
 #include "algo/algorithm.h"
 #include <iostream>
+#include "algo/chase_algorithm.h"
+#include "algo/defensive_algorithm.h"
 
 const int NUM_DIRECTIONS = sizeof(ALL_DIRECTIONS) / sizeof(ALL_DIRECTIONS[0]);
 
@@ -11,10 +13,11 @@ Algorithm::~Algorithm() {
 }
 
 Algorithm* Algorithm::createAlgorithm(const std::string& type) {
-    if (type == "chase" || type == "defensive") {
-        return nullptr;
+    if (type == "chase") {
+      return new ChaseAlgorithm();
+    } else if (type == "defensive") {
+      return new DefensiveAlgorithm();
     }
-    
     return nullptr;
 }
 
