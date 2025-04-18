@@ -72,4 +72,22 @@ private:
       const std::map<Point, Point>& came_from,
       const Point& start,
       const Point& end) const;
+
+    // TODO: Consider optimize with minimum rotations/weights included
+      /**
+     * @brief Performs a Breadth-First Search to find a path between two points.
+     *
+     * Finds the shortest path (in terms of steps) from start to end, avoiding
+     * walls and mines. Uses getValidNeighbors and reconstructPath helpers.
+     *
+     * @param start The starting point for the search.
+     * @param end The target end point for the search.
+     * @param gameBoard The game board state.
+     * @return A vector of points representing the path from start (exclusive)
+     * to end (inclusive), or an empty vector if no path is found.
+     */
+    std::vector<Point> calculatePathBFS(
+      const Point& start,
+      const Point& end,
+      const GameBoard& gameBoard) const;
 };

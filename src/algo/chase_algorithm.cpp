@@ -1,6 +1,7 @@
 #include "algo/chase_algorithm.h"
 #include "utils/direction.h"
 #include <algorithm>
+#include <set>
 
 ChaseAlgorithm::ChaseAlgorithm() : Algorithm() {
     // Constructor implementation
@@ -58,4 +59,40 @@ std::vector<Point> ChaseAlgorithm::reconstructPath(
   }
   std::reverse(path.begin(), path.end());
   return path;
+}
+
+std::vector<Point> ChaseAlgorithm::calculatePathBFS(
+  const Point& start,
+  const Point& end,
+  const GameBoard& gameBoard) const
+{
+  if (start == end) {
+      return {};
+  }
+
+  std::queue<Point> q;                
+  std::map<Point, Point> came_from;   
+  std::set<Point> visited;         
+
+  q.push(start);
+  visited.insert(start);
+
+  while (!q.empty()) {
+      Point current = q.front();
+      q.pop();
+
+      if (current == end) {
+          return reconstructPath(came_from, start, end);
+      }
+
+      std::vector<Point> neighbors = getValidNeighbors(current, gameBoard);
+      for (const Point& neighbor : neighbors) {
+          if (visited.count(neighbor) == 0) {
+              visited.insert(neighbor);       
+              came_from[neighbor] = current;  
+              q.push(neighbor);               
+          }
+      }
+  }
+  return {};
 }
