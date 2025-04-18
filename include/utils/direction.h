@@ -19,6 +19,15 @@ enum class Direction {
 };
 
 /**
+ * Represents the 8 possible directions for tank movement and shooting.
+ * This is a constant array of all possible directions.
+ */
+static const Direction ALL_DIRECTIONS[] = {
+  Direction::Up, Direction::UpRight, Direction::Right, Direction::DownRight,
+  Direction::Down, Direction::DownLeft, Direction::Left, Direction::UpLeft
+};
+
+/**
  * Converts a Direction enum value to its string representation.
  * 
  * @param direction The direction to convert
