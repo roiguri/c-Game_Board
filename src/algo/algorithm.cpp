@@ -1,10 +1,6 @@
 #include "algo/algorithm.h"
 #include <iostream>
 
-static const Direction ALL_DIRECTIONS[] = {
-  Direction::Up, Direction::UpRight, Direction::Right, Direction::DownRight,
-  Direction::Down, Direction::DownLeft, Direction::Left, Direction::UpLeft
-};
 const int NUM_DIRECTIONS = sizeof(ALL_DIRECTIONS) / sizeof(ALL_DIRECTIONS[0]);
 
 // TODO: not implemented

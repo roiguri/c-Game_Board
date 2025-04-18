@@ -1,4 +1,5 @@
 #include "algo/chase_algorithm.h"
+#include "utils/direction.h"
 
 ChaseAlgorithm::ChaseAlgorithm() : Algorithm() {
     // Constructor implementation
@@ -18,46 +19,21 @@ Action ChaseAlgorithm::getNextAction(
     return Action::None;
 }
 
-Action ChaseAlgorithm::findPathToEnemy(
-  const GameBoard& gameBoard,
-  const Tank& myTank,
-  const Tank& enemyTank
-) {
-  // TODO: Will be implemented in a later commit
-  return Action::None;
-}
+std::vector<Point> ChaseAlgorithm::getValidNeighbors(const Point& current, const GameBoard& gameBoard) const {
+  std::vector<Point> neighbors;
+  neighbors.reserve(8);
 
-ChaseAlgorithm::PathNode* ChaseAlgorithm::runBFS(
-  const GameBoard& gameBoard,
-  PathNode* startNode,
-  const Point& targetPosition,
-  int maxNodes
-) {
-  // TODO: Will be implemented in a later commit
-  return nullptr;
-}
+  // TODO: consider adding an iterator on all neighbor points 
+  for (const Direction& dir : ALL_DIRECTIONS) {
+    Point delta = getDirectionDelta(dir);
+    Point potentialNeighbor = current + delta;
 
-std::vector<ChaseAlgorithm::PathNode*> ChaseAlgorithm::getNextMoves(
-  const GameBoard& gameBoard,
-  const PathNode* currentNode
-) {
-  // TODO: Will be implemented in a later commit
-  return std::vector<PathNode*>();
-}
+    Point wrappedNeighbor = gameBoard.wrapPosition(potentialNeighbor); //
 
-bool ChaseAlgorithm::isSameState(
-  const std::tuple<Point, Direction, bool, int>& pos1,
-  const std::tuple<Point, Direction, bool, int>& pos2
-) const {
-  // TODO: Will be implemented in a later commit
-  return false;
-}
-
-Action ChaseAlgorithm::extractFirstAction(const PathNode* endNode) const {
-  // TODO: Will be implemented in a later commit
-  return Action::None;
-}
-
-void ChaseAlgorithm::cleanupNodes(const std::vector<PathNode*>& nodes) {
-  // TODO: Will be implemented in a later commit
+    GameBoard::CellType cellType = gameBoard.getCellType(wrappedNeighbor); //
+    if (cellType != GameBoard::CellType::Wall && cellType != GameBoard::CellType::Mine) { //
+        neighbors.push_back(wrappedNeighbor);
+    }
+  }
+  return neighbors;
 }
