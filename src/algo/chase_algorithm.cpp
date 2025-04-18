@@ -23,14 +23,34 @@ Action ChaseAlgorithm::getNextAction(
       }
     }
     // Priority 2: Shoot if you can hit the enemy
-    // TODO: Refactor to use a single function for shooting
+    // TODO: consider checking if enemy is in the line of sight
     if (myTank.canShoot()) {
       if (canShootEnemy(gameBoard, myTank, enemyTank)) {
         return Action::Shoot;
-      } // TODO: consider checking if enemy is in the line of sight
+      } 
     }
     // Priority 3: Chase the enemy
-    // TODO: will be added in a different commit.
+    updateAndValidatePath(gameBoard, myTank, enemyTank);
+    if (!m_currentPath.empty()) {
+      const Point& nextStep = m_currentPath.front();
+      std::optional<Direction> targetDirOpt = getDirectionToPoint(myTank.getPosition(), nextStep);
+
+      if (targetDirOpt.has_value()) {
+          Direction targetDir = targetDirOpt.value();
+          if (myTank.getDirection() == targetDir) {
+              m_currentPath.erase(m_currentPath.begin());
+              return Action::MoveForward;
+          } else {
+              Action rotationAction = getFirstRotationAction(myTank.getDirection(), targetDir);
+              if (rotationAction != Action::None) {
+                  return rotationAction;
+              }
+          }
+      } else {
+           m_currentPath.clear();
+           m_lastTargetPosition = Point(-1,-1);
+      }
+    }
     return Action::None;
 }
 
