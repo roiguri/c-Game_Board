@@ -130,3 +130,56 @@ TEST(DirectionTest, StreamInsertionOperator) {
     oss << Direction::Up;
     EXPECT_EQ(oss.str(), "Up");
 }
+
+TEST(DirectionTest, GetDirectionToPoint_AdjacentPoints) {
+  Point center(5, 5);
+
+  // Test all 8 adjacent directions
+  struct TestCase {
+      Point target;
+      Direction expectedDir;
+  };
+
+  TestCase testCases[] = {
+      {Point(5, 4), Direction::Up},     
+      {Point(6, 4), Direction::UpRight}, 
+      {Point(6, 5), Direction::Right},  
+      {Point(6, 6), Direction::DownRight},
+      {Point(5, 6), Direction::Down}, 
+      {Point(4, 6), Direction::DownLeft},
+      {Point(4, 5), Direction::Left},   
+      {Point(4, 4), Direction::UpLeft}   
+  };
+
+  for (const auto& tc : testCases) {
+      std::optional<Direction> result = getDirectionToPoint(center, tc.target);
+      ASSERT_TRUE(result.has_value());
+      EXPECT_EQ(result.value(), tc.expectedDir);
+  }
+}
+
+TEST(DirectionTest, GetDirectionToPoint_SamePoint) {
+  Point p1(10, 10);
+  Point p2(10, 10);
+
+  std::optional<Direction> result = getDirectionToPoint(p1, p2);
+
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST(DirectionTest, GetDirectionToPoint_NonAdjacentPoints) {
+  Point p1(3, 3);
+
+  Point nonAdjacent[] = {
+      Point(3, 5),
+      Point(5, 3),
+      Point(1, 1),
+      Point(5, 5),
+      Point(4, 1)
+  };
+
+  for (const auto& p2 : nonAdjacent) {
+      std::optional<Direction> result = getDirectionToPoint(p1, p2);
+      EXPECT_FALSE(result.has_value());
+  }
+}

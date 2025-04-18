@@ -3,6 +3,7 @@
 #include <string>
 #include "utils/point.h"
 #include <ostream>
+#include <optional>
 
 /**
  * Represents the 8 possible directions for tank movement and shooting.
@@ -61,6 +62,15 @@ Direction rotateRight(Direction direction, bool quarterTurn = false);
  * @return A Point representing the delta movement in x,y coordinates
  */
 Point getDirectionDelta(Direction direction, int magnitude = 1);
+
+/**
+ * @brief Calculates the direction needed to move from one adjacent point to another.
+ * @param from The starting point.
+ * @param to The target adjacent point.
+ * @return Optional of Direction enum value needed to move from 'from' to 'to'.
+ */
+std::optional<Direction> getDirectionToPoint(const Point& from, const Point& to);
+
 
 /**
  * Overloads the << operator to print the Direction enum value.
