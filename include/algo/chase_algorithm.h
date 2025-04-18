@@ -44,6 +44,7 @@ private:
     // for unit testing
     friend class ChaseAlgorithmTest;
 
+    // State members
     std::vector<Point> m_currentPath;
     Point m_lastTargetPosition; 
 
@@ -93,4 +94,14 @@ private:
       const Point& start,
       const Point& end,
       const GameBoard& gameBoard) const;
+
+    /**
+     * @brief Updates and validates the stored path to the enemy tank.
+     *
+     * @param gameBoard The current game board state.
+     * @param myTank The tank controlled by this algorithm (used for start position).
+     * @param enemyTank The opponent's tank (used for end position and checking movement).
+     */
+    void updateAndValidatePath(const GameBoard& gameBoard, const Tank& myTank, const Tank& enemyTank);
+
 };
