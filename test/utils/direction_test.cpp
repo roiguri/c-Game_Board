@@ -124,3 +124,9 @@ TEST(DirectionTest, OppositeDirections) {
     EXPECT_EQ(rotateLeft(rotateLeft(rotateLeft(rotateLeft(Direction::Left, false), false), false), false), Direction::Right);
     EXPECT_EQ(rotateLeft(rotateLeft(rotateLeft(rotateLeft(Direction::UpLeft, false), false), false), false), Direction::DownRight);
 }
+
+TEST(DirectionTest, StreamInsertionOperator) {
+    std::ostringstream oss;
+    oss << Direction::Up;
+    EXPECT_EQ(oss.str(), "Up");
+}

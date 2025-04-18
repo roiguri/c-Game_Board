@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <ostream>
 
 enum class Action {
     MoveForward,
@@ -20,3 +21,12 @@ enum class Action {
  * @return A string representation of the action
  */
 std::string actionToString(Action action);
+
+/**
+ * Overloads the << operator to print the Action enum value.
+ * 
+ * @param os The output stream
+ * @param action The action to print
+ * @return The output stream
+ */
+std::ostream& operator<<(std::ostream& os, Action action);

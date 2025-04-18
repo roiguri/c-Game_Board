@@ -2,6 +2,7 @@
 
 #include <string>
 #include "utils/point.h"
+#include <ostream>
 
 /**
  * Represents the 8 possible directions for tank movement and shooting.
@@ -51,3 +52,12 @@ Direction rotateRight(Direction direction, bool quarterTurn = false);
  * @return A Point representing the delta movement in x,y coordinates
  */
 Point getDirectionDelta(Direction direction, int magnitude = 1);
+
+/**
+ * Overloads the << operator to print the Direction enum value.
+ * 
+ * @param os The output stream
+ * @param dir The direction to print
+ * @return The output stream
+ */
+std::ostream& operator<<(std::ostream& os, Direction dir);

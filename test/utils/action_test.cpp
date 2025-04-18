@@ -11,3 +11,9 @@ TEST(ActionTest, ActionToString) {
     EXPECT_EQ(actionToString(Action::Shoot), "Shoot");
     EXPECT_EQ(actionToString(Action::None), "None");
 }
+
+TEST(ActionTest, StreamInsertionOperator) {
+    std::ostringstream oss;
+    oss << Action::MoveForward;
+    EXPECT_EQ(oss.str(), "Move Forward");
+}

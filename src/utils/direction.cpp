@@ -56,3 +56,8 @@ Point getDirectionDelta(Direction direction, int magnitude) {
             return Point(0, 0);
     }
 }
+
+std::ostream& operator<<(std::ostream& os, Direction dir) {
+  os << directionToString(dir);
+  return os;
+}

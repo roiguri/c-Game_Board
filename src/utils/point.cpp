@@ -32,3 +32,8 @@ int Point::manhattanDistance(const Point& a, const Point& b) {
 double Point::euclideanDistance(const Point& a, const Point& b) {
     return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2));
 }
+
+std::ostream& operator<<(std::ostream& os, const Point& pt) {
+    os << pt.toString();
+    return os;
+}

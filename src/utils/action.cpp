@@ -22,3 +22,7 @@ std::string actionToString(Action action) {
             return "Unknown Action";
     }
 }
+std::ostream& operator<<(std::ostream& os, Action action) {
+  os << actionToString(action);
+  return os;
+}

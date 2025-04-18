@@ -122,3 +122,10 @@ TEST(PointTest, EdgeCases) {
     EXPECT_EQ(Point::manhattanDistance(p3, p4), 0);
     EXPECT_DOUBLE_EQ(Point::euclideanDistance(p3, p4), 0.0);
 }
+
+TEST(PointTest, StreamInsertionOperator) {
+    std::ostringstream oss;
+    Point p(3, 4);
+    oss << p;
+    EXPECT_EQ(oss.str(), "(3,4)");
+}
