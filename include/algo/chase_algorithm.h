@@ -43,18 +43,4 @@ private:
     // Expose the test class to allow access to private members
     // for unit testing
     friend class ChaseAlgorithmTest;
-
-    /**
-     * @brief Checks if the tank can shoot the enemy
-     * 
-     * @param gameBoard The game board
-     * @param myTank The tank controlled by this algorithm
-     * @param enemyTank The opponent's tank
-     * @return true if the enemy can be shot, false otherwise
-     */
-    bool canShootEnemy(
-        const GameBoard& gameBoard,
-        const Tank& myTank,
-        const Tank& enemyTank
-    ) const;
 };

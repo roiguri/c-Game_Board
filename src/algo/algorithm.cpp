@@ -223,3 +223,20 @@ Action Algorithm::getFirstRotationAction(Direction currentDir, Direction targetD
              Action::RotateLeftQuarter : Action::RotateLeftEighth;
   }
 }
+
+bool Algorithm::canShootEnemy(
+  const GameBoard& gameBoard,
+  const Tank& myTank,
+  const Tank& enemyTank
+) const {
+  if (enemyTank.isDestroyed() || !myTank.canShoot()) {
+      return false;
+  }
+  
+  return hasLineOfSightInDirection(
+    gameBoard,
+    myTank.getPosition(),
+    enemyTank.getPosition(),
+    myTank.getDirection()
+  );
+}

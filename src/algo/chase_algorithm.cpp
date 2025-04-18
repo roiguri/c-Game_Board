@@ -17,20 +17,3 @@ Action ChaseAlgorithm::getNextAction(
     // TODO: not implemented
     return Action::None;
 }
-
-bool ChaseAlgorithm::canShootEnemy(
-    const GameBoard& gameBoard,
-    const Tank& myTank,
-    const Tank& enemyTank
-) const {
-    if (enemyTank.isDestroyed() || !myTank.canShoot()) {
-        return false;
-    }
-    
-    return hasLineOfSightInDirection(
-      gameBoard,
-      myTank.getPosition(),
-      enemyTank.getPosition(),
-      myTank.getDirection()
-    );
-}

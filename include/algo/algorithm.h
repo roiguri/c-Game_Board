@@ -124,6 +124,20 @@ protected:
       const Tank& tank,
       const std::vector<Shell>& shells,
       int stepsToCheck = 3
+    ) const;
+
+    /**
+     * @brief Checks if the tank can shoot the enemy
+     * 
+     * @param gameBoard The game board
+     * @param myTank The tank controlled by this algorithm
+     * @param enemyTank The opponent's tank
+     * @return true if the enemy can be shot, false otherwise
+     */
+    bool canShootEnemy(
+      const GameBoard& gameBoard,
+      const Tank& myTank,
+      const Tank& enemyTank
   ) const;
 private:
     /**

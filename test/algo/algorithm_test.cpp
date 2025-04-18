@@ -51,6 +51,14 @@ public:
     ) const {
         return findSafeAction(gameBoard, tank, shells);
     }
+
+    bool testCanShootEnemy(
+      const GameBoard& board,
+      const Tank& myTank,
+      const Tank& enemyTank
+    ) {
+        return canShootEnemy(board, myTank, enemyTank);
+    }
 };
 
 class AlgorithmTest : public ::testing::Test {
@@ -664,4 +672,129 @@ TEST_F(AlgorithmTest, FindSafeAction_MoreThanOneRotationNeeded) {
   shells.push_back(Shell(2, Point(0, 3), Direction::Left));
   
   EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::RotateLeftQuarter);
+}
+
+
+
+TEST_F(AlgorithmTest, CanShootEnemy_NoLineOfSight) {
+  std::vector<std::string> boardLines = {
+      "#####",
+      "#1#2#",
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+
+  Tank myTank(1, Point(1, 1), Direction::Right);
+  Tank enemyTank(2, Point(3, 1), Direction::Left);
+  
+  EXPECT_FALSE(mockAlgorithm->testCanShootEnemy(board, myTank, enemyTank));
+}
+
+TEST_F(AlgorithmTest, CanShootEnemy_LineOfSightWrongDirection) {
+  std::vector<std::string> boardLines = {
+      "#####",
+      "#1 2#",
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  
+  Tank myTank(1, Point(1, 1), Direction::Down);  
+  Tank enemyTank(2, Point(3, 1), Direction::Left);
+  
+  EXPECT_FALSE(mockAlgorithm->testCanShootEnemy(board, myTank, enemyTank));
+}
+
+TEST_F(AlgorithmTest, CanShootEnemy_LineOfSightCorrectDirection) {
+  std::vector<std::string> boardLines = {
+      "#####",
+      "#1 2#",
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  
+  Tank myTank(1, Point(1, 1), Direction::Right);
+  Tank enemyTank(2, Point(3, 1), Direction::Left);
+  
+  EXPECT_TRUE(mockAlgorithm->testCanShootEnemy(board, myTank, enemyTank));
+}
+
+TEST_F(AlgorithmTest, CanShootEnemy_TankDestroyed) {
+  std::vector<std::string> boardLines = {
+      "#####",
+      "#1 2#",
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  
+  Tank myTank(1, Point(1, 1), Direction::Right);
+  myTank.destroy();
+  Tank enemyTank(2, Point(3, 1), Direction::Left);
+  
+  EXPECT_FALSE(mockAlgorithm->testCanShootEnemy(board, myTank, enemyTank));
+  
+  myTank = Tank(1, Point(1, 1), Direction::Right);
+  enemyTank.destroy();
+  
+  EXPECT_FALSE(mockAlgorithm->testCanShootEnemy(board, myTank, enemyTank));
+}
+
+TEST_F(AlgorithmTest, CanShootEnemy_NoShells) {
+  std::vector<std::string> boardLines = {
+      "#####",
+      "#1 2#",
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  
+  Tank myTank(1, Point(1, 1), Direction::Right);
+  // Use all shells
+  for (int i = 0; i < Tank::INITIAL_SHELLS; i++) {
+      myTank.decrementShells();
+  }
+  Tank enemyTank(2, Point(3, 1), Direction::Left);
+  
+  EXPECT_FALSE(mockAlgorithm->testCanShootEnemy(board, myTank, enemyTank));
+}
+
+TEST_F(AlgorithmTest, CanShootEnemy_ShootCooldown) {
+  std::vector<std::string> boardLines = {
+      "#####",
+      "#1 2#",
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  
+  Tank myTank(1, Point(1, 1), Direction::Right);
+  myTank.shoot();  // Activate the cooldown
+  Tank enemyTank(2, Point(3, 1), Direction::Left);
+  
+  EXPECT_FALSE(mockAlgorithm->testCanShootEnemy(board, myTank, enemyTank));
+}
+
+TEST_F(AlgorithmTest, CanShootEnemy_WrappingLineOfSight) {
+  std::vector<std::string> boardLines = {
+      "     ",
+      "1   2",
+      "     ",
+      "     ",
+      "     "
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  
+  Tank myTank(1, Point(0, 1), Direction::Left);
+  Tank enemyTank(2, Point(4, 1), Direction::Right);
+  
+  EXPECT_TRUE(mockAlgorithm->testCanShootEnemy(board, myTank, enemyTank));
 }
