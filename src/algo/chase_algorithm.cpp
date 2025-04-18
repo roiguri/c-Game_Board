@@ -3,12 +3,10 @@
 #include <algorithm>
 #include <set>
 
-ChaseAlgorithm::ChaseAlgorithm() : Algorithm() {
-    // Constructor implementation
-}
+ChaseAlgorithm::ChaseAlgorithm() : m_lastTargetPosition(-1, -1) {}
 
 ChaseAlgorithm::~ChaseAlgorithm() {
-    // Destructor implementation
+    // TODO: remove if not needed
 }
 
 Action ChaseAlgorithm::getNextAction(
@@ -17,7 +15,22 @@ Action ChaseAlgorithm::getNextAction(
     const Tank& enemyTank,
     const std::vector<Shell>& shells
 ) {
-    // TODO: Will be implemented in a later commit
+    // Priority 1: Avoid danger from shells
+    if (isPositionInDangerFromShells(gameBoard, myTank.getPosition(), shells)) {
+      Action safeAction = findSafeAction(gameBoard, myTank, shells);
+      if (safeAction != Action::None) { 
+          return safeAction;
+      }
+    }
+    // Priority 2: Shoot if you can hit the enemy
+    // TODO: Refactor to use a single function for shooting
+    if (myTank.canShoot()) {
+      if (canShootEnemy(gameBoard, myTank, enemyTank)) {
+        return Action::Shoot;
+      } // TODO: consider checking if enemy is in the line of sight
+    }
+    // Priority 3: Chase the enemy
+    // TODO: will be added in a different commit.
     return Action::None;
 }
 

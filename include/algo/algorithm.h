@@ -138,8 +138,8 @@ protected:
       const GameBoard& gameBoard,
       const Tank& myTank,
       const Tank& enemyTank
-  ) const;
-private:
+    ) const;
+
     /**
      * @brief Determines the first rotation action needed to turn from one direction to another
      * 

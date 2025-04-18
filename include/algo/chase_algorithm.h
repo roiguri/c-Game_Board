@@ -44,6 +44,9 @@ private:
     // for unit testing
     friend class ChaseAlgorithmTest;
 
+    std::vector<Point> m_currentPath;
+    Point m_lastTargetPosition; 
+
     /**
      * @brief Gets valid neighboring points for pathfinding.
      *
