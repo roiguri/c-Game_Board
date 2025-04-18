@@ -107,4 +107,31 @@ protected:
       const std::vector<Shell>& shells,
       int stepsToCheck = 3
     ) const;
+
+    /**
+     * @brief Finds the best action to avoid incoming shells
+     * 
+     * Evaluates possible moves to determine the safest action when
+     * a tank is in danger from incoming shells.
+     * 
+     * @param gameBoard The game board
+     * @param tank The tank that needs to move
+     * @param shells All active shells on the board
+     * @return The safest action, or Action::None if no safe action is found
+     */
+    Action findSafeAction(
+      const GameBoard& gameBoard,
+      const Tank& tank,
+      const std::vector<Shell>& shells,
+      int stepsToCheck = 3
+  ) const;
+private:
+    /**
+     * @brief Determines the first rotation action needed to turn from one direction to another
+     * 
+     * @param currentDir Current direction the tank is facing
+     * @param targetDir Target direction to face
+     * @return The most efficient first rotation action to take
+     */
+    Action getFirstRotationAction(Direction currentDir, Direction targetDir) const;
 };

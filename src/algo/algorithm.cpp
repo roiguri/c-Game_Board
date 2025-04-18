@@ -1,4 +1,5 @@
 #include "algo/algorithm.h"
+#include <iostream>
 
 static const Direction ALL_DIRECTIONS[] = {
   Direction::Up, Direction::UpRight, Direction::Right, Direction::DownRight,
@@ -118,3 +119,107 @@ bool Algorithm::isPositionInDangerFromShells(
   return false;
 }
 
+// TODO: should we change stepsToCheck to const imediate threat
+// TODO: possible improvement: if tank facing the tank - shoot
+Action Algorithm::findSafeAction(
+  const GameBoard& gameBoard,
+  const Tank& tank,
+  const std::vector<Shell>& shells,
+  int stepsToCheck
+) const {
+  if (tank.isDestroyed() || shells.empty()) {
+      return Action::None;
+  }
+  
+  if (tank.isMovingBackward()) {
+      Point backwardPos = tank.getNextBackwardPosition();
+      if (!isPositionInDangerFromShells(gameBoard, backwardPos, shells, stepsToCheck)) {
+          return Action::None; // TODO: check if need to move backward again.
+      }
+  }
+  
+  if (!isPositionInDangerFromShells(gameBoard, tank.getPosition(), shells, stepsToCheck)) {
+      return Action::None;
+  }
+  
+  Point forwardPos = tank.getNextForwardPosition();
+  if (gameBoard.canMoveTo(forwardPos) && 
+      !isPositionInDangerFromShells(gameBoard, forwardPos, shells, stepsToCheck)) {
+      return Action::MoveForward;
+  }
+  // TODO: Do we have enought steps to move backward?
+  Point backwardPos = tank.getNextBackwardPosition();
+  if (gameBoard.canMoveTo(backwardPos) && 
+      !isPositionInDangerFromShells(gameBoard, backwardPos, shells, stepsToCheck)) {
+      return Action::MoveBackward;
+  }
+  // TODO: is this the best way to handle this? check if tank has enough steps.
+  for (int i = 0; i < NUM_DIRECTIONS; ++i) {
+      Direction targetDir = ALL_DIRECTIONS[i];
+      if (targetDir == tank.getDirection()) {
+          continue;
+      }
+      
+      Point targetPos = tank.getPosition() + getDirectionDelta(targetDir);
+      targetPos = gameBoard.wrapPosition(targetPos);
+      if (!gameBoard.canMoveTo(targetPos) || 
+          isPositionInDangerFromShells(gameBoard, targetPos, shells, stepsToCheck)) {
+          continue;
+      }
+      
+      return getFirstRotationAction(tank.getDirection(), targetDir);
+  }
+  std::cout << "No safe action found" << std::endl;
+  return Action::None;
+}
+
+Action Algorithm::getFirstRotationAction(Direction currentDir, Direction targetDir) const {
+  std::cout << "Finding first rotation action from " << static_cast<int>(currentDir) 
+            << " to " << static_cast<int>(targetDir) << std::endl;
+  if (currentDir == targetDir) {
+      return Action::None;
+  }
+  
+  // One step rotations
+  if (targetDir == rotateRight(currentDir, false)) {
+      return Action::RotateRightEighth;
+  }
+  if (targetDir == rotateLeft(currentDir, false)) {
+      return Action::RotateLeftEighth;
+  }
+  if (targetDir == rotateRight(currentDir, true)) {
+      return Action::RotateRightQuarter;
+  }
+  if (targetDir == rotateLeft(currentDir, true)) {
+      return Action::RotateLeftQuarter;
+  }
+  
+  // Two step rotations
+  int stepsClockwise = 0;
+  int stepsCounterClockwise = 0;
+  
+  // Count steps in each direction
+  Direction tempDir = currentDir;
+  while (tempDir != targetDir && stepsClockwise < 4) {
+      tempDir = rotateRight(tempDir, false);
+      stepsClockwise++;
+  }
+  
+  tempDir = currentDir;
+  while (tempDir != targetDir && stepsCounterClockwise < 4) {
+      tempDir = rotateLeft(tempDir, false);
+      stepsCounterClockwise++;
+  }
+  
+  // Choose the direction with fewer steps
+  bool rotateClockwise = (stepsClockwise <= stepsCounterClockwise);
+  
+  // Return the appropriate first rotation
+  if (rotateClockwise) {
+      return (stepsClockwise >= 2 && stepsClockwise <= 3) ? 
+             Action::RotateRightQuarter : Action::RotateRightEighth;
+  } else {
+      return (stepsCounterClockwise >= 2 && stepsCounterClockwise <= 3) ? 
+             Action::RotateLeftQuarter : Action::RotateLeftEighth;
+  }
+}
