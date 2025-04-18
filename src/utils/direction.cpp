@@ -57,6 +57,20 @@ Point getDirectionDelta(Direction direction, int magnitude) {
     }
 }
 
+std::optional<Direction> getDirectionToPoint(const Point& from, const Point& to) {
+  if (from == to) {
+      return std::nullopt;
+  }
+
+  for (const Direction& dir : ALL_DIRECTIONS) {
+      Point expectedTo = from + getDirectionDelta(dir);
+      if (expectedTo == to) {
+          return dir;
+      }
+  }
+  return std::nullopt; // Points are not adjacent
+}
+
 std::ostream& operator<<(std::ostream& os, Direction dir) {
   os << directionToString(dir);
   return os;
