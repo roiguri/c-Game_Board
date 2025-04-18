@@ -31,6 +31,10 @@ protected:
     std::vector<Point> testReconstructPath(const std::map<Point, Point>& came_from, const Point& start, const Point& end) {
         return algorithm->reconstructPath(came_from, start, end);
     }
+
+    std::vector<Point> testCalculatePathBFS(const Point& start, const Point& end, const GameBoard& gameBoard) {
+        return algorithm->calculatePathBFS(start, end, gameBoard);
+    }
 };
 
 using ::testing::UnorderedElementsAreArray;
@@ -313,5 +317,181 @@ TEST_F(ChaseAlgorithmTest, ReconstructPath_EmptyCameFrom) {
   std::vector<Point> expectedPath = {};
   std::vector<Point> actualPath = testReconstructPath(came_from, start, end);
 
+  EXPECT_EQ(actualPath, expectedPath);
+}
+
+TEST_F(ChaseAlgorithmTest, CalculatePathBFS_EmptyBoardDirectPath) {
+  GameBoard board = create5X5TestBoard({
+      "     ",
+      "     ",
+      "     ",
+      "     ",
+      "     "
+  });
+  Point start(1, 1);
+  Point end(1, 3);
+
+  std::vector<Point> expectedPath = { Point(2, 2), Point(1, 3) };
+  size_t expectedLength = 2;
+
+  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
+  EXPECT_EQ(actualPath.size(), expectedLength);
+  EXPECT_EQ(actualPath, expectedPath);
+}
+
+TEST_F(ChaseAlgorithmTest, CalculatePathBFS_EmptyBoardDiagonalPath) {
+  GameBoard board = create5X5TestBoard({
+      "     ",
+      "     ",
+      "     ",
+      "     ",
+      "     "
+  });
+  Point start(1, 1);
+  Point end(3, 3);
+  // Shortest path is diagonal
+  std::vector<Point> expectedPath = { Point(2, 2), Point(3, 3) }; // Path: (1,1)->(2,2)->(3,3)
+  size_t expectedLength = 2;
+
+  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
+  EXPECT_EQ(actualPath.size(), expectedLength);
+  EXPECT_EQ(actualPath, expectedPath);
+}
+
+
+TEST_F(ChaseAlgorithmTest, CalculatePathBFS_PathAroundWall) {
+  GameBoard board = create5X5TestBoard({
+      "     ",
+      " S   ", // S = Start (1,1)
+      "  #  ", // Wall y=2
+      "   E ", // E = End (3,3)
+      "     "
+  });
+  Point start(1, 1);
+  Point end(3, 3);
+
+  // Path: (1,0)->(2,4)->(3,3)
+  std::vector<Point> expectedPath = {
+      Point(1,0), Point(2,4), Point(3, 3)
+  };
+  size_t expectedLength = 3; // Shortest path length
+
+  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
+  EXPECT_EQ(actualPath.size(), expectedLength);
+  EXPECT_EQ(actualPath, expectedPath);
+}
+
+TEST_F(ChaseAlgorithmTest, CalculatePathBFS_PathAroundMine) {
+   GameBoard board = create5X5TestBoard({
+      "     ",
+      " S   ", // S = Start (1,1)
+      "  @  ", // Mine at (2,2)
+      "   E ", // E = End (3,3)
+      "     "
+  });
+  Point start(1, 1);
+  Point end(3, 3);
+
+  std::vector<Point> expectedPath = { Point(1,0), Point(2,4), Point(3, 3) };
+  size_t expectedLength = 3;
+
+  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
+  EXPECT_EQ(actualPath.size(), expectedLength);
+  EXPECT_EQ(actualPath, expectedPath);
+}
+
+
+TEST_F(ChaseAlgorithmTest, CalculatePathBFS_TargetUnreachableWalled) {
+  GameBoard board = create5X5TestBoard({
+      "#####",
+      "#S#E#", // S=Start(1,1), E=End(3,1), separated by wall
+      "#####",
+      "     ",
+      "     "
+  });
+  Point start(1, 1);
+  Point end(3, 1);
+
+  std::vector<Point> expectedPath = {};
+  size_t expectedLength = 0;
+
+  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
+  EXPECT_EQ(actualPath.size(), expectedLength);
+  EXPECT_EQ(actualPath, expectedPath);
+}
+
+TEST_F(ChaseAlgorithmTest, CalculatePathBFS_TargetUnreachableMined) {
+   GameBoard board = create5X5TestBoard({
+      " @@@ ",
+      " @S@ ", // S=Start(2,1)
+      " @@@ ", 
+      " @E@ ", // E=End(2,3) surrounded by mines
+      " @@@ "
+  });
+  Point start(2, 1);
+  Point end(2, 3);
+
+  std::vector<Point> expectedPath = {};
+  size_t expectedLength = 0;
+
+  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
+  EXPECT_EQ(actualPath.size(), expectedLength);
+  EXPECT_EQ(actualPath, expectedPath);
+}
+
+
+TEST_F(ChaseAlgorithmTest, CalculatePathBFS_StartEqualsEnd) {
+  GameBoard board = create5X5TestBoard({
+      "     ",
+      "     ",
+      "     ",
+      "     ",
+      "     "
+  });
+  Point start(2, 2);
+  Point end(2, 2);
+  std::vector<Point> expectedPath = {};
+  size_t expectedLength = 0;
+
+  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
+  EXPECT_EQ(actualPath.size(), expectedLength);
+  EXPECT_EQ(actualPath, expectedPath);
+}
+
+TEST_F(ChaseAlgorithmTest, CalculatePathBFS_WrapPathX) {
+  GameBoard board = create5X5TestBoard({ // Width 5
+      "     ",
+      "E   S", // E at (0,1), S at (4,1). Wrap is shorter
+      "     ",
+      "     ",
+      "     "
+  });
+  Point start(4, 1);
+  Point end(0, 1);
+  // Wrap path: (4,1) -> (0,1). Length 1.
+  std::vector<Point> expectedPath = { Point(0, 1) };
+  size_t expectedLength = 1;
+
+  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
+  EXPECT_EQ(actualPath.size(), expectedLength);
+  EXPECT_EQ(actualPath, expectedPath);
+}
+
+TEST_F(ChaseAlgorithmTest, CalculatePathBFS_WrapPathY) {
+   GameBoard board = create5X5TestBoard({ // Height 5
+      "  E  ", // E at (2,0)
+      "     ", 
+      "     ",
+      "     ",
+      "  S  "  // S at (2,4). Wrap is shorter
+  });
+  Point start(2, 4);
+  Point end(2, 0);
+  // Wrap path: (2,0)->(2,1). Length 1.
+   std::vector<Point> expectedPath = { Point(2, 0) };
+   size_t expectedLength = 1;
+
+  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
+  EXPECT_EQ(actualPath.size(), expectedLength);
   EXPECT_EQ(actualPath, expectedPath);
 }
