@@ -43,6 +43,14 @@ public:
     ) const {
         return isPositionInDangerFromShells(gameBoard, position, shells, stepsToCheck);
     }
+
+    Action testFindSafeAction(
+      const GameBoard& gameBoard,
+      const Tank& tank,
+      const std::vector<Shell>& shells
+    ) const {
+        return findSafeAction(gameBoard, tank, shells);
+    }
 };
 
 class AlgorithmTest : public ::testing::Test {
@@ -435,4 +443,225 @@ TEST_F(AlgorithmTest, IsPositionInDangerFromShells_MultipleShells) {
   shells.push_back(Shell(2, Point(2, 0), Direction::Down));
   
   EXPECT_TRUE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells, 2));
+}
+
+TEST_F(AlgorithmTest, FindSafeAction_NoShells) {
+  std::vector<std::string> boardLines = {
+    "     ",
+    "     ",
+    "  1  ",
+    "     ",
+    "     "
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  Tank tank(1, Point(2, 2), Direction::Right);
+  std::vector<Shell> shells;
+  
+  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::None);
+}
+
+TEST_F(AlgorithmTest, FindSafeAction_DestroyedTank) {
+  std::vector<std::string> boardLines = {
+      "     ",
+      "     ", 
+      "  1S ",
+      "     ",
+      "     "
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  Tank tank(1, Point(2, 2), Direction::Right);
+  tank.destroy();
+  
+  std::vector<Shell> shells;
+  shells.push_back(Shell(2, Point(3, 2), Direction::Left));
+  
+  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::None);
+}
+
+TEST_F(AlgorithmTest, FindSafeAction_AlreadySafe) {
+  std::vector<std::string> boardLines = {
+      "     ",
+      "     ", 
+      "  1  ",
+      "   s ",
+      "     "
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  Tank tank(1, Point(2, 2), Direction::Right);
+  
+  std::vector<Shell> shells;
+  shells.push_back(Shell(2, Point(3, 3), Direction::Up));
+  
+  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::None);
+}
+
+TEST_F(AlgorithmTest, FindSafeAction_ContinueBackwardMovement) {
+  std::vector<std::string> boardLines = {
+      "## ##",
+      "#   #",
+      "#   #",
+      "#   #",
+      "# 1 #"
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  Tank tank(1, Point(2, 4), Direction::Right);
+  
+  tank.moveBackward(Point(1, 4));
+  EXPECT_TRUE(tank.isMovingBackward());
+  
+  std::vector<Shell> shells;
+  shells.push_back(Shell(2, Point(1, 2), Direction::Right));
+  
+  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::None);
+}
+
+TEST_F(AlgorithmTest, FindSafeAction_MoveForward) {
+  std::vector<std::string> boardLines = {
+      "     ",
+      "     ",
+      "  1  ",
+      "     ",
+      "     "
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  Tank tank(1, Point(2, 2), Direction::Down);
+  
+  std::vector<Shell> shells;
+  shells.push_back(Shell(2, Point(0, 2), Direction::Right));
+  
+  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::MoveForward);
+}
+
+TEST_F(AlgorithmTest, FindSafeAction_MoveBackward) {
+  std::vector<std::string> boardLines = {
+      "     ",
+      "     ",
+      "     ",
+      "     ",
+      "  1# "
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  Tank tank(1, Point(2, 4), Direction::Right);
+  
+  std::vector<Shell> shells;
+  shells.push_back(Shell(2, Point(2, 0), Direction::Down));
+  
+  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::MoveBackward);
+}
+
+TEST_F(AlgorithmTest, FindSafeAction_RotateRightEighth) {
+  std::vector<std::string> boardLines = {
+      "     ",
+      "     ",
+      " # # ",
+      " #1# ",
+      " ##  "
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  Tank tank(1, Point(2, 3), Direction::Right);
+  
+  std::vector<Shell> shells;
+  shells.push_back(Shell(2, Point(2, 0), Direction::Down));
+
+  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::RotateRightEighth);
+}
+
+TEST_F(AlgorithmTest, FindSafeAction_RotateLeftEighth) {
+  std::vector<std::string> boardLines = {
+    "     ",
+    "     ",
+    " #   ",
+    " #1# ",
+    " ### "
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  Tank tank(1, Point(2, 3), Direction::Right);
+  
+  std::vector<Shell> shells;
+  shells.push_back(Shell(2, Point(2, 0), Direction::Down));
+  
+  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::RotateLeftEighth);
+}
+
+TEST_F(AlgorithmTest, FindSafeAction_RotateRightQuarter) {
+  std::vector<std::string> boardLines = {
+    "     ",
+    "     ",
+    "  ###",
+    "s  1#",
+    "  # #"
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  Tank tank(1, Point(3, 3), Direction::Right);
+  
+  std::vector<Shell> shells;
+  shells.push_back(Shell(2, Point(0, 3), Direction::Right));
+  
+  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::RotateRightQuarter);
+}
+
+TEST_F(AlgorithmTest, FindSafeAction_RotateLeftQuarter) {
+  std::vector<std::string> boardLines = {
+    "     ",
+    "     ",
+    "# #  ",
+    "#1  s",
+    "###  "
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  Tank tank(1, Point(1, 3), Direction::Right);
+  
+  std::vector<Shell> shells;
+  shells.push_back(Shell(2, Point(0, 3), Direction::Left));
+  
+  // Should rotate left by 1/4 to face up
+  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::RotateLeftQuarter);
+}
+
+TEST_F(AlgorithmTest, FindSafeAction_NoSafeMove) {
+  std::vector<std::string> boardLines = {
+      "     ",
+      "     ",
+      "  1  ",
+      "     ",
+      "     "
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  Tank tank(1, Point(2, 2), Direction::Right);
+  
+  std::vector<Shell> shells;
+  // Shells surrounding the tank from all directions
+  for (int x = 1; x <= 3; x++) {
+      for (int y = 1; y <= 3; y++) {
+          if (x != 2 || y != 2) { // Skip tank's position
+              Point shellPos(x, y);
+              Direction shellDir;
+              if (x < 2) shellDir = Direction::Right;
+              else if (x > 2) shellDir = Direction::Left;
+              else if (y < 2) shellDir = Direction::Down;
+              else shellDir = Direction::Up;
+              shells.push_back(Shell(2, shellPos, shellDir));
+          }
+      }
+  }
+  
+  // No safe move available
+  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::None);
+}
+
+TEST_F(AlgorithmTest, FindSafeAction_MoreThanOneRotationNeeded) {
+  std::vector<std::string> boardLines = {
+    "     ",
+    "     ",
+    "###  ",
+    "#1  s",
+    " ##  "
+  };
+  GameBoard board = create5X5TestBoard(boardLines);
+  Tank tank(1, Point(1, 3), Direction::Up);
+  
+  std::vector<Shell> shells;
+  shells.push_back(Shell(2, Point(0, 3), Direction::Left));
+  
+  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::RotateLeftQuarter);
 }
