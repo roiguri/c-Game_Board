@@ -82,9 +82,12 @@ bool Algorithm::isPositionInDangerFromShells(
       return false;
   }
 
+  bool skipShell;
+
   // TODO: consider moving to next shell if shell belongs to the same tank
   // TODO: remove use of goto
   for (const Shell& shell : shells) {
+      skipShell = false;
       if (shell.isDestroyed()) {
           continue;
       }
@@ -105,15 +108,18 @@ bool Algorithm::isPositionInDangerFromShells(
               // Check if shell hits a wall
               if (gameBoard.isWall(shellPosition)) {
                   // Shell would be destroyed by the wall
-                  goto next_shell;
+                  skipShell = true;
+                  break;
               }
 
               if (shellPosition == position) {
                   return true;
               }
           }
+          if (skipShell) {
+              break;
+          }
       }
-      next_shell:;
   }
 
   return false;
