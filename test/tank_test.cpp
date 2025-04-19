@@ -341,3 +341,85 @@ TEST_F(TankTest, ResetBackwardMovement_ResetsAllBackwardState) {
 
   EXPECT_FALSE(tank->isContinuousBackward());
 }
+
+TEST_F(TankTest, PreviousPosition_InitiallyMatchesPosition) {
+  Tank tank(1, Point(3, 4), Direction::Right);
+  EXPECT_EQ(tank.getPosition(), Point(3, 4));
+  EXPECT_EQ(tank.getPreviousPosition(), Point(3, 4));
+}
+
+TEST_F(TankTest, PreviousPosition_UpdatedWhenPositionChanges) {
+  Tank tank(1, Point(3, 4), Direction::Right);
+  
+  // Initial position and previous position should be the same
+  EXPECT_EQ(tank.getPosition(), Point(3, 4));
+  EXPECT_EQ(tank.getPreviousPosition(), Point(3, 4));
+  
+  // Change position using setPosition
+  tank.setPosition(Point(4, 4));
+  
+  // Previous position should now be the old position
+  EXPECT_EQ(tank.getPosition(), Point(4, 4));
+  EXPECT_EQ(tank.getPreviousPosition(), Point(3, 4));
+  
+  // Change position again
+  tank.setPosition(Point(5, 5));
+  
+  // Previous position should be updated
+  EXPECT_EQ(tank.getPosition(), Point(5, 5));
+  EXPECT_EQ(tank.getPreviousPosition(), Point(4, 4));
+}
+
+TEST_F(TankTest, MoveForward_UpdatesPreviousPosition) {
+  Tank tank(1, Point(3, 4), Direction::Right);
+  Point originalPosition = tank.getPosition();
+  
+  // Move forward
+  Point newPosition(4, 4);
+  tank.moveForward(newPosition);
+  
+  // Check that previous position was updated
+  EXPECT_EQ(tank.getPosition(), newPosition);
+  EXPECT_EQ(tank.getPreviousPosition(), originalPosition);
+}
+
+TEST_F(TankTest, MoveBackward_UpdatesPreviousPosition) {
+  Tank tank(1, Point(3, 4), Direction::Right);
+  
+  // First request to move backward (doesn't actually move)
+  Point backwardPos = tank.getNextBackwardPosition();
+  tank.requestMoveBackward(backwardPos);
+  
+  // Position shouldn't change, so previous position is still the same
+  EXPECT_EQ(tank.getPosition(), Point(3, 4));
+  EXPECT_EQ(tank.getPreviousPosition(), Point(3, 4));
+  
+  // Second request - ignored
+  tank.rotateLeft(false);
+  EXPECT_EQ(tank.getPosition(), Point(3, 4));
+  EXPECT_EQ(tank.getPreviousPosition(), Point(3, 4));
+  
+  // Third request (now it moves)
+  Point originalPosition = tank.getPosition();
+  tank.rotateLeft(false);
+  
+  // Check that previous position was updated
+  EXPECT_EQ(tank.getPosition(), backwardPos);
+  EXPECT_EQ(tank.getPreviousPosition(), originalPosition);
+}
+
+TEST_F(TankTest, UpdatePreviousPosition_ExplicitUpdate) {
+  Tank tank(1, Point(3, 4), Direction::Right);
+  
+  // Manually update previous position
+  tank.updatePreviousPosition();
+  
+  // Change position (simulating direct modification)
+  Point oldPosition = tank.getPosition();
+  
+  // Simulate direct modification of position (for testing)
+  tank.setPosition(Point(7, 8));
+  
+  // Check that previous position was updated correctly
+  EXPECT_EQ(tank.getPreviousPosition(), oldPosition);
+}

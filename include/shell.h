@@ -76,10 +76,24 @@ public:
      * @return The next position of the shell
      */
     Point getNextPosition() const;
+
+    /**
+     * @brief Get the previous position of the shell
+     * 
+     * @return The position before the last movement
+     */
+    Point getPreviousPosition() const;
+
+    /**
+     * @brief Set the previous position to the current position
+     * This should be called before changing the current position
+     */
+    void updatePreviousPosition();
     
 private:
     int m_playerId;
     Point m_position;
     Direction m_direction;
     bool m_destroyed;
+    Point m_previousPosition;
 };

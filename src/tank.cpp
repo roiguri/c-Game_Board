@@ -3,6 +3,7 @@
 Tank::Tank(int playerId, const Point& position, Direction direction)
     : m_playerId(playerId),
       m_position(position),
+      m_previousPosition(position),
       m_direction(direction),
       m_remainingShells(INITIAL_SHELLS),
       m_destroyed(false),
@@ -21,6 +22,14 @@ int Tank::getPlayerId() const {
 
 Point Tank::getPosition() const {
     return m_position;
+}
+
+Point Tank::getPreviousPosition() const {
+  return m_previousPosition;
+}
+
+void Tank::updatePreviousPosition() {
+  m_previousPosition = m_position;
 }
 
 Direction Tank::getDirection() const {
@@ -54,6 +63,7 @@ bool Tank::isContinuousBackward() const {
 }
 
 void Tank::setPosition(const Point& position) {
+    m_previousPosition = m_position;
     m_position = position;
 }
 
@@ -88,7 +98,7 @@ bool Tank::moveForward(const Point& newPosition) {
     return true;
   }
   
-  m_position = newPosition;
+  setPosition(newPosition);
 
   m_continuousBackward = false;
   return true;
@@ -108,7 +118,7 @@ bool Tank::requestMoveBackward(const Point& newPosition) {
 }
 
 void Tank::moveBackward() {
-  m_position = m_backwardPosition;
+  setPosition(m_backwardPosition);
   m_backwardCounter = 0;
   m_continuousBackward = true;
 }

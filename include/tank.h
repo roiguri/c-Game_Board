@@ -167,6 +167,19 @@ public:
      */
     Point getNextBackwardPosition() const;
 
+    /**
+     * @brief Get the previous position of the tank
+     * 
+     * @return The position before the last movement
+     */
+    Point getPreviousPosition() const;
+    
+    /**
+     * @brief Set the previous position to the current position
+     * This should be called before changing the current position
+     */
+    void updatePreviousPosition();
+
 private:
     void moveBackward();
     bool isInBackwardMovement();
@@ -180,4 +193,5 @@ private:
     int m_backwardCounter;
     bool m_continuousBackward;
     Point m_backwardPosition;
+    Point m_previousPosition;
 };

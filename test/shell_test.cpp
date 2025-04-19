@@ -109,3 +109,47 @@ TEST_F(ShellTest, GetNextPosition) {
   Shell upLeftShell(1, Point(5, 5), Direction::UpLeft);
   EXPECT_EQ(upLeftShell.getNextPosition(), Point(4, 4)); // -1 in x, -1 in y
 }
+
+TEST_F(ShellTest, PreviousPosition_InitiallyMatchesPosition) {
+  Shell shell(1, Point(5, 5), Direction::Right);
+  EXPECT_EQ(shell.getPosition(), Point(5, 5));
+  EXPECT_EQ(shell.getPreviousPosition(), Point(5, 5));
+}
+
+TEST_F(ShellTest, PreviousPosition_UpdatedWhenPositionChanges) {
+  Shell shell(1, Point(5, 5), Direction::Right);
+  
+  // Initial position and previous position should be the same
+  EXPECT_EQ(shell.getPosition(), Point(5, 5));
+  EXPECT_EQ(shell.getPreviousPosition(), Point(5, 5));
+  
+  // Change position
+  shell.setPosition(Point(6, 5));
+  
+  // Previous position should now be the old position
+  EXPECT_EQ(shell.getPosition(), Point(6, 5));
+  EXPECT_EQ(shell.getPreviousPosition(), Point(5, 5));
+  
+  // Change position again
+  shell.setPosition(Point(7, 5));
+  
+  // Previous position should be updated
+  EXPECT_EQ(shell.getPosition(), Point(7, 5));
+  EXPECT_EQ(shell.getPreviousPosition(), Point(6, 5));
+}
+
+TEST_F(ShellTest, UpdatePreviousPosition_ExplicitUpdate) {
+  Shell shell(1, Point(5, 5), Direction::Right);
+  
+  // Manually update previous position
+  shell.updatePreviousPosition();
+  
+  // Change position without using setPosition
+  Point oldPosition = shell.getPosition();
+  
+  // Simulate direct modification of position (test only)
+  shell.setPosition(Point(7, 8));
+  
+  // Check that previous position was updated correctly
+  EXPECT_EQ(shell.getPreviousPosition(), oldPosition);
+}
