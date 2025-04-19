@@ -31,6 +31,18 @@ protected:
     void testLogAction(GameManager& manager, int playerId, Action action, bool valid) {
         manager.logAction(playerId, action, valid);
     }
+
+    void testMoveShellsOnce(GameManager& manager) {
+      manager.moveShellsOnce();
+    }
+
+    void testProcessStep(GameManager& manager) {
+      manager.processStep();
+    }
+
+    bool testApplyAction(GameManager& manager, int playerId, Action action) {
+      return manager.applyAction(playerId, action);
+    }
     
     std::string tempFilePath;
 };
@@ -376,4 +388,78 @@ TEST_F(GameManagerTest, GetGameLog_MultipleEntries) {
   EXPECT_EQ(log[0], "Player 1: Move Forward - Success");
   EXPECT_EQ(log[1], "Player 2: Rotate Left 1/8 - Invalid");
   EXPECT_EQ(log[2], "Player 1: Shoot - Success");
+}
+
+TEST_F(GameManagerTest, MoveShellsOnce_ShellMovementAndCollision) {
+  // Create a board with tank 1 to the right of tank 2, with 2 spaces between
+  std::vector<std::string> boardLines = {
+      "7 3",
+      "#######",
+      "#2   1#", // Tank 2 at (1,1), Tank 1 at (5,1)
+      "#######"
+  };
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  ASSERT_TRUE(manager.initialize(tempFilePath));
+  
+  // Verify tank positions and directions
+  auto initialTanks = manager.getTanks();
+  ASSERT_EQ(initialTanks.size(), 2);
+  EXPECT_EQ(initialTanks[0].getPosition(), Point(1, 1)); // Tank 2
+  EXPECT_EQ(initialTanks[1].getPosition(), Point(5, 1)); // Tank 1
+  
+  // Player 2 shoots (facing right)
+  ASSERT_TRUE(testApplyAction(manager, 2, Action::Shoot));
+  
+  // Get the shell
+  auto shellsBeforeMove = manager.getShells();
+  ASSERT_EQ(shellsBeforeMove.size(), 1);
+  EXPECT_EQ(shellsBeforeMove[0].getPosition(), Point(1, 1));
+  
+  // Move shell once
+  testMoveShellsOnce(manager);
+  
+  // Verify shell moved one step right
+  auto shellsAfterFirstMove = manager.getShells();
+  ASSERT_EQ(shellsAfterFirstMove.size(), 1);
+  EXPECT_EQ(shellsAfterFirstMove[0].getPosition(), Point(2, 1));
+}
+
+TEST_F(GameManagerTest, MoveShellsOnce_EdgeWrapping) {
+  // Create a board with tank 1 at position (5,1) and open edges for wrapping
+  std::vector<std::string> boardLines = {
+      "7 3",
+      "       ", // No walls at top
+      "  1    ", // Tank 1 at position (2,1)
+      "      2"  // No walls at bottom
+  };
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  ASSERT_TRUE(manager.initialize(tempFilePath));
+  
+  // Verify tank 1 position
+  auto initialTanks = manager.getTanks();
+  ASSERT_EQ(initialTanks.size(), 2);
+  EXPECT_EQ(initialTanks[0].getPosition(), Point(2, 1)); // Tank 1
+  
+  // Player 1 shoots (towards left)
+  ASSERT_TRUE(testApplyAction(manager, 1, Action::Shoot));
+  
+  // Move shell once - should be at (1,1)
+  testMoveShellsOnce(manager);
+  EXPECT_EQ(manager.getShells()[0].getPosition(), Point(1, 1));
+  
+  // Move shell again - should be at (0,1)
+  testMoveShellsOnce(manager);
+  EXPECT_EQ(manager.getShells()[0].getPosition(), Point(0, 1));
+  
+  // Move shell again - should wrap to the right edge (6,1)
+  testMoveShellsOnce(manager);
+  EXPECT_EQ(manager.getShells()[0].getPosition(), Point(6, 1));
+  
+  // Move shell again - should be at (5,1)
+  testMoveShellsOnce(manager);
+  EXPECT_EQ(manager.getShells()[0].getPosition(), Point(5, 1));
 }

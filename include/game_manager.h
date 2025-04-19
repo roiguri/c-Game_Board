@@ -7,6 +7,7 @@
 #include "tank.h"
 #include "shell.h"
 #include "algo/algorithm.h"
+#include "collision_handler.h"
 
 /**
  * @brief Manages the overall game flow and state for the tank battle simulation
@@ -56,7 +57,9 @@ public:
 
     // Accessors
     std::vector<Tank> getTanks() const;
+    std::vector<Shell> getShells() const;
     const std::vector<std::string>& getGameLog() const;
+    GameBoard getGameBoard() const;
 private:
     // For testing purposes
     friend class GameManagerTest;
@@ -76,6 +79,7 @@ private:
     bool m_gameOver;
     std::string m_gameResult;
     std::vector<std::string> m_gameLog;
+    CollisionHandler m_collisionHandler;
     
     // Game step methods
     /**
@@ -109,7 +113,7 @@ private:
      * 
      * Updates shell positions considering board wrapping
      */
-    void moveShells();
+    void moveShellsOnce();
     
     /**
      * @brief Check if the game has ended
