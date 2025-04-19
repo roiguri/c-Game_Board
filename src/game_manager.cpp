@@ -104,7 +104,44 @@ void GameManager::saveResults(const std::string& outputFilePath) {
 }
 
 void GameManager::processStep() {
-    // This is a stub implementation
+  // First shell movement
+  std::vector<MovementPath> firstShellPaths = CollisionHandler::createShellPaths();
+  std::vector<MovementPath> staticTankPaths = CollisionHandler::createStaticTankPaths();
+  
+  // Check for collisions after first shell movement
+  bool tankDestroyed = CollisionHandler::resolveCollisions(m_board, m_shells, m_tanks, firstShellPaths, staticTankPaths);
+  if (tankDestroyed) {
+      // If a tank was destroyed, end the step early
+      return;
+  }
+  
+  // Move shells once
+  moveShellsOnce();
+  
+  // Get actions from both player algorithms
+  Action player1Action = getPlayerAction(1);
+  Action player2Action = getPlayerAction(2);
+  
+  // Create paths for tank actions and second shell movement
+  std::vector<MovementPath> tankActionPaths = CollisionHandler::createTankActionPaths(player1Action, player2Action);
+  std::vector<MovementPath> secondShellPaths = CollisionHandler::createShellPaths();
+  
+  // Check for collisions for shell and tank movement
+  tankDestroyed = CollisionHandler::resolveCollisions(m_board, m_shells, m_tanks, secondShellPaths, tankActionPaths);
+  
+  // Apply tank actions
+  bool player1ActionSuccessful = applyAction(1, player1Action);
+  bool player2ActionSuccessful = applyAction(2, player2Action);
+  
+  // Move shells a second time
+  moveShellsOnce();
+  
+  // Update cooldowns for all tanks
+  for (auto& tank : m_tanks) {
+      tank.updateCooldowns();
+  }
+  
+  // Game over check will be performed in the main game loop
 }
 
 Action GameManager::getPlayerAction(int playerId) {
