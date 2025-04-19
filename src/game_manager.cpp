@@ -17,6 +17,10 @@ GameManager::~GameManager() {
     cleanup();
 }
 
+// Accessors
+const std::vector<std::string>& GameManager::getGameLog() const {
+    return m_gameLog;
+}
 std::vector<Tank> GameManager::getTanks() const {
     return m_tanks;
 }
@@ -65,8 +69,32 @@ void GameManager::processStep() {
 }
 
 Action GameManager::getPlayerAction(int playerId) {
-    // This is a stub implementation
+  if (playerId != 1 && playerId != 2) {
     return Action::None;
+  }
+
+  // Find the player's tank
+  Tank* playerTank = nullptr;
+  Tank* enemyTank = nullptr;
+  
+  for (auto& tank : m_tanks) {
+      if (tank.getPlayerId() == playerId) {
+          playerTank = &tank;
+      } else {
+          enemyTank = &tank;
+      }
+  }
+  
+  if (!playerTank || !enemyTank) {
+      return Action::None;
+  }
+  // Get the appropriate algorithm
+  Algorithm* algorithm = (playerId == 1) ? m_player1Algorithm : m_player2Algorithm;
+  if (!algorithm) {
+      return Action::None;
+  }
+  // Get action from algorithm
+  return algorithm->getNextAction(m_board, *playerTank, *enemyTank, m_shells);
 }
 
 bool GameManager::applyAction(int playerId, Action action) {
@@ -83,8 +111,16 @@ bool GameManager::checkGameOver() {
     return false;
 }
 
+// TODO: consider logging game state for each action logged - tank position, etc
 void GameManager::logAction(int playerId, Action action, bool valid) {
-    // This is a stub implementation
+  std::string actionType = actionToString(action);
+  std::string status = valid ? "Success" : "Invalid";
+  
+  // Format: "Player X: [Action] - [Status]"
+  std::string logEntry = "Player " + std::to_string(playerId) + ": " + 
+                         actionType + " - " + status;
+  
+  m_gameLog.push_back(logEntry);
 }
 
 void GameManager::createAlgorithms() {

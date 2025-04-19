@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
 #include "game_manager.h"
+#include "algo/algorithm.h"
+#include "utils/action.h"
 #include <fstream>
 #include <sstream>
 #include <cstdio>
@@ -20,6 +22,14 @@ protected:
             file << line << '\n';
         }
         file.close();
+    }
+
+    Action testGetPlayerAction(GameManager& manager, int playerId) {
+      return manager.getPlayerAction(playerId);
+    }
+    
+    void testLogAction(GameManager& manager, int playerId, Action action, bool valid) {
+        manager.logAction(playerId, action, valid);
     }
     
     std::string tempFilePath;
@@ -279,5 +289,91 @@ TEST_F(GameManagerTest, Initialize_NoErrorFile) {
   EXPECT_FALSE(errorFile.is_open());
 }
 
+TEST_F(GameManagerTest, GetPlayerAction_ClearShot) {
+  // Create a board where tanks are in a direct line of sight
+  std::vector<std::string> boardLines = {
+      "5 5",
+      "#####",
+      "#2 1#",  // Player 1 and 2 in same row with clear line of sight
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  ASSERT_TRUE(manager.initialize(tempFilePath));
+  
+  // For DefensiveAlgorithm, when there's a clear shot, it should return Shoot
+  Action player2Action = testGetPlayerAction(manager, 2);
+  std::cout << "Player 2 action (defensive with clear shot): " 
+            << actionToString(player2Action) << std::endl;
+  
+  // We expect DefensiveAlgorithm to shoot when there's a clear shot
+  EXPECT_EQ(player2Action, Action::Shoot);
+}
+
+// Test getPlayerAction with invalid player IDs
+TEST_F(GameManagerTest, GetPlayerAction_InvalidPlayerIds) {
+  // Create a valid test board file
+  std::vector<std::string> boardLines = {
+      "5 5",
+      "#####",
+      "#1 2#",
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  ASSERT_TRUE(manager.initialize(tempFilePath));
+  
+  // Test with invalid player IDs
+  Action invalidAction1 = testGetPlayerAction(manager, 0);
+  Action invalidAction2 = testGetPlayerAction(manager, 3);
+  
+  // Should return None for invalid IDs
+  EXPECT_EQ(invalidAction1, Action::None);
+  EXPECT_EQ(invalidAction2, Action::None);
+}
 
 
+// Test logAction adds entries correctly
+TEST_F(GameManagerTest, LogAction_FormatsCorrectly) {
+  GameManager manager;
+  
+  // Log a valid action using the test helper method
+  testLogAction(manager, 1, Action::MoveForward, true);
+  
+  // Check log entry format
+  const auto& log = manager.getGameLog();
+  ASSERT_EQ(log.size(), 1);
+  EXPECT_EQ(log[0], "Player 1: Move Forward - Success");
+  
+  // Log an invalid action
+  testLogAction(manager, 2, Action::Shoot, false);
+  
+  // Check both log entries
+  ASSERT_EQ(log.size(), 2);
+  EXPECT_EQ(log[1], "Player 2: Shoot - Invalid");
+}
+
+// Test getGameLog accessor with multiple entries
+TEST_F(GameManagerTest, GetGameLog_MultipleEntries) {
+  GameManager manager;
+  
+  // Log several actions
+  testLogAction(manager, 1, Action::MoveForward, true);
+  testLogAction(manager, 2, Action::RotateLeftEighth, false);
+  testLogAction(manager, 1, Action::Shoot, true);
+  
+  // Get the log
+  const auto& log = manager.getGameLog();
+  
+  // Check that the log contains all entries
+  ASSERT_EQ(log.size(), 3);
+  EXPECT_EQ(log[0], "Player 1: Move Forward - Success");
+  EXPECT_EQ(log[1], "Player 2: Rotate Left 1/8 - Invalid");
+  EXPECT_EQ(log[2], "Player 1: Shoot - Success");
+}
