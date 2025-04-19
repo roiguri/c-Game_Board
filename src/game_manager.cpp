@@ -25,6 +25,12 @@ const std::vector<std::string>& GameManager::getGameLog() const {
 std::vector<Tank> GameManager::getTanks() const {
     return m_tanks;
 }
+std::vector<Shell> GameManager::getShells() const {
+    return m_shells;
+}
+GameBoard GameManager::getGameBoard() const {
+    return m_board;
+}
 
 bool GameManager::initialize(const std::string& filePath) {
     // TODO: potentially add reset state method.
@@ -108,7 +114,7 @@ void GameManager::processStep() {
   moveShellsOnce();
 
   // Check for collisions after first shell movement
-  bool tankDestroyed = CollisionHandler::resolveCollisions(m_board, m_shells, m_tanks, firstShellPaths, staticTankPaths);
+  bool tankDestroyed = m_collisionHandler.resolveAllCollisions(m_tanks, m_shells, m_board);
   if (tankDestroyed) {
       // If a tank was destroyed, end the step early
       return;
@@ -121,12 +127,12 @@ void GameManager::processStep() {
   // Apply tank actions
   bool player1ActionSuccessful = applyAction(1, player1Action);
   bool player2ActionSuccessful = applyAction(2, player2Action);
-  
+
   // Move shells a second time
   moveShellsOnce();
 
   // Check for collisions for shell and tank movement
-  tankDestroyed = CollisionHandler::resolveAllCollisions(m_shells, m_tanks, m_board);
+  tankDestroyed = m_collisionHandler.resolveAllCollisions(m_tanks, m_shells, m_board);
   
   // Update cooldowns for all tanks
   for (auto& tank : m_tanks) {
@@ -257,8 +263,22 @@ bool GameManager::applyAction(int playerId, Action action) {
   return actionResult;
 }
 
-void GameManager::moveShells() {
-    // This is a stub implementation
+void GameManager::moveShellsOnce() {
+  for (auto& shell : m_shells) {
+      // Skip destroyed shells
+      if (shell.isDestroyed()) {
+          continue;
+      }
+      
+      // Calculate new position based on direction
+      Point newPosition = shell.getPosition() + getDirectionDelta(shell.getDirection());
+      
+      // Handle board wrapping
+      newPosition = m_board.wrapPosition(newPosition);
+      
+      // Update shell position
+      shell.setPosition(newPosition);
+  }
 }
 
 bool GameManager::checkGameOver() {
