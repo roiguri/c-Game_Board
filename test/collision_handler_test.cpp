@@ -8,7 +8,7 @@
 class CollisionHandlerTest : public ::testing::Test {
 protected:
     CollisionHandler handler;
-    GameBoard dummyBoard{10, 10};
+    GameBoard board{10, 10};
 
     const std::vector<std::pair<float, float>>& getPathExplosions() const {
         return handler.m_pathExplosions;
@@ -39,11 +39,11 @@ protected:
     }
 
     void checkShellWallCollisions(std::vector<Shell>& shells) {
-      handler.checkShellWallCollisions(shells, dummyBoard);
+      handler.checkShellWallCollisions(shells, board);
     }
     
     void checkTankMineCollisions(std::vector<Tank>& tanks) {
-        handler.checkTankMineCollisions(tanks, dummyBoard);
+        handler.checkTankMineCollisions(tanks, board);
     }
 
     bool resolveAll(std::vector<Tank>& tanks, std::vector<Shell>& shells) {
@@ -62,7 +62,7 @@ TEST_F(CollisionHandlerTest, DetectPathCrossings_ShellsSwap_ExplosionLogged) {
     std::vector<Shell> shells{s1, s2};
     std::vector<Tank> tanks;
 
-    handler.resolveAllCollisions(tanks, shells, dummyBoard);
+    handler.resolveAllCollisions(tanks, shells, board);
 
     ASSERT_EQ(getPathExplosions().size(), 1);
     EXPECT_FLOAT_EQ(getPathExplosions()[0].first, 1.5f);
@@ -79,7 +79,7 @@ TEST_F(CollisionHandlerTest, DetectPathCrossings_NoIntersection_NoExplosion) {
     std::vector<Tank> tanks{t1};
     std::vector<Shell> shells{s1};
 
-    handler.resolveAllCollisions(tanks, shells, dummyBoard);
+    handler.resolveAllCollisions(tanks, shells, board);
 
     EXPECT_TRUE(getPathExplosions().empty());
 
@@ -99,7 +99,7 @@ TEST_F(CollisionHandlerTest, DetectPathCrossings_TanksSwap_ExplosionLogged) {
     std::vector<Tank> tanks{t1, t2};
     std::vector<Shell> shells;
 
-    handler.resolveAllCollisions(tanks, shells, dummyBoard);
+    handler.resolveAllCollisions(tanks, shells, board);
 
     ASSERT_EQ(getPathExplosions().size(), 1);
     EXPECT_FLOAT_EQ(getPathExplosions()[0].first, 3.5f);
@@ -143,8 +143,8 @@ TEST_F(CollisionHandlerTest, ApplyPathExplosion_DestroysCrossingTank) {
 TEST_F(CollisionHandlerTest, ApplyPositionExplosion_DestroysTankAndRemovesMine) {
   Point minePos(2, 2);
 
-  dummyBoard.setCellType(minePos, GameBoard::CellType::Mine);
-  EXPECT_EQ(dummyBoard.getCellType(minePos), GameBoard::CellType::Mine);
+  board.setCellType(minePos, GameBoard::CellType::Mine);
+  EXPECT_EQ(board.getCellType(minePos), GameBoard::CellType::Mine);
 
   Tank tank(0, minePos, Direction::Up);
   std::vector<Tank> tanks{tank};
@@ -152,10 +152,10 @@ TEST_F(CollisionHandlerTest, ApplyPositionExplosion_DestroysTankAndRemovesMine) 
 
   markPositionExplosion(minePos);
 
-  bool result = applyPositionExplosions(tanks, shells, dummyBoard);
+  bool result = applyPositionExplosions(tanks, shells, board);
 
   EXPECT_TRUE(tanks[0].isDestroyed());
-  EXPECT_EQ(dummyBoard.getCellType(minePos), GameBoard::CellType::Empty);
+  EXPECT_EQ(board.getCellType(minePos), GameBoard::CellType::Empty);
   EXPECT_TRUE(result);
 }
 
@@ -168,7 +168,7 @@ TEST_F(CollisionHandlerTest, ApplyPositionExplosion_DestroysShell) {
 
   markPositionExplosion(p);
 
-  bool result = applyPositionExplosions(tanks, shells, dummyBoard);
+  bool result = applyPositionExplosions(tanks, shells, board);
 
   EXPECT_TRUE(shells[0].isDestroyed());
   EXPECT_FALSE(result);  // No tank destroyed
@@ -225,7 +225,7 @@ TEST_F(CollisionHandlerTest, DetectPositionCollision_NoCollision_NoExplosionLogg
 
 TEST_F(CollisionHandlerTest, ShellWallCollision_OneHit_ExplosionLoggedWallSurvives) {
   Point wallPos(3, 3);
-  dummyBoard.setCellType(wallPos, GameBoard::CellType::Wall);
+  board.setCellType(wallPos, GameBoard::CellType::Wall);
 
   Shell shell(0, Point(0, 0), Direction::Right);
   shell.setPosition(wallPos);
@@ -234,14 +234,14 @@ TEST_F(CollisionHandlerTest, ShellWallCollision_OneHit_ExplosionLoggedWallSurviv
 
   checkShellWallCollisions(shells);
 
-  EXPECT_EQ(dummyBoard.getCellType(wallPos), GameBoard::CellType::Wall);
+  EXPECT_EQ(board.getCellType(wallPos), GameBoard::CellType::Wall);
   ASSERT_EQ(getPositionExplosions().size(), 1);
   EXPECT_EQ(getPositionExplosions()[0], wallPos);
 }
 
 TEST_F(CollisionHandlerTest, ShellWallCollision_TwoHits_WallDestroyed) {
   Point wallPos(4, 4);
-  dummyBoard.setCellType(wallPos, GameBoard::CellType::Wall);
+  board.setCellType(wallPos, GameBoard::CellType::Wall);
 
   Shell s1(0, Point(1, 1), Direction::Down);
   Shell s2(1, Point(2, 2), Direction::Down);
@@ -253,7 +253,7 @@ TEST_F(CollisionHandlerTest, ShellWallCollision_TwoHits_WallDestroyed) {
 
   checkShellWallCollisions(shells);
 
-  EXPECT_EQ(dummyBoard.getCellType(wallPos), GameBoard::CellType::Empty);
+  EXPECT_EQ(board.getCellType(wallPos), GameBoard::CellType::Empty);
 
   ASSERT_EQ(getPositionExplosions().size(), 2);
   EXPECT_EQ(getPositionExplosions()[0], wallPos);
@@ -262,7 +262,7 @@ TEST_F(CollisionHandlerTest, ShellWallCollision_TwoHits_WallDestroyed) {
 
 TEST_F(CollisionHandlerTest, TankMineCollision_DestroyedAndMineRemoved) {
   Point minePos(5, 5);
-  dummyBoard.setCellType(minePos, GameBoard::CellType::Mine);
+  board.setCellType(minePos, GameBoard::CellType::Mine);
 
   Tank tank(0, Point(0, 0), Direction::Down);
   tank.setPosition(minePos);
@@ -272,14 +272,14 @@ TEST_F(CollisionHandlerTest, TankMineCollision_DestroyedAndMineRemoved) {
   checkTankMineCollisions(tanks);
 
   EXPECT_TRUE(tanks[0].isDestroyed());
-  EXPECT_EQ(dummyBoard.getCellType(minePos), GameBoard::CellType::Empty);
+  EXPECT_EQ(board.getCellType(minePos), GameBoard::CellType::Empty);
   ASSERT_EQ(getPositionExplosions().size(), 1);
   EXPECT_EQ(getPositionExplosions()[0], minePos);
 }
 
 TEST_F(CollisionHandlerTest, TankMineCollision_NoMine_NoExplosion) {
   Point safePos(6, 6);
-  dummyBoard.setCellType(safePos, GameBoard::CellType::Empty);
+  board.setCellType(safePos, GameBoard::CellType::Empty);
 
   Tank tank(0, Point(0, 0), Direction::Right);
   tank.setPosition(safePos);
@@ -289,6 +289,343 @@ TEST_F(CollisionHandlerTest, TankMineCollision_NoMine_NoExplosion) {
   checkTankMineCollisions(tanks);
 
   EXPECT_FALSE(tanks[0].isDestroyed());
-  EXPECT_EQ(dummyBoard.getCellType(safePos), GameBoard::CellType::Empty);
+  EXPECT_EQ(board.getCellType(safePos), GameBoard::CellType::Empty);
   EXPECT_TRUE(getPositionExplosions().empty());
 }
+
+TEST_F(CollisionHandlerTest, Resolve_ShellShellPositionCollision_BothDestroyed) {
+  Shell s1(0, Point(1, 1), Direction::Down);
+  Shell s2(1, Point(2, 2), Direction::Up);
+
+  s1.setPosition(Point(3, 3));
+  s2.setPosition(Point(3, 3));
+
+  std::vector<Shell> shells{s1, s2};
+  std::vector<Tank> tanks;
+
+  bool result = resolveAll(tanks, shells);
+
+  EXPECT_TRUE(shells[0].isDestroyed());
+  EXPECT_TRUE(shells[1].isDestroyed());
+  EXPECT_FALSE(result);
+  ASSERT_EQ(getPositionExplosions().size(), 1);
+  EXPECT_EQ(getPositionExplosions()[0], Point(3, 3));
+}
+
+TEST_F(CollisionHandlerTest, Resolve_TankTankPositionCollision_BothDestroyed) {
+  Tank t1(0, Point(0, 0), Direction::Right);
+  Tank t2(1, Point(4, 4), Direction::Left);
+
+  t1.setPosition(Point(2, 2));
+  t2.setPosition(Point(2, 2));
+
+  std::vector<Tank> tanks{t1, t2};
+  std::vector<Shell> shells;
+
+  bool result = resolveAll(tanks, shells);
+
+  EXPECT_TRUE(tanks[0].isDestroyed());
+  EXPECT_TRUE(tanks[1].isDestroyed());
+  EXPECT_TRUE(result);
+  ASSERT_EQ(getPositionExplosions().size(), 1);
+  EXPECT_EQ(getPositionExplosions()[0], Point(2, 2));
+}
+
+TEST_F(CollisionHandlerTest, Resolve_ShellWallOneHit_WallSurvives) {
+  Point wallPos(3, 3);
+  board.setCellType(wallPos, GameBoard::CellType::Wall);
+
+  Shell s1(0, Point(0, 0), Direction::DownRight);
+  s1.setPosition(wallPos);
+
+  std::vector<Shell> shells{s1};
+  std::vector<Tank> tanks;
+
+  bool result = resolveAll(tanks, shells);
+
+  EXPECT_TRUE(shells[0].isDestroyed());
+  EXPECT_EQ(board.getCellType(wallPos), GameBoard::CellType::Wall);
+  ASSERT_EQ(getPositionExplosions().size(), 1);
+  EXPECT_EQ(getPositionExplosions()[0], wallPos);
+  EXPECT_FALSE(result);
+}
+
+TEST_F(CollisionHandlerTest, Resolve_ShellWallThreeHits_WallDestroyed) {
+  Point wallPos(3, 3);
+  board.setCellType(wallPos, GameBoard::CellType::Wall);
+
+  Shell s1(0, Point(0, 0), Direction::Down);
+  Shell s2(1, Point(1, 1), Direction::Down);
+  Shell s3(2, Point(2, 2), Direction::Down);
+
+  s1.setPosition(wallPos);
+  s2.setPosition(wallPos);
+  s3.setPosition(wallPos);
+
+  std::vector<Shell> shells{s1, s2, s3};
+  std::vector<Tank> tanks;
+
+  bool result = resolveAll(tanks, shells);
+
+  for (const Shell& s : shells) {
+      EXPECT_TRUE(s.isDestroyed());
+  }
+
+  EXPECT_EQ(board.getCellType(wallPos), GameBoard::CellType::Empty);
+  EXPECT_FALSE(result);
+  ASSERT_EQ(getPositionExplosions().size(), 3);
+  for (const Point& p : getPositionExplosions()) {
+      EXPECT_EQ(p, wallPos);
+  }
+}
+
+TEST_F(CollisionHandlerTest, Resolve_ShellsCrossMidpoint_AllDestroyed) {
+  Shell s1(0, Point(0, 0), Direction::DownRight);
+  Shell s2(1, Point(1, 1), Direction::UpLeft);
+  Shell s3(2, Point(1, 0), Direction::UpRight);
+
+  s1.setPosition(Point(1, 1));
+  s2.setPosition(Point(0, 0));
+  s3.setPosition(Point(0, 1));
+
+  std::vector<Shell> shells{s1, s2, s3};
+  std::vector<Tank> tanks;
+
+  bool result = resolveAll(tanks, shells);
+
+  for (const Shell& s : shells) {
+      EXPECT_TRUE(s.isDestroyed());
+  }
+
+  // Midpoints: all are (0.5, 0.5)
+  for (const auto& [x, y] : getPathExplosions()) {
+      EXPECT_FLOAT_EQ(x, 0.5f);
+      EXPECT_FLOAT_EQ(y, 0.5f);
+  }
+
+  EXPECT_FALSE(result);
+}
+
+TEST_F(CollisionHandlerTest, Resolve_TankStepsOnMine_DestroyedAndCleared) {
+  Point minePos(2, 2);
+  board.setCellType(minePos, GameBoard::CellType::Mine);
+
+  Tank tank(0, Point(0, 0), Direction::DownRight);
+  tank.setPosition(minePos);
+
+  std::vector<Tank> tanks{tank};
+  std::vector<Shell> shells;
+
+  bool result = resolveAll(tanks, shells);
+
+  EXPECT_TRUE(tanks[0].isDestroyed());
+  EXPECT_EQ(board.getCellType(minePos), GameBoard::CellType::Empty);
+  EXPECT_TRUE(result);
+  ASSERT_EQ(getPositionExplosions().size(), 1);
+  EXPECT_EQ(getPositionExplosions()[0], minePos);
+}
+
+TEST_F(CollisionHandlerTest, Resolve_ShellHitsTank_BothDestroyed) {
+  Tank tank(0, Point(0, 0), Direction::Up);
+  tank.setPosition(Point(2, 2));
+
+  Shell shell(1, Point(4, 4), Direction::UpLeft);
+  shell.setPosition(Point(2, 2));
+
+  std::vector<Tank> tanks{tank};
+  std::vector<Shell> shells{shell};
+
+  bool result = resolveAll(tanks, shells);
+
+  EXPECT_TRUE(tanks[0].isDestroyed());
+  EXPECT_TRUE(shells[0].isDestroyed());
+  EXPECT_TRUE(result);
+  ASSERT_EQ(getPositionExplosions().size(), 1);
+  EXPECT_EQ(getPositionExplosions()[0], Point(2, 2));
+}
+
+TEST_F(CollisionHandlerTest, Resolve_TankShellPathCross_BothDestroyed) {
+  Tank tank(0, Point(0, 0), Direction::DownRight);
+  Shell shell(1, Point(2, 2), Direction::UpLeft);
+
+  tank.setPosition(Point(2, 2));     // prev: (0,0), curr: (2,2)
+  shell.setPosition(Point(0, 0));    // prev: (2,2), curr: (0,0)
+
+  std::vector<Tank> tanks{tank};
+  std::vector<Shell> shells{shell};
+
+  bool result = resolveAll(tanks, shells);
+
+  EXPECT_TRUE(tanks[0].isDestroyed());
+  EXPECT_TRUE(shells[0].isDestroyed());
+  EXPECT_TRUE(result);
+
+  ASSERT_EQ(getPathExplosions().size(), 1);
+  EXPECT_FLOAT_EQ(getPathExplosions()[0].first, 1.0f);
+  EXPECT_FLOAT_EQ(getPathExplosions()[0].second, 1.0f);
+}
+
+TEST_F(CollisionHandlerTest, Resolve_NoCollisions_AllSurvive) {
+  Tank tank(0, Point(0, 0), Direction::Right);
+  Shell shell(1, Point(3, 3), Direction::Left);
+
+  tank.setPosition(Point(1, 0));
+  shell.setPosition(Point(2, 3));
+
+  std::vector<Tank> tanks{tank};
+  std::vector<Shell> shells{shell};
+
+  bool result = resolveAll(tanks, shells);
+
+  EXPECT_FALSE(tank.isDestroyed());
+  EXPECT_FALSE(shell.isDestroyed());
+  EXPECT_FALSE(result);
+
+  EXPECT_TRUE(getPathExplosions().empty());
+  EXPECT_TRUE(getPositionExplosions().empty());
+}
+
+TEST_F(CollisionHandlerTest, Resolve_MixedCollisions_AllHandledCorrectly) {
+  // Setup:
+  // - s1 + s2: collide at (2,2)
+  // - s3 hits wall at (1,1)
+  // - t1 hits mine at (3,3)
+
+  Point wallPos(1, 1);
+  Point minePos(3, 3);
+  board.setCellType(wallPos, GameBoard::CellType::Wall);
+  board.setCellType(minePos, GameBoard::CellType::Mine);
+
+  Shell s1(0, Point(0, 0), Direction::DownRight);
+  Shell s2(1, Point(4, 4), Direction::UpLeft);
+  Shell s3(2, Point(0, 1), Direction::Right);
+  s1.setPosition(Point(2, 2));
+  s2.setPosition(Point(2, 2));
+  s3.setPosition(wallPos);
+
+  Tank t1(0, Point(0, 0), Direction::DownRight);
+  t1.setPosition(minePos);
+
+  std::vector<Shell> shells{s1, s2, s3};
+  std::vector<Tank> tanks{t1};
+
+  bool result = resolveAll(tanks, shells);
+
+  EXPECT_TRUE(shells[0].isDestroyed());
+  EXPECT_TRUE(shells[1].isDestroyed());
+  EXPECT_TRUE(shells[2].isDestroyed());
+
+  EXPECT_TRUE(tanks[0].isDestroyed());
+  EXPECT_EQ(board.getCellType(wallPos), GameBoard::CellType::Wall);  // only 1 hit
+  EXPECT_EQ(board.getCellType(minePos), GameBoard::CellType::Empty);
+
+  EXPECT_TRUE(result);  // tank destroyed
+  ASSERT_EQ(getPositionExplosions().size(), 3);
+  EXPECT_EQ(getPositionExplosions()[0], wallPos);
+  EXPECT_EQ(getPositionExplosions()[1], Point(2, 2));
+  EXPECT_EQ(getPositionExplosions()[2], minePos);
+}
+
+TEST_F(CollisionHandlerTest, Resolve_ShellHitsMine_ShellSurvivesMineUnaffected) {
+  Point minePos(2, 2);
+  board.setCellType(minePos, GameBoard::CellType::Mine);
+
+  Shell shell(0, Point(1, 2), Direction::Right);
+  shell.setPosition(minePos);
+
+  std::vector<Shell> shells{shell};
+  std::vector<Tank> tanks;
+
+  bool result = resolveAll(tanks, shells);
+
+  EXPECT_FALSE(shells[0].isDestroyed());
+  EXPECT_EQ(board.getCellType(minePos), GameBoard::CellType::Mine);
+  EXPECT_FALSE(result);
+  EXPECT_TRUE(getPositionExplosions().empty());
+  EXPECT_TRUE(getPathExplosions().empty());
+}
+
+TEST_F(CollisionHandlerTest, Resolve_WraparoundShellPathCrossing_BothDestroyed) {
+  Shell s1(0, Point(9, 0), Direction::Right);
+  Shell s2(1, Point(0, 0), Direction::Left);
+
+  s1.setPosition(Point(0, 0));  // wraparound
+  s2.setPosition(Point(9, 0));  // wraparound
+
+  std::vector<Shell> shells{s1, s2};
+  std::vector<Tank> tanks;
+
+  bool result = resolveAll(tanks, shells);
+
+  EXPECT_TRUE(shells[0].isDestroyed());
+  EXPECT_TRUE(shells[1].isDestroyed());
+  EXPECT_FALSE(result);
+
+  ASSERT_EQ(getPathExplosions().size(), 1);
+  EXPECT_FLOAT_EQ(getPathExplosions()[0].first, 9.5f);
+  EXPECT_FLOAT_EQ(getPathExplosions()[0].second, 0.0f);
+}
+
+TEST_F(CollisionHandlerTest, Resolve_WraparoundX_CollisionMidpointCorrect) {
+  Shell s1(0, Point(9, 5), Direction::Right);
+  Shell s2(1, Point(0, 5), Direction::Left);
+
+  s1.setPosition(Point(0, 5));  // wraps
+  s2.setPosition(Point(9, 5));  // wraps
+
+  std::vector<Shell> shells{s1, s2};
+  std::vector<Tank> tanks;
+
+  bool result = resolveAll(tanks, shells);
+
+  EXPECT_TRUE(shells[0].isDestroyed());
+  EXPECT_TRUE(shells[1].isDestroyed());
+
+  ASSERT_EQ(getPathExplosions().size(), 1);
+  EXPECT_FLOAT_EQ(getPathExplosions()[0].first, 9.5f);
+  EXPECT_FLOAT_EQ(getPathExplosions()[0].second, 5.0f);
+  EXPECT_FALSE(result);
+}
+
+TEST_F(CollisionHandlerTest, Resolve_WraparoundY_CollisionMidpointCorrect) {
+  Shell s1(0, Point(5, 9), Direction::Down);
+  Shell s2(1, Point(5, 0), Direction::Up);
+
+  s1.setPosition(Point(5, 0));
+  s2.setPosition(Point(5, 9));
+
+  std::vector<Shell> shells{s1, s2};
+  std::vector<Tank> tanks;
+
+  bool result = resolveAll(tanks, shells);
+
+  EXPECT_TRUE(shells[0].isDestroyed());
+  EXPECT_TRUE(shells[1].isDestroyed());
+
+  ASSERT_EQ(getPathExplosions().size(), 1);
+  EXPECT_FLOAT_EQ(getPathExplosions()[0].first, 5.0f);
+  EXPECT_FLOAT_EQ(getPathExplosions()[0].second, 9.5f);
+  EXPECT_FALSE(result);
+}
+
+TEST_F(CollisionHandlerTest, Resolve_WraparoundCornerDiagonal_CollisionMidpointCorrect) {
+  Shell s1(0, Point(9, 9), Direction::DownRight);
+  Shell s2(1, Point(0, 0), Direction::UpLeft);
+
+  s1.setPosition(Point(0, 0));
+  s2.setPosition(Point(9, 9));
+
+  std::vector<Shell> shells{s1, s2};
+  std::vector<Tank> tanks;
+
+  bool result = resolveAll(tanks, shells);
+
+  EXPECT_TRUE(shells[0].isDestroyed());
+  EXPECT_TRUE(shells[1].isDestroyed());
+
+  ASSERT_EQ(getPathExplosions().size(), 1);
+  EXPECT_FLOAT_EQ(getPathExplosions()[0].first, 9.5f);
+  EXPECT_FLOAT_EQ(getPathExplosions()[0].second, 9.5f);
+  EXPECT_FALSE(result);
+}
+

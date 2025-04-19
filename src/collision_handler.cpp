@@ -8,6 +8,8 @@ bool CollisionHandler::resolveAllCollisions(
 ) {
   m_positionExplosions.clear();
   m_pathExplosions.clear();
+  m_boardWidth = board.getWidth();
+  m_boardHeight = board.getHeight();
 
   detectPathCrossings(tanks, shells);
   bool tankDestroyed = applyPathExplosions(tanks, shells);
@@ -17,7 +19,7 @@ bool CollisionHandler::resolveAllCollisions(
   detectPositionCollisions(tanks, shells);
   tankDestroyed |= applyPositionExplosions(tanks, shells, board);
 
-  checkTankMineCollisions(tanks, board);
+  tankDestroyed |= checkTankMineCollisions(tanks, board);
 
   return tankDestroyed;
 }
@@ -105,17 +107,20 @@ void CollisionHandler::checkShellWallCollisions(std::vector<Shell>& shells, Game
   }
 }
 
-void CollisionHandler::checkTankMineCollisions(std::vector<Tank>& tanks, GameBoard& board) {
+bool CollisionHandler::checkTankMineCollisions(std::vector<Tank>& tanks, GameBoard& board) {
+  bool tankDestroyed = false;
   for (Tank& tank : tanks) {
       if (tank.isDestroyed()) continue;
 
       Point pos = tank.getPosition();
       if (board.getCellType(pos) == GameBoard::CellType::Mine) {
           tank.destroy();
+          tankDestroyed = true;
           board.setCellType(pos, GameBoard::CellType::Empty);
           markPositionExplosionAt(pos);
       }
   }
+  return tankDestroyed;
 }
 
 bool CollisionHandler::applyPathExplosions(std::vector<Tank>& tanks,
@@ -190,21 +195,45 @@ void CollisionHandler::markPositionExplosionAt(const Point& pos) {
 }
 
 void CollisionHandler::markPathExplosionAt(const Point& from, const Point& to) {
-  float mx = (from.x + to.x) / 2.0f;
-  float my = (from.y + to.y) / 2.0f;
+  auto [mx, my] = computeMidpoint(from, to);
   m_pathExplosions.emplace_back(mx, my);
 }
 
 // TODO: replace with a floating point struct to hold midpoint
 bool CollisionHandler::pathCrossedMidpoint(const Point& prev, const Point& curr, float mx, float my) {
-  float px = static_cast<float>(prev.x);
-  float py = static_cast<float>(prev.y);
-  float cx = static_cast<float>(curr.x);
-  float cy = static_cast<float>(curr.y);
+    // First, compute the real midpoint between prev and curr
+    auto [computed_mx, computed_my] = computeMidpoint(prev, curr);
 
-  float midx = (px + cx) / 2.0f;
-  float midy = (py + cy) / 2.0f;
+    // Compare against the input explosion midpoint
+    return std::abs(computed_mx - mx) < 1e-5f && std::abs(computed_my - my) < 1e-5f;
+}
 
-  return std::abs(midx - mx) < 1e-5f && std::abs(midy - my) < 1e-5f;
+std::pair<float, float> CollisionHandler::computeMidpoint(const Point& a, const Point& b) {
+  int dx = b.x - a.x;
+  int dy = b.y - a.y;
+
+  float mx, my;
+
+  // X axis midpoint
+  if (dx == 1 || dx == -1) {
+      mx = (a.x + b.x) / 2.0f;
+  } else if ((a.x == 0 && b.x == m_boardWidth - 1) || (b.x == 0 && a.x == m_boardWidth - 1)) {
+      // Wraparound on X
+      mx = (m_boardWidth - 0.5f);
+  } else {
+      mx = (a.x + b.x) / 2.0f;  // fallback for robustness
+  }
+
+  // Y axis midpoint
+  if (dy == 1 || dy == -1) {
+      my = (a.y + b.y) / 2.0f;
+  } else if ((a.y == 0 && b.y == m_boardHeight - 1) || (b.y == 0 && a.y == m_boardHeight - 1)) {
+      // Wraparound on Y
+      my = (m_boardHeight - 0.5f);
+  } else {
+      my = (a.y + b.y) / 2.0f;
+  }
+
+  return {mx, my};
 }
 

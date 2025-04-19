@@ -16,8 +16,12 @@ private:
     // For Test purposes
     friend class CollisionHandlerTest;
 
+    // TODO: consider changing to a set
     std::vector<std::pair<float, float>> m_pathExplosions;   
     std::vector<Point> m_positionExplosions;
+    int m_boardWidth;
+    int m_boardHeight;
+
 
     void detectPathCrossings(
         std::vector<Tank>& tanks,
@@ -34,7 +38,7 @@ private:
         GameBoard& board
     );
 
-    void checkTankMineCollisions(
+    bool checkTankMineCollisions(
         std::vector<Tank>& tanks,
         GameBoard& board
     );
@@ -49,4 +53,5 @@ private:
     void markPositionExplosionAt(const Point& pos);
     void markPathExplosionAt(const Point& from, const Point& to);
     bool pathCrossedMidpoint(const Point& prev, const Point& curr, float mx, float my);
+    std::pair<float, float> computeMidpoint(const Point& a, const Point& b);
 };
