@@ -16,6 +16,10 @@ GameManager::~GameManager() {
     cleanup();
 }
 
+std::vector<Tank> GameManager::getTanks() const {
+    return m_tanks;
+}
+
 bool GameManager::initialize(const std::string& filePath) {
     // Load board file
     int boardWidth = 0;
@@ -39,7 +43,7 @@ bool GameManager::initialize(const std::string& filePath) {
         return false;
     }
     
-    // TODO: Create tanks from board
+    createTanksFromBoard();
     
     // Create algorithms
     createAlgorithms();
@@ -99,4 +103,34 @@ void GameManager::cleanup() {
     
     delete m_player2Algorithm;
     m_player2Algorithm = nullptr;
+}
+
+void GameManager::createTanksFromBoard() {
+  m_tanks.clear();
+  bool foundTank1 = false;
+  bool foundTank2 = false;
+  
+  // Scan the board for tank positions
+  for (int y = 0; y < m_board.getHeight(); ++y) {
+      for (int x = 0; x < m_board.getWidth(); ++x) {
+          Point pos(x, y);
+          GameBoard::CellType cellType = m_board.getCellType(pos);
+          
+          if (cellType == GameBoard::CellType::Tank1) {
+              // Create tank for player 1 (cannon pointing left)
+              m_tanks.emplace_back(1, pos, Direction::Left);
+              foundTank1 = true; 
+          } else if (cellType == GameBoard::CellType::Tank2) {
+              // Create tank for player 2 (cannon pointing right)
+              m_tanks.emplace_back(2, pos, Direction::Right);
+              foundTank2 = true;
+          }
+          if (foundTank1 && foundTank2) {
+            break; // Both tanks found, exit loop
+          }
+      }
+      if (foundTank1 && foundTank2) {
+          break; // Both tanks found, exit loop
+      }
+  }
 }

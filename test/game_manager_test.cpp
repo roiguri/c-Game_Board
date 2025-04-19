@@ -133,27 +133,91 @@ TEST_F(GameManagerTest, Cleanup_ThroughReinitialization) {
     // No crash means cleanup worked properly
 }
 
-// This test checks that initialization errors are being logged
-TEST_F(GameManagerTest, Initialize_ErrorsAreLogged) {
-    // Create a board with recoverable errors (e.g., multiple tanks)
-    std::vector<std::string> boardLines = {
-        "5 5",      // 5x5 board
-        "#####",
-        "#1 2#",
-        "#1 2#",    // Duplicate tanks
-        "# @ #",
-        "#####"
-    };
-    createTestBoardFile(boardLines);
-    
-    GameManager manager;
-    EXPECT_TRUE(manager.initialize(tempFilePath));
-    
-    // We can't directly access the game log, but we know errors should be logged
-    // Instead, we'll save results to a temporary file and check for error messages
-    std::string outputPath = tempFilePath + ".out";
-    manager.saveResults(outputPath);
-    
-    // TODO: This part of the test might need adjustment if saveResults is fully implemented
-    // as it currently only outputs to cout
+// Test getTanks returns empty vector before initialization
+TEST_F(GameManagerTest, GetTanks_EmptyBeforeInit) {
+  GameManager manager;
+  
+  // Before initialization, tanks vector should be empty
+  EXPECT_TRUE(manager.getTanks().empty());
+}
+
+// Test tank creation with normal board
+TEST_F(GameManagerTest, Initialize_NormalTankCreation) {
+  std::vector<std::string> boardLines = {
+      "5 5",
+      "#####",
+      "#1 2#",  // Player 1 at (1,1), Player 2 at (3,1)
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  EXPECT_TRUE(manager.initialize(tempFilePath));
+  
+  const auto& tanks = manager.getTanks();
+  ASSERT_EQ(tanks.size(), 2);
+  
+  // Check player 1's tank
+  EXPECT_EQ(tanks[0].getPlayerId(), 1);
+  EXPECT_EQ(tanks[0].getPosition(), Point(1, 1));
+  EXPECT_EQ(tanks[0].getDirection(), Direction::Left);
+  
+  // Check player 2's tank
+  EXPECT_EQ(tanks[1].getPlayerId(), 2);
+  EXPECT_EQ(tanks[1].getPosition(), Point(3, 1));
+  EXPECT_EQ(tanks[1].getDirection(), Direction::Right);
+}
+
+// Test tank creation with multiple tanks for one player
+TEST_F(GameManagerTest, Initialize_MultipleTanksOnePlayer) {
+  std::vector<std::string> boardLines = {
+      "5 5",
+      "#1###",
+      "#   #",
+      "# 1 #",  // Second tank for player 1
+      "#  2#",
+      "#####"
+  };
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  EXPECT_TRUE(manager.initialize(tempFilePath));
+  
+  const auto& tanks = manager.getTanks();
+  ASSERT_EQ(tanks.size(), 2);
+  
+  // Should keep the first tank found (top-to-bottom, left-to-right scan)
+  EXPECT_EQ(tanks[0].getPlayerId(), 1);
+  EXPECT_EQ(tanks[0].getPosition(), Point(1, 0));
+  
+  EXPECT_EQ(tanks[1].getPlayerId(), 2);
+  EXPECT_EQ(tanks[1].getPosition(), Point(3, 3));
+}
+
+// Test tank creation with multiple tanks for both players
+TEST_F(GameManagerTest, Initialize_MultipleTanksBothPlayers) {
+  std::vector<std::string> boardLines = {
+      "5 5",
+      "#12##",  // First tanks
+      "#   #",
+      "# 1 #",  // Duplicate player 1
+      "#  2#",  // Duplicate player 2
+      "#####"
+  };
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  EXPECT_TRUE(manager.initialize(tempFilePath));
+  
+  const auto& tanks = manager.getTanks();
+  ASSERT_EQ(tanks.size(), 2);
+  
+  // Should keep the first tanks found
+  EXPECT_EQ(tanks[0].getPlayerId(), 1);
+  EXPECT_EQ(tanks[0].getPosition(), Point(1, 0));
+  
+  EXPECT_EQ(tanks[1].getPlayerId(), 2);
+  EXPECT_EQ(tanks[1].getPosition(), Point(2, 0));
 }

@@ -54,6 +54,9 @@ public:
      */
     void saveResults(const std::string& outputFilePath);
 
+    // Accessors
+    std::vector<Tank> getTanks() const;
+
 private:
     // Core game state
     GameBoard m_board;
@@ -132,4 +135,6 @@ private:
      * @brief Clean up resources before destruction
      */
     void cleanup();
+
+    void createTanksFromBoard();
 };
