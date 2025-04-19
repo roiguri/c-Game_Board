@@ -132,7 +132,7 @@ public:
      * @param newPosition The new position after backward movement
      * @return true if backward movement was initiated or continued, false otherwise
      */
-    bool moveBackward(const Point& newPosition);
+    bool requestMoveBackward(const Point& newPosition);
 
     /**
      * @brief Rotate the tank left
@@ -168,6 +168,9 @@ public:
     Point getNextBackwardPosition() const;
 
 private:
+    void moveBackward();
+    bool isInBackwardMovement();
+
     int m_playerId;
     Point m_position;
     Direction m_direction;
@@ -176,4 +179,5 @@ private:
     int m_shootCooldown;
     int m_backwardCounter;
     bool m_continuousBackward;
+    Point m_backwardPosition;
 };

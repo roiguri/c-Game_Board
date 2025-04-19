@@ -525,7 +525,7 @@ TEST_F(AlgorithmTest, FindSafeAction_ContinueBackwardMovement) {
   GameBoard board = create5X5TestBoard(boardLines);
   Tank tank(1, Point(2, 4), Direction::Right);
   
-  tank.moveBackward(Point(1, 4));
+  tank.requestMoveBackward(Point(1, 4));
   EXPECT_TRUE(tank.isMovingBackward());
   
   std::vector<Shell> shells;

@@ -94,32 +94,40 @@ bool Tank::moveForward(const Point& newPosition) {
   return true;
 }
 
-bool Tank::moveBackward(const Point& newPosition) {
-  if (m_backwardCounter > 0) {
-      m_backwardCounter++;
-      
-      if (m_backwardCounter > BACKWARD_DELAY) {
-          m_position = newPosition;
-          
-          m_backwardCounter = 0;
-          m_continuousBackward = true;
-          
-          return true;
-      }
-      return true; // Waiting for backward movement to complete
-  }
-  
-  if (m_continuousBackward) {
-      m_position = newPosition;
+bool Tank::requestMoveBackward(const Point& newPosition) {
+  if (isInBackwardMovement()) {
       return true;
   }
-  
+  m_backwardPosition = newPosition;
+  if (m_continuousBackward) {
+      moveBackward();
+      return true;
+  }
   m_backwardCounter = 1;
   return true;
 }
 
-bool Tank::rotateLeft(bool quarterTurn) {
+void Tank::moveBackward() {
+  m_position = m_backwardPosition;
+  m_backwardCounter = 0;
+  m_continuousBackward = true;
+}
+
+bool Tank::isInBackwardMovement() {
   if (m_backwardCounter > 0) {
+    m_backwardCounter++;
+    
+    if (m_backwardCounter > BACKWARD_DELAY) {
+        moveBackward();          
+        return true;
+    }
+    return true;
+  }
+  return false;
+}
+
+bool Tank::rotateLeft(bool quarterTurn) {
+  if (isInBackwardMovement()) {
     return false;
   }
   
@@ -129,7 +137,7 @@ bool Tank::rotateLeft(bool quarterTurn) {
 }
 
 bool Tank::rotateRight(bool quarterTurn) {
-  if (m_backwardCounter > 0) {
+  if (isInBackwardMovement()) {
     return false;
   }
   
@@ -139,7 +147,7 @@ bool Tank::rotateRight(bool quarterTurn) {
 }
 
 bool Tank::shoot() {
-  if (m_backwardCounter > 0) {
+  if (isInBackwardMovement()) {
     return false;
   }
 
