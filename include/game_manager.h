@@ -56,8 +56,11 @@ public:
 
     // Accessors
     std::vector<Tank> getTanks() const;
-
+    const std::vector<std::string>& getGameLog() const;
 private:
+    // For testing purposes
+    friend class GameManagerTest;
+
     // Core game state
     GameBoard m_board;
     std::vector<Tank> m_tanks;
