@@ -2,7 +2,8 @@
 
 Shell::Shell(int playerId, const Point& position, Direction direction)
     : m_playerId(playerId), 
-      m_position(position), 
+      m_position(position),
+      m_previousPosition(position), 
       m_direction(direction),
       m_destroyed(false) {
 }
@@ -19,6 +20,14 @@ Point Shell::getPosition() const {
   return m_position;
 }
 
+Point Shell::getPreviousPosition() const {
+  return m_previousPosition;
+}
+
+void Shell::updatePreviousPosition() {
+  m_previousPosition = m_position;
+}
+
 Direction Shell::getDirection() const {
   return m_direction;
 }
@@ -27,8 +36,8 @@ bool Shell::isDestroyed() const {
   return m_destroyed;
 }
 
-
 void Shell::setPosition(const Point& position) {
+  m_previousPosition = m_position;
   m_position = position;
 }
 
