@@ -8,7 +8,8 @@ GameManager::GameManager()
     : m_player1Algorithm(nullptr),
       m_player2Algorithm(nullptr),
       m_currentStep(0),
-      m_gameOver(false) {
+      m_gameOver(false),
+      m_remaining_steps(40) {
     // Initialize empty game state
 }
 
@@ -57,7 +58,45 @@ bool GameManager::initialize(const std::string& filePath) {
 }
 
 void GameManager::runGame() {
-    // TODO: Implement game loop
+  m_currentStep = 0;
+  m_gameOver = false;
+  m_gameLog.clear();
+  
+  // Game continues until game over condition is reached
+  while (!m_gameOver) {
+      // Process a single step of the game
+      processStep();
+      
+      // Check if the game is over after this step
+      m_gameOver = checkGameOver();
+      
+      // Increment step counter
+      m_currentStep++;
+      
+      // Add a step separator to log
+      m_gameLog.push_back("Step " + std::to_string(m_currentStep) + " completed");
+      
+      // Check for maximum step count (if both tanks are out of shells)
+      bool bothOutOfShells = true;
+      for (const auto& tank : m_tanks) {
+          if (!tank.isDestroyed() && tank.getRemainingShells() > 0) {
+              bothOutOfShells = false;
+              break;
+          }
+      }
+      
+      if (bothOutOfShells) {
+          m_remaining_steps--;
+      }
+      if (m_remaining_steps < 0) {
+        m_gameOver = true;
+        m_gameResult = "Tie - Both tanks out of shells";
+    }
+  }
+  
+  // Log the final game result
+  m_gameLog.push_back("Game ended after " + std::to_string(m_currentStep) + " steps"); // TODO: remove if necessary
+  m_gameLog.push_back("Result: " + m_gameResult);
 }
 
 void GameManager::saveResults(const std::string& outputFilePath) {
