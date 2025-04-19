@@ -175,13 +175,10 @@ Action Algorithm::findSafeAction(
       
       return getFirstRotationAction(tank.getDirection(), targetDir);
   }
-  std::cout << "No safe action found" << std::endl;
   return Action::None;
 }
 
 Action Algorithm::getFirstRotationAction(Direction currentDir, Direction targetDir) const {
-  std::cout << "Finding first rotation action from " << static_cast<int>(currentDir) 
-            << " to " << static_cast<int>(targetDir) << std::endl;
   if (currentDir == targetDir) {
       return Action::None;
   }
