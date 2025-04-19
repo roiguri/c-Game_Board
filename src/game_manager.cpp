@@ -2,6 +2,7 @@
 #include "file_loader.h"
 #include "collision_handler.h"
 #include <iostream>
+#include <fstream>
 
 GameManager::GameManager()
     : m_player1Algorithm(nullptr),
@@ -21,6 +22,8 @@ std::vector<Tank> GameManager::getTanks() const {
 }
 
 bool GameManager::initialize(const std::string& filePath) {
+    // TODO: potentially add reset state method.
+
     // Load board file
     int boardWidth = 0;
     int boardHeight = 0;
@@ -34,19 +37,17 @@ bool GameManager::initialize(const std::string& filePath) {
     m_board = GameBoard(boardWidth, boardHeight);
     std::vector<std::string> errors;
     
-    bool initSuccess = m_board.initialize(boardLines, errors);
-    for (const auto& error : errors) {
-      m_gameLog.push_back("Error: " + error);
-    }
-    if (!initSuccess) {
+    if (!m_board.initialize(boardLines, errors)) {
         // Unrecoverable error in board initialization
+        return false;
+    }
+    if (!saveErrorsToFile(errors)) {
+        std::cerr << "Error: Could not save errors to file" << std::endl;
         return false;
     }
     
     createTanksFromBoard();
-    
-    // Create algorithms
-    createAlgorithms();
+    createAlgorithms(); // TODO: optional add unit tests to cover this
     
     return true;
 }
@@ -133,4 +134,27 @@ void GameManager::createTanksFromBoard() {
           break; // Both tanks found, exit loop
       }
   }
+}
+
+// TODO: consider output file location
+bool GameManager::saveErrorsToFile(const std::vector<std::string>& errors) const {
+  // Only create file if there are errors to report
+  if (errors.empty()) {
+      return true;
+  }
+  
+  // Create input_errors.txt file
+  std::ofstream errorFile("input_errors.txt");
+  if (!errorFile.is_open()) {
+      std::cerr << "Error: Could not create input_errors.txt file" << std::endl;
+      return false;
+  }
+  
+  // Write all recoverable errors to the file
+  for (const auto& error : errors) {
+      errorFile << error << std::endl;
+  }
+  
+  errorFile.close();
+  return true;
 }

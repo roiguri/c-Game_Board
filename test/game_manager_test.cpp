@@ -221,3 +221,63 @@ TEST_F(GameManagerTest, Initialize_MultipleTanksBothPlayers) {
   EXPECT_EQ(tanks[1].getPlayerId(), 2);
   EXPECT_EQ(tanks[1].getPosition(), Point(2, 0));
 }
+
+TEST_F(GameManagerTest, Initialize_CreatesErrorFile) {
+  // Create a board with a recoverable error (extra row)
+  std::vector<std::string> boardLines = {
+      "5 4",    // 5x4 board, but we provide 5 rows
+      "#####",
+      "#1 2#",
+      "#   #",
+      "#   #",
+      "#####"  // Extra row
+  };
+  createTestBoardFile(boardLines);
+  
+  // Remove any existing error file first
+  std::remove("input_errors.txt");
+  
+  GameManager manager;
+  EXPECT_TRUE(manager.initialize(tempFilePath));
+  
+  // Check that error file was created
+  std::ifstream errorFile("input_errors.txt");
+  ASSERT_TRUE(errorFile.is_open());
+  
+  // Verify file has content (at least one line)
+  std::string line;
+  std::getline(errorFile, line);
+  bool hasContent = !errorFile.fail() && !line.empty();
+  EXPECT_TRUE(hasContent);
+  
+  // Clean up
+  errorFile.close();
+  std::remove("input_errors.txt");
+}
+
+// Test that initialization doesn't create an error file when there are no errors
+TEST_F(GameManagerTest, Initialize_NoErrorFile) {
+  // Create a valid board with no errors
+  std::vector<std::string> boardLines = {
+      "5 5",
+      "#####",
+      "#1 2#",
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  createTestBoardFile(boardLines);
+  
+  // Remove any existing error file first
+  std::remove("input_errors.txt");
+  
+  GameManager manager;
+  EXPECT_TRUE(manager.initialize(tempFilePath));
+  
+  // Check that error file was not created
+  std::ifstream errorFile("input_errors.txt");
+  EXPECT_FALSE(errorFile.is_open());
+}
+
+
+

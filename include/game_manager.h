@@ -136,5 +136,17 @@ private:
      */
     void cleanup();
 
+    /**
+     * @brief Create tanks based on the current board state
+     * 
+     * Scans the board for tank positions and initializes them
+     */
     void createTanksFromBoard();
+
+    /**
+     * @brief Save recoverable errors to input_errors.txt file
+     * 
+     * Saves errors encountered during board initialization
+     */
+    bool saveErrorsToFile(const std::vector<std::string>& errors) const;
 };
