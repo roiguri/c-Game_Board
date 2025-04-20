@@ -181,7 +181,7 @@ TEST_F(TankTest, UpdateCooldowns_DecrementsCooldown) {
   EXPECT_FALSE(tank->canShoot());
   
   // Update cooldowns Tank::SHOOT_COOLDOWN times
-  for (int i = 0; i < Tank::SHOOT_COOLDOWN; i++) {
+  for (int i = 0; i <= Tank::SHOOT_COOLDOWN; i++) {
       EXPECT_FALSE(tank->canShoot());
       tank->updateCooldowns();
   }

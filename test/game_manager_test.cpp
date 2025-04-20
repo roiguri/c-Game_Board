@@ -797,7 +797,7 @@ TEST_F(GameManagerTest, ProcessStep_waitForCooldown) {
   
   EXPECT_EQ(manager.getShells().size(), 2);
 
-  for (int i = 1; i <= 4; ++i) {
+  for (int i = 1; i <= Tank::SHOOT_COOLDOWN; ++i) {
     // tanks can't shoot due to cooldown
     EXPECT_FALSE(manager.getTanks()[0].canShoot());
     EXPECT_FALSE(manager.getTanks()[1].canShoot());
@@ -987,7 +987,7 @@ TEST_F(GameManagerTest, RunGame_TankAvoidShell) {
   EXPECT_EQ(getLogEntries(gameManager), expectedLogEntries);
 }
 
-// TODO: consider id this behavior is correct
+// TODO: consider if this behavior is correct
 TEST_F(GameManagerTest, RunGame_BackwardMovement) {
   // Create test board
   std::vector<std::string> boardLines = {
