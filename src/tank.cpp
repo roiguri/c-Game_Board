@@ -166,7 +166,7 @@ bool Tank::shoot() {
   }
   
   decrementShells();
-  m_shootCooldown = SHOOT_COOLDOWN;
+  m_shootCooldown = SHOOT_COOLDOWN + 1;
   m_continuousBackward = false;
   return true;
 }
