@@ -130,10 +130,6 @@ void GameManager::processStep() {
 
   // Check for collisions after first shell movement
   bool tankDestroyed = m_collisionHandler.resolveAllCollisions(m_tanks, m_shells, m_board);
-  if (tankDestroyed) {
-      // If a tank was destroyed, end the step early
-      return;
-  }
   
   // Apply tank actions
   bool player1ActionSuccessful = applyAction(1, player1Action);
