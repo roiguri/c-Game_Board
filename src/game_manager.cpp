@@ -105,8 +105,20 @@ void GameManager::runGame() {
   m_gameLog.push_back("Result: " + m_gameResult);
 }
 
+// TODO: consider changing to boolean
 void GameManager::saveResults(const std::string& outputFilePath) {
-    // TODO: Save game log and results to file
+  std::ofstream outputFile(outputFilePath);
+  if (!outputFile.is_open()) {
+      std::cerr << "Error: Could not open output file " << outputFilePath << std::endl;
+      return;
+  }
+  
+  // Write all the game log entries to the file
+  for (const auto& logEntry : m_gameLog) {
+      outputFile << logEntry << std::endl;
+  }
+  
+  outputFile.close();
 }
 
 void GameManager::processStep() {
@@ -167,7 +179,8 @@ Action GameManager::getPlayerAction(int playerId) {
   if (!algorithm) {
       return Action::None;
   }
-  // Get action from algorithm
+  // Get action from algorithm 
+  // TODO: check if pointer okay here
   return algorithm->getNextAction(m_board, *playerTank, *enemyTank, m_shells);
 }
 
@@ -282,8 +295,39 @@ void GameManager::moveShellsOnce() {
 }
 
 bool GameManager::checkGameOver() {
-    // This is a stub implementation
-    return false;
+  // Check if any tank was destroyed
+  int destroyedTankCount = 0;
+  int playerWinner = 0;
+  
+  for (const auto& tank : m_tanks) {
+      if (tank.isDestroyed()) {
+          destroyedTankCount++;
+          // If only one tank is destroyed, the other player wins
+          if (destroyedTankCount == 1) {
+              playerWinner = (tank.getPlayerId() == 1) ? 2 : 1;
+          }
+      }
+  }
+
+  if (destroyedTankCount == 1) {
+    m_gameResult = "Player " + std::to_string(playerWinner) + " wins - Enemy tank destroyed";
+    return true;
+  }
+  
+  // If both tanks are destroyed, it's a tie
+  if (destroyedTankCount == 2) {
+      m_gameResult = "Tie - Both tanks destroyed";
+      return true;
+  }
+  
+  // If all shells are used and additional steps have passed, it's a tie
+  if (m_remaining_steps < 0) {
+      m_gameResult = "Tie - Maximum steps reached after shells depleted";
+      return true;
+  }
+  
+  // Game continues
+  return false;
 }
 
 // TODO: consider logging game state for each action logged - tank position, etc
