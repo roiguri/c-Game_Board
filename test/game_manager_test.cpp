@@ -838,7 +838,7 @@ TEST_F(GameManagerTest, ProcessStep_shellReachPointTankLeavePoint_NoCollision) {
   EXPECT_FALSE(manager.getShells()[0].isDestroyed());
 }
 
-TEST_F(GameManagerTest, TankOneWinsByShooting) {
+TEST_F(GameManagerTest, RunGame_tankOneWinsByShooting) {
   // Create test board
   std::vector<std::string> boardLines = {
       "5 5",      // Board dimensions
@@ -865,8 +865,12 @@ TEST_F(GameManagerTest, TankOneWinsByShooting) {
       "Player 1: Shoot - Success",
       "Player 2: None - Success",
       "Step 1 completed",
-      "Step 2 completed",
-      "Game ended after 2 steps",
+      
+      "Player 1: Rotate Left 1/8 - Success", 
+      "Player 2: Move Forward - Invalid", 
+      "Step 2 completed", 
+      
+      "Game ended after 2 steps",       
       "Result: Player 1 wins - Enemy tank destroyed"
   };
   
@@ -881,3 +885,155 @@ TEST_F(GameManagerTest, TankOneWinsByShooting) {
   EXPECT_FALSE(gameManager.getTanks()[1].isDestroyed()) << "Tank 1 should not be destroyed";
 }
 
+TEST_F(GameManagerTest, RunGame_bothTanksDestroyed) {
+  // Create test board
+  std::vector<std::string> boardLines = {
+      "6 5",      // Board dimensions
+      "######",    // Row 0
+      " 2  1 ",    // Row 1 - Both tanks facing each other
+      "#    #",    // Row 2
+      "#    #",    // Row 3
+      "######"     // Row 4
+  };
+  createTestBoardFile(boardLines);
+  
+  // Create and initialize game manager
+  GameManager gameManager;
+  ASSERT_TRUE(gameManager.initialize(tempFilePath));
+  
+  // Set Tank 2 to face down
+  setTankDirection(gameManager, 2, Direction::Left);
+  
+  // Run the game
+  gameManager.runGame();
+  
+  // Define expected log entries
+  std::vector<std::string> expectedLogEntries = {
+      "Player 1: Shoot - Success",
+      "Player 2: Shoot - Success",
+      "Step 1 completed",
+      
+      "Player 1: Rotate Left 1/4 - Success", 
+      "Player 2: Rotate Left 1/4 - Success",
+      "Step 2 completed", 
+      
+      "Game ended after 2 steps", 
+      "Result: Tie - Both tanks destroyed"
+  };
+  
+  // Verify log contains expected entries
+  EXPECT_EQ(getLogEntries(gameManager), expectedLogEntries);
+  
+  // Verify game result
+  verifyGameResult(gameManager, "Tie - Both tanks destroyed");
+  
+  // Additional assertions to verify final game state
+  EXPECT_TRUE(gameManager.getTanks()[0].isDestroyed()) << "Tank 2 should be destroyed";
+  EXPECT_TRUE(gameManager.getTanks()[1].isDestroyed()) << "Tank 1 should not be destroyed";
+}
+
+TEST_F(GameManagerTest, RunGame_TankAvoidShell) {
+  // Create test board
+  std::vector<std::string> boardLines = {
+      "6 5",      // Board dimensions
+      "#1####",    // Row 0
+      "      ",    // Row 1 - Both tanks facing each other
+      "#    #",    // Row 2
+      "#2   #",    // Row 3
+      "######"     // Row 4
+  };
+  createTestBoardFile(boardLines);
+  
+  // Create and initialize game manager
+  GameManager gameManager;
+  ASSERT_TRUE(gameManager.initialize(tempFilePath));
+  
+  // Set Tank 2 to face down
+  setTankDirection(gameManager, 1, Direction::Down);
+  setTankDirection(gameManager, 2, Direction::Right);
+  
+  // Run the game
+  gameManager.runGame();
+  
+  // Define expected log entries
+  std::vector<std::string> expectedLogEntries = { 
+    "Player 1: Shoot - Success", 
+    "Player 2: None - Success", 
+    "Step 1 completed", 
+    
+    "Player 1: Rotate Left 1/8 - Success", 
+    "Player 2: Move Forward - Success", 
+    "Step 2 completed", 
+    
+    "Player 1: Move Forward - Success", 
+    "Player 2: None - Success", 
+    "Step 3 completed", 
+    
+    "Player 1: Move Forward - Success", 
+    "Player 2: None - Success", 
+    "Step 4 completed", 
+    
+    "Player 1: Rotate Right 1/4 - Success", 
+    "Player 2: None - Success", 
+    "Step 5 completed", 
+    
+    "Player 1: Shoot - Success", 
+    "Player 2: None - Success", 
+    "Step 6 completed", 
+    
+    "Game ended after 6 steps", 
+    "Result: Player 1 wins - Enemy tank destroyed" 
+  };
+  EXPECT_EQ(getLogEntries(gameManager), expectedLogEntries);
+}
+
+// TODO: consider id this behavior is correct
+TEST_F(GameManagerTest, RunGame_BackwardMovement) {
+  // Create test board
+  std::vector<std::string> boardLines = {
+      "6 9",      // Board dimensions
+      "#1####",    // Row 0
+      "      ",    // Row 1 - Both tanks facing each other
+      "#    #",    // Row 2
+      "#    #",    // Row 3
+      "#    #",    // Row 4
+      "#    #",    // Row 5
+      "#    #",    // Row 6
+      "#2   #",    // Row 7
+      "######"     // Row 8
+  };
+  createTestBoardFile(boardLines);
+  
+  // Create and initialize game manager
+  GameManager gameManager;
+  ASSERT_TRUE(gameManager.initialize(tempFilePath));
+  
+  setTankDirection(gameManager, 1, Direction::Down);
+  setTankDirection(gameManager, 2, Direction::Left);
+  
+  // Run the game
+  gameManager.runGame();
+  
+  // Define expected log entries
+  std::vector<std::string> expectedLogEntries = { 
+    "Player 1: Shoot - Success", 
+    "Player 2: None - Success", 
+    "Step 1 completed", 
+    
+    "Player 1: Rotate Left 1/8 - Success", 
+    "Player 2: Move Backward - Success", 
+    "Step 2 completed", 
+    
+    "Player 1: Move Forward - Success", 
+    "Player 2: None - Success", 
+    "Step 3 completed", 
+    
+    "Player 1: Move Forward - Success", 
+    "Player 2: None - Success", 
+    "Step 4 completed", 
+    
+    "Game ended after 4 steps", 
+    "Result: Player 1 wins - Enemy tank destroyed" 
+  };
+  EXPECT_EQ(getLogEntries(gameManager), expectedLogEntries);
+}
