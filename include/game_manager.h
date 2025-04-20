@@ -157,4 +157,12 @@ private:
      * Saves errors encountered during board initialization
      */
     bool saveErrorsToFile(const std::vector<std::string>& errors) const;
+
+    /**
+     * @brief Remove any destroyed shells from the game
+     * 
+     * Cleans up shells marked as destroyed to prevent memory leaks
+     * and ensure proper game state
+     */
+    void removeDestroyedShells();
 };
