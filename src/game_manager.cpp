@@ -147,6 +147,9 @@ void GameManager::processStep() {
     tank.updateCooldowns();
   }
 
+  logAction(1, player1Action, player1ActionSuccessful);
+  logAction(2, player2Action, player2ActionSuccessful);
+
   // TODO: update game state - remove shells, move tanks in board etc.
   // Game over check will be performed in the main game loop
 }
@@ -265,11 +268,7 @@ bool GameManager::applyAction(int playerId, Action action) {
       default:
           actionResult = false;
           break;
-  }
-  
-  // Log the action and its result
-  logAction(playerId, action, actionResult);
-  
+  }  
   return actionResult;
 }
 
