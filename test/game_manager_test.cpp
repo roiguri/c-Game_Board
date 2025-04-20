@@ -10,10 +10,12 @@ class GameManagerTest : public ::testing::Test {
 protected:
     void SetUp() override {
         tempFilePath = "temp_test_board.txt";
+        outputFilePath = "test_output.txt";
     }
     
     void TearDown() override {
         std::remove(tempFilePath.c_str());
+        std::remove(outputFilePath.c_str());
     }
     
     void createTestBoardFile(const std::vector<std::string>& lines) {
@@ -77,8 +79,32 @@ protected:
             }
         }
     }
+
+    // Helper method to verify log contents
+    void verifyLogContains(GameManager& manager, const std::vector<std::string>& expectedEntries) {
+        for (const auto& expected : expectedEntries) {
+            bool found = false;
+            for (const auto& logEntry : manager.m_gameLog) {
+                if (logEntry.find(expected) != std::string::npos) {
+                    found = true;
+                    break;
+                }
+            }
+            EXPECT_TRUE(found) << "Expected log entry not found: " << expected;
+        }
+    }
+
+    std::vector<std::string> getLogEntries(GameManager& manager) {
+        return manager.m_gameLog;
+    }
+  
+    // Helper to check if the game ended with the expected result
+    void verifyGameResult(GameManager& manager, const std::string& expectedResult) {
+        EXPECT_EQ(manager.m_gameResult, expectedResult);
+    }
     
     std::string tempFilePath;
+    std::string outputFilePath;
 };
 
 TEST_F(GameManagerTest, Constructor) {
@@ -810,5 +836,48 @@ TEST_F(GameManagerTest, ProcessStep_shellReachPointTankLeavePoint_NoCollision) {
   EXPECT_EQ(manager.getTanks()[0].getPosition(), Point(4, 2));
   EXPECT_EQ(manager.getShells().size(), 1);
   EXPECT_FALSE(manager.getShells()[0].isDestroyed());
+}
+
+TEST_F(GameManagerTest, TankOneWinsByShooting) {
+  // Create test board
+  std::vector<std::string> boardLines = {
+      "5 5",      // Board dimensions
+      "#####",    // Row 0
+      "#2 1#",    // Row 1 - Both tanks facing each other
+      "#   #",    // Row 2
+      "#   #",    // Row 3
+      "#####"     // Row 4
+  };
+  createTestBoardFile(boardLines);
+  
+  // Create and initialize game manager
+  GameManager gameManager;
+  ASSERT_TRUE(gameManager.initialize(tempFilePath));
+  
+  // Set Tank 2 to face down
+  setTankDirection(gameManager, 2, Direction::Down);
+  
+  // Run the game
+  gameManager.runGame();
+  
+  // Define expected log entries
+  std::vector<std::string> expectedLogEntries = {
+      "Player 1: Shoot - Success",
+      "Player 2: None - Success",
+      "Step 1 completed",
+      "Step 2 completed",
+      "Game ended after 2 steps",
+      "Result: Player 1 wins - Enemy tank destroyed"
+  };
+  
+  // Verify log contains expected entries
+  EXPECT_EQ(getLogEntries(gameManager), expectedLogEntries);
+  
+  // Verify game result
+  verifyGameResult(gameManager, "Player 1 wins - Enemy tank destroyed");
+  
+  // Additional assertions to verify final game state
+  EXPECT_TRUE(gameManager.getTanks()[0].isDestroyed()) << "Tank 2 should be destroyed";
+  EXPECT_FALSE(gameManager.getTanks()[1].isDestroyed()) << "Tank 1 should not be destroyed";
 }
 
