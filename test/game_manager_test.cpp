@@ -43,6 +43,26 @@ protected:
     bool testApplyAction(GameManager& manager, int playerId, Action action) {
       return manager.applyAction(playerId, action);
     }
+
+    bool testCheckGameOver(GameManager& manager) {
+      return manager.checkGameOver();
+    }
+
+    std::string testGetGameResult(GameManager& manager) {
+      return manager.m_gameResult;
+  }
+  
+    void testSetRemainingSteps(GameManager& manager, int steps) {
+        manager.m_remaining_steps = steps;
+    }
+    
+    std::vector<Tank>& testGetTanksMutable(GameManager& manager) {
+        return manager.m_tanks;
+    }
+
+    void testSaveResults(GameManager& manager, const std::string& outputFilePath) {
+      manager.saveResults(outputFilePath);
+    }
     
     std::string tempFilePath;
 };
@@ -462,4 +482,197 @@ TEST_F(GameManagerTest, MoveShellsOnce_EdgeWrapping) {
   // Move shell again - should be at (5,1)
   testMoveShellsOnce(manager);
   EXPECT_EQ(manager.getShells()[0].getPosition(), Point(5, 1));
+}
+
+// Test checkGameOver with one tank destroyed
+TEST_F(GameManagerTest, CheckGameOver_OneTankDestroyed) {
+  // Create a valid test board file
+  std::vector<std::string> boardLines = {
+      "5 5",
+      "#####",
+      "#1 2#",
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  ASSERT_TRUE(manager.initialize(tempFilePath));
+  
+  // Manually set one tank to destroyed state
+  std::vector<Tank>& tanks = testGetTanksMutable(manager);
+  tanks[0].destroy();
+  
+  // Test checkGameOver
+  bool gameOver = testCheckGameOver(manager);
+  
+  EXPECT_TRUE(gameOver);
+  EXPECT_EQ(testGetGameResult(manager), "Player 2 wins - Enemy tank destroyed");
+}
+
+// Test checkGameOver with both tanks destroyed
+TEST_F(GameManagerTest, CheckGameOver_BothTanksDestroyed) {
+  // Create a valid test board file
+  std::vector<std::string> boardLines = {
+      "5 5",
+      "#####",
+      "#1 2#",
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  ASSERT_TRUE(manager.initialize(tempFilePath));
+  
+  // Destroy both tanks
+  std::vector<Tank>& tanks = testGetTanksMutable(manager);
+  tanks[0].destroy();
+  tanks[1].destroy();
+  
+  // Test checkGameOver
+  bool gameOver = testCheckGameOver(manager);
+  
+  EXPECT_TRUE(gameOver);
+  EXPECT_EQ(testGetGameResult(manager), "Tie - Both tanks destroyed");
+}
+
+// Test checkGameOver with shells depleted and steps exhausted
+TEST_F(GameManagerTest, CheckGameOver_ShellsDepleted) {
+  // Create a valid test board file
+  std::vector<std::string> boardLines = {
+      "5 5",
+      "#####",
+      "#1 2#",
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  ASSERT_TRUE(manager.initialize(tempFilePath));
+  
+  // Set the remaining steps counter to negative
+  testSetRemainingSteps(manager, -1);
+  
+  // Test checkGameOver
+  bool gameOver = testCheckGameOver(manager);
+  
+  EXPECT_TRUE(gameOver);
+  EXPECT_EQ(testGetGameResult(manager), "Tie - Maximum steps reached after shells depleted");
+}
+
+// Test checkGameOver with game still in progress
+TEST_F(GameManagerTest, CheckGameOver_GameInProgress) {
+  // Create a valid test board file
+  std::vector<std::string> boardLines = {
+      "5 5",
+      "#####",
+      "#1 2#",
+      "#   #",
+      "#   #",
+      "#####"
+  };
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  ASSERT_TRUE(manager.initialize(tempFilePath));
+  
+  // No tanks destroyed, steps not exhausted
+  std::vector<Tank>& tanks = testGetTanksMutable(manager);
+  ASSERT_FALSE(tanks[0].isDestroyed());
+  ASSERT_FALSE(tanks[1].isDestroyed());
+  testSetRemainingSteps(manager, 40); // default value
+  
+  // Test checkGameOver
+  bool gameOver = testCheckGameOver(manager);
+  
+  EXPECT_FALSE(gameOver);
+  // Game should not be over yet
+}
+
+// Test saveResults writes game log to output file
+TEST_F(GameManagerTest, SaveResults_WritesGameLog) {
+  GameManager manager;
+  
+  // Add some entries to the game log
+  testLogAction(manager, 1, Action::MoveForward, true);
+  testLogAction(manager, 2, Action::Shoot, false);
+  testLogAction(manager, 1, Action::RotateLeftQuarter, true);
+  
+  std::string outputFilePath = "test_output.txt";
+  
+  // Save the results
+  testSaveResults(manager, outputFilePath);
+  
+  // Read the output file and verify its contents
+  std::ifstream outputFile(outputFilePath);
+  ASSERT_TRUE(outputFile.is_open());
+  
+  std::vector<std::string> fileContents;
+  std::string line;
+  while (std::getline(outputFile, line)) {
+      fileContents.push_back(line);
+  }
+  
+  // Check file contents match game log
+  const auto& gameLog = manager.getGameLog();
+  ASSERT_EQ(fileContents.size(), gameLog.size());
+  
+  for (size_t i = 0; i < gameLog.size(); ++i) {
+      EXPECT_EQ(fileContents[i], gameLog[i]);
+  }
+  
+  // Clean up
+  outputFile.close();
+  std::remove(outputFilePath.c_str());
+}
+
+// Test saveResults with empty game log
+TEST_F(GameManagerTest, SaveResults_EmptyGameLog) {
+  GameManager manager;
+  
+  // No log entries added, should create an empty file
+  std::string outputFilePath = "test_empty_output.txt";
+  
+  testSaveResults(manager, outputFilePath);
+  
+  // Check that the file was created but is empty
+  std::ifstream outputFile(outputFilePath);
+  ASSERT_TRUE(outputFile.is_open());
+  
+  std::string line;
+  std::getline(outputFile, line);
+  bool hasContent = !outputFile.fail() && !line.empty();
+  EXPECT_FALSE(hasContent);
+  
+  // Clean up
+  outputFile.close();
+  std::remove(outputFilePath.c_str());
+}
+
+// Test saveResults with invalid file path
+TEST_F(GameManagerTest, SaveResults_InvalidFilePath) {
+  GameManager manager;
+  
+  // Add some entries to the game log
+  testLogAction(manager, 1, Action::MoveForward, true);
+  
+  // Redirect cerr to capture error output
+  std::stringstream cerr_buffer;
+  std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
+  
+  // Attempt to save to an invalid path (on most systems, writing to /proc/invalid will fail)
+  // If this doesn't reliably fail on your system, consider using a different invalid path
+  testSaveResults(manager, "/proc/invalid/output.txt");
+  
+  // Restore cerr
+  std::cerr.rdbuf(old_cerr);
+  
+  // Check error message
+  std::string output = cerr_buffer.str();
+  EXPECT_TRUE(output.find("Error: Could not open output file") != std::string::npos);
 }
