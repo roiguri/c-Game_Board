@@ -771,8 +771,7 @@ TEST_F(GameManagerTest, ProcessStep_shellsCollide) {
   EXPECT_EQ(manager.getShells().size(), 2);
 
   testProcessStep(manager);
-  EXPECT_EQ(manager.getShells()[0].isDestroyed(), true);
-  EXPECT_EQ(manager.getShells()[1].isDestroyed(), true);
+  EXPECT_EQ(manager.getShells().size(), 0);
   // Tanks hide from shells
   EXPECT_EQ(manager.getTanks()[0].getPosition(), Point(1, 2));
   EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(8, 2));

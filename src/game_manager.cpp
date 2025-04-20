@@ -3,6 +3,7 @@
 #include "collision_handler.h"
 #include <iostream>
 #include <fstream>
+#include <algorithm> // TODO: make sure this is okay to use
 
 GameManager::GameManager()
     : m_player1Algorithm(nullptr),
@@ -141,6 +142,7 @@ void GameManager::processStep() {
   // Check for collisions for shell and tank movement
   tankDestroyed = m_collisionHandler.resolveAllCollisions(m_tanks, m_shells, m_board);
   
+  removeDestroyedShells();
 
   // Update cooldowns for all tanks
   for (auto& tank : m_tanks) {
@@ -150,8 +152,7 @@ void GameManager::processStep() {
   logAction(1, player1Action, player1ActionSuccessful);
   logAction(2, player2Action, player2ActionSuccessful);
 
-  // TODO: update game state - remove shells, move tanks in board etc.
-  // Game over check will be performed in the main game loop
+  // TODO: update game state - move tanks in board etc.
 }
 
 Action GameManager::getPlayerAction(int playerId) {
@@ -404,4 +405,13 @@ bool GameManager::saveErrorsToFile(const std::vector<std::string>& errors) const
   
   errorFile.close();
   return true;
+}
+
+void GameManager::removeDestroyedShells() {
+  // Use the erase-remove idiom to remove destroyed shells
+  m_shells.erase(
+      std::remove_if(m_shells.begin(), m_shells.end(),
+          [](const Shell& shell) { return shell.isDestroyed(); }),
+      m_shells.end()
+  );
 }
