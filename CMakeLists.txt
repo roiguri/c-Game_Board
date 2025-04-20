@@ -29,6 +29,9 @@ add_executable(tank_battle_tests ${TEST_SOURCES})
 target_include_directories(tank_battle_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(tank_battle_tests PRIVATE tank_battle_lib gtest gmock gtest_main)
 
+add_executable(tank_game ${PROJECT_SOURCES} "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+target_include_directories(tank_game PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 # Discover tests
 include(GoogleTest)
 gtest_discover_tests(tank_battle_tests)
