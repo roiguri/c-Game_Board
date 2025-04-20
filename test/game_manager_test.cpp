@@ -63,6 +63,20 @@ protected:
     void testSaveResults(GameManager& manager, const std::string& outputFilePath) {
       manager.saveResults(outputFilePath);
     }
+
+    void createShell(GameManager& manager, int playerId, const Point& position, Direction direction) {
+        Shell shell(playerId, position, direction);
+        manager.m_shells.push_back(shell);
+    }
+
+    void setTankDirection(GameManager& manager, int playerId, Direction direction) {
+        for (auto& tank : manager.m_tanks) {
+            if (tank.getPlayerId() == playerId) {
+                tank.setDirection(direction);
+                break;
+            }
+        }
+    }
     
     std::string tempFilePath;
 };
@@ -676,3 +690,125 @@ TEST_F(GameManagerTest, SaveResults_InvalidFilePath) {
   std::string output = cerr_buffer.str();
   EXPECT_TRUE(output.find("Error: Could not open output file") != std::string::npos);
 }
+
+TEST_F(GameManagerTest, ProcessStep_shellStartsNextToTank) {
+  // Create a simple test board with two tanks in clear view of each other
+  std::vector<std::string> boardLines = {
+      "10 3",
+      "##########",
+      "#2      1#", // Tanks are in the same row with clear line of sight
+      "# ###### #"
+    // 0123456789 (cell indexes)
+  };
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  ASSERT_TRUE(manager.initialize(tempFilePath));
+  
+  // Both tanks Shoot
+  testProcessStep(manager);
+  
+  EXPECT_EQ(manager.getShells().size(), 2);
+  EXPECT_EQ(manager.getShells()[0].getPosition(), Point(7, 1));
+  EXPECT_EQ(manager.getShells()[1].getPosition(), Point(2, 1));
+
+  testProcessStep(manager);
+
+  EXPECT_EQ(manager.getShells().size(), 2);
+  EXPECT_EQ(manager.getShells()[0].getPosition(), Point(5, 1));
+  EXPECT_EQ(manager.getShells()[1].getPosition(), Point(4, 1));
+  EXPECT_EQ(manager.getTanks()[0].getDirection(), Direction::Down);
+  EXPECT_EQ(manager.getTanks()[1].getDirection(), Direction::Down);
+}
+
+TEST_F(GameManagerTest, ProcessStep_shellsCollide) {
+  // Create a simple test board with two tanks in clear view of each other
+  std::vector<std::string> boardLines = {
+      "10 3",
+      "##########",
+      "#2      1#", // Tanks are in the same row with clear line of sight
+      "# ###### #"
+    // 0123456789 (cell indexes)
+  };
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  ASSERT_TRUE(manager.initialize(tempFilePath));
+  
+  // Both tanks Shoot
+  testProcessStep(manager);
+  
+  EXPECT_EQ(manager.getShells().size(), 2);
+
+  testProcessStep(manager);
+
+  EXPECT_EQ(manager.getShells().size(), 2);
+
+  testProcessStep(manager);
+  EXPECT_EQ(manager.getShells()[0].isDestroyed(), true);
+  EXPECT_EQ(manager.getShells()[1].isDestroyed(), true);
+  // Tanks hide from shells
+  EXPECT_EQ(manager.getTanks()[0].getPosition(), Point(1, 2));
+  EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(8, 2));
+}
+
+TEST_F(GameManagerTest, ProcessStep_waitForCooldown) {
+  // Create a simple test board with two tanks in clear view of each other
+  std::vector<std::string> boardLines = {
+      "27 3",
+      "###########################",
+      "#2                       1#", // Tanks are in the same row with clear line of sight
+      "###########################"
+    // 012345678901234567890123456 (cell indexes)
+  };
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  ASSERT_TRUE(manager.initialize(tempFilePath));
+  
+  // Both tanks Shoot
+  testProcessStep(manager);
+  
+  EXPECT_EQ(manager.getShells().size(), 2);
+
+  for (int i = 1; i <= 4; ++i) {
+    // tanks can't shoot due to cooldown
+    EXPECT_FALSE(manager.getTanks()[0].canShoot());
+    EXPECT_FALSE(manager.getTanks()[1].canShoot());
+    testProcessStep(manager);
+    EXPECT_EQ(manager.getShells().size(), 2);
+    EXPECT_EQ(manager.getTanks()[0].getPosition(), Point(1, 1));
+    EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(25-i, 1));
+  }
+  testProcessStep(manager);
+  EXPECT_EQ(manager.getShells().size(), 4);
+}
+
+TEST_F(GameManagerTest, ProcessStep_shellReachPointTankLeavePoint_NoCollision) {
+  // Create a simple test board with two tanks in clear view of each other
+  std::vector<std::string> boardLines = {
+      "10 3",
+      "##########",
+      "#  #2   1#", // Tanks are in the same row with clear line of sight
+      "# ## #####"
+    // 0123456789 (cell indexes)
+  };
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  ASSERT_TRUE(manager.initialize(tempFilePath));
+  setTankDirection(manager, 2, Direction::Down);
+  
+  // Tank 1 Shoot, Tank 2 do nothing
+  testProcessStep(manager);
+  
+  EXPECT_EQ(manager.getShells().size(), 1);
+  EXPECT_EQ(manager.getTanks()[0].getPosition(), Point(4, 1));
+
+  // Tank 2 move down, shell still exists
+  testProcessStep(manager);
+  EXPECT_EQ(manager.getTanks()[0].getPosition(), Point(4, 2));
+  EXPECT_EQ(manager.getShells().size(), 1);
+  EXPECT_FALSE(manager.getShells()[0].isDestroyed());
+}
+

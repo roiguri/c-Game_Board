@@ -18,7 +18,7 @@ GameManager::~GameManager() {
     cleanup();
 }
 
-// Accessors
+// Accessors // TODO - remove the accessors
 const std::vector<std::string>& GameManager::getGameLog() const {
     return m_gameLog;
 }
@@ -58,8 +58,7 @@ bool GameManager::initialize(const std::string& filePath) {
     }
     
     createTanksFromBoard();
-    createAlgorithms(); // TODO: optional add unit tests to cover this
-    
+    createAlgorithms();
     return true;
 }
 
@@ -122,6 +121,10 @@ void GameManager::saveResults(const std::string& outputFilePath) {
 }
 
 void GameManager::processStep() {
+  // Get actions from both player algorithms
+  Action player1Action = getPlayerAction(1);
+  Action player2Action = getPlayerAction(2);
+
   // Move shells once
   moveShellsOnce();
 
@@ -131,10 +134,6 @@ void GameManager::processStep() {
       // If a tank was destroyed, end the step early
       return;
   }
-  
-  // Get actions from both player algorithms
-  Action player1Action = getPlayerAction(1);
-  Action player2Action = getPlayerAction(2);
   
   // Apply tank actions
   bool player1ActionSuccessful = applyAction(1, player1Action);
@@ -146,11 +145,13 @@ void GameManager::processStep() {
   // Check for collisions for shell and tank movement
   tankDestroyed = m_collisionHandler.resolveAllCollisions(m_tanks, m_shells, m_board);
   
+
   // Update cooldowns for all tanks
   for (auto& tank : m_tanks) {
-      tank.updateCooldowns();
+    tank.updateCooldowns();
   }
-  
+
+  // TODO: update game state - remove shells, move tanks in board etc.
   // Game over check will be performed in the main game loop
 }
 
@@ -343,15 +344,11 @@ void GameManager::logAction(int playerId, Action action, bool valid) {
 }
 
 void GameManager::createAlgorithms() {
-    // This is a stub implementation
-    // Clean up any existing algorithms
-    cleanup();
-    
-    // Create placeholder algorithms (will be replaced with proper algorithm factory calls)
     m_player1Algorithm = Algorithm::createAlgorithm("chase");
     m_player2Algorithm = Algorithm::createAlgorithm("defensive");
 }
 
+// TODO: when do we call clean up at the end of the run
 void GameManager::cleanup() {
     // Free algorithm resources
     delete m_player1Algorithm;
