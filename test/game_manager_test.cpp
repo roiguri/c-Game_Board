@@ -428,7 +428,7 @@ TEST_F(GameManagerTest, LogAction_FormatsCorrectly) {
   
   // Check both log entries
   ASSERT_EQ(log.size(), 2);
-  EXPECT_EQ(log[1], "Player 2: Shoot - Invalid");
+  EXPECT_EQ(log[1], "Player 2: Shoot - Bad Step");
 }
 
 // Test getGameLog accessor with multiple entries
@@ -446,7 +446,7 @@ TEST_F(GameManagerTest, GetGameLog_MultipleEntries) {
   // Check that the log contains all entries
   ASSERT_EQ(log.size(), 3);
   EXPECT_EQ(log[0], "Player 1: Move Forward - Success");
-  EXPECT_EQ(log[1], "Player 2: Rotate Left 1/8 - Invalid");
+  EXPECT_EQ(log[1], "Player 2: Rotate Left 1/8 - Bad Step");
   EXPECT_EQ(log[2], "Player 1: Shoot - Success");
 }
 
