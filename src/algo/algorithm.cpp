@@ -21,24 +21,23 @@ Algorithm* Algorithm::createAlgorithm(const std::string& type) {
     return nullptr;
 }
 
-// TODO: delete if not used. if used return optional instead of pointer
-Direction* Algorithm::hasDirectLineOfSight(
+std::optional<Direction> Algorithm::hasDirectLineOfSight(
   const GameBoard& gameBoard,
   const Point& from,
   const Point& to) const
 {
   if (from == to) {
-      return new Direction(Direction::Up); // Any direction is fine when points are the same
+      return Direction::Up; // Any direction is fine when points are the same
   }
 
   // TODO: replace with enum iteration if possible
   for (int i = 0; i < NUM_DIRECTIONS; ++i) {
       Direction current_dir = ALL_DIRECTIONS[i];
       if (hasLineOfSightInDirection(gameBoard, from, to, current_dir)) {
-          return new Direction(current_dir);
+          return current_dir;
       }
   }
-  return nullptr;
+  return std::nullopt;
 }
 
 bool Algorithm::hasLineOfSightInDirection(

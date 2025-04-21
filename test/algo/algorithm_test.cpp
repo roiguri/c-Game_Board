@@ -20,7 +20,7 @@ public:
         return Action::None;
     }
 
-    Direction* testHasDirectLineOfSight(
+    std::optional<Direction> testHasDirectLineOfSight(
       const GameBoard& gameBoard,
       const Point& from,
       const Point& to
@@ -132,14 +132,13 @@ TEST_F(AlgorithmTest, HasDirectLineOfSight_BasicClear) {
     };
     GameBoard board = create5X5TestBoard(boardLines);
     
-    Direction* dir1 = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 1));
-    EXPECT_NE(dir1, nullptr);
-    EXPECT_EQ(*dir1, Direction::Right);
-    delete dir1;
+    auto dir1 = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 1));
+    EXPECT_TRUE(dir1.has_value());
+    EXPECT_EQ(dir1.value(), Direction::Right);
     
     // No line of sight
-    Direction* dir3 = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 2));
-    EXPECT_EQ(dir3, nullptr);
+    auto dir3 = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 2));
+    EXPECT_FALSE(dir3.has_value());
 }
 
 TEST_F(AlgorithmTest, HasDirectLineOfSight_BlockedHorizontal) {
@@ -152,8 +151,8 @@ TEST_F(AlgorithmTest, HasDirectLineOfSight_BlockedHorizontal) {
     };
     GameBoard board = create5X5TestBoard(boardLines);
     
-    Direction* dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 1));
-    EXPECT_EQ(dir, nullptr);
+    auto dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 1));
+    EXPECT_FALSE(dir.has_value());
 }
 
 TEST_F(AlgorithmTest, HasDirectLineOfSight_BlockedVertical) {
@@ -166,8 +165,8 @@ TEST_F(AlgorithmTest, HasDirectLineOfSight_BlockedVertical) {
     };
     GameBoard board = create5X5TestBoard(boardLines);
     
-    Direction* dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(1, 3));
-    EXPECT_EQ(dir, nullptr);
+    auto dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(1, 3));
+    EXPECT_FALSE(dir.has_value());
 }
 
 TEST_F(AlgorithmTest, HasDirectLineOfSight_BlockedDiagonal) {
@@ -180,8 +179,8 @@ TEST_F(AlgorithmTest, HasDirectLineOfSight_BlockedDiagonal) {
     };
     GameBoard board = create5X5TestBoard(boardLines);
     
-    Direction* dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 3));
-    EXPECT_EQ(dir, nullptr);
+    auto dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 3));
+    EXPECT_FALSE(dir.has_value());
 }
 
 TEST_F(AlgorithmTest, HasDirectLineOfSight_WrappingHorizontal) {
@@ -194,10 +193,9 @@ TEST_F(AlgorithmTest, HasDirectLineOfSight_WrappingHorizontal) {
     };
     GameBoard board = create5X5TestBoard(boardLines);
     
-    Direction* dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 2), Point(3, 2));
-    EXPECT_NE(dir, nullptr);
-    EXPECT_EQ(*dir, Direction::Left);
-    delete dir;
+    auto dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 2), Point(3, 2));
+    EXPECT_TRUE(dir.has_value());
+    EXPECT_EQ(dir.value(), Direction::Left);
 }
 
 TEST_F(AlgorithmTest, HasDirectLineOfSight_WrappingVertical) {
@@ -210,10 +208,9 @@ TEST_F(AlgorithmTest, HasDirectLineOfSight_WrappingVertical) {
   };
   GameBoard board = create5X5TestBoard(boardLines);
   
-  Direction* dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(2, 1), Point(2, 3));
-  EXPECT_NE(dir, nullptr);
-  EXPECT_EQ(*dir, Direction::Up);
-  delete dir;
+  auto dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(2, 1), Point(2, 3));
+  EXPECT_TRUE(dir.has_value());
+  EXPECT_EQ(dir.value(), Direction::Up);
 }
 
 TEST_F(AlgorithmTest, HasDirectLineOfSight_WrappingDiagonal) {
@@ -226,10 +223,9 @@ TEST_F(AlgorithmTest, HasDirectLineOfSight_WrappingDiagonal) {
   };
   GameBoard board = create5X5TestBoard(boardLines);
   
-  Direction* dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(3, 1), Point(1, 3));
-  EXPECT_NE(dir, nullptr);
-  EXPECT_EQ(*dir, Direction::UpRight);
-  delete dir;
+  auto dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(3, 1), Point(1, 3));
+  EXPECT_TRUE(dir.has_value());
+  EXPECT_EQ(dir.value(), Direction::UpRight);
 }
 
 TEST_F(AlgorithmTest, HasLineOfSightInDirection_CorrectDirection) {

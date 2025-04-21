@@ -62,9 +62,10 @@ protected:
      * @param gameBoard The game board containing layout and obstacles.
      * @param from The starting point.
      * @param to The target point.
-     * @return Direction of the line of sight if exists, nullptr if no line of sight.
+     * @return An optional Direction indicating the direction of the line of sight,
+     *  or nullopt if no direct line exists.
      */
-    Direction* hasDirectLineOfSight(
+    std::optional<Direction> hasDirectLineOfSight(
       const GameBoard& gameBoard,
       const Point& from,
       const Point& to
