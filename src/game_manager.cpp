@@ -12,11 +12,19 @@ GameManager::GameManager()
       m_gameOver(false),
       m_remaining_steps(40) {
     // Initialize empty game state
+
+    #ifdef ENABLE_VISUALIZATION
+    m_visualizationManager = createVisualizationManager();
+    #endif
 }
 
 GameManager::~GameManager() {
     // Clean up resources
     cleanup();
+
+    #ifdef ENABLE_VISUALIZATION
+    m_visualizationManager.reset();
+    #endif
 }
 
 // Accessors // TODO - remove the accessors
@@ -35,7 +43,6 @@ GameBoard GameManager::getGameBoard() const {
 
 bool GameManager::initialize(const std::string& filePath) {
     // TODO: potentially add reset state method.
-
     // Load board file
     int boardWidth = 0;
     int boardHeight = 0;
@@ -67,6 +74,23 @@ void GameManager::runGame() {
   m_currentStep = 0;
   m_gameOver = false;
   m_gameLog.clear();
+
+  #ifdef ENABLE_VISUALIZATION
+  if (m_visualizationManager) {
+      // Create a message describing current step
+      std::string stepMessage = "Game started";
+      
+      // Capture the game state for visualization
+      m_visualizationManager->captureGameState(
+          m_currentStep,
+          m_board,
+          m_tanks,
+          m_shells,
+          m_remaining_steps,  // Use as countdown if relevant
+          stepMessage
+      );
+  }
+  #endif
   
   // Game continues until game over condition is reached
   while (!m_gameOver) {
@@ -81,7 +105,6 @@ void GameManager::runGame() {
       
       // Add a step separator to log
       m_gameLog.push_back("Step " + std::to_string(m_currentStep) + " completed");
-      
       // Check for maximum step count (if both tanks are out of shells)
       bool bothOutOfShells = true;
       for (const auto& tank : m_tanks) {
@@ -119,6 +142,25 @@ void GameManager::saveResults(const std::string& outputFilePath) {
   }
   
   outputFile.close();
+
+  #ifdef ENABLE_VISUALIZATION
+  if (m_visualizationManager) {
+      // Generate visualization output using same base filename
+      std::string visualizationPath = outputFilePath;
+      // Remove extension if present
+      size_t dotPos = visualizationPath.find_last_of('.');
+      if (dotPos != std::string::npos) {
+          visualizationPath = visualizationPath.substr(0, dotPos);
+      }
+      visualizationPath += "_visualization";
+      
+      if (m_visualizationManager->generateOutputs(visualizationPath)) {
+          std::cout << "Visualization generated at " << visualizationPath << ".html" << std::endl;
+      } else {
+          std::cerr << "Failed to generate visualization." << std::endl;
+      }
+  }
+  #endif
 }
 
 void GameManager::processStep() {
@@ -131,6 +173,24 @@ void GameManager::processStep() {
 
   // Check for collisions after first shell movement
   bool tankDestroyed = m_collisionHandler.resolveAllCollisions(m_tanks, m_shells, m_board);
+
+  #ifdef ENABLE_VISUALIZATION
+  if (m_visualizationManager) {
+      // Create a message describing current step
+      std::string midStepMessage = "Step " + std::to_string(m_currentStep) + ": ";
+      midStepMessage += "Shells moved once";
+      
+      // Capture the game state for visualization
+      m_visualizationManager->captureGameState(
+          m_currentStep,
+          m_board,
+          m_tanks,
+          m_shells,
+          m_remaining_steps,  // Use as countdown if relevant
+          midStepMessage
+      );
+  }
+  #endif
   
   // Apply tank actions
   bool player1ActionSuccessful = applyAction(1, player1Action);
@@ -151,6 +211,27 @@ void GameManager::processStep() {
 
   logAction(1, player1Action, player1ActionSuccessful);
   logAction(2, player2Action, player2ActionSuccessful);
+
+  #ifdef ENABLE_VISUALIZATION
+  if (m_visualizationManager) {
+      // Create a message describing current step
+      std::string stepMessage = "Step " + std::to_string(m_currentStep) + ": ";
+      stepMessage += "P1: " + actionToString(player1Action) + 
+                    (player1ActionSuccessful ? " (Success)" : " (Failed)");
+      stepMessage += ", P2: " + actionToString(player2Action) + 
+                    (player2ActionSuccessful ? " (Success)" : " (Failed)");
+      
+      // Capture the game state for visualization
+      m_visualizationManager->captureGameState(
+          m_currentStep,
+          m_board,
+          m_tanks,
+          m_shells,
+          m_remaining_steps,  // Use as countdown if relevant
+          stepMessage
+      );
+  }
+  #endif
 
   // TODO: update game state - move tanks in board etc.
 }

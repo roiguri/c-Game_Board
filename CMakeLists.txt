@@ -73,3 +73,19 @@ target_link_libraries(viz_demo PRIVATE tank_battle_lib)
 # Copy visualization templates to build directory for the demo
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/bonus/visualization/visualizers/html_visualizer/templates/
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/templates)
+
+option(ENABLE_VISUALIZATION "Enable visualization features" ON)
+
+if(ENABLE_VISUALIZATION)
+    add_definitions(-DENABLE_VISUALIZATION)
+    
+    file(GLOB_RECURSE VISUALIZATION_SOURCES 
+        "src/bonus/visualization/*.cpp"
+    )
+    file(GLOB_RECURSE VISUALIZATION_HEADERS 
+        "include/bonus/visualization/*.h"
+    )
+    
+    list(APPEND PROJECT_SOURCES ${VISUALIZATION_SOURCES})
+    list(APPEND PROJECT_HEADERS ${VISUALIZATION_HEADERS})
+endif()
