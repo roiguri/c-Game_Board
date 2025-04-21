@@ -18,8 +18,18 @@ int main(int argc, char* argv[]) {
   
   gameManager.runGame();
   
-  // TODO: do we need a specific file name for the output?
-  const std::string outputFilePath = "game_results.txt";
+  std::filesystem::path inputPath(inputFilePath);
+  std::string directory = inputPath.parent_path().string();
+  std::string filename = inputPath.filename().string();
+  
+  // Create output path: [input file path]/output_[input file name].txt
+  std::string outputFilePath;
+  if (directory.empty()) {
+      outputFilePath = "output_" + filename;
+  } else {
+      outputFilePath = directory + "/" + "output_" + filename;
+  }
+   
   gameManager.saveResults(outputFilePath);
 
   std::cout << "Game completed successfully. Results saved to " << outputFilePath << "." << std::endl;
