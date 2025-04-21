@@ -510,7 +510,7 @@ TEST_F(GameBoardTest, CanMoveTo_EmptySpace) {
     EXPECT_TRUE(board.canMoveTo(Point(2, 2)));
 }
 
-TEST_F(GameBoardTest, CanMoveTo_Mine) {
+TEST_F(GameBoardTest, CantMoveTo_Mine) {
     std::vector<std::string> boardLines = {
         "#####",
         "#1 2#",
@@ -521,8 +521,8 @@ TEST_F(GameBoardTest, CanMoveTo_Mine) {
     
     createBoardWithContent(boardLines);
     
-    // Should be able to move to a mine
-    EXPECT_TRUE(board.canMoveTo(Point(2, 3)));
+    // Should not be able to move to a mine
+    EXPECT_FALSE(board.canMoveTo(Point(2, 3)));
 }
 
 TEST_F(GameBoardTest, CanMoveTo_Wall) {

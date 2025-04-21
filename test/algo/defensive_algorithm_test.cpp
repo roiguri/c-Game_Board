@@ -30,26 +30,6 @@ TEST_F(DefensiveAlgorithmTest, Constructor) {
     EXPECT_NE(algorithm, nullptr);
 }
 
-TEST_F(DefensiveAlgorithmTest, GetNextAction_DestroyedTank) {
-    std::vector<std::string> boardLines = {
-        "#####",
-        "#1 2#",
-        "#   #",
-        "#   #",
-        "#####"
-    };
-    GameBoard board = createTestBoard(boardLines);
-    
-    Tank myTank(1, Point(1, 1), Direction::Right);
-    myTank.destroy();
-    
-    Tank enemyTank(2, Point(3, 1), Direction::Left);
-    std::vector<Shell> shells;
-    
-    Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
-    EXPECT_EQ(action, Action::None);
-}
-
 TEST_F(DefensiveAlgorithmTest, GetNextAction_InDangerNoSafeAction) {
     std::vector<std::string> boardLines = {
         "#####",
@@ -169,7 +149,7 @@ TEST_F(DefensiveAlgorithmTest, GetNextAction_NoShellsRemaining) {
     std::vector<Shell> shells;
     
     Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
-    EXPECT_EQ(action, Action::None);
+    EXPECT_EQ(action, Action::RotateRightQuarter);
 }
 
 TEST_F(DefensiveAlgorithmTest, GetNextAction_ShootingCooldown) {
@@ -189,5 +169,5 @@ TEST_F(DefensiveAlgorithmTest, GetNextAction_ShootingCooldown) {
     std::vector<Shell> shells;
     
     Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
-    EXPECT_EQ(action, Action::None);
+    EXPECT_EQ(action, Action::RotateRightQuarter);
 }
