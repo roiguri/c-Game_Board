@@ -242,3 +242,36 @@ bool Algorithm::canShootEnemy(
     myTank.getDirection()
   );
 }
+
+// TODO: consider doing this more elegantly
+Action Algorithm::getTryToShootAction(GameBoard gameBoard, Tank myTank, Tank enemyTank) const{
+  if (myTank.canShoot()) {
+    if (canShootEnemy(gameBoard, myTank, enemyTank)) {
+        return Action::Shoot;
+    }
+    std::optional<Direction> dir = hasDirectLineOfSight(gameBoard, myTank.getPosition(), enemyTank.getPosition());
+    if (dir.has_value()) {
+        Direction targetDir = dir.value();
+        std::cout << "line of sight direction: " << targetDir << std::endl;
+        if (myTank.getDirection() == targetDir) {
+            return Action::Shoot;
+        } else {
+            Action rotationAction = getFirstRotationAction(myTank.getDirection(), targetDir);
+            if (rotationAction != Action::None) {
+                return rotationAction;
+            }
+        }
+    }
+  }
+  return Action::None;
+}
+
+Action Algorithm::getTryToAvoidShellsAction(GameBoard gameBoard, Tank myTank, std::vector<Shell> shells) const {
+  if (isPositionInDangerFromShells(gameBoard, myTank.getPosition(), shells)) {
+    Action safeAction = findSafeAction(gameBoard, myTank, shells);
+    if (safeAction != Action::None) {
+        return safeAction;
+    }
+  }
+  return Action::None;
+}

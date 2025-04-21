@@ -104,7 +104,7 @@ TEST_F(DefensiveAlgorithmTest, GetNextAction_SafeCannotShoot) {
     std::vector<Shell> shells;
     
     Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
-    EXPECT_EQ(action, Action::None);
+    EXPECT_EQ(action, Action::RotateLeftQuarter);
 }
 
 TEST_F(DefensiveAlgorithmTest, GetNextAction_InDangerCanEscape) {

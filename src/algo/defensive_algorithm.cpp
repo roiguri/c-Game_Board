@@ -14,21 +14,17 @@ Action DefensiveAlgorithm::getNextAction(
     const Tank& enemyTank,
     const std::vector<Shell>& shells
 ) {
-    if (myTank.isDestroyed()) {
-        return Action::None;
+    Action action = Action::None;
+    
+    action = getTryToAvoidShellsAction(gameBoard, myTank, shells);
+    if (action != Action::None) {
+        return action;
     }
     
-    // TODO: can increase the number of steps to check
-    if (isPositionInDangerFromShells(gameBoard, myTank.getPosition(), shells)) {
-        Action safeAction = findSafeAction(gameBoard, myTank, shells);
-        if (safeAction != Action::None) {
-            return safeAction;
-        }
+    action = getTryToShootAction(gameBoard, myTank, enemyTank);
+    if (action != Action::None) {
+        return action;
     }
     
-    if (canShootEnemy(gameBoard, myTank, enemyTank)) {
-        return Action::Shoot;
-    }
-    
-    return Action::None;
+    return action;
 }
