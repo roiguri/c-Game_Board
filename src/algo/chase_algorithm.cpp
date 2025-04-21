@@ -15,20 +15,20 @@ Action ChaseAlgorithm::getNextAction(
     const Tank& enemyTank,
     const std::vector<Shell>& shells
 ) {
+    Action action;
+
     // Priority 1: Avoid danger from shells
-    if (isPositionInDangerFromShells(gameBoard, myTank.getPosition(), shells)) {
-      Action safeAction = findSafeAction(gameBoard, myTank, shells);
-      if (safeAction != Action::None) { 
-          return safeAction;
-      }
+    action = getTryToAvoidShellsAction(gameBoard, myTank, shells);
+    if (action != Action::None) {
+        return action;
     }
+    
     // Priority 2: Shoot if you can hit the enemy
-    // TODO: consider checking if enemy is in the line of sight
-    if (myTank.canShoot()) {
-      if (canShootEnemy(gameBoard, myTank, enemyTank)) {
-        return Action::Shoot;
-      } 
+    action = getTryToShootAction(gameBoard, myTank, enemyTank);
+    if (action != Action::None) {
+        return action;
     }
+
     // Priority 3: Chase the enemy
     updateAndValidatePath(gameBoard, myTank, enemyTank);
     if (!m_currentPath.empty()) {

@@ -71,6 +71,7 @@ protected:
       const Point& to
     ) const;
 
+    // TODO: delete if unused
     /**
      * @brief Checks for a direct, unobstructed line of sight in a specific direction.
      *
@@ -149,4 +150,7 @@ protected:
      * @return The most efficient first rotation action to take
      */
     Action getFirstRotationAction(Direction currentDir, Direction targetDir) const;
+
+    Action getTryToShootAction(GameBoard gameBoard, Tank myTank, Tank enemyTank) const;
+    Action getTryToAvoidShellsAction(GameBoard gameBoard, Tank myTank, std::vector<Shell> shells) const;
 };

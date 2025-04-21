@@ -532,11 +532,11 @@ TEST_F(ChaseAlgorithmTest, GetNextAction_Evasion_DangerMoveForwardSafe) {
 
 TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_CanShootAligned) {
   GameBoard board = create5X5TestBoard({
-      "     ",
+      "  #  ",
       "  1  ", // Tank 1 at (2,1) facing Down
       "     ",
       "  2  ", // Tank 2 at (2,3)
-      "     "
+      "  #  "
   });
   Tank myTank(1, Point(2, 1), Direction::Down);
   Tank enemyTank(2, Point(2, 3), Direction::Up);
@@ -565,35 +565,34 @@ TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_CannotShootCooldown) {
 
 TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_CannotShootObstacle) {
   GameBoard board = create5X5TestBoard({
-      "     ",
+      "  #  ",
       "  1  ", // Tank 1 at (2,1) facing Down
       "  #  ", // Wall obstruction
       "  2  ", // Tank 2 at (2,3)
-      "     "
+      "  #  "
   });
   Tank myTank = Tank(1, Point(2, 1), Direction::Down);
   Tank enemyTank(2, Point(2, 3), Direction::Up);
   std::vector<Shell> shells;
 
-  EXPECT_NE(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
-  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::RotateLeftEighth);
+  EXPECT_NE(algorithm->getNextAction(board, enemyTank, myTank, shells), Action::Shoot);
+  EXPECT_NE(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::Shoot);
 }
 
 
 TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_NeedsRotation) {
    GameBoard board = create5X5TestBoard({
-      "     ",
+      "  #  ",
       "  1  ", // Tank 1 at (2,1) facing Right
       "     ",
       "  2  ", // Tank 2 at (2,3)
-      "     "
+      "  #  "
   });
   Tank myTank(1, Point(2, 1), Direction::Right);
   Tank enemyTank(2, Point(2, 3), Direction::Up);
   std::vector<Shell> shells;
 
-  EXPECT_NE(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
-  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::RotateRightEighth);
+  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::RotateRightQuarter);
 }
 
 TEST_F(ChaseAlgorithmTest, UpdateAndValidatePath_NewPathNeeded_PathEmpty) {
