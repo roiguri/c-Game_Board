@@ -216,8 +216,8 @@ Point GameBoard::wrapPosition(const Point& position) const {
 bool GameBoard::canMoveTo(const Point& position) const {
   Point wrapped = wrapPosition(position);
   
-  // Check if the cell is a wall (only walls block movement)
-  return m_board[wrapped.y][wrapped.x] != CellType::Wall;
+  return m_board[wrapped.y][wrapped.x] != CellType::Wall &&
+         m_board[wrapped.y][wrapped.x] != CellType::Mine;
 }
 
 std::string GameBoard::toString() const {
