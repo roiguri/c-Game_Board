@@ -9,6 +9,10 @@
 #include "algo/algorithm.h"
 #include "collision_handler.h"
 
+#ifdef ENABLE_VISUALIZATION
+#include "bonus/visualization/visualization.h"
+#endif
+
 /**
  * @brief Manages the overall game flow and state for the tank battle simulation
  * 
@@ -165,4 +169,8 @@ private:
      * and ensure proper game state
      */
     void removeDestroyedShells();
+
+    #ifdef ENABLE_VISUALIZATION
+    std::unique_ptr<VisualizationManager> m_visualizationManager;
+    #endif
 };
