@@ -2,7 +2,6 @@
 
 #include "utils/point.h"
 #include "utils/direction.h"
-// TODO: consider adding an update state method.
 /**
  * @class Tank
  * @brief Represents a tank in the game with its properties and actions

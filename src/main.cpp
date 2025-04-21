@@ -30,7 +30,9 @@ int main(int argc, char* argv[]) {
       outputFilePath = directory + "/" + "output_" + filename;
   }
    
-  gameManager.saveResults(outputFilePath);
+  if (!gameManager.saveResults(outputFilePath)) {
+      return 1;
+  }
 
   std::cout << "Game completed successfully. Results saved to " << outputFilePath << "." << std::endl;
   return 0;

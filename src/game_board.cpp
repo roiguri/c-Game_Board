@@ -13,13 +13,10 @@ GameBoard::GameBoard(int width, int height) : m_width(width), m_height(height) {
     }
 }
 
-// TODO: check if we need a destructor.
 GameBoard::~GameBoard() {}
 
-// TODO: add to documentation. assumes gameboard initalized in required dimensions.
 bool GameBoard::initialize(const std::vector<std::string>& boardLines, std::vector<std::string>& errors) {
   if (boardLines.empty()) {
-      // TODO: print error to screen and exit safely
       std::cerr << "Error: Input board is empty. Cannot initialize game." << std::endl;
       return false;
   }
@@ -119,13 +116,11 @@ bool GameBoard::initialize(const std::vector<std::string>& boardLines, std::vect
   
   // Check if both tanks are present
   if (tank1Count == 0) {
-      // TODO: print error to screen and exit safely
       std::cerr << "Error: No tank found for player 1. Cannot start game." << std::endl;
       return false;
   }
   
   if (tank2Count == 0) {
-      // TODO: print error to screen and exit safely
       std::cerr << "Error: No tank found for player 2. Cannot start game." << std::endl;
       return false;
   }
@@ -173,7 +168,6 @@ bool GameBoard::isWall(const Point& position) const {
 bool GameBoard::damageWall(const Point& position) {
     Point wrapped = wrapPosition(position);
     
-    // TODO: maybe unnecessary assertion
     // Check if there's a wall at the position
     if (!isWall(wrapped)) {
         return false;
@@ -201,7 +195,7 @@ int GameBoard::getWallHealth(const Point& position) const {
         return it->second;
     }
     
-    return 0; // TODO: Do we want to return 0 when no walls found?
+    return 0;
 }
 
 // TODO: add to documentation - range of values supported
@@ -212,7 +206,6 @@ Point GameBoard::wrapPosition(const Point& position) const {
     return Point(wrappedX, wrappedY);
 }
 
-// TODO: check order of proccesing (shell should hit the wall first)
 bool GameBoard::canMoveTo(const Point& position) const {
   Point wrapped = wrapPosition(position);
   

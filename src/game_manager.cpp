@@ -3,7 +3,7 @@
 #include "collision_handler.h"
 #include <iostream>
 #include <fstream>
-#include <algorithm> // TODO: make sure this is okay to use
+#include <algorithm>
 
 GameManager::GameManager()
     : m_player1Algorithm(nullptr),
@@ -42,7 +42,6 @@ GameBoard GameManager::getGameBoard() const {
 }
 
 bool GameManager::initialize(const std::string& filePath) {
-    // TODO: potentially add reset state method.
     // Load board file
     int boardWidth = 0;
     int boardHeight = 0;
@@ -124,16 +123,15 @@ void GameManager::runGame() {
   }
   
   // Log the final game result
-  m_gameLog.push_back("Game ended after " + std::to_string(m_currentStep) + " steps"); // TODO: remove if necessary
+  m_gameLog.push_back("Game ended after " + std::to_string(m_currentStep) + " steps");
   m_gameLog.push_back("Result: " + m_gameResult);
 }
 
-// TODO: consider changing to boolean
-void GameManager::saveResults(const std::string& outputFilePath) {
+bool GameManager::saveResults(const std::string& outputFilePath) {
   std::ofstream outputFile(outputFilePath);
   if (!outputFile.is_open()) {
       std::cerr << "Error: Could not open output file " << outputFilePath << std::endl;
-      return;
+      return false;
   }
   
   // Write all the game log entries to the file
@@ -158,9 +156,11 @@ void GameManager::saveResults(const std::string& outputFilePath) {
           std::cout << "Visualization generated at " << visualizationPath << ".html" << std::endl;
       } else {
           std::cerr << "Failed to generate visualization." << std::endl;
+          return false;
       }
   }
   #endif
+  return true;
 }
 
 void GameManager::processStep() {
@@ -262,7 +262,6 @@ Action GameManager::getPlayerAction(int playerId) {
       return Action::None;
   }
   // Get action from algorithm 
-  // TODO: check if pointer okay here
   return algorithm->getNextAction(m_board, *playerTank, *enemyTank, m_shells);
 }
 
@@ -334,7 +333,6 @@ bool GameManager::applyAction(int playerId, Action action) {
               Point shellPosition = playerTank->getPosition();
               Direction shellDirection = playerTank->getDirection();
               
-              // TODO: consider creating shells in the next cell.
               // Create a new shell
               m_shells.emplace_back(playerId, shellPosition, shellDirection);
               
@@ -408,10 +406,9 @@ bool GameManager::checkGameOver() {
   return false;
 }
 
-// TODO: consider logging game state for each action logged - tank position, etc
 void GameManager::logAction(int playerId, Action action, bool valid) {
   std::string actionType = actionToString(action);
-  std::string status = valid ? "Success" : "Invalid";
+  std::string status = valid ? "Success" : "Bad Step";
   
   // Format: "Player X: [Action] - [Status]"
   std::string logEntry = "Player " + std::to_string(playerId) + ": " + 
@@ -425,7 +422,6 @@ void GameManager::createAlgorithms() {
     m_player2Algorithm = Algorithm::createAlgorithm("defensive");
 }
 
-// TODO: when do we call clean up at the end of the run
 void GameManager::cleanup() {
     // Free algorithm resources
     delete m_player1Algorithm;
@@ -465,7 +461,6 @@ void GameManager::createTanksFromBoard() {
   }
 }
 
-// TODO: consider output file location
 bool GameManager::saveErrorsToFile(const std::vector<std::string>& errors) const {
   // Only create file if there are errors to report
   if (errors.empty()) {

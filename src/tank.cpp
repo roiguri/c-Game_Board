@@ -152,7 +152,7 @@ bool Tank::rotateRight(bool quarterTurn) {
   }
   
   m_direction = ::rotateRight(m_direction, quarterTurn);
-  m_continuousBackward = false; // TODO: is this needed?
+  m_continuousBackward = false;
   return true;
 }
 

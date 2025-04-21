@@ -57,7 +57,7 @@ public:
      * 
      * @param outputFilePath Path to the output file
      */
-    void saveResults(const std::string& outputFilePath);
+    bool saveResults(const std::string& outputFilePath);
 
     // Accessors
     std::vector<Tank> getTanks() const;
