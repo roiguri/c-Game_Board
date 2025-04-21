@@ -71,7 +71,6 @@ protected:
       const Point& to
     ) const;
 
-    // TODO: delete if unused
     /**
      * @brief Checks for a direct, unobstructed line of sight in a specific direction.
      *
