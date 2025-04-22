@@ -11,7 +11,6 @@ GameManager::GameManager()
       m_currentStep(0),
       m_gameOver(false),
       m_remaining_steps(40) {
-    // Initialize empty game state
 
     #ifdef ENABLE_VISUALIZATION
     m_visualizationManager = createVisualizationManager();
@@ -209,9 +208,6 @@ void GameManager::processStep() {
     tank.updateCooldowns();
   }
 
-  logAction(1, player1Action, player1ActionSuccessful);
-  logAction(2, player2Action, player2ActionSuccessful);
-
   #ifdef ENABLE_VISUALIZATION
   if (m_visualizationManager) {
       // Create a message describing current step
@@ -232,8 +228,6 @@ void GameManager::processStep() {
       );
   }
   #endif
-
-  // TODO: update game state - move tanks in board etc.
 }
 
 Action GameManager::getPlayerAction(int playerId) {
@@ -281,14 +275,12 @@ bool GameManager::applyAction(int playerId, Action action) {
       }
   }
   
-  // Check tank exists and is not destroyed
   if (playerTank == nullptr || playerTank->isDestroyed()) {
       return false;
   }
   
   bool actionResult = false;
   
-  // Execute action based on type
   switch (action) {
       case Action::MoveForward: {
           Point newPosition = playerTank->getNextForwardPosition();
@@ -349,6 +341,7 @@ bool GameManager::applyAction(int playerId, Action action) {
           actionResult = false;
           break;
   }  
+  logAction(playerId, action, actionResult);
   return actionResult;
 }
 
