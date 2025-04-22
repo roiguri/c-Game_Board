@@ -15,134 +15,138 @@ Action ChaseAlgorithm::getNextAction(
     const Tank& enemyTank,
     const std::vector<Shell>& shells
 ) {
-    Action action;
-
-    // Priority 1: Avoid danger from shells
-    action = getTryToAvoidShellsAction(gameBoard, myTank, shells);
-    if (action != Action::None) {
-        return action;
+    // Priority 1: Avoid shells
+    if (isInDanger(gameBoard, myTank, shells)) {
+        Action safeAction = findOptimalSafeMove(gameBoard, myTank, enemyTank, shells, false);
+        if (safeAction != Action::None) {
+            return safeAction;
+        }
     }
     
-    // Priority 2: Shoot if you can hit the enemy
-    action = getTryToShootAction(gameBoard, myTank, enemyTank);
-    if (action != Action::None) {
-        return action;
+    // Priority 2: Shoot if in direction + have line of sight
+    if (canHitTarget(gameBoard, myTank, enemyTank.getPosition())) {
+        return Action::Shoot;
     }
-
-    // Priority 3: Chase the enemy
-    updateAndValidatePath(gameBoard, myTank, enemyTank);
+    
+    // TODO: Consider removing this priority
+    // Priority 3: Rotate to face enemy if we have line of sight
+    auto lineOfSightDir = getLineOfSightDirection(gameBoard, myTank.getPosition(), enemyTank.getPosition());
+    if (lineOfSightDir.has_value()) {
+        Direction targetDir = lineOfSightDir.value();
+        if (targetDir != myTank.getDirection()) {
+            return getRotationToDirection(myTank.getDirection(), targetDir);
+        }
+    }
+    
+    // Priority 4: Chase the enemy
+    updatePathToTarget(gameBoard, myTank.getPosition(), enemyTank.getPosition());
+    
     if (!m_currentPath.empty()) {
-      const Point& nextStep = m_currentPath.front();
-      std::optional<Direction> targetDirOpt = getDirectionToPoint(myTank.getPosition(), nextStep);
-
-      if (targetDirOpt.has_value()) {
-          Direction targetDir = targetDirOpt.value();
-          if (myTank.getDirection() == targetDir) {
-              m_currentPath.erase(m_currentPath.begin());
-              return Action::MoveForward;
-          } else {
-              Action rotationAction = getFirstRotationAction(myTank.getDirection(), targetDir);
-              if (rotationAction != Action::None) {
-                  return rotationAction;
-              }
-          }
-      } else {
-           m_currentPath.clear();
-           m_lastTargetPosition = Point(-1,-1);
-      }
+        return followCurrentPath(gameBoard, myTank);
     }
-    return Action::None;
+    
+    return (myTank.getPosition().x % 2 == 0) ? 
+            Action::RotateRightQuarter : Action::RotateLeftQuarter;
 }
 
-std::vector<Point> ChaseAlgorithm::getValidNeighbors(const Point& current, const GameBoard& gameBoard) const {
-  std::vector<Point> neighbors;
-  neighbors.reserve(8);
-
-  // TODO: consider adding an iterator on all neighbor points 
-  for (const Direction& dir : ALL_DIRECTIONS) {
-    Point delta = getDirectionDelta(dir);
-    Point potentialNeighbor = current + delta;
-
-    Point wrappedNeighbor = gameBoard.wrapPosition(potentialNeighbor); //
-
-    GameBoard::CellType cellType = gameBoard.getCellType(wrappedNeighbor); //
-    if (cellType != GameBoard::CellType::Wall && cellType != GameBoard::CellType::Mine) { //
-        neighbors.push_back(wrappedNeighbor);
+void ChaseAlgorithm::updatePathToTarget(const GameBoard& gameBoard, const Point& start, 
+                                       const Point& target) {
+    // Recalculate path if:
+    // 1. Current path is empty
+    // 2. Target has moved since last calculation
+    bool needNewPath = m_currentPath.empty() || target != m_lastTargetPosition;
+    
+    if (needNewPath) {
+        m_currentPath = findPathBFS(gameBoard, start, target);
+        m_lastTargetPosition = target;
     }
-  }
-  return neighbors;
+    
+    // Check if the next step in our path is still valid
+    // TODO: change to check if the step is still safe
+    if (!m_currentPath.empty()) {
+        Point nextStep = m_currentPath.front();
+        if (!gameBoard.canMoveTo(nextStep)) {
+            // Path is now blocked, need to recalculate
+            m_currentPath.clear();
+            m_lastTargetPosition = Point(-1, -1);
+        }
+    }
 }
 
-std::vector<Point> ChaseAlgorithm::reconstructPath(
-  const std::map<Point, Point>& came_from,
-  const Point& start,
-  const Point& end) const
-{
-  std::vector<Point> path;
-  Point current = end;
-
-  if (came_from.find(end) == came_from.end()) {
-      return path;
-  }
-
-  // Trace back from end to start, assuming the path exists in the map
-  while (current != start) {
-      path.push_back(current);
-      current = came_from.at(current);
-  }
-  std::reverse(path.begin(), path.end());
-  return path;
+Action ChaseAlgorithm::followCurrentPath(const GameBoard& gameBoard, const Tank& myTank) const {
+    if (m_currentPath.empty()) {
+        return Action::None;
+    }
+    
+    Point nextPoint = m_currentPath.front();
+    
+    // TODO: consider this
+    // Check if the next point is directly adjacent to our current position
+    auto directionOpt = getLineOfSightDirection(gameBoard, myTank.getPosition(), nextPoint);
+    if (!directionOpt.has_value()) {
+        return Action::None;
+    }
+    
+    Direction targetDirection = directionOpt.value();
+    if (targetDirection != myTank.getDirection()) {
+        return getRotationToDirection(myTank.getDirection(), targetDirection);
+    }
+    return Action::MoveForward;
 }
 
-std::vector<Point> ChaseAlgorithm::calculatePathBFS(
-  const Point& start,
-  const Point& end,
-  const GameBoard& gameBoard) const
-{
-  if (start == end) {
-      return {};
-  }
-
-  std::queue<Point> q;                
-  std::map<Point, Point> came_from;   
-  std::set<Point> visited;         
-
-  q.push(start);
-  visited.insert(start);
-
-  while (!q.empty()) {
-      Point current = q.front();
-      q.pop();
-
-      if (current == end) {
-          return reconstructPath(came_from, start, end);
-      }
-
-      std::vector<Point> neighbors = getValidNeighbors(current, gameBoard);
-      for (const Point& neighbor : neighbors) {
-          if (visited.count(neighbor) == 0) {
-              visited.insert(neighbor);       
-              came_from[neighbor] = current;  
-              q.push(neighbor);               
-          }
-      }
-  }
-  return {};
-}
-
-void ChaseAlgorithm::updateAndValidatePath(const GameBoard& gameBoard, const Tank& myTank, const Tank& enemyTank) {
-  // TODO: consider changing sensitivity to enemy tank movement / walls position
-  bool needsNewPath = m_currentPath.empty() || (enemyTank.getPosition() != m_lastTargetPosition);
-  if (needsNewPath) {
-      m_currentPath = calculatePathBFS(myTank.getPosition(), enemyTank.getPosition(), gameBoard);
-      m_lastTargetPosition = enemyTank.getPosition();
-  }
-
-  if (!m_currentPath.empty()) {
-      const Point& nextStep = m_currentPath.front();
-      if (!gameBoard.canMoveTo(nextStep)) {
-          m_currentPath.clear();
-          m_lastTargetPosition = Point(-1, -1);
-      }
-  }
+// TODO: make sure that we always check next step for danger
+std::vector<Point> ChaseAlgorithm::findPathBFS(const GameBoard& gameBoard, const Point& start, 
+                                             const Point& target) const {
+    if (start == target) {
+        return std::vector<Point>();
+    }
+    
+    std::queue<Point> q;
+    std::map<Point, Point> cameFrom;
+    std::set<Point> visited;
+    
+    q.push(start);
+    visited.insert(start);
+    
+    bool foundPath = false;
+    
+    while (!q.empty() && !foundPath) {
+        Point current = q.front();
+        q.pop();
+        
+        if (current == target) {
+            foundPath = true;
+            break;
+        }
+        
+        // Explore all valid neighbors
+        for (const Direction& dir : ALL_DIRECTIONS) {
+            Point neighbor = gameBoard.wrapPosition(current + getDirectionDelta(dir));
+            
+            // Skip if already visited or can't move to this position
+            if (visited.count(neighbor) > 0 || !gameBoard.canMoveTo(neighbor)) {
+                continue;
+            }
+            
+            visited.insert(neighbor);
+            cameFrom[neighbor] = current;
+            q.push(neighbor);
+        }
+    }
+    
+    // Reconstruct the path if we found one
+    if (foundPath) {
+        std::vector<Point> path;
+        Point current = target;
+        
+        while (current != start) {
+            path.push_back(current);
+            current = cameFrom[current];
+        }
+        
+        // Reverse to get path from start to target
+        std::reverse(path.begin(), path.end());
+        return path;
+    }
+    return std::vector<Point>();
 }
