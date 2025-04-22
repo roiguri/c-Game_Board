@@ -11,16 +11,16 @@ public:
     enum class CellType {
         Empty,
         Wall,
-        Mine,
-        Tank1,
-        Tank2
+        Mine
     };
 
     GameBoard();
     GameBoard(int width, int height);
     ~GameBoard();
     
-    bool initialize(const std::vector<std::string>& boardLines, std::vector<std::string>& errors);
+    bool initialize(const std::vector<std::string>& boardLines, 
+      std::vector<std::string>& errors,
+      std::vector<std::pair<int, Point>>& tankPositions);
     
     // Board access
     CellType getCellType(int x, int y) const;

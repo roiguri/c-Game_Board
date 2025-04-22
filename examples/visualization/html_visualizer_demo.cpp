@@ -21,7 +21,8 @@ int main() {
         "##########"
     };
     std::vector<std::string> errors;
-    board.initialize(boardLines, errors);
+    std::vector<std::pair<int, Point>> tankPositions;
+    board.initialize(boardLines, errors, tankPositions);
     
     // Create some tanks
     std::vector<Tank> tanks;

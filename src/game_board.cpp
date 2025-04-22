@@ -15,7 +15,9 @@ GameBoard::GameBoard(int width, int height) : m_width(width), m_height(height) {
 
 GameBoard::~GameBoard() {}
 
-bool GameBoard::initialize(const std::vector<std::string>& boardLines, std::vector<std::string>& errors) {
+bool GameBoard::initialize(const std::vector<std::string>& boardLines, 
+  std::vector<std::string>& errors,
+  std::vector<std::pair<int, Point>>& tankPositions) {
   if (boardLines.empty()) {
       std::cerr << "Error: Input board is empty. Cannot initialize game." << std::endl;
       return false;
@@ -71,20 +73,20 @@ bool GameBoard::initialize(const std::vector<std::string>& boardLines, std::vect
                   if (tank1Count > 1) {
                       errors.push_back("Multiple tanks for player 1 found. Tank at position (" + 
                                       std::to_string(x) + "," + std::to_string(y) + ") ignored.");
-                      cellType = CellType::Empty;
                   } else {
-                    cellType = CellType::Tank1;
+                    tankPositions.push_back({1, Point(x, y)});
                   }
+                  cellType = CellType::Empty;
                   break;
               case '2':
                   tank2Count++;
                   if (tank2Count > 1) {
                       errors.push_back("Multiple tanks for player 2 found. Tank at position (" + 
                                       std::to_string(x) + "," + std::to_string(y) + ") ignored.");
-                      cellType = CellType::Empty;
                   } else {
-                    cellType = CellType::Tank2;
+                    tankPositions.push_back({2, Point(x, y)});
                   }
+                  cellType = CellType::Empty;
                   break;
               case '@':
                   cellType = CellType::Mine;
@@ -228,12 +230,6 @@ std::string GameBoard::toString() const {
                     break;
                 case CellType::Mine:
                     ss << '@';
-                    break;
-                case CellType::Tank1:
-                    ss << '1';
-                    break;
-                case CellType::Tank2:
-                    ss << '2';
                     break;
                 default:
                     ss << '?';

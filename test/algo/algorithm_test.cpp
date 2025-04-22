@@ -79,7 +79,8 @@ protected:
 GameBoard create5X5TestBoard(const std::vector<std::string>& boardLines) {
     GameBoard board(5, 5);
     std::vector<std::string> errors;
-    board.initialize(boardLines, errors);
+    std::vector<std::pair<int, Point>> tankPositions;
+    board.initialize(boardLines, errors, tankPositions);
     return board;
 }
 

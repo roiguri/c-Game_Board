@@ -153,7 +153,7 @@ private:
      * 
      * Scans the board for tank positions and initializes them
      */
-    void createTanksFromBoard();
+    void createTanks(std::vector<std::pair<int, Point>> tankPositions);
 
     /**
      * @brief Save recoverable errors to input_errors.txt file

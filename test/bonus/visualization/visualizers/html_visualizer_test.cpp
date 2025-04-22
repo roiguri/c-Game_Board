@@ -53,7 +53,8 @@ protected:
             "#2#"
         };
         std::vector<std::string> errors;
-        board.initialize(boardLines, errors);
+        std::vector<std::pair<int, Point>> tankPositions;
+        board.initialize(boardLines, errors, tankPositions);
 
         // Damage one wall to test wall health
         board.damageWall(Point(0, 0));

@@ -51,11 +51,11 @@ bool GameManager::initialize(const std::string& filePath) {
         return false;
     }
     
-    // Initialize the board
     m_board = GameBoard(boardWidth, boardHeight);
     std::vector<std::string> errors;
-    
-    if (!m_board.initialize(boardLines, errors)) {
+
+    std::vector<std::pair<int, Point>> tankPositions;
+    if (!m_board.initialize(boardLines, errors, tankPositions)) {
         // Unrecoverable error in board initialization
         return false;
     }
@@ -64,7 +64,7 @@ bool GameManager::initialize(const std::string& filePath) {
         return false;
     }
     
-    createTanksFromBoard();
+    createTanks(tankPositions);
     createAlgorithms();
     return true;
 }
@@ -431,33 +431,18 @@ void GameManager::cleanup() {
     m_player2Algorithm = nullptr;
 }
 
-void GameManager::createTanksFromBoard() {
+void GameManager::createTanks(std::vector<std::pair<int, Point>> tankPositions) {
   m_tanks.clear();
-  bool foundTank1 = false;
-  bool foundTank2 = false;
-  
-  // Scan the board for tank positions
-  for (int y = 0; y < m_board.getHeight(); ++y) {
-      for (int x = 0; x < m_board.getWidth(); ++x) {
-          Point pos(x, y);
-          GameBoard::CellType cellType = m_board.getCellType(pos);
-          
-          if (cellType == GameBoard::CellType::Tank1) {
-              // Create tank for player 1 (cannon pointing left)
-              m_tanks.emplace_back(1, pos, Direction::Left);
-              foundTank1 = true; 
-          } else if (cellType == GameBoard::CellType::Tank2) {
-              // Create tank for player 2 (cannon pointing right)
-              m_tanks.emplace_back(2, pos, Direction::Right);
-              foundTank2 = true;
-          }
-          if (foundTank1 && foundTank2) {
-            break; // Both tanks found, exit loop
-          }
+  for (const auto& tankPos : tankPositions) {
+      int playerId = tankPos.first;
+      Point position = tankPos.second;
+      Direction dir;
+      if (playerId == 1) {
+          dir = Direction::Left;
+      } else  {
+          dir = Direction::Right;
       }
-      if (foundTank1 && foundTank2) {
-          break; // Both tanks found, exit loop
-      }
+      m_tanks.emplace_back(playerId, position, dir);
   }
 }
 

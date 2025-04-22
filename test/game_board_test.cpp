@@ -19,10 +19,11 @@ protected:
     GameBoard board;
     
     // Helper method to create a board with specific content
-    void createBoardWithContent(const std::vector<std::string>& content) {
+    void createBoardWithContent(const std::vector<std::string>& content,
+                                std::vector<std::pair<int, Point>>& tankPositions) {
         board = GameBoard(content[0].length(), content.size());
         std::vector<std::string> errors;
-        board.initialize(content, errors);
+        board.initialize(content, errors, tankPositions);
     }
 };
 
@@ -53,8 +54,9 @@ TEST_F(GameBoardTest, Initialize_EmptyBoardLines) {
   // Redirect cerr to capture output
   std::stringstream cerr_buffer;
   std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
+  std::vector<std::pair<int, Point>> tankPositions;
   
-  EXPECT_FALSE(board.initialize(emptyLines, errors));
+  EXPECT_FALSE(board.initialize(emptyLines, errors, tankPositions));
   
   // Restore cerr
   std::cerr.rdbuf(old_cerr);
@@ -77,8 +79,8 @@ TEST_F(GameBoardTest, Initialize_MissingTank1) {
   // Redirect cerr to capture output
   std::stringstream cerr_buffer;
   std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
-  
-  EXPECT_FALSE(board.initialize(boardLines, errors));
+  std::vector<std::pair<int, Point>> tankPositions;
+  EXPECT_FALSE(board.initialize(boardLines, errors, tankPositions));
   
   // Restore cerr
   std::cerr.rdbuf(old_cerr);
@@ -102,7 +104,9 @@ TEST_F(GameBoardTest, Initialize_MissingTank2) {
   std::stringstream cerr_buffer;
   std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
   
-  EXPECT_FALSE(board.initialize(boardLines, errors));
+  // Add tankPositions vector
+  std::vector<std::pair<int, Point>> tankPositions;
+  EXPECT_FALSE(board.initialize(boardLines, errors, tankPositions));
   
   // Restore cerr
   std::cerr.rdbuf(old_cerr);
@@ -122,7 +126,9 @@ TEST_F(GameBoardTest, Initialize_MultipleTanks) {
   };
   std::vector<std::string> errors;
   
-  EXPECT_TRUE(board.initialize(boardLines, errors));
+  // Add tankPositions vector
+  std::vector<std::pair<int, Point>> tankPositions;
+  EXPECT_TRUE(board.initialize(boardLines, errors, tankPositions));
   
   // Check that the error messages were captured
   bool foundPlayer1Error = false;
@@ -145,14 +151,12 @@ TEST_F(GameBoardTest, Initialize_MultipleTanks) {
   Point tank1Pos(-1, -1);
   Point tank2Pos(-1, -1);
   
-  // TODO: consider adding find tanks method to GameBoard
-  for (int y = 0; y < board.getHeight(); ++y) {
-      for (int x = 0; x < board.getWidth(); ++x) {
-          if (board.getCellType(x, y) == GameBoard::CellType::Tank1) {
-              tank1Pos = Point(x, y);
-          } else if (board.getCellType(x, y) == GameBoard::CellType::Tank2) {
-              tank2Pos = Point(x, y);
-          }
+  // Check the tankPositions vector to find tank positions
+  for (const auto& tankPos : tankPositions) {
+      if (tankPos.first == 1) {
+          tank1Pos = tankPos.second;
+      } else if (tankPos.first == 2) {
+          tank2Pos = tankPos.second;
       }
   }
   
@@ -161,8 +165,8 @@ TEST_F(GameBoardTest, Initialize_MultipleTanks) {
   EXPECT_EQ(tank2Pos, Point(3, 1));
   
   // The second tanks should have been ignored
-  EXPECT_NE(board.getCellType(1, 2), GameBoard::CellType::Tank1);
-  EXPECT_NE(board.getCellType(3, 2), GameBoard::CellType::Tank2);
+  EXPECT_EQ(board.getCellType(1, 2), GameBoard::CellType::Empty);
+  EXPECT_EQ(board.getCellType(3, 2), GameBoard::CellType::Empty);
 }
 
 TEST_F(GameBoardTest, Initialize_ValidBoardLines) {
@@ -175,12 +179,14 @@ TEST_F(GameBoardTest, Initialize_ValidBoardLines) {
   };
   std::vector<std::string> errors;
   
-  EXPECT_TRUE(board.initialize(boardLines, errors));
+  // Add tankPositions vector
+  std::vector<std::pair<int, Point>> tankPositions;
+  EXPECT_TRUE(board.initialize(boardLines, errors, tankPositions));
   
   // Check specific cells
   EXPECT_EQ(board.getCellType(0, 0), GameBoard::CellType::Wall);
-  EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Tank1);
-  EXPECT_EQ(board.getCellType(3, 1), GameBoard::CellType::Tank2);
+  EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Empty); //TANK1
+  EXPECT_EQ(board.getCellType(3, 1), GameBoard::CellType::Empty); //TANK2
   EXPECT_EQ(board.getCellType(2, 3), GameBoard::CellType::Mine);
   EXPECT_EQ(board.getCellType(2, 2), GameBoard::CellType::Empty);
   
@@ -199,12 +205,14 @@ TEST_F(GameBoardTest, Initialize_IncompleteRows) {
   };
   std::vector<std::string> errors;
   
-  EXPECT_TRUE(board.initialize(boardLines, errors));
+  // Add tankPositions vector
+  std::vector<std::pair<int, Point>> tankPositions;
+  EXPECT_TRUE(board.initialize(boardLines, errors, tankPositions));
   
   // Check specific cells
   EXPECT_EQ(board.getCellType(0, 0), GameBoard::CellType::Wall);
-  EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Tank1);
-  EXPECT_EQ(board.getCellType(3, 1), GameBoard::CellType::Tank2);
+  EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Empty);
+  EXPECT_EQ(board.getCellType(3, 1), GameBoard::CellType::Empty);
   
   // Check that missing rows are filled with empty cells
   EXPECT_EQ(board.getCellType(0, 3), GameBoard::CellType::Empty);
@@ -232,12 +240,14 @@ TEST_F(GameBoardTest, Initialize_IncompleteColumns) {
   };
   std::vector<std::string> errors;
   
-  EXPECT_TRUE(board.initialize(boardLines, errors));
+  // Add tankPositions vector  
+  std::vector<std::pair<int, Point>> tankPositions;
+  EXPECT_TRUE(board.initialize(boardLines, errors, tankPositions));
   
   // Check cells that are defined
   EXPECT_EQ(board.getCellType(0, 0), GameBoard::CellType::Wall);
-  EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Tank1);
-  EXPECT_EQ(board.getCellType(2, 1), GameBoard::CellType::Tank2);
+  EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Empty);
+  EXPECT_EQ(board.getCellType(2, 1), GameBoard::CellType::Empty);
   
   // Check that missing columns are filled with empty cells
   EXPECT_EQ(board.getCellType(3, 0), GameBoard::CellType::Empty);
@@ -270,12 +280,14 @@ TEST_F(GameBoardTest, Initialize_ExtraRows) {
   };
   std::vector<std::string> errors;
   
-  EXPECT_TRUE(board.initialize(boardLines, errors));
+  // Add tankPositions vector
+  std::vector<std::pair<int, Point>> tankPositions;
+  EXPECT_TRUE(board.initialize(boardLines, errors, tankPositions));
   
   // Check valid cells are correct
   EXPECT_EQ(board.getCellType(0, 0), GameBoard::CellType::Wall);
-  EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Tank1);
-  EXPECT_EQ(board.getCellType(3, 1), GameBoard::CellType::Tank2);
+  EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Empty);
+  EXPECT_EQ(board.getCellType(3, 1), GameBoard::CellType::Empty);
   EXPECT_EQ(board.getCellType(2, 3), GameBoard::CellType::Mine);
   
   // Check the error count
@@ -295,12 +307,14 @@ TEST_F(GameBoardTest, Initialize_ExtraColumns) {
   };
   std::vector<std::string> errors;
   
-  EXPECT_TRUE(board.initialize(boardLines, errors));
+  // Add tankPositions vector
+  std::vector<std::pair<int, Point>> tankPositions;
+  EXPECT_TRUE(board.initialize(boardLines, errors, tankPositions));
   
   // Check valid cells are correct
   EXPECT_EQ(board.getCellType(0, 0), GameBoard::CellType::Wall);
-  EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Tank1);
-  EXPECT_EQ(board.getCellType(3, 1), GameBoard::CellType::Tank2);
+  EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Empty);
+  EXPECT_EQ(board.getCellType(3, 1), GameBoard::CellType::Empty);
   EXPECT_EQ(board.getCellType(2, 3), GameBoard::CellType::Mine);
   
   // Check the error count
@@ -326,7 +340,9 @@ TEST_F(GameBoardTest, Initialize_UnrecognizedCharacters) {
   };
   std::vector<std::string> errors;
   
-  EXPECT_TRUE(board.initialize(boardLines, errors));
+  // Add tankPositions vector
+  std::vector<std::pair<int, Point>> tankPositions;
+  EXPECT_TRUE(board.initialize(boardLines, errors, tankPositions));
   
   // Check if the error about unrecognized character is reported
   bool foundUnrecognizedCharError = false;
@@ -352,11 +368,13 @@ TEST_F(GameBoardTest, GetCellType_ValidPosition) {
         "#####"
     };
     
-    createBoardWithContent(boardLines);
+    // Add tankPositions vector
+    std::vector<std::pair<int, Point>> tankPositions;
+    createBoardWithContent(boardLines, tankPositions);
     
     EXPECT_EQ(board.getCellType(0, 0), GameBoard::CellType::Wall);
-    EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Tank1);
-    EXPECT_EQ(board.getCellType(3, 1), GameBoard::CellType::Tank2);
+    EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Empty);
+    EXPECT_EQ(board.getCellType(3, 1), GameBoard::CellType::Empty);
     EXPECT_EQ(board.getCellType(Point(2, 3)), GameBoard::CellType::Mine);
 }
 
@@ -369,7 +387,9 @@ TEST_F(GameBoardTest, GetCellType_WrappedPosition) {
         "#####"
     };
     
-    createBoardWithContent(boardLines);
+    // Add tankPositions vector
+    std::vector<std::pair<int, Point>> tankPositions;
+    createBoardWithContent(boardLines, tankPositions);
 
     // Test wrapping - should get same result as (0, 0)
     EXPECT_EQ(board.getCellType(5, 0), GameBoard::CellType::Wall);
@@ -381,26 +401,22 @@ TEST_F(GameBoardTest, GetCellType_WrappedPosition) {
 // SetCellType Tests
 TEST_F(GameBoardTest, SetCellType_ValidPosition) {
     // Set cells to different types
-    board.setCellType(1, 1, GameBoard::CellType::Tank1);
-    board.setCellType(3, 3, GameBoard::CellType::Tank2);
     board.setCellType(Point(2, 2), GameBoard::CellType::Wall);
     board.setCellType(Point(0, 4), GameBoard::CellType::Mine);
     
     // Verify the cells were set correctly
-    EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Tank1);
-    EXPECT_EQ(board.getCellType(3, 3), GameBoard::CellType::Tank2);
     EXPECT_EQ(board.getCellType(2, 2), GameBoard::CellType::Wall);
     EXPECT_EQ(board.getCellType(0, 4), GameBoard::CellType::Mine);
 }
 
 TEST_F(GameBoardTest, SetCellType_WrappedPosition) {
     // Set cells using wrapped positions
-    board.setCellType(boardWidth + 1, 1, GameBoard::CellType::Tank1);
-    board.setCellType(-2, 3, GameBoard::CellType::Tank2);
+    board.setCellType(boardWidth + 1, 1, GameBoard::CellType::Mine);
+    board.setCellType(-2, 3, GameBoard::CellType::Mine);
     
     // Verify the cells were set correctly at their wrapped positions
-    EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Tank1);
-    EXPECT_EQ(board.getCellType(3, 3), GameBoard::CellType::Tank2);
+    EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Mine);
+    EXPECT_EQ(board.getCellType(3, 3), GameBoard::CellType::Mine);
 }
 
 // IsWall Tests
@@ -413,7 +429,9 @@ TEST_F(GameBoardTest, IsWall_WallAndNonWall) {
         "#####"
     };
     
-    createBoardWithContent(boardLines);
+    // Add tankPositions vector
+    std::vector<std::pair<int, Point>> tankPositions;
+    createBoardWithContent(boardLines, tankPositions);
 
     // Check wall positions
     EXPECT_TRUE(board.isWall(Point(0, 0)));
@@ -435,7 +453,9 @@ TEST_F(GameBoardTest, DamageWall_WallDestructionAfterTwoHits) {
         "#####"
     };
     
-    createBoardWithContent(boardLines);
+    // Add tankPositions vector
+    std::vector<std::pair<int, Point>> tankPositions;
+    createBoardWithContent(boardLines, tankPositions);
     Point wallPosition(0, 0);
     
     // First hit - wall should be damaged but not destroyed
@@ -504,7 +524,9 @@ TEST_F(GameBoardTest, CanMoveTo_EmptySpace) {
         "#####"
     };
     
-    createBoardWithContent(boardLines);
+    // Add tankPositions vector
+    std::vector<std::pair<int, Point>> tankPositions;
+    createBoardWithContent(boardLines, tankPositions);
 
     // Should be able to move to empty space
     EXPECT_TRUE(board.canMoveTo(Point(2, 2)));
@@ -519,7 +541,9 @@ TEST_F(GameBoardTest, CanMoveTo_Mine) {
         "#####"
     };
     
-    createBoardWithContent(boardLines);
+    // Add tankPositions vector
+    std::vector<std::pair<int, Point>> tankPositions;
+    createBoardWithContent(boardLines, tankPositions);
     
     // Should not be able to move to a mine
     EXPECT_TRUE(board.canMoveTo(Point(2, 3)));
@@ -534,7 +558,9 @@ TEST_F(GameBoardTest, CanMoveTo_Wall) {
         "#####"
     };
     
-    createBoardWithContent(boardLines);
+    // Add tankPositions vector
+    std::vector<std::pair<int, Point>> tankPositions;
+    createBoardWithContent(boardLines, tankPositions);
     
     // Should not be able to move to a wall
     EXPECT_FALSE(board.canMoveTo(Point(0, 0)));
@@ -548,7 +574,10 @@ TEST_F(GameBoardTest, CanMoveTo_Tank) {
         "# @ #",
         "#####"
     };
-    createBoardWithContent(boardLines);
+    
+    // Add tankPositions vector
+    std::vector<std::pair<int, Point>> tankPositions;
+    createBoardWithContent(boardLines, tankPositions);
 
     // Should be able to move to another tank's position (this will trigger a collision)
     EXPECT_TRUE(board.canMoveTo(Point(1, 1))); // Tank1's position
@@ -567,8 +596,11 @@ TEST_F(GameBoardTest, ToString_PopulatedBoard) {
         "1@2",
         "###"
     };
-    createBoardWithContent(boardLines);
+    
+    // Add tankPositions vector
+    std::vector<std::pair<int, Point>> tankPositions;
+    createBoardWithContent(boardLines, tankPositions);
 
-    std::string expected = "# #\n1@2\n###\n";
+    std::string expected = "# #\n @ \n###\n";
     EXPECT_EQ(board.toString(), expected);
 }
