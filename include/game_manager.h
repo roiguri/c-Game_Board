@@ -80,6 +80,7 @@ private:
     // Game state tracking
     int m_currentStep;
     int m_remaining_steps;
+    int m_maximum_steps;
     bool m_gameOver;
     std::string m_gameResult;
     std::vector<std::string> m_gameLog;

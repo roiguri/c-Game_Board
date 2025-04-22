@@ -10,7 +10,8 @@ GameManager::GameManager()
       m_player2Algorithm(nullptr),
       m_currentStep(0),
       m_gameOver(false),
-      m_remaining_steps(40) {
+      m_remaining_steps(40),
+      m_maximum_steps(1000) {
 
     #ifdef ENABLE_VISUALIZATION
     m_visualizationManager = createVisualizationManager();
@@ -296,7 +297,6 @@ bool GameManager::applyAction(int playerId, Action action) {
           Point newPosition = playerTank->getNextBackwardPosition();
           newPosition = m_board.wrapPosition(newPosition);
           
-          // TODO: consider checking only when actually applying movement
           if (m_board.canMoveTo(newPosition)) {
               actionResult = playerTank->requestMoveBackward(newPosition);
           }
@@ -392,6 +392,11 @@ bool GameManager::checkGameOver() {
   // If all shells are used and additional steps have passed, it's a tie
   if (m_remaining_steps < 0) {
       m_gameResult = "Tie - Maximum steps reached after shells depleted";
+      return true;
+  }
+
+  if (m_currentStep >= m_maximum_steps) {
+      m_gameResult = "Tie - Maximum steps reached";
       return true;
   }
   

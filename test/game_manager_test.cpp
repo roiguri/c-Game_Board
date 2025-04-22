@@ -102,6 +102,14 @@ protected:
     void verifyGameResult(GameManager& manager, const std::string& expectedResult) {
         EXPECT_EQ(manager.m_gameResult, expectedResult);
     }
+
+    void testRunGame(GameManager& manager) {
+        manager.runGame();
+    }
+
+    int getGameSteps(GameManager& manager) {
+        return manager.m_currentStep;
+    }
     
     std::string tempFilePath;
     std::string outputFilePath;
@@ -807,4 +815,22 @@ TEST_F(GameManagerTest, ProcessStep_waitForCooldown) {
   }
   testProcessStep(manager);
   EXPECT_EQ(manager.getShells().size(), 4);
+}
+
+TEST_F(GameManagerTest, GameManagerTest_maximumSteps) {
+  // Create a simple test board with two tanks in clear view of each other
+  std::vector<std::string> boardLines = {
+      "6 3",
+      "######",
+      "#2##1#", // Tanks are in the same row with clear line of sight
+      "######"
+    // 012345678901234567890123456 (cell indexes)
+  };
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  ASSERT_TRUE(manager.initialize(tempFilePath));
+    
+  testRunGame(manager);
+  EXPECT_EQ(getGameSteps(manager), 1001);
 }
