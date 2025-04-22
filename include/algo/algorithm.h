@@ -106,43 +106,4 @@ protected:
     
     Action evaluateOffensiveOptions(const GameBoard& gameBoard, const Tank& myTank, 
                                    const Tank& enemyTank) const;
-
-
-    // TODO: Old methods - remove after refactor.
-    std::optional<Direction> hasDirectLineOfSight(
-      const GameBoard& gameBoard,
-      const Point& from,
-      const Point& to
-    ) const;
-
-    bool hasLineOfSightInDirection(
-      const GameBoard& gameBoard,
-      const Point& from,
-      const Point& to,
-      Direction direction
-    ) const;
-
-    bool isPositionInDangerFromShells(
-      const GameBoard& gameBoard,
-      const Point& position,
-      const std::vector<Shell>& shells,
-      int stepsToCheck = 3
-    ) const;
-
-    Action findSafeAction(
-      const GameBoard& gameBoard,
-      const Tank& tank,
-      const std::vector<Shell>& shells,
-      int stepsToCheck = 3
-    ) const;
-
-    bool canShootEnemy(
-      const GameBoard& gameBoard,
-      const Tank& myTank,
-      const Tank& enemyTank
-    ) const;
-
-    Action getFirstRotationAction(Direction currentDir, Direction targetDir) const;
-    Action getTryToShootAction(GameBoard gameBoard, Tank myTank, Tank enemyTank) const;
-    Action getTryToAvoidShellsAction(GameBoard gameBoard, Tank myTank, std::vector<Shell> shells) const;
 };

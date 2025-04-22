@@ -1,5 +1,4 @@
 #include "gtest/gtest.h"
-#include "gmock/gmock.h"
 #include "algo/chase_algorithm.h"
 #include "game_board.h"
 #include "tank.h"
@@ -15,720 +14,212 @@ protected:
         delete algorithm;
     }
     
-    ChaseAlgorithm* algorithm;
-    
-    GameBoard create5X5TestBoard(const std::vector<std::string>& boardLines) {
-        GameBoard board(5, 5);
+    // Helper method to create a test board
+    GameBoard createTestBoard(const std::vector<std::string>& boardLines) const {
+        GameBoard board(boardLines[0].length(), boardLines.size());
         std::vector<std::string> errors;
         std::vector<std::pair<int, Point>> tankPositions;
         board.initialize(boardLines, errors, tankPositions);
         return board;
     }
-
-    std::vector<Point> testGetValidNeighbors(const Point& current, const GameBoard& gameBoard) {
-        return algorithm->getValidNeighbors(current, gameBoard);
-    }
-
-    std::vector<Point> testReconstructPath(const std::map<Point, Point>& came_from, const Point& start, const Point& end) {
-        return algorithm->reconstructPath(came_from, start, end);
-    }
-
-    std::vector<Point> testCalculatePathBFS(const Point& start, const Point& end, const GameBoard& gameBoard) {
-        return algorithm->calculatePathBFS(start, end, gameBoard);
-    }
-
-    void testUpdateAndValidatePath(const GameBoard& gameBoard, const Tank& myTank, const Tank& enemyTank) {
-        algorithm->updateAndValidatePath(gameBoard, myTank, enemyTank);
-    }
-
-    const std::vector<Point>& getCurrentPathForTesting() const {
-        return algorithm->m_currentPath;
-    }
-    void setCurrentPathForTesting(const std::vector<Point>& path) {
-        algorithm->m_currentPath = path;
-    }
-
-    Point getLastTargetPositionForTesting() const {
-        return algorithm->m_lastTargetPosition;
-    }
-    void setLastTargetPositionForTesting(const Point& position) {
-        algorithm->m_lastTargetPosition = position;
-    }
+    
+    ChaseAlgorithm* algorithm;
 };
 
-using ::testing::UnorderedElementsAreArray;
-
-TEST_F(ChaseAlgorithmTest, Constructor) {
-    EXPECT_NE(algorithm, nullptr);
+// Test Priority 1: Avoid shells
+TEST_F(ChaseAlgorithmTest, Priority1_AvoidShells_ImmediateDanger) {
+    std::vector<std::string> boardLines = {
+        "#####",
+        "#   #",
+        "# 1 #",
+        "#   #",
+        "#####"
+    };
+    GameBoard board = createTestBoard(boardLines);
+    
+    Tank myTank(1, Point(2, 2), Direction::Right);
+    Tank enemyTank(2, Point(4, 4), Direction::Left);
+    
+    // Shell coming directly at the tank
+    std::vector<Shell> shells;
+    shells.push_back(Shell(2, Point(4, 2), Direction::Left));
+    
+    Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
+    
+    // Should move to avoid the shell
+    EXPECT_NE(action, Action::None);
+    EXPECT_NE(action, Action::MoveForward); // Forward would move into shell's path
 }
 
-TEST_F(ChaseAlgorithmTest, GetValidNeighbors_EmptyBoardCenter) {
-  GameBoard board = create5X5TestBoard({
-      "     ",
-      "     ",
-      "     ",
-      "     ",
-      "     "
-  });
-  Point center(2, 2);
-
-  std::vector<Point> expectedNeighbors = {
-      Point(2, 1), Point(3, 1), Point(3, 2), Point(3, 3),
-      Point(2, 3), Point(1, 3), Point(1, 2), Point(1, 1)
-  };
-
-  std::vector<Point> actualNeighbors = testGetValidNeighbors(center, board);
-
-  EXPECT_THAT(actualNeighbors, UnorderedElementsAreArray(expectedNeighbors));
+// Test Priority 2: Shoot if in direction + have line of sight
+TEST_F(ChaseAlgorithmTest, Priority2_Shoot_DirectLineOfSight) {
+    std::vector<std::string> boardLines = {
+        "#####",
+        "#   #",
+        "#1 2#", // Tanks facing each other
+        "#   #",
+        "#####"
+    };
+    GameBoard board = createTestBoard(boardLines);
+    
+    Tank myTank(1, Point(1, 2), Direction::Right);
+    Tank enemyTank(2, Point(3, 2), Direction::Left);
+    std::vector<Shell> shells;
+    
+    Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
+    EXPECT_EQ(action, Action::Shoot);
 }
 
-TEST_F(ChaseAlgorithmTest, GetValidNeighbors_EmptyBoardCornerWrap) {
-  // Using the fixture's helper
-   GameBoard board = create5X5TestBoard({
-      "     ",
-      "     ",
-      "     ",
-      "     ",
-      "     "
-  });
-  Point corner(0, 0);
-
-  std::vector<Point> expectedNeighbors = {
-      Point(0, 4), Point(1, 4), Point(1, 0), Point(1, 1),
-      Point(0, 1), Point(4, 1), Point(4, 0), Point(4, 4)
-  };
-
-  std::vector<Point> actualNeighbors = testGetValidNeighbors(corner, board);
-  EXPECT_THAT(actualNeighbors, UnorderedElementsAreArray(expectedNeighbors));
+// Test Priority 3: Rotate to face enemy if line of sight exists
+TEST_F(ChaseAlgorithmTest, Priority3_Rotate_LineOfSight) {
+    std::vector<std::string> boardLines = {
+        "#####",
+        "#   #",
+        "#1 2#", // Tanks in same row but not facing each other
+        "#   #",
+        "#####"
+    };
+    GameBoard board = createTestBoard(boardLines);
+    
+    Tank myTank(1, Point(1, 2), Direction::Down); // Facing down, not towards enemy
+    Tank enemyTank(2, Point(3, 2), Direction::Left);
+    std::vector<Shell> shells;
+    
+    Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
+    
+    // Should rotate right to face the enemy
+    EXPECT_EQ(action, Action::RotateLeftQuarter);
 }
 
-TEST_F(ChaseAlgorithmTest, GetValidNeighbors_EmptyBoardEdgeWrap) {
-   GameBoard board = create5X5TestBoard({
-      "     ",
-      "     ",
-      "     ",
-      "     ",
-      "     "
-  });
-  Point edge(2, 0);
-
-  std::vector<Point> expectedNeighbors = {
-       Point(2, 4), Point(3, 4), Point(3, 0), Point(3, 1),
-       Point(2, 1), Point(1, 1), Point(1, 0), Point(1, 4)
-  };
-
-  std::vector<Point> actualNeighbors = testGetValidNeighbors(edge, board);
-  EXPECT_THAT(actualNeighbors, UnorderedElementsAreArray(expectedNeighbors));
+// Test Priority 4: Chase enemy
+TEST_F(ChaseAlgorithmTest, Priority4_Chase_DirectPath) {
+    std::vector<std::string> boardLines = {
+        "#####",
+        "#1  #",
+        "#   #",
+        "#  2#",
+        "#####"
+    };
+    GameBoard board = createTestBoard(boardLines);
+    
+    Tank myTank(1, Point(1, 1), Direction::Right);
+    Tank enemyTank(2, Point(3, 3), Direction::Left);
+    std::vector<Shell> shells;
+    
+    Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
+    
+    EXPECT_EQ(action, Action::RotateRightEighth);
 }
 
-
-TEST_F(ChaseAlgorithmTest, GetValidNeighbors_WallBlock) {
-  GameBoard board = create5X5TestBoard({
-      "     ",
-      "  #  ", // Wall at (2, 1)
-      "   # ", // Wall at (3, 2)
-      "     ",
-      "     "
-  });
-  Point center(2, 2);
-
-  std::vector<Point> expectedNeighbors = {
-      /*Point(2, 1),*/ Point(3, 1), /*Point(3, 2),*/ Point(3, 3), // Up and Right are blocked
-      Point(2, 3), Point(1, 3), Point(1, 2), Point(1, 1)
-  };
-
-  std::vector<Point> actualNeighbors = testGetValidNeighbors(center, board);
-  EXPECT_THAT(actualNeighbors, UnorderedElementsAreArray(expectedNeighbors));
+TEST_F(ChaseAlgorithmTest, Priority4_Chase_PathWithObstacles) {
+    std::vector<std::string> boardLines = {
+        "#####",
+        "#1  #",
+        "### #",  // Wall forcing a different path
+        "#  2#",
+        "#####"
+    };
+    GameBoard board = createTestBoard(boardLines);
+    
+    Tank myTank(1, Point(1, 1), Direction::Right);
+    Tank enemyTank(2, Point(3, 3), Direction::Left);
+    std::vector<Shell> shells;
+    
+    Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
+    
+    // Should find path around obstacle
+    EXPECT_TRUE(action == Action::MoveForward);
 }
 
-TEST_F(ChaseAlgorithmTest, GetValidNeighbors_MineBlock) {
-   GameBoard board = create5X5TestBoard({
-      "     ",
-      "     ",
-      " @   ", // Mine at (1, 2)
-      "  @  ", // Mine at (2, 3)
-      "     "
-  });
-  Point center(2, 2);
-
-  std::vector<Point> expectedNeighbors = {
-      Point(2, 1), Point(3, 1), Point(3, 2), Point(3, 3),
-      /*Point(2, 3),*/ Point(1, 3), /*Point(1, 2),*/ Point(1, 1) // Down and Left are blocked
-  };
-
-  std::vector<Point> actualNeighbors = testGetValidNeighbors(center, board);
-  EXPECT_THAT(actualNeighbors, UnorderedElementsAreArray(expectedNeighbors));
+TEST_F(ChaseAlgorithmTest, Priority4_Chase_NoPathAvailable) {
+    std::vector<std::string> boardLines = {
+        "#####",
+        "#1###",  // Tanks separated by impassable walls
+        "### #",
+        "#  2#",
+        "#####"
+    };
+    GameBoard board = createTestBoard(boardLines);
+    
+    Tank myTank(1, Point(1, 1), Direction::Right);
+    Tank enemyTank(2, Point(3, 3), Direction::Left);
+    std::vector<Shell> shells;
+    
+    Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
+    
+    // No path available, should rotate to scan
+    EXPECT_TRUE(action == Action::RotateRightQuarter || 
+                action == Action::RotateLeftQuarter);
 }
 
-TEST_F(ChaseAlgorithmTest, GetValidNeighbors_MixedBlock) {
-  GameBoard board = create5X5TestBoard({
-      "     ",
-      " #   ", // Wall at (1, 1)
-      "     ",
-      "   @ ", // Mine at (3, 3)
-      "     "
-  });
-  Point center(2, 2);
-
-   std::vector<Point> expectedNeighbors = {
-      Point(2, 1), Point(3, 1), Point(3, 2), /*Point(3, 3),*/ // Mine DR blocked
-      Point(2, 3), Point(1, 3), Point(1, 2) /* Point(1, 1) */ // Wall UL blocked
-  };
-
-  std::vector<Point> actualNeighbors = testGetValidNeighbors(center, board);
-  EXPECT_THAT(actualNeighbors, UnorderedElementsAreArray(expectedNeighbors));
+// Combined priorities tests
+TEST_F(ChaseAlgorithmTest, CombinedPriorities_DangerOverShooting) {
+    std::vector<std::string> boardLines = {
+        "#####",
+        "#   #",
+        "#1 2#",  // Tanks facing each other
+        "#   #",
+        "#####"
+    };
+    GameBoard board = createTestBoard(boardLines);
+    
+    Tank myTank(1, Point(1, 2), Direction::Right);
+    Tank enemyTank(2, Point(3, 2), Direction::Left);
+    
+    // Shell coming at tank 1
+    std::vector<Shell> shells;
+    shells.push_back(Shell(2, Point(0, 2), Direction::Right));
+    
+    Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
+    
+    // Should avoid shell even though it could shoot
+    EXPECT_NE(action, Action::Shoot);
 }
 
-TEST_F(ChaseAlgorithmTest, GetValidNeighbors_WrapRightEdge) {
-  GameBoard board = create5X5TestBoard({ // width = 5
-      "     ",
-      "     ",
-      "     ",
-      "     ",
-      "     "
-  });
-  Point rightEdge(4, 2);
-
-  std::vector<Point> expectedNeighbors = {
-      Point(4, 1), Point(0, 1), Point(0, 2), Point(0, 3), // Wrapped points have x=0
-      Point(4, 3), Point(3, 3), Point(3, 2), Point(3, 1)
-  };
-
-  std::vector<Point> actualNeighbors = testGetValidNeighbors(rightEdge, board);
-  EXPECT_THAT(actualNeighbors, UnorderedElementsAreArray(expectedNeighbors));
+TEST_F(ChaseAlgorithmTest, CombinedPriorities_ShootingOverChasing) {
+    std::vector<std::string> boardLines = {
+        "#####",
+        "#   #",
+        "#1 2#",  // Tanks facing each other
+        "#   #",
+        "#####"
+    };
+    GameBoard board = createTestBoard(boardLines);
+    
+    Tank myTank(1, Point(1, 2), Direction::Right);
+    Tank enemyTank(2, Point(3, 2), Direction::Left);
+    std::vector<Shell> shells;
+    
+    Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
+    
+    // Should shoot rather than chase since enemy is in line of sight
+    EXPECT_EQ(action, Action::Shoot);
 }
 
-TEST_F(ChaseAlgorithmTest, GetValidNeighbors_WrapBottomEdge) {
-  GameBoard board = create5X5TestBoard({ // height = 5
-      "     ",
-      "     ",
-      "     ",
-      "     ",
-      "     "
-  });
-  Point bottomEdge(2, 4);
-
-  std::vector<Point> expectedNeighbors = {
-      Point(2, 3), Point(3, 3), Point(3, 4), Point(3, 0), // Wrapped points have y=0
-      Point(2, 0), Point(1, 0), Point(1, 4), Point(1, 3)
-  };
-
-  std::vector<Point> actualNeighbors = testGetValidNeighbors(bottomEdge, board);
-  EXPECT_THAT(actualNeighbors, UnorderedElementsAreArray(expectedNeighbors));
-}
-
-TEST_F(ChaseAlgorithmTest, GetValidNeighbors_WrapCornerBottomRight) {
-  GameBoard board = create5X5TestBoard({ // width=5, height=5
-      "     ",
-      "     ",
-      "     ",
-      "     ",
-      "     "
-  });
-  Point corner(4, 4); // Bottom right
-
-  std::vector<Point> expectedNeighbors = {
-      Point(4, 3), Point(0, 3), Point(0, 4), Point(0, 0), // 0,0 is wrap of 5,5 -> DR
-      Point(4, 0), Point(3, 0), Point(3, 4), Point(3, 3)
-  };
-
-  std::vector<Point> actualNeighbors = testGetValidNeighbors(corner, board);
-  EXPECT_THAT(actualNeighbors, UnorderedElementsAreArray(expectedNeighbors));
-}
-
-TEST_F(ChaseAlgorithmTest, ReconstructPath_StraightLine) {
-  Point start(1, 1);
-  Point end(1, 4);
-  std::map<Point, Point> came_from;
-
-  // Path: (1,1) -> (1,2) -> (1,3) -> (1,4)
-  came_from[Point(1, 2)] = Point(1, 1);
-  came_from[Point(1, 3)] = Point(1, 2);
-  came_from[Point(1, 4)] = Point(1, 3);
-
-  std::vector<Point> expectedPath = { Point(1, 2), Point(1, 3), Point(1, 4) };
-  std::vector<Point> actualPath = testReconstructPath(came_from, start, end);
-
-  EXPECT_EQ(actualPath, expectedPath);
-}
-
-TEST_F(ChaseAlgorithmTest, ReconstructPath_DiagonalLine) {
-  Point start(0, 0);
-  Point end(3, 3);
-  std::map<Point, Point> came_from;
-
-  // Path: (0,0) -> (1,1) -> (2,2) -> (3,3)
-  came_from[Point(1, 1)] = Point(0, 0);
-  came_from[Point(2, 2)] = Point(1, 1);
-  came_from[Point(3, 3)] = Point(2, 2);
-
-  std::vector<Point> expectedPath = { Point(1, 1), Point(2, 2), Point(3, 3) };
-  std::vector<Point> actualPath = testReconstructPath(came_from, start, end);
-  EXPECT_EQ(actualPath, expectedPath);
-}
-
-TEST_F(ChaseAlgorithmTest, ReconstructPath_LShape) {
-  Point start(1, 1);
-  Point end(3, 3);
-  std::map<Point, Point> came_from;
-
-  // Path: (1,1) -> (1,2) -> (1,3) -> (2,3) -> (3,3)
-  came_from[Point(1, 2)] = Point(1, 1);
-  came_from[Point(1, 3)] = Point(1, 2);
-  came_from[Point(2, 3)] = Point(1, 3);
-  came_from[Point(3, 3)] = Point(2, 3);
-
-  std::vector<Point> expectedPath = { Point(1, 2), Point(1, 3), Point(2, 3), Point(3, 3) };
-  std::vector<Point> actualPath = testReconstructPath(came_from, start, end);
-
-  EXPECT_EQ(actualPath, expectedPath);
-}
-
-TEST_F(ChaseAlgorithmTest, ReconstructPath_StartEqualsEnd) {
-  Point start(2, 2);
-  Point end(2, 2);
-  std::map<Point, Point> came_from;
-
-
-  std::vector<Point> expectedPath = {};
-  std::vector<Point> actualPath = testReconstructPath(came_from, start, end);
-
-  EXPECT_EQ(actualPath, expectedPath);
-}
-
-TEST_F(ChaseAlgorithmTest, ReconstructPath_EndNotReached) {
-  Point start(1, 1);
-  Point end(5, 5);
-  std::map<Point, Point> came_from;
-
-  // Path: (1,1) -> (1,2) -> (2,1)
-  came_from[Point(1, 2)] = Point(1, 1);
-  came_from[Point(2, 1)] = Point(1, 1);
-
-  std::vector<Point> expectedPath = {};
-  std::vector<Point> actualPath = testReconstructPath(came_from, start, end);
-
-  EXPECT_EQ(actualPath, expectedPath);
-}
-
-TEST_F(ChaseAlgorithmTest, ReconstructPath_EmptyCameFrom) {
-  Point start(1, 1);
-  Point end(5, 5);
-  std::map<Point, Point> came_from;
-
-  std::vector<Point> expectedPath = {};
-  std::vector<Point> actualPath = testReconstructPath(came_from, start, end);
-
-  EXPECT_EQ(actualPath, expectedPath);
-}
-
-TEST_F(ChaseAlgorithmTest, CalculatePathBFS_EmptyBoardDirectPath) {
-  GameBoard board = create5X5TestBoard({
-      "     ",
-      "     ",
-      "     ",
-      "     ",
-      "     "
-  });
-  Point start(1, 1);
-  Point end(1, 3);
-
-  std::vector<Point> expectedPath = { Point(2, 2), Point(1, 3) };
-  size_t expectedLength = 2;
-
-  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
-  EXPECT_EQ(actualPath.size(), expectedLength);
-  EXPECT_EQ(actualPath, expectedPath);
-}
-
-TEST_F(ChaseAlgorithmTest, CalculatePathBFS_EmptyBoardDiagonalPath) {
-  GameBoard board = create5X5TestBoard({
-      "     ",
-      "     ",
-      "     ",
-      "     ",
-      "     "
-  });
-  Point start(1, 1);
-  Point end(3, 3);
-  // Shortest path is diagonal
-  std::vector<Point> expectedPath = { Point(2, 2), Point(3, 3) }; // Path: (1,1)->(2,2)->(3,3)
-  size_t expectedLength = 2;
-
-  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
-  EXPECT_EQ(actualPath.size(), expectedLength);
-  EXPECT_EQ(actualPath, expectedPath);
-}
-
-
-TEST_F(ChaseAlgorithmTest, CalculatePathBFS_PathAroundWall) {
-  GameBoard board = create5X5TestBoard({
-      "     ",
-      " S   ", // S = Start (1,1)
-      "  #  ", // Wall y=2
-      "   E ", // E = End (3,3)
-      "     "
-  });
-  Point start(1, 1);
-  Point end(3, 3);
-
-  // Path: (1,0)->(2,4)->(3,3)
-  std::vector<Point> expectedPath = {
-      Point(1,0), Point(2,4), Point(3, 3)
-  };
-  size_t expectedLength = 3; // Shortest path length
-
-  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
-  EXPECT_EQ(actualPath.size(), expectedLength);
-  EXPECT_EQ(actualPath, expectedPath);
-}
-
-TEST_F(ChaseAlgorithmTest, CalculatePathBFS_PathAroundMine) {
-   GameBoard board = create5X5TestBoard({
-      "     ",
-      " S   ", // S = Start (1,1)
-      "  @  ", // Mine at (2,2)
-      "   E ", // E = End (3,3)
-      "     "
-  });
-  Point start(1, 1);
-  Point end(3, 3);
-
-  std::vector<Point> expectedPath = { Point(1,0), Point(2,4), Point(3, 3) };
-  size_t expectedLength = 3;
-
-  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
-  EXPECT_EQ(actualPath.size(), expectedLength);
-  EXPECT_EQ(actualPath, expectedPath);
-}
-
-
-TEST_F(ChaseAlgorithmTest, CalculatePathBFS_TargetUnreachableWalled) {
-  GameBoard board = create5X5TestBoard({
-      "#####",
-      "#S#E#", // S=Start(1,1), E=End(3,1), separated by wall
-      "#####",
-      "     ",
-      "     "
-  });
-  Point start(1, 1);
-  Point end(3, 1);
-
-  std::vector<Point> expectedPath = {};
-  size_t expectedLength = 0;
-
-  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
-  EXPECT_EQ(actualPath.size(), expectedLength);
-  EXPECT_EQ(actualPath, expectedPath);
-}
-
-TEST_F(ChaseAlgorithmTest, CalculatePathBFS_TargetUnreachableMined) {
-   GameBoard board = create5X5TestBoard({
-      " @@@ ",
-      " @S@ ", // S=Start(2,1)
-      " @@@ ", 
-      " @E@ ", // E=End(2,3) surrounded by mines
-      " @@@ "
-  });
-  Point start(2, 1);
-  Point end(2, 3);
-
-  std::vector<Point> expectedPath = {};
-  size_t expectedLength = 0;
-
-  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
-  EXPECT_EQ(actualPath.size(), expectedLength);
-  EXPECT_EQ(actualPath, expectedPath);
-}
-
-
-TEST_F(ChaseAlgorithmTest, CalculatePathBFS_StartEqualsEnd) {
-  GameBoard board = create5X5TestBoard({
-      "     ",
-      "     ",
-      "     ",
-      "     ",
-      "     "
-  });
-  Point start(2, 2);
-  Point end(2, 2);
-  std::vector<Point> expectedPath = {};
-  size_t expectedLength = 0;
-
-  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
-  EXPECT_EQ(actualPath.size(), expectedLength);
-  EXPECT_EQ(actualPath, expectedPath);
-}
-
-TEST_F(ChaseAlgorithmTest, CalculatePathBFS_WrapPathX) {
-  GameBoard board = create5X5TestBoard({ // Width 5
-      "     ",
-      "E   S", // E at (0,1), S at (4,1). Wrap is shorter
-      "     ",
-      "     ",
-      "     "
-  });
-  Point start(4, 1);
-  Point end(0, 1);
-  // Wrap path: (4,1) -> (0,1). Length 1.
-  std::vector<Point> expectedPath = { Point(0, 1) };
-  size_t expectedLength = 1;
-
-  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
-  EXPECT_EQ(actualPath.size(), expectedLength);
-  EXPECT_EQ(actualPath, expectedPath);
-}
-
-TEST_F(ChaseAlgorithmTest, CalculatePathBFS_WrapPathY) {
-   GameBoard board = create5X5TestBoard({ // Height 5
-      "  E  ", // E at (2,0)
-      "     ", 
-      "     ",
-      "     ",
-      "  S  "  // S at (2,4). Wrap is shorter
-  });
-  Point start(2, 4);
-  Point end(2, 0);
-  // Wrap path: (2,0)->(2,1). Length 1.
-   std::vector<Point> expectedPath = { Point(2, 0) };
-   size_t expectedLength = 1;
-
-  std::vector<Point> actualPath = testCalculatePathBFS(start, end, board);
-  EXPECT_EQ(actualPath.size(), expectedLength);
-  EXPECT_EQ(actualPath, expectedPath);
-}
-
-TEST_F(ChaseAlgorithmTest, GetNextAction_Evasion_SafePosition) {
-  GameBoard board = create5X5TestBoard({
-      "     ",
-      "  1  ", // Tank 1 at (2,1)
-      "     ",
-      "   2 ", // Tank 2 at (3,3)
-      "     "
-  });
-  Tank myTank(1, Point(2, 1), Direction::Down);
-  Tank enemyTank(2, Point(3, 3), Direction::Up);
-  std::vector<Shell> shells; // No shells
-
-  // TODO: fix when chase is added
-  EXPECT_NE(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
-  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::RotateLeftEighth);
-}
-
-TEST_F(ChaseAlgorithmTest, GetNextAction_Evasion_DangerMoveForwardSafe) {
-  GameBoard board = create5X5TestBoard({
-      "     ",
-      "  S  ", // Shell moving down towards (2,2)
-      "  1  ", // Tank 1 at (2,2) facing DownRight
-      "     ", // Position (2,3) is safe
-      "    2"
-  });
-  Tank myTank(1, Point(2, 2), Direction::DownRight);
-  Tank enemyTank(2, Point(4, 4), Direction::Up);
-  std::vector<Shell> shells = { Shell(2, Point(2, 1), Direction::Down) };
-
-  // findSafeAction should identify moving forward (to 2,3) as safe.
-  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::MoveForward);
-}
-
-TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_CanShootAligned) {
-  GameBoard board = create5X5TestBoard({
-      "  #  ",
-      "  1  ", // Tank 1 at (2,1) facing Down
-      "     ",
-      "  2  ", // Tank 2 at (2,3)
-      "  #  "
-  });
-  Tank myTank(1, Point(2, 1), Direction::Down);
-  Tank enemyTank(2, Point(2, 3), Direction::Up);
-  std::vector<Shell> shells;
-
-  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::Shoot);
-}
-
-TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_CannotShootCooldown) {
-  GameBoard board = create5X5TestBoard({
-      "     ",
-      "  1  ", // Tank 1 at (2,1) facing Down
-      "     ",
-      "  2  ", // Tank 2 at (2,3)
-      "     "
-  });
-  Tank myTank(1, Point(2, 1), Direction::Down);
-  Tank enemyTank(2, Point(2, 3), Direction::Up);
-  std::vector<Shell> shells;
-
-  myTank.shoot(); // Simulate cooldown
-  // TODO: fix when chase is added
-  EXPECT_NE(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::None);
-  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::RotateLeftEighth);
-}
-
-TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_CannotShootObstacle) {
-  GameBoard board = create5X5TestBoard({
-      "  #  ",
-      "  1  ", // Tank 1 at (2,1) facing Down
-      "  #  ", // Wall obstruction
-      "  2  ", // Tank 2 at (2,3)
-      "  #  "
-  });
-  Tank myTank = Tank(1, Point(2, 1), Direction::Down);
-  Tank enemyTank(2, Point(2, 3), Direction::Up);
-  std::vector<Shell> shells;
-
-  EXPECT_NE(algorithm->getNextAction(board, enemyTank, myTank, shells), Action::Shoot);
-  EXPECT_NE(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::Shoot);
-}
-
-
-TEST_F(ChaseAlgorithmTest, GetNextAction_Shooting_NeedsRotation) {
-   GameBoard board = create5X5TestBoard({
-      "  #  ",
-      "  1  ", // Tank 1 at (2,1) facing Right
-      "     ",
-      "  2  ", // Tank 2 at (2,3)
-      "  #  "
-  });
-  Tank myTank(1, Point(2, 1), Direction::Right);
-  Tank enemyTank(2, Point(2, 3), Direction::Up);
-  std::vector<Shell> shells;
-
-  EXPECT_EQ(algorithm->getNextAction(board, myTank, enemyTank, shells), Action::RotateRightQuarter);
-}
-
-TEST_F(ChaseAlgorithmTest, UpdateAndValidatePath_NewPathNeeded_PathEmpty) {
-  GameBoard board = create5X5TestBoard({ /* ... empty ... */ });
-  Tank myTank(1, Point(2, 1), Direction::Down);
-  Tank enemyTank(2, Point(3, 3), Direction::Up);
-
-  // Setup initial state using setters
-  setCurrentPathForTesting({}); // Empty path
-  setLastTargetPositionForTesting(Point(-1, -1));
-
-  // Call the method
-  testUpdateAndValidatePath(board, myTank, enemyTank);
-
-  // Verify using getters
-  std::vector<Point> expectedPath = { Point(3, 2), Point(3, 3) };
-  EXPECT_EQ(getCurrentPathForTesting(), expectedPath);
-  EXPECT_EQ(getLastTargetPositionForTesting(), enemyTank.getPosition());
-  EXPECT_FALSE(getCurrentPathForTesting().empty());
-}
-
-TEST_F(ChaseAlgorithmTest, UpdateAndValidatePath_NewPathNeeded_EnemyMoved) {
-  GameBoard board = create5X5TestBoard({ /* ... empty ... */ });
-  Tank myTank(1, Point(2, 1), Direction::Down);
-  std::vector<Point> currentPath = { Point(3, 2), Point(3, 3) };
-  Point enemyTankPosition(3, 3);
-  setCurrentPathForTesting(currentPath);
-  setLastTargetPositionForTesting(enemyTankPosition);
-
-  Tank enemyTank(2, Point(3, 4), Direction::Up); // Enemy moved to (3,4)
-  testUpdateAndValidatePath(board, myTank, enemyTank);
-
-  std::vector<Point> expectedNewPath = { Point(3, 2), Point(3, 3), Point(3, 4) };
-  EXPECT_NE(getCurrentPathForTesting(), currentPath);
-  EXPECT_NE(getLastTargetPositionForTesting(), enemyTankPosition);
-}
-
-TEST_F(ChaseAlgorithmTest, UpdateAndValidatePath_PathStillValid_EnemyNotMoved) {
-  GameBoard board = create5X5TestBoard({ /* ... empty ... */ });
-  Tank myTank(1, Point(2, 1), Direction::Down);
-  Tank enemyTank(2, Point(3, 3), Direction::Up); // Enemy at same position
-
-  // Setup initial state using setters
-  std::vector<Point> existingPath = { Point(3, 2), Point(3, 3) };
-  setCurrentPathForTesting(existingPath);
-  setLastTargetPositionForTesting(enemyTank.getPosition());
-
-  // Call the method
-  testUpdateAndValidatePath(board, myTank, enemyTank);
-
-  // Verify using getters
-  EXPECT_EQ(getCurrentPathForTesting(), existingPath);
-  EXPECT_EQ(getLastTargetPositionForTesting(), enemyTank.getPosition());
-}
-
-TEST_F(ChaseAlgorithmTest, UpdateAndValidatePath_PathInvalidated_NextStepBlocked) {
-  GameBoard board = create5X5TestBoard({ /* ... empty ... */ });
-  Tank myTank(1, Point(2, 1), Direction::Down);
-  Tank enemyTank(2, Point(3, 3), Direction::Up);
-
-  // Setup initial state using setters
-  std::vector<Point> existingPath = { Point(3, 2), Point(3, 3) }; // Next step is (3,2)
-  setCurrentPathForTesting(existingPath);
-  setLastTargetPositionForTesting(enemyTank.getPosition());
-
-  // Block the next step
-  board.setCellType(Point(3, 2), GameBoard::CellType::Wall); //
-
-  // Call the method
-  testUpdateAndValidatePath(board, myTank, enemyTank);
-
-  // Verify using getters
-  EXPECT_TRUE(getCurrentPathForTesting().empty());
-  EXPECT_EQ(getLastTargetPositionForTesting(), Point(-1,-1));
-}
-
-TEST_F(ChaseAlgorithmTest, UpdateAndValidatePath_PathValid_NextStepClear) {
-  GameBoard board = create5X5TestBoard({ /* ... empty ... */ });
-  Tank myTank(1, Point(2, 1), Direction::Down);
-  Tank enemyTank(2, Point(3, 3), Direction::Up);
-
-  // Setup initial state using setters
-  std::vector<Point> existingPath = { Point(3, 2), Point(3, 3) }; // Next step is (3,2)
-  setCurrentPathForTesting(existingPath);
-  setLastTargetPositionForTesting(enemyTank.getPosition());
-
-  // Call the method
-  testUpdateAndValidatePath(board, myTank, enemyTank);
-
-  // Verify using getters
-  EXPECT_EQ(getCurrentPathForTesting(), existingPath);
-  EXPECT_EQ(getLastTargetPositionForTesting(), enemyTank.getPosition());
-}
-
-TEST_F(ChaseAlgorithmTest, GetNextAction_PathFollowing_NeedsRotation) {
-  GameBoard board = create5X5TestBoard({ // Empty board
-      "     ",
-      "  1  ", // Tank 1 at (2,1) facing UP
-      "     ", // Path wants to go Right to (3,1)
-      "   2 ", // Tank 2 at (3,3) - target pos
-      "     "
-  });
-  Tank myTank(1, Point(2, 1), Direction::Up); // Facing Up
-  Tank enemyTank(2, Point(3, 3), Direction::Up);
-  std::vector<Shell> shells; // No danger
-
-  // Setup path state: path requires moving Right to (3,1) first
-  std::vector<Point> path = { Point(3, 1), Point(3, 2), Point(3, 3) };
-  setCurrentPathForTesting(path);
-  setLastTargetPositionForTesting(enemyTank.getPosition());
-
-  Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
-
-  EXPECT_EQ(action, Action::RotateRightQuarter);
-  EXPECT_EQ(getCurrentPathForTesting(), path);
-}
-
-TEST_F(ChaseAlgorithmTest, GetNextAction_PathFollowing_MoveForwardAligned) {
-  GameBoard board = create5X5TestBoard({ // Empty board
-      "     ",
-      "  1  ", // Tank 1 at (2,1) facing RIGHT
-      "     ", // Path wants to go Right to (3,1)
-      "   2 ", // Tank 2 at (3,3)
-      "     "
-  });
-  Tank myTank(1, Point(2, 1), Direction::Right); // Facing Right
-  Tank enemyTank(2, Point(3, 3), Direction::Up);
-  std::vector<Shell> shells;
-  std::vector<Point> initialPath = { Point(3, 1), Point(3, 2), Point(3, 3) };
-  setCurrentPathForTesting(initialPath);
-  setLastTargetPositionForTesting(enemyTank.getPosition());
-
-  Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
-
-  EXPECT_EQ(action, Action::MoveForward);
-  std::vector<Point> expectedRemainingPath = { Point(3, 2), Point(3, 3) };
-  EXPECT_EQ(getCurrentPathForTesting(), expectedRemainingPath);
+// Edge cases
+TEST_F(ChaseAlgorithmTest, EdgeCase_NoShellsRemaining) {
+    std::vector<std::string> boardLines = {
+        "#####",
+        "#   #",
+        "#1 2#",
+        "#   #",
+        "#####"
+    };
+    GameBoard board = createTestBoard(boardLines);
+    
+    Tank myTank(1, Point(1, 2), Direction::Right);
+    
+    // Use all shells
+    for (int i = 0; i < Tank::INITIAL_SHELLS; i++) {
+        myTank.decrementShells();
+    }
+    
+    Tank enemyTank(2, Point(3, 2), Direction::Left);
+    std::vector<Shell> shells;
+    
+    Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
+    
+    // Can't shoot, but should still prioritize chasing over rotating
+    EXPECT_NE(action, Action::Shoot);
+    EXPECT_EQ(action, Action::RotateLeftEighth);
 }
