@@ -86,6 +86,8 @@ private:
     std::vector<std::string> m_gameLog;
     CollisionHandler m_collisionHandler;
     
+    Tank& getPlayerTank(int playerId);
+
     // Game step methods
     /**
      * @brief Process a single step of the game

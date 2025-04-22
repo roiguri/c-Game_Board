@@ -237,27 +237,26 @@ Action GameManager::getPlayerAction(int playerId) {
   }
 
   // Find the player's tank
-  Tank* playerTank = nullptr;
-  Tank* enemyTank = nullptr;
-  
-  for (auto& tank : m_tanks) {
-      if (tank.getPlayerId() == playerId) {
-          playerTank = &tank;
-      } else {
-          enemyTank = &tank;
-      }
-  }
-  
-  if (!playerTank || !enemyTank) {
-      return Action::None;
-  }
+  Tank& playerTank = getPlayerTank(playerId);
+  Tank& enemyTank = getPlayerTank(playerId == 1 ? 2 : 1);
+
   // Get the appropriate algorithm
   Algorithm* algorithm = (playerId == 1) ? m_player1Algorithm : m_player2Algorithm;
   if (!algorithm) {
       return Action::None;
   }
   // Get action from algorithm 
-  return algorithm->getNextAction(m_board, *playerTank, *enemyTank, m_shells);
+  return algorithm->getNextAction(m_board, playerTank, enemyTank, m_shells);
+}
+
+Tank& GameManager::getPlayerTank(int playerId) {
+  for (auto& tank : m_tanks) {
+    if (tank.getPlayerId() == playerId) {
+        return tank;
+    }
+  }
+  // If no tank found, return the first tank (should not happen)
+  return m_tanks[0];
 }
 
 // TODO: add unit tests to cover this
@@ -268,15 +267,9 @@ bool GameManager::applyAction(int playerId, Action action) {
   }
   
   // Find the player's tank
-  Tank* playerTank = nullptr;
-  for (auto& tank : m_tanks) {
-      if (tank.getPlayerId() == playerId) {
-          playerTank = &tank;
-          break;
-      }
-  }
+  Tank& playerTank = getPlayerTank(playerId);
   
-  if (playerTank == nullptr || playerTank->isDestroyed()) {
+  if (playerTank.isDestroyed()) {
       return false;
   }
   
@@ -284,52 +277,52 @@ bool GameManager::applyAction(int playerId, Action action) {
   
   switch (action) {
       case Action::MoveForward: {
-          Point newPosition = playerTank->getNextForwardPosition();
+          Point newPosition = playerTank.getNextForwardPosition();
           newPosition = m_board.wrapPosition(newPosition);
           
           if (m_board.canMoveTo(newPosition)) {
-              actionResult = playerTank->moveForward(newPosition);
+              actionResult = playerTank.moveForward(newPosition);
           }
           break;
       }
           
       case Action::MoveBackward: {
-          Point newPosition = playerTank->getNextBackwardPosition();
+          Point newPosition = playerTank.getNextBackwardPosition();
           newPosition = m_board.wrapPosition(newPosition);
           
           if (m_board.canMoveTo(newPosition)) {
-              actionResult = playerTank->requestMoveBackward(newPosition);
+              actionResult = playerTank.requestMoveBackward(newPosition);
           }
           break;
       }
               
       case Action::RotateLeftEighth:
-          actionResult = playerTank->rotateLeft(false);
+          actionResult = playerTank.rotateLeft(false);
           break;
           
       case Action::RotateRightEighth:
-          actionResult = playerTank->rotateRight(false);
+          actionResult = playerTank.rotateRight(false);
           break;
           
       case Action::RotateLeftQuarter:
-          actionResult = playerTank->rotateLeft(true);
+          actionResult = playerTank.rotateLeft(true);
           break;
           
       case Action::RotateRightQuarter:
-          actionResult = playerTank->rotateRight(true);
+          actionResult = playerTank.rotateRight(true);
           break;
           
       case Action::Shoot:
-          if (playerTank->canShoot()) {
+          if (playerTank.canShoot()) {
               // Get tank's current position and direction
-              Point shellPosition = playerTank->getPosition();
-              Direction shellDirection = playerTank->getDirection();
+              Point shellPosition = playerTank.getPosition();
+              Direction shellDirection = playerTank.getDirection();
               
               // Create a new shell
               m_shells.emplace_back(playerId, shellPosition, shellDirection);
               
               // Update tank's state (decrement shells and set cooldown)
-              actionResult = playerTank->shoot();
+              actionResult = playerTank.shoot();
           }
           break;
           
