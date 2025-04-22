@@ -20,46 +20,90 @@ public:
         return Action::None;
     }
 
-    std::optional<Direction> testHasDirectLineOfSight(
-      const GameBoard& gameBoard,
-      const Point& from,
-      const Point& to
+    // Expose protected methods for testing
+    bool testIsInDanger(
+        const GameBoard& gameBoard,
+        const Point& position,
+        const std::vector<Shell>& shells,
+        int lookAheadSteps = 3
     ) const {
-        return hasDirectLineOfSight(gameBoard, from, to);
+        return isInDanger(gameBoard, position, shells, lookAheadSteps);
     }
 
-    bool testHasLineOfSightInDirection(
-      const GameBoard& gameBoard,
-      const Point& from,
-      const Point& to,
-      Direction direction
+    std::optional<Direction> testGetLineOfSightDirection(
+        const GameBoard& gameBoard,
+        const Point& from,
+        const Point& to
     ) const {
-        return hasLineOfSightInDirection(gameBoard, from, to, direction);
+        return getLineOfSightDirection(gameBoard, from, to);
     }
 
-    bool testIsPositionInDangerFromShells(
-      const GameBoard& gameBoard,
-      const Point& position,
-      const std::vector<Shell>& shells,
-      int stepsToCheck = 3
+    bool testCheckLineOfSightInDirection(
+        const GameBoard& gameBoard,
+        const Point& from,
+        const Point& to,
+        Direction direction
     ) const {
-        return isPositionInDangerFromShells(gameBoard, position, shells, stepsToCheck);
+        return checkLineOfSightInDirection(gameBoard, from, to, direction);
     }
 
-    Action testFindSafeAction(
-      const GameBoard& gameBoard,
-      const Tank& tank,
-      const std::vector<Shell>& shells
+    Action testFindOptimalSafeMove(
+        const GameBoard& gameBoard,
+        const Tank& tank,
+        const Tank& enemyTank,
+        const std::vector<Shell>& shells,
+        bool avoidEnemySight = false
     ) const {
-        return findSafeAction(gameBoard, tank, shells);
+        return findOptimalSafeMove(gameBoard, tank, enemyTank, shells, avoidEnemySight);
     }
 
-    bool testCanShootEnemy(
-      const GameBoard& board,
-      const Tank& myTank,
-      const Tank& enemyTank
-    ) {
-        return canShootEnemy(board, myTank, enemyTank);
+    std::vector<SafeMoveOption> testGetSafeMoveOptions(
+        const GameBoard& gameBoard,
+        const Tank& tank,
+        const Tank& enemyTank,
+        const std::vector<Shell>& shells,
+        bool avoidEnemySight = false
+    ) const {
+        return getSafeMoveOptions(gameBoard, tank, enemyTank, shells, avoidEnemySight);
+    }
+
+    bool testIsExposedToEnemy(
+        const GameBoard& gameBoard,
+        const Point& position,
+        const Tank& enemyTank
+    ) const {
+        return isExposedToEnemy(gameBoard, position, enemyTank);
+    }
+
+    int testCalculateMoveCost(
+        const Tank& tank,
+        const Point& targetPos,
+        Direction targetDir
+    ) const {
+        return calculateMoveCost(tank, targetPos, targetDir);
+    }
+
+    bool testCanHitTarget(
+        const GameBoard& board,
+        const Tank& myTank,
+        const Point& targetPos
+    ) const {
+        return canHitTarget(board, myTank, targetPos);
+    }
+
+    Action testGetRotationToDirection(
+        Direction current,
+        Direction target
+    ) const {
+        return getRotationToDirection(current, target);
+    }
+
+    Action testEvaluateOffensiveOptions(
+        const GameBoard& gameBoard,
+        const Tank& myTank,
+        const Tank& enemyTank
+    ) const {
+        return evaluateOffensiveOptions(gameBoard, myTank, enemyTank);
     }
 };
 
@@ -74,15 +118,16 @@ protected:
     }
     
     MockAlgorithm* mockAlgorithm;
-};
 
-GameBoard create5X5TestBoard(const std::vector<std::string>& boardLines) {
-    GameBoard board(5, 5);
-    std::vector<std::string> errors;
-    std::vector<std::pair<int, Point>> tankPositions;
-    board.initialize(boardLines, errors, tankPositions);
-    return board;
-}
+    // Helper to create a test board
+    GameBoard create5X5TestBoard(const std::vector<std::string>& boardLines) {
+        GameBoard board(5, 5);
+        std::vector<std::string> errors;
+        std::vector<std::pair<int, Point>> tankPositions;
+        board.initialize(boardLines, errors, tankPositions);
+        return board;
+    }
+};
 
 TEST_F(AlgorithmTest, Constructor) {
     Algorithm* testAlgorithm = new MockAlgorithm();
@@ -91,23 +136,22 @@ TEST_F(AlgorithmTest, Constructor) {
 }
 
 TEST_F(AlgorithmTest, CreateAlgorithm_ValidTypes) {
-  Algorithm* chaseAlgo = Algorithm::createAlgorithm("chase");
-  EXPECT_NE(chaseAlgo, nullptr);
-  EXPECT_TRUE(dynamic_cast<ChaseAlgorithm*>(chaseAlgo) != nullptr);
-  EXPECT_TRUE(dynamic_cast<DefensiveAlgorithm*>(chaseAlgo) == nullptr);
-  delete chaseAlgo;
-  
-  Algorithm* defensiveAlgo = Algorithm::createAlgorithm("defensive");
-  EXPECT_NE(defensiveAlgo, nullptr);
-  EXPECT_TRUE(dynamic_cast<ChaseAlgorithm*>(defensiveAlgo) == nullptr);
-  EXPECT_TRUE(dynamic_cast<DefensiveAlgorithm*>(defensiveAlgo) != nullptr);
-  delete defensiveAlgo;
+    Algorithm* chaseAlgo = Algorithm::createAlgorithm("chase");
+    EXPECT_NE(chaseAlgo, nullptr);
+    EXPECT_TRUE(dynamic_cast<ChaseAlgorithm*>(chaseAlgo) != nullptr);
+    EXPECT_TRUE(dynamic_cast<DefensiveAlgorithm*>(chaseAlgo) == nullptr);
+    delete chaseAlgo;
+    
+    Algorithm* defensiveAlgo = Algorithm::createAlgorithm("defensive");
+    EXPECT_NE(defensiveAlgo, nullptr);
+    EXPECT_TRUE(dynamic_cast<ChaseAlgorithm*>(defensiveAlgo) == nullptr);
+    EXPECT_TRUE(dynamic_cast<DefensiveAlgorithm*>(defensiveAlgo) != nullptr);
+    delete defensiveAlgo;
 }
 
 TEST_F(AlgorithmTest, CreateAlgorithm_UnknownType) {
-  Algorithm* unknownAlgo = Algorithm::createAlgorithm("unknown_type");
-  
-  EXPECT_EQ(unknownAlgo, nullptr);
+    Algorithm* unknownAlgo = Algorithm::createAlgorithm("unknown_type");
+    EXPECT_EQ(unknownAlgo, nullptr);
 }
 
 TEST_F(AlgorithmTest, GetNextAction) {
@@ -122,687 +166,522 @@ TEST_F(AlgorithmTest, GetNextAction) {
     EXPECT_EQ(result, Action::None);
 }
 
-TEST_F(AlgorithmTest, HasDirectLineOfSight_BasicClear) {
-    // Create a board specific to this test
-    std::vector<std::string> boardLines = {
-      "#####",
-      "#   #",
-      "#   #",
-      "#   #",
-      "#####"
-    };
-    GameBoard board = create5X5TestBoard(boardLines);
-    
-    auto dir1 = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 1));
-    EXPECT_TRUE(dir1.has_value());
-    EXPECT_EQ(dir1.value(), Direction::Right);
-    
-    // No line of sight
-    auto dir3 = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 2));
-    EXPECT_FALSE(dir3.has_value());
-}
-
-TEST_F(AlgorithmTest, HasDirectLineOfSight_BlockedHorizontal) {
-    std::vector<std::string> boardLines = {
-        "#####",
-        "# # #",
-        "#   #",
-        "# # #",
-        "#####"
-    };
-    GameBoard board = create5X5TestBoard(boardLines);
-    
-    auto dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 1));
-    EXPECT_FALSE(dir.has_value());
-}
-
-TEST_F(AlgorithmTest, HasDirectLineOfSight_BlockedVertical) {
-    std::vector<std::string> boardLines = {
+// IsInDanger Tests
+TEST_F(AlgorithmTest, IsInDanger_NoShells) {
+    GameBoard board = create5X5TestBoard({
         "#####",
         "#   #",
-        "## ##",
+        "#   #",
         "#   #",
         "#####"
-    };
-    GameBoard board = create5X5TestBoard(boardLines);
+    });
+    Point position(2, 2);
+    std::vector<Shell> shells;
     
-    auto dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(1, 3));
-    EXPECT_FALSE(dir.has_value());
+    EXPECT_FALSE(mockAlgorithm->testIsInDanger(board, position, shells));
 }
 
-TEST_F(AlgorithmTest, HasDirectLineOfSight_BlockedDiagonal) {
-    std::vector<std::string> boardLines = {
+TEST_F(AlgorithmTest, IsInDanger_DirectHit) {
+    GameBoard board = create5X5TestBoard({
         "#####",
         "#   #",
-        "# # #",
+        "#   #",
         "#   #",
         "#####"
-    };
-    GameBoard board = create5X5TestBoard(boardLines);
+    });
+    Point position(2, 2);
     
-    auto dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 1), Point(3, 3));
-    EXPECT_FALSE(dir.has_value());
+    std::vector<Shell> shells;
+    shells.push_back(Shell(2, Point(2, 2), Direction::Left)); // Shell at same position
+    
+    EXPECT_TRUE(mockAlgorithm->testIsInDanger(board, position, shells));
 }
 
-TEST_F(AlgorithmTest, HasDirectLineOfSight_WrappingHorizontal) {
-    std::vector<std::string> boardLines = {
+TEST_F(AlgorithmTest, IsInDanger_ShellInPath) {
+    GameBoard board = create5X5TestBoard({
         "#####",
-        "#####",
-        "  #  ",
-        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
         "#####"
-    };
-    GameBoard board = create5X5TestBoard(boardLines);
+    });
+    Point position(2, 2);
     
-    auto dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(1, 2), Point(3, 2));
-    EXPECT_TRUE(dir.has_value());
-    EXPECT_EQ(dir.value(), Direction::Left);
+    std::vector<Shell> shells;
+    shells.push_back(Shell(2, Point(3, 2), Direction::Left)); // Shell will hit position
+    
+    EXPECT_TRUE(mockAlgorithm->testIsInDanger(board, position, shells, 1));
 }
 
-TEST_F(AlgorithmTest, HasDirectLineOfSight_WrappingVertical) {
-  std::vector<std::string> boardLines = {
-      "## ##",
-      "## ##",
-      "#####",
-      "## ##",
-      "## ##"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  
-  auto dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(2, 1), Point(2, 3));
-  EXPECT_TRUE(dir.has_value());
-  EXPECT_EQ(dir.value(), Direction::Up);
-}
-
-TEST_F(AlgorithmTest, HasDirectLineOfSight_WrappingDiagonal) {
-  std::vector<std::string> boardLines = {
-    "#### ",
-    "### #",
-    "#####",
-    "# ###",
-    " ####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  
-  auto dir = mockAlgorithm->testHasDirectLineOfSight(board, Point(3, 1), Point(1, 3));
-  EXPECT_TRUE(dir.has_value());
-  EXPECT_EQ(dir.value(), Direction::UpRight);
-}
-
-TEST_F(AlgorithmTest, HasLineOfSightInDirection_CorrectDirection) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#   #",
-      "#   #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  
-  // Test with correct directions
-  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(1, 2), Point(3, 2), Direction::Right));
-  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(2, 1), Point(2, 3), Direction::Down));
-  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(1, 1), Point(3, 3), Direction::DownRight));
-}
-
-TEST_F(AlgorithmTest, HasLineOfSightInDirection_WrongDirection) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#   #",
-      "#   #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  
-  EXPECT_FALSE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(1, 2), Point(3, 2), Direction::Left));
-  EXPECT_FALSE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(2, 1), Point(2, 3), Direction::Up));
-  EXPECT_FALSE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(1, 1), Point(3, 3), Direction::UpRight));
-}
-
-TEST_F(AlgorithmTest, HasLineOfSightInDirection_BlockedPath) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#   #",
-      "# # #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  
-  EXPECT_FALSE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(1, 2), Point(3, 2), Direction::Right));
-  EXPECT_FALSE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(2, 1), Point(2, 3), Direction::Down));
-  EXPECT_FALSE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(1, 1), Point(3, 3), Direction::DownRight));
-}
-
-TEST_F(AlgorithmTest, HasLineOfSightInDirection_Wrapping) {
-  // Create a 5x5 board with no walls
-  std::vector<std::string> boardLines = {
-      "     ",
-      "     ",
-      "     ",
-      "     ",
-      "     "
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  
-  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(4, 2), Point(0, 2), Direction::Right));
-  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(2, 4), Point(2, 0), Direction::Down));
-  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(4, 4), Point(0, 0), Direction::DownRight));
-}
-
-TEST_F(AlgorithmTest, HasLineOfSightInDirection_SamePoint) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#   #",
-      "#   #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  
-  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(2, 2), Point(2, 2), Direction::Right));
-  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(2, 2), Point(2, 2), Direction::Down));
-  EXPECT_TRUE(mockAlgorithm->testHasLineOfSightInDirection(board, Point(2, 2), Point(2, 2), Direction::UpLeft));
-}
-
-TEST_F(AlgorithmTest, IsPositionInDangerFromShells_NoShells) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#   #",
-      "#   #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Point position(2, 2);
-  std::vector<Shell> shells;
-  
-  EXPECT_FALSE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells));
-}
-
-TEST_F(AlgorithmTest, IsPositionInDangerFromShells_DestroyedShell) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#   #",
-      "#   #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Point position(2, 2);
-  
-  std::vector<Shell> shells;
-  Shell shell(2, Point(3, 2), Direction::Left);
-  shell.destroy();
-  shells.push_back(shell);
-  
-  EXPECT_FALSE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells));
-}
-
-TEST_F(AlgorithmTest, IsPositionInDangerFromShells_DirectHit) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#   #",
-      "#   #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Point position(2, 2);
-  
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(2, 2), Direction::Left)); // Shell at same position as tank
-  
-  EXPECT_TRUE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells));
-}
-
-TEST_F(AlgorithmTest, IsPositionInDangerFromShells_ImmediateImpact) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#   #",
-      "#   #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Point position(2, 2);
-  
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(3, 2), Direction::Left));
-  
-  EXPECT_TRUE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells, 1));
-}
-
-TEST_F(AlgorithmTest, IsPositionInDangerFromShells_FutureImpact) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#   #",
-      "#   #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Point position(2, 2);
-  
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(1, 2), Direction::Right));
-  
-  EXPECT_FALSE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells, 0));
-  EXPECT_TRUE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells, 1));
-}
-
-TEST_F(AlgorithmTest, IsPositionInDangerFromShells_DiagonalApproach) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#   #",
-      "#   #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Point position(2, 2);
-  
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(3, 3), Direction::UpLeft));
-  
-  EXPECT_TRUE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells, 2));
-}
-
-TEST_F(AlgorithmTest, IsPositionInDangerFromShells_ShellHitsWall) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#   #",
-      "# # #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Point position(2, 2);
-  
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(3, 2), Direction::Left));
-  
-  EXPECT_FALSE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells, 3));
-}
-
-TEST_F(AlgorithmTest, IsPositionInDangerFromShells_ShellWrapsAround) {
-  std::vector<std::string> boardLines = {
-      "     ",
-      "     ",
-      "     ",
-      "     ",
-      "     "
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Point position(2, 2);
-  
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(0, 2), Direction::Left));
-  
-  EXPECT_TRUE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells, 3));
-}
-
-TEST_F(AlgorithmTest, IsPositionInDangerFromShells_MultipleShells) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#   #",
-      "#   #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Point position(2, 2);
-  
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(4, 2), Direction::Left));
-  shells.push_back(Shell(2, Point(2, 0), Direction::Down));
-  
-  EXPECT_TRUE(mockAlgorithm->testIsPositionInDangerFromShells(board, position, shells, 2));
-}
-
-TEST_F(AlgorithmTest, FindSafeAction_NoShells) {
-  std::vector<std::string> boardLines = {
-    "     ",
-    "     ",
-    "  1  ",
-    "     ",
-    "     "
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 2), Direction::Right);
-  std::vector<Shell> shells;
-  
-  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::None);
-}
-
-TEST_F(AlgorithmTest, FindSafeAction_DestroyedTank) {
-  std::vector<std::string> boardLines = {
-      "     ",
-      "     ", 
-      "  1S ",
-      "     ",
-      "     "
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 2), Direction::Right);
-  tank.destroy();
-  
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(3, 2), Direction::Left));
-  
-  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::None);
-}
-
-TEST_F(AlgorithmTest, FindSafeAction_AlreadySafe) {
-  std::vector<std::string> boardLines = {
-      "     ",
-      "     ", 
-      "  1  ",
-      "   s ",
-      "     "
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 2), Direction::Right);
-  
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(3, 3), Direction::Up));
-  
-  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::None);
-}
-
-TEST_F(AlgorithmTest, FindSafeAction_ContinueBackwardMovement) {
-  std::vector<std::string> boardLines = {
+TEST_F(AlgorithmTest, IsInDanger_ShellFarInPath) {
+  GameBoard board = create5X5TestBoard({
       "## ##",
       "#   #",
       "#   #",
       "#   #",
-      "# 1 #"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 4), Direction::Right);
-  
-  tank.requestMoveBackward(Point(1, 4));
-  EXPECT_TRUE(tank.isMovingBackward());
+      "#   #",
+      "#####"
+  });
+  Point position(2, 4);
   
   std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(1, 2), Direction::Right));
+  shells.push_back(Shell(2, Point(2, 0), Direction::Down)); // Shell will hit position
   
-  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::None);
+  EXPECT_TRUE(mockAlgorithm->testIsInDanger(board, position, shells, 2));
 }
 
-TEST_F(AlgorithmTest, FindSafeAction_MoveForward) {
-  std::vector<std::string> boardLines = {
-      "     ",
-      "     ",
-      "  1  ",
-      "     ",
-      "     "
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 2), Direction::Down);
-  
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(0, 2), Direction::Right));
-  
-  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::MoveForward);
+TEST_F(AlgorithmTest, IsInDanger_ShellBlocked) {
+    GameBoard board = create5X5TestBoard({
+        "#####",
+        "#   #",
+        "# # #", // Wall at (2, 2)
+        "#   #",
+        "#####"
+    });
+    Point position(1, 2);
+    
+    std::vector<Shell> shells;
+    shells.push_back(Shell(2, Point(3, 2), Direction::Left)); // Shell would hit but blocked by wall
+    
+    EXPECT_FALSE(mockAlgorithm->testIsInDanger(board, position, shells, 2));
 }
 
-TEST_F(AlgorithmTest, FindSafeAction_MoveBackward) {
-  std::vector<std::string> boardLines = {
-      "     ",
-      "     ",
-      "     ",
-      "     ",
-      "  1# "
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 4), Direction::Right);
-  
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(2, 0), Direction::Down));
-  
-  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::MoveBackward);
+// Line of Sight Tests
+TEST_F(AlgorithmTest, GetLineOfSightDirection_DirectLine) {
+    GameBoard board = create5X5TestBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    
+    // Horizontal line of sight
+    auto result1 = mockAlgorithm->testGetLineOfSightDirection(board, Point(1, 2), Point(3, 2));
+    EXPECT_TRUE(result1.has_value());
+    EXPECT_EQ(result1.value(), Direction::Right);
+    
+    // Vertical line of sight
+    auto result2 = mockAlgorithm->testGetLineOfSightDirection(board, Point(2, 1), Point(2, 3));
+    EXPECT_TRUE(result2.has_value());
+    EXPECT_EQ(result2.value(), Direction::Down);
+    
+    // Diagonal line of sight
+    auto result3 = mockAlgorithm->testGetLineOfSightDirection(board, Point(1, 1), Point(3, 3));
+    EXPECT_TRUE(result3.has_value());
+    EXPECT_EQ(result3.value(), Direction::DownRight);
 }
 
-TEST_F(AlgorithmTest, FindSafeAction_RotateRightEighth) {
-  std::vector<std::string> boardLines = {
-      "     ",
-      "     ",
-      " # # ",
-      " #1# ",
-      " ##  "
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 3), Direction::Right);
-  
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(2, 0), Direction::Down));
-
-  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::RotateRightEighth);
+TEST_F(AlgorithmTest, GetLineOfSightDirection_BlockedLine) {
+    GameBoard board = create5X5TestBoard({
+        "#####",
+        "#   #",
+        "# # #", // Wall at (2, 2)
+        "#   #",
+        "#####"
+    });
+    
+    // Horizontal line blocked
+    auto result1 = mockAlgorithm->testGetLineOfSightDirection(board, Point(1, 2), Point(3, 2));
+    EXPECT_FALSE(result1.has_value());
+    
+    // Diagonal line blocked
+    auto result2 = mockAlgorithm->testGetLineOfSightDirection(board, Point(1, 1), Point(3, 3));
+    EXPECT_FALSE(result2.has_value());
 }
 
-TEST_F(AlgorithmTest, FindSafeAction_RotateLeftEighth) {
-  std::vector<std::string> boardLines = {
-    "     ",
-    "     ",
-    " #   ",
-    " #1# ",
-    " ### "
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 3), Direction::Right);
-  
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(2, 0), Direction::Down));
-  
-  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::RotateLeftEighth);
+TEST_F(AlgorithmTest, CheckLineOfSightInDirection_CorrectDirections) {
+    GameBoard board = create5X5TestBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    
+    // Same point
+    EXPECT_TRUE(mockAlgorithm->testCheckLineOfSightInDirection(
+        board, Point(2, 2), Point(2, 2), Direction::Up));
+    
+    // Correct directions
+    EXPECT_TRUE(mockAlgorithm->testCheckLineOfSightInDirection(
+        board, Point(1, 2), Point(3, 2), Direction::Right));
+    
+    EXPECT_TRUE(mockAlgorithm->testCheckLineOfSightInDirection(
+        board, Point(2, 1), Point(2, 3), Direction::Down));
+    
+    EXPECT_TRUE(mockAlgorithm->testCheckLineOfSightInDirection(
+        board, Point(1, 1), Point(3, 3), Direction::DownRight));
+    
+    // Wrong directions
+    EXPECT_FALSE(mockAlgorithm->testCheckLineOfSightInDirection(
+        board, Point(1, 2), Point(3, 2), Direction::Left));
+    
+    EXPECT_FALSE(mockAlgorithm->testCheckLineOfSightInDirection(
+        board, Point(1, 1), Point(3, 3), Direction::Up));
 }
 
-TEST_F(AlgorithmTest, FindSafeAction_RotateRightQuarter) {
-  std::vector<std::string> boardLines = {
-    "     ",
-    "     ",
-    "  ###",
-    "s  1#",
-    "  # #"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(3, 3), Direction::Right);
-  
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(0, 3), Direction::Right));
-  
-  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::RotateRightQuarter);
+// Safe Move Tests
+TEST_F(AlgorithmTest, GetSafeMoveOptions_AllOptionsSafe) {
+    GameBoard board = create5X5TestBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    
+    Tank tank(1, Point(2, 2), Direction::Right);
+    Tank enemyTank(2, Point(4, 4), Direction::Left);
+    std::vector<Shell> shells;
+    
+    auto options = mockAlgorithm->testGetSafeMoveOptions(board, tank, enemyTank, shells);
+    
+    // (7 directions + 1 forward + 1 backward)
+    EXPECT_EQ(options.size(), 9);
+    
+    // Forward should be the cheapest option
+    bool foundForward = false;
+    for (const auto& option : options) {
+        if (option.action == Action::MoveForward) {
+            EXPECT_EQ(option.stepCost, 1); // Forward costs 1 step
+            foundForward = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(foundForward);
+    
+    // Backward should be the most expensive
+    bool foundBackward = false;
+    for (const auto& option : options) {
+        if (option.action == Action::MoveBackward) {
+            EXPECT_EQ(option.stepCost, 3); // Initial backward costs 3 steps
+            foundBackward = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(foundBackward);
 }
 
-TEST_F(AlgorithmTest, FindSafeAction_RotateLeftQuarter) {
-  std::vector<std::string> boardLines = {
-    "     ",
-    "     ",
-    "# #  ",
-    "#1  s",
-    "###  "
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(1, 3), Direction::Right);
-  
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(0, 3), Direction::Left));
-  
-  // Should rotate left by 1/4 to face up
-  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::RotateLeftQuarter);
+TEST_F(AlgorithmTest, GetSafeMoveOptions_SomeOptionsBlocked) {
+    GameBoard board = create5X5TestBoard({
+        "#####",
+        "#   #",
+        "# # #", // Wall at (2, 2)
+        "#   #",
+        "#####"
+    });
+    
+    Tank tank(1, Point(1, 2), Direction::Right);
+    Tank enemyTank(2, Point(4, 4), Direction::Left);
+    std::vector<Shell> shells;
+    
+    auto options = mockAlgorithm->testGetSafeMoveOptions(board, tank, enemyTank, shells);
+    
+    // Forward is blocked by wall, so it shouldn't be an option
+    for (const auto& option : options) {
+        EXPECT_NE(option.action, Action::MoveForward);
+    }
 }
 
-TEST_F(AlgorithmTest, FindSafeAction_NoSafeMove) {
-  std::vector<std::string> boardLines = {
-      "     ",
-      "     ",
-      "  1  ",
-      "     ",
-      "     "
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(2, 2), Direction::Right);
+TEST_F(AlgorithmTest, GetSafeMoveOptions_DangerousOptions) {
+    GameBoard board = create5X5TestBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    
+    Tank tank(1, Point(2, 2), Direction::Right);
+    Tank enemyTank(2, Point(4, 4), Direction::Left);
+    std::vector<Shell> shells;
+    
+    // Shell that will hit position (3, 2) - forward position
+    shells.push_back(Shell(2, Point(4, 2), Direction::Left));
+    
+    auto options = mockAlgorithm->testGetSafeMoveOptions(board, tank, enemyTank, shells);
+    
+    // Forward should not be an option as it's dangerous
+    for (const auto& option : options) {
+        EXPECT_NE(option.position, Point(3, 2));
+    }
+}
+
+TEST_F(AlgorithmTest, FindOptimalSafeMove_SelectsCheapest) {
+    GameBoard board = create5X5TestBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    
+    // Tank currently facing Right
+    Tank tank(1, Point(2, 2), Direction::Right);
+    Tank enemyTank(2, Point(4, 4), Direction::Left);
+    std::vector<Shell> shells;
+    
+    // Add a shell that endangers the current position but not forward
+    shells.push_back(Shell(2, Point(2, 4), Direction::Up));
+    
+    // Forward should be the optimal move
+    Action result = mockAlgorithm->testFindOptimalSafeMove(board, tank, enemyTank, shells);
+    EXPECT_EQ(result, Action::MoveForward);
+    
+    // Now block forward and endanger right side
+    shells.clear();
+    shells.push_back(Shell(2, Point(4, 2), Direction::Left));
+    
+    // Rotate to a different direction
+    result = mockAlgorithm->testFindOptimalSafeMove(board, tank, enemyTank, shells);
+    EXPECT_NE(result, Action::MoveForward);
+}
+
+TEST_F(AlgorithmTest, GetSafeMoveOptions_AvoidEnemyTankCollision) {
+  GameBoard board = create5X5TestBoard({
+      "#####",
+      "#   #",
+      "#   #",
+      "#   #",
+      "#####"
+  });
   
+  Tank myTank(1, Point(2, 2), Direction::Right);
+  Tank enemyTank(2, Point(3, 2), Direction::Left); // Enemy right in front
   std::vector<Shell> shells;
-  // Shells surrounding the tank from all directions
-  for (int x = 1; x <= 3; x++) {
-      for (int y = 1; y <= 3; y++) {
-          if (x != 2 || y != 2) { // Skip tank's position
-              Point shellPos(x, y);
-              Direction shellDir;
-              if (x < 2) shellDir = Direction::Right;
-              else if (x > 2) shellDir = Direction::Left;
-              else if (y < 2) shellDir = Direction::Down;
-              else shellDir = Direction::Up;
-              shells.push_back(Shell(2, shellPos, shellDir));
-          }
+  
+  auto options = mockAlgorithm->testGetSafeMoveOptions(board, myTank, enemyTank, shells, false);
+  
+  // Forward should not be an option due to enemy tank
+  for (const auto& option : options) {
+      EXPECT_NE(option.position, enemyTank.getPosition());
+  }
+}
+
+TEST_F(AlgorithmTest, GetSafeMoveOptions_AvoidEnemySight) {
+  GameBoard board = create5X5TestBoard({
+      "#####",
+      "#   #",
+      "#   #",
+      "#   #",
+      "#####"
+  });
+  
+  Tank myTank(1, Point(1, 2), Direction::Right);
+  Tank enemyTank(2, Point(3, 2), Direction::Left); // Enemy with line of sight
+  std::vector<Shell> shells;
+  
+  // First without line of sight avoidance
+  auto optionsWithoutAvoidance = mockAlgorithm->testGetSafeMoveOptions(
+      board, myTank, enemyTank, shells, false);
+  
+  // Should include positions in enemy's line of sight
+  bool includesExposedPositions = false;
+  for (const auto& option : optionsWithoutAvoidance) {
+      if (option.position.x == 2 && option.position.y == 2) {
+          includesExposedPositions = true;
+          break;
       }
   }
+  EXPECT_TRUE(includesExposedPositions);
   
-  // No safe move available
-  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::None);
-}
-
-TEST_F(AlgorithmTest, FindSafeAction_MoreThanOneRotationNeeded) {
-  std::vector<std::string> boardLines = {
-    "     ",
-    "     ",
-    "###  ",
-    "#1  s",
-    " ##  "
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  Tank tank(1, Point(1, 3), Direction::Up);
+  // Now with line of sight avoidance
+  auto optionsWithAvoidance = mockAlgorithm->testGetSafeMoveOptions(
+      board, myTank, enemyTank, shells, true);
   
-  std::vector<Shell> shells;
-  shells.push_back(Shell(2, Point(0, 3), Direction::Left));
-  
-  EXPECT_EQ(mockAlgorithm->testFindSafeAction(board, tank, shells), Action::RotateLeftQuarter);
-}
-
-
-
-TEST_F(AlgorithmTest, CanShootEnemy_NoLineOfSight) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#1#2#",
-      "#   #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-
-  Tank myTank(1, Point(1, 1), Direction::Right);
-  Tank enemyTank(2, Point(3, 1), Direction::Left);
-  
-  EXPECT_FALSE(mockAlgorithm->testCanShootEnemy(board, myTank, enemyTank));
-}
-
-TEST_F(AlgorithmTest, CanShootEnemy_LineOfSightWrongDirection) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#1 2#",
-      "#   #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  
-  Tank myTank(1, Point(1, 1), Direction::Down);  
-  Tank enemyTank(2, Point(3, 1), Direction::Left);
-  
-  EXPECT_FALSE(mockAlgorithm->testCanShootEnemy(board, myTank, enemyTank));
-}
-
-TEST_F(AlgorithmTest, CanShootEnemy_LineOfSightCorrectDirection) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#1 2#",
-      "#   #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  
-  Tank myTank(1, Point(1, 1), Direction::Right);
-  Tank enemyTank(2, Point(3, 1), Direction::Left);
-  
-  EXPECT_TRUE(mockAlgorithm->testCanShootEnemy(board, myTank, enemyTank));
-}
-
-TEST_F(AlgorithmTest, CanShootEnemy_TankDestroyed) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#1 2#",
-      "#   #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  
-  Tank myTank(1, Point(1, 1), Direction::Right);
-  myTank.destroy();
-  Tank enemyTank(2, Point(3, 1), Direction::Left);
-  
-  EXPECT_FALSE(mockAlgorithm->testCanShootEnemy(board, myTank, enemyTank));
-  
-  myTank = Tank(1, Point(1, 1), Direction::Right);
-  enemyTank.destroy();
-  
-  EXPECT_FALSE(mockAlgorithm->testCanShootEnemy(board, myTank, enemyTank));
-}
-
-TEST_F(AlgorithmTest, CanShootEnemy_NoShells) {
-  std::vector<std::string> boardLines = {
-      "#####",
-      "#1 2#",
-      "#   #",
-      "#   #",
-      "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  
-  Tank myTank(1, Point(1, 1), Direction::Right);
-  // Use all shells
-  for (int i = 0; i < Tank::INITIAL_SHELLS; i++) {
-      myTank.decrementShells();
+  // Should not include positions in enemy's line of sight
+  includesExposedPositions = false;
+  for (const auto& option : optionsWithAvoidance) {
+      bool isExposed = mockAlgorithm->testIsExposedToEnemy(board, option.position, enemyTank);
+      if (isExposed) {
+          includesExposedPositions = true;
+          break;
+      }
   }
-  Tank enemyTank(2, Point(3, 1), Direction::Left);
-  
-  EXPECT_FALSE(mockAlgorithm->testCanShootEnemy(board, myTank, enemyTank));
+  EXPECT_FALSE(includesExposedPositions);
 }
 
-TEST_F(AlgorithmTest, CanShootEnemy_ShootCooldown) {
-  std::vector<std::string> boardLines = {
+// New test for IsExposedToEnemy
+TEST_F(AlgorithmTest, IsExposedToEnemy_DetectsLineOfSight) {
+  GameBoard board = create5X5TestBoard({
       "#####",
-      "#1 2#",
+      "#   #",
       "#   #",
       "#   #",
       "#####"
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
+  });
   
-  Tank myTank(1, Point(1, 1), Direction::Right);
-  myTank.shoot();  // Activate the cooldown
-  Tank enemyTank(2, Point(3, 1), Direction::Left);
+  Tank enemyTank(2, Point(1, 2), Direction::Right);
   
-  EXPECT_FALSE(mockAlgorithm->testCanShootEnemy(board, myTank, enemyTank));
+  // Position directly in line of sight
+  EXPECT_TRUE(mockAlgorithm->testIsExposedToEnemy(board, Point(3, 2), enemyTank));
+  
+  // Position behind a wall
+  board.setCellType(Point(2, 2), GameBoard::CellType::Wall);
+  EXPECT_FALSE(mockAlgorithm->testIsExposedToEnemy(board, Point(3, 2), enemyTank));
+  
+  // Position not in line with enemy
+  EXPECT_FALSE(mockAlgorithm->testIsExposedToEnemy(board, Point(2, 4), enemyTank));
+  
+  // Enemy destroyed
+  Tank destroyedTank(2, Point(1, 2), Direction::Right);
+  destroyedTank.destroy();
+  EXPECT_FALSE(mockAlgorithm->testIsExposedToEnemy(board, Point(3, 2), destroyedTank));
 }
 
-TEST_F(AlgorithmTest, CanShootEnemy_WrappingLineOfSight) {
-  std::vector<std::string> boardLines = {
-      "     ",
-      "1   2",
-      "     ",
-      "     ",
-      "     "
-  };
-  GameBoard board = create5X5TestBoard(boardLines);
-  
-  Tank myTank(1, Point(0, 1), Direction::Left);
-  Tank enemyTank(2, Point(4, 1), Direction::Right);
-  
-  EXPECT_TRUE(mockAlgorithm->testCanShootEnemy(board, myTank, enemyTank));
+TEST_F(AlgorithmTest, CalculateMoveCost_AlreadyFacingTarget) {
+    Tank tank(1, Point(2, 2), Direction::Right);
+    
+    // Already facing target direction
+    int cost = mockAlgorithm->testCalculateMoveCost(tank, Point(3, 2), Direction::Right);
+    EXPECT_EQ(cost, 1);
+}
+
+TEST_F(AlgorithmTest, CalculateMoveCost_SingleRotation) {
+    Tank tank(1, Point(2, 2), Direction::Right);
+    
+    // 1/8 turn (45 degrees)
+    int cost1 = mockAlgorithm->testCalculateMoveCost(tank, Point(3, 3), Direction::DownRight);
+    EXPECT_EQ(cost1, 2);  // 1 rotate + 1 move
+    
+    // 1/4 turn (90 degrees)
+    int cost2 = mockAlgorithm->testCalculateMoveCost(tank, Point(2, 3), Direction::Down);
+    EXPECT_EQ(cost2, 2);  // 1 rotate + 1 move
+}
+
+TEST_F(AlgorithmTest, CalculateMoveCost_MultipleRotations) {
+    Tank tank(1, Point(2, 2), Direction::Right);
+    
+    // 3/8 turn (135 degrees)
+    int cost1 = mockAlgorithm->testCalculateMoveCost(tank, Point(1, 3), Direction::DownLeft);
+    EXPECT_EQ(cost1, 3);  // 2 rotates + 1 move
+    
+    // 1/2 turn (180 degrees)
+    int cost2 = mockAlgorithm->testCalculateMoveCost(tank, Point(1, 2), Direction::Left);
+    EXPECT_EQ(cost2, 3);  // 2 rotates + 1 move
+}
+
+// Targeting Tests
+TEST_F(AlgorithmTest, CanHitTarget_InLineOfSight) {
+    GameBoard board = create5X5TestBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    
+    Tank tank(1, Point(1, 2), Direction::Right);
+    
+    // Target in line of sight
+    EXPECT_TRUE(mockAlgorithm->testCanHitTarget(board, tank, Point(3, 2)));
+    
+    // Target not in line with direction
+    EXPECT_FALSE(mockAlgorithm->testCanHitTarget(board, tank, Point(1, 3)));
+    
+    // Target blocked by wall
+    board.setCellType(Point(2, 2), GameBoard::CellType::Wall);
+    EXPECT_FALSE(mockAlgorithm->testCanHitTarget(board, tank, Point(3, 2)));
+}
+
+TEST_F(AlgorithmTest, CanHitTarget_CooldownAndShells) {
+    GameBoard board = create5X5TestBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    
+    Tank tank(1, Point(1, 2), Direction::Right);
+    
+    // With cooldown
+    tank.shoot();  // Activates cooldown
+    EXPECT_FALSE(mockAlgorithm->testCanHitTarget(board, tank, Point(3, 2)));
+    
+    // With no shells
+    Tank emptyTank(1, Point(1, 2), Direction::Right);
+    for (int i = 0; i < Tank::INITIAL_SHELLS; i++) {
+        emptyTank.decrementShells();
+    }
+    EXPECT_FALSE(mockAlgorithm->testCanHitTarget(board, emptyTank, Point(3, 2)));
+}
+
+TEST_F(AlgorithmTest, GetRotationToDirection_SingleRotation) {
+    // 1/8 turns
+    EXPECT_EQ(mockAlgorithm->testGetRotationToDirection(Direction::Up, Direction::UpRight), 
+              Action::RotateRightEighth);
+    EXPECT_EQ(mockAlgorithm->testGetRotationToDirection(Direction::Up, Direction::UpLeft), 
+              Action::RotateLeftEighth);
+    
+    // 1/4 turns
+    EXPECT_EQ(mockAlgorithm->testGetRotationToDirection(Direction::Up, Direction::Right), 
+              Action::RotateRightQuarter);
+    EXPECT_EQ(mockAlgorithm->testGetRotationToDirection(Direction::Up, Direction::Left), 
+              Action::RotateLeftQuarter);
+}
+
+TEST_F(AlgorithmTest, GetRotationToDirection_MultipleRotations) {
+    // Multiple steps - should return first rotation in optimal direction
+    
+    // 3/8 turn (need 3 eighth turns) - should use quarter then eighth
+    EXPECT_EQ(mockAlgorithm->testGetRotationToDirection(Direction::Up, Direction::DownRight), 
+              Action::RotateRightQuarter);
+    
+    // 1/2 turn (need 4 eighth turns) - should use quarter
+    EXPECT_EQ(mockAlgorithm->testGetRotationToDirection(Direction::Up, Direction::Down), 
+              Action::RotateRightQuarter);
+    
+    // 5/8 turn (need 5 eighth turns) - shorter to go other way (3 eighth turns)
+    EXPECT_EQ(mockAlgorithm->testGetRotationToDirection(Direction::Up, Direction::DownLeft), 
+              Action::RotateLeftQuarter);
+}
+
+TEST_F(AlgorithmTest, EvaluateOffensiveOptions_CanShoot) {
+    GameBoard board = create5X5TestBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    
+    Tank myTank(1, Point(1, 2), Direction::Right);
+    Tank enemyTank(2, Point(3, 2), Direction::Left);
+    
+    Action action = mockAlgorithm->testEvaluateOffensiveOptions(board, myTank, enemyTank);
+    EXPECT_EQ(action, Action::Shoot);
+}
+
+TEST_F(AlgorithmTest, EvaluateOffensiveOptions_NeedRotation) {
+    GameBoard board = create5X5TestBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    
+    Tank myTank(1, Point(1, 2), Direction::Down);
+    Tank enemyTank(2, Point(3, 2), Direction::Left);
+    
+    Action action = mockAlgorithm->testEvaluateOffensiveOptions(board, myTank, enemyTank);
+    EXPECT_EQ(action, Action::RotateLeftQuarter);
+}
+
+TEST_F(AlgorithmTest, EvaluateOffensiveOptions_NoOptions) {
+    GameBoard board = create5X5TestBoard({
+        "#####",
+        "#   #",
+        "# # #", // Wall at (2, 2)
+        "#   #",
+        "#####"
+    });
+    
+    Tank myTank(1, Point(1, 2), Direction::Right);
+    Tank enemyTank(2, Point(3, 2), Direction::Left);
+    
+    Action action = mockAlgorithm->testEvaluateOffensiveOptions(board, myTank, enemyTank);
+    EXPECT_EQ(action, Action::None);
 }

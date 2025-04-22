@@ -39,25 +39,4 @@ public:
         const Tank& enemyTank,
         const std::vector<Shell>& shells
     ) override;
-private:
-    /**
-     * @brief Find an action to move out of the enemy's line of sight
-     * 
-     * Checks adjacent positions and chooses one that:
-     * 1. Is not in the enemy's line of sight
-     * 2. Is not in danger from shells
-     * 3. Requires minimal rotation to reach
-     * 
-     * @param gameBoard The current game board state
-     * @param myTank The tank controlled by this algorithm
-     * @param enemyTank The opponent's tank
-     * @param shells All active shells on the board
-     * @return Action to move out of line of sight, or Action::None if not possible
-     */
-    Action moveOutOfLineOfSight(
-      const GameBoard& gameBoard,
-      const Tank& myTank,
-      const Tank& enemyTank,
-      const std::vector<Shell>& shells
-  ) const;
 };
