@@ -82,3 +82,51 @@ TEST(PointTest, StreamInsertionOperator) {
     oss << p;
     EXPECT_EQ(oss.str(), "(3,4)");
 }
+
+
+TEST(PointTest, ManhattanDistance) {
+  Point p1(1, 2);
+  Point p2(4, 6);
+  
+  int distance = Point::manhattanDistance(p1, p2);
+  EXPECT_EQ(distance, 7); // |4-1| + |6-2| = 3 + 4 = 7
+}
+
+TEST(PointTest, ManhattanDistanceWithNegativeCoordinates) {
+  Point p1(-2, 3);
+  Point p2(5, -1);
+  
+  int distance = Point::manhattanDistance(p1, p2);
+  EXPECT_EQ(distance, 11); // |5-(-2)| + |(-1)-3| = 7 + 4 = 11
+}
+
+TEST(PointTest, EuclideanDistance) {
+  Point p1(0, 0);
+  Point p2(3, 4);
+  
+  double distance = Point::euclideanDistance(p1, p2);
+  EXPECT_DOUBLE_EQ(distance, 5.0); // sqrt(3² + 4²) = sqrt(9 + 16) = sqrt(25) = 5
+}
+
+TEST(PointTest, EuclideanDistanceFloatingPoint) {
+  Point p1(1, 1);
+  Point p2(4, 5);
+  
+  double distance = Point::euclideanDistance(p1, p2);
+  EXPECT_DOUBLE_EQ(distance, 5.0); // sqrt((4-1)² + (5-1)²) = sqrt(9 + 16) = sqrt(25) = 5
+}
+
+TEST(PointTest, EdgeCases) {
+  // Testing with large values
+  Point p1(1000000, 2000000);
+  Point p2(3000000, 5000000);
+  
+  EXPECT_EQ(Point::manhattanDistance(p1, p2), 5000000);
+  
+  // Testing with zero difference
+  Point p3(42, 42);
+  Point p4(42, 42);
+  
+  EXPECT_EQ(Point::manhattanDistance(p3, p4), 0);
+  EXPECT_DOUBLE_EQ(Point::euclideanDistance(p3, p4), 0.0);
+}
