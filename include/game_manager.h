@@ -43,7 +43,9 @@ public:
      * @param filePath Path to the board file
      * @return true if initialization was successful, false otherwise
      */
-    bool initialize(const std::string& filePath);
+    bool initialize(const std::string& filePath,
+                    Algorithm* player1Algorithm = nullptr,
+                    Algorithm* player2Algorithm = nullptr);
     
     /**
      * @brief Run the game loop until completion
@@ -144,7 +146,7 @@ private:
     /**
      * @brief Create algorithm instances for both players
      */
-    void createAlgorithms();
+    void createAlgorithms(Algorithm* player1Algorithm, Algorithm* player2Algorithm);
 
     /**
      * @brief Create tanks based on the current board state

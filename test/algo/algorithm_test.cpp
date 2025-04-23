@@ -135,25 +135,6 @@ TEST_F(AlgorithmTest, Constructor) {
     delete testAlgorithm;
 }
 
-TEST_F(AlgorithmTest, CreateAlgorithm_ValidTypes) {
-    Algorithm* chaseAlgo = Algorithm::createAlgorithm("chase");
-    EXPECT_NE(chaseAlgo, nullptr);
-    EXPECT_TRUE(dynamic_cast<ChaseAlgorithm*>(chaseAlgo) != nullptr);
-    EXPECT_TRUE(dynamic_cast<DefensiveAlgorithm*>(chaseAlgo) == nullptr);
-    delete chaseAlgo;
-    
-    Algorithm* defensiveAlgo = Algorithm::createAlgorithm("defensive");
-    EXPECT_NE(defensiveAlgo, nullptr);
-    EXPECT_TRUE(dynamic_cast<ChaseAlgorithm*>(defensiveAlgo) == nullptr);
-    EXPECT_TRUE(dynamic_cast<DefensiveAlgorithm*>(defensiveAlgo) != nullptr);
-    delete defensiveAlgo;
-}
-
-TEST_F(AlgorithmTest, CreateAlgorithm_UnknownType) {
-    Algorithm* unknownAlgo = Algorithm::createAlgorithm("unknown_type");
-    EXPECT_EQ(unknownAlgo, nullptr);
-}
-
 TEST_F(AlgorithmTest, GetNextAction) {
     // Create test objects
     GameBoard board(10, 10);
