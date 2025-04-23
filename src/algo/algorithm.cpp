@@ -10,15 +10,6 @@ Algorithm::Algorithm() {
 Algorithm::~Algorithm() {
 }
 
-Algorithm* Algorithm::createAlgorithm(const std::string& type) {
-    if (type == "chase") {
-      return new ChaseAlgorithm();
-    } else if (type == "defensive") {
-      return new DefensiveAlgorithm();
-    }
-    return nullptr;
-}
-
 bool Algorithm::isInDanger(const GameBoard& gameBoard, const Tank& tank, 
                          const std::vector<Shell>& shells, int lookAheadSteps) const {
     return isInDanger(gameBoard, tank.getPosition(), shells, lookAheadSteps);

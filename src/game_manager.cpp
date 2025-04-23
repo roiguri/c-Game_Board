@@ -1,6 +1,8 @@
 #include "game_manager.h"
 #include "file_loader.h"
 #include "collision_handler.h"
+#include "algo/chase_algorithm.h"
+#include "algo/defensive_algorithm.h"
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -41,7 +43,9 @@ GameBoard GameManager::getGameBoard() const {
     return m_board;
 }
 
-bool GameManager::initialize(const std::string& filePath) {
+bool GameManager::initialize(const std::string& filePath,
+                             Algorithm* player1Algorithm,
+                             Algorithm* player2Algorithm) {
     // Load board file
     int boardWidth = 0;
     int boardHeight = 0;
@@ -65,7 +69,7 @@ bool GameManager::initialize(const std::string& filePath) {
     }
     
     createTanks(tankPositions);
-    createAlgorithms();
+    createAlgorithms(player1Algorithm, player2Algorithm);
     return true;
 }
 
@@ -408,9 +412,10 @@ void GameManager::logAction(int playerId, Action action, bool valid) {
   m_gameLog.push_back(logEntry);
 }
 
-void GameManager::createAlgorithms() {
-    m_player1Algorithm = Algorithm::createAlgorithm("chase");
-    m_player2Algorithm = Algorithm::createAlgorithm("defensive");
+// TODO: Consider not having a fallback algorithm
+void GameManager::createAlgorithms(Algorithm* player1Algorithm, Algorithm* player2Algorithm) {
+  m_player1Algorithm = player1Algorithm ? player1Algorithm : new ChaseAlgorithm();
+  m_player2Algorithm = player2Algorithm ? player2Algorithm : new DefensiveAlgorithm();
 }
 
 void GameManager::createTanks(std::vector<std::pair<int, Point>> tankPositions) {

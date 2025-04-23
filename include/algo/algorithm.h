@@ -43,14 +43,6 @@ public:
         const Tank& enemyTank,
         const std::vector<Shell>& shells
     ) = 0;
-    
-    /**
-     * @brief Factory method to create algorithm instances
-     * 
-     * @param type String identifier for the algorithm type
-     * @return Pointer to the new algorithm instance
-     */
-    static Algorithm* createAlgorithm(const std::string& type);
 protected:
     bool isInDanger(const GameBoard& gameBoard, const Tank& tank, 
                    const std::vector<Shell>& shells, int lookAheadSteps = 3) const;
