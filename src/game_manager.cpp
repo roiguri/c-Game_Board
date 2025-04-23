@@ -19,8 +19,8 @@ GameManager::GameManager()
 }
 
 GameManager::~GameManager() {
-    // Clean up resources
-    cleanup();
+    delete m_player1Algorithm;
+    delete m_player2Algorithm;
 
     #ifdef ENABLE_VISUALIZATION
     m_visualizationManager.reset();
@@ -411,15 +411,6 @@ void GameManager::logAction(int playerId, Action action, bool valid) {
 void GameManager::createAlgorithms() {
     m_player1Algorithm = Algorithm::createAlgorithm("chase");
     m_player2Algorithm = Algorithm::createAlgorithm("defensive");
-}
-
-void GameManager::cleanup() {
-    // Free algorithm resources
-    delete m_player1Algorithm;
-    m_player1Algorithm = nullptr;
-    
-    delete m_player2Algorithm;
-    m_player2Algorithm = nullptr;
 }
 
 void GameManager::createTanks(std::vector<std::pair<int, Point>> tankPositions) {

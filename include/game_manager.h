@@ -145,11 +145,6 @@ private:
      * @brief Create algorithm instances for both players
      */
     void createAlgorithms();
-    
-    /**
-     * @brief Clean up resources before destruction
-     */
-    void cleanup();
 
     /**
      * @brief Create tanks based on the current board state
