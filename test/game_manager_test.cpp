@@ -811,10 +811,13 @@ TEST_F(GameManagerTest, ProcessStep_waitForCooldown) {
     testProcessStep(manager);
     EXPECT_EQ(manager.getShells().size(), 2);
     EXPECT_EQ(manager.getTanks()[0].getPosition(), Point(1, 1));
-    EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(25-i, 1));
+    EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(24, 1));
   }
+  EXPECT_EQ(manager.getTanks()[0].getDirection(), Direction::Right);
+  EXPECT_EQ(manager.getTanks()[1].getDirection(), Direction::Up);
   testProcessStep(manager);
-  EXPECT_EQ(manager.getShells().size(), 4);
+  // tanks can shoot again (only one of the tanks is in direction)
+  EXPECT_EQ(manager.getShells().size(), 3);
 }
 
 TEST_F(GameManagerTest, GameManagerTest_maximumSteps) {
