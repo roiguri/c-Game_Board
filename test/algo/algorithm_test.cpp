@@ -5,21 +5,7 @@
 #include "game_board.h"
 #include "tank.h"
 #include "shell.h"
-
-class MockAlgorithm : public Algorithm {
-public:
-    MockAlgorithm() : Algorithm() {}
-    
-    virtual Action getNextAction(
-        const GameBoard& gameBoard,
-        const Tank& myTank,
-        const Tank& enemyTank,
-        const std::vector<Shell>& shells
-    ) override {
-        // Simple implementation for testing
-        return Action::None;
-    }
-};
+#include "test/mock_algorithm.h"
 
 class AlgorithmTest : public ::testing::Test {
 protected:
