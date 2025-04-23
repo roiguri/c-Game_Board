@@ -98,4 +98,7 @@ protected:
     
     Action evaluateOffensiveOptions(const GameBoard& gameBoard, const Tank& myTank, 
                                    const Tank& enemyTank) const;
+
+    // Expose methods for testing
+    friend class AlgorithmTest;
 };
