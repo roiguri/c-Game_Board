@@ -4,9 +4,6 @@
 #include "algo/chase_algorithm.h"
 #include "algo/defensive_algorithm.h"
 
-// TODO: move to Direction enum or remove
-const int NUM_DIRECTIONS = sizeof(ALL_DIRECTIONS) / sizeof(ALL_DIRECTIONS[0]);
-
 Algorithm::Algorithm() {
 }
 
