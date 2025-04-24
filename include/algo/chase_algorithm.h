@@ -51,7 +51,7 @@ private:
     void updatePathToTarget(const GameBoard& gameBoard, const Point& start, 
                            const Point& target);
     
-    Action followCurrentPath(const GameBoard& gameBoard, const Tank& myTank) const;
+    Action followCurrentPath(const GameBoard& gameBoard, const Tank& myTank, const std::vector<Shell>& shells);
     
     std::vector<Point> findPathBFS(const GameBoard& gameBoard, const Point& start, 
                                   const Point& target) const;

@@ -73,8 +73,6 @@ Action Algorithm::findOptimalSafeMove(
     return options[0].action;
 }
 
-// TODO: to many options considered
-// TODO: add mine to checks
 std::vector<Algorithm::SafeMoveOption> Algorithm::getSafeMoveOptions(
     const GameBoard& gameBoard, 
     const Tank& tank,

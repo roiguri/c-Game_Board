@@ -2,12 +2,11 @@
 #include "utils/direction.h"
 #include <algorithm>
 #include <set>
+#include <iostream>
 
 ChaseAlgorithm::ChaseAlgorithm() : m_lastTargetPosition(-1, -1) {}
 
-ChaseAlgorithm::~ChaseAlgorithm() {
-    // TODO: remove if not needed
-}
+ChaseAlgorithm::~ChaseAlgorithm() {}
 
 Action ChaseAlgorithm::getNextAction(
     const GameBoard& gameBoard,
@@ -28,7 +27,6 @@ Action ChaseAlgorithm::getNextAction(
         return Action::Shoot;
     }
     
-    // TODO: Consider removing this priority
     // Priority 3: Rotate to face enemy if we have line of sight
     auto lineOfSightDir = getLineOfSightDirection(gameBoard, myTank.getPosition(), enemyTank.getPosition());
     if (lineOfSightDir.has_value()) {
@@ -42,7 +40,7 @@ Action ChaseAlgorithm::getNextAction(
     updatePathToTarget(gameBoard, myTank.getPosition(), enemyTank.getPosition());
     
     if (!m_currentPath.empty()) {
-        return followCurrentPath(gameBoard, myTank);
+        return followCurrentPath(gameBoard, myTank, shells);
     }
     
     return (myTank.getPosition().x % 2 == 0) ? 
@@ -54,47 +52,56 @@ void ChaseAlgorithm::updatePathToTarget(const GameBoard& gameBoard, const Point&
     // Recalculate path if:
     // 1. Current path is empty
     // 2. Target has moved since last calculation
-    bool needNewPath = m_currentPath.empty() || target != m_lastTargetPosition;
+    bool needNewPath = m_currentPath.empty() || (Point::euclideanDistance(m_lastTargetPosition, target) > 1.5);
     
     if (needNewPath) {
         m_currentPath = findPathBFS(gameBoard, start, target);
-        m_lastTargetPosition = target;
-    }
-    
-    // Check if the next step in our path is still valid
-    // TODO: change to check if the step is still safe
-    if (!m_currentPath.empty()) {
-        Point nextStep = m_currentPath.front();
-        if (!gameBoard.canMoveTo(nextStep)) {
-            // Path is now blocked, need to recalculate
-            m_currentPath.clear();
-            m_lastTargetPosition = Point(-1, -1);
+        std::cout << "Path size: " << m_currentPath.size() << std::endl;
+        std::cout << "Path: " << std::endl;
+        for (const auto& point : m_currentPath) {
+            std::cout << point << std::endl;
         }
+        m_lastTargetPosition = target;
     }
 }
 
-Action ChaseAlgorithm::followCurrentPath(const GameBoard& gameBoard, const Tank& myTank) const {
+Action ChaseAlgorithm::followCurrentPath(
+  const GameBoard& gameBoard, 
+  const Tank& myTank,
+  const std::vector<Shell>& shells
+) {
     if (m_currentPath.empty()) {
         return Action::None;
     }
     
     Point nextPoint = m_currentPath.front();
-    
-    // TODO: consider this
-    // Check if the next point is directly adjacent to our current position
-    auto directionOpt = getLineOfSightDirection(gameBoard, myTank.getPosition(), nextPoint);
-    if (!directionOpt.has_value()) {
+
+    if (myTank.getPosition() == nextPoint) {
+      // Remove this point and move to the next one
+      if (m_currentPath.size() > 1) {
+          m_currentPath.erase(m_currentPath.begin());
+          nextPoint = m_currentPath.front();
+      } else {
+          m_currentPath.clear();
+          return Action::None;
+      }
+    }
+
+    if (isInDanger(gameBoard, nextPoint, shells, 2)) {
         return Action::None;
     }
     
-    Direction targetDirection = directionOpt.value();
+    Direction targetDirection = getLineOfSightDirection(gameBoard, myTank.getPosition(), nextPoint).value();
     if (targetDirection != myTank.getDirection()) {
+        std::cout << "Rotating to: " << targetDirection << std::endl;
+        std::cout << "Current direction: " << myTank.getDirection() << std::endl;
+        std::cout << "Current position: " << myTank.getPosition() << std::endl;
+        std::cout << "Next point: " << nextPoint << std::endl;
         return getRotationToDirection(myTank.getDirection(), targetDirection);
     }
     return Action::MoveForward;
 }
 
-// TODO: make sure that we always check next step for danger
 std::vector<Point> ChaseAlgorithm::findPathBFS(const GameBoard& gameBoard, const Point& start, 
                                              const Point& target) const {
     if (start == target) {
@@ -124,7 +131,7 @@ std::vector<Point> ChaseAlgorithm::findPathBFS(const GameBoard& gameBoard, const
             Point neighbor = gameBoard.wrapPosition(current + getDirectionDelta(dir));
             
             // Skip if already visited or can't move to this position
-            if (visited.count(neighbor) > 0 || !gameBoard.canMoveTo(neighbor)) {
+            if (visited.count(neighbor) > 0 || !gameBoard.canMoveTo(neighbor) || gameBoard.isMine(neighbor)) {
                 continue;
             }
             
