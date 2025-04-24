@@ -137,6 +137,7 @@ bool Tank::isInBackwardMovement() {
 }
 
 bool Tank::rotateLeft(bool quarterTurn) {
+  m_previousPosition = m_position;
   if (isInBackwardMovement()) {
     return false;
   }
@@ -147,6 +148,7 @@ bool Tank::rotateLeft(bool quarterTurn) {
 }
 
 bool Tank::rotateRight(bool quarterTurn) {
+  m_previousPosition = m_position;
   if (isInBackwardMovement()) {
     return false;
   }
@@ -157,6 +159,7 @@ bool Tank::rotateRight(bool quarterTurn) {
 }
 
 bool Tank::shoot() {
+  m_previousPosition = m_position;
   if (isInBackwardMovement()) {
     return false;
   }

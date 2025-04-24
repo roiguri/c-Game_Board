@@ -100,9 +100,6 @@ void GameManager::runGame() {
       // Process a single step of the game
       processStep();
       
-      // Check if the game is over after this step
-      m_gameOver = checkGameOver();
-      
       // Increment step counter
       m_currentStep++;
       
@@ -120,10 +117,9 @@ void GameManager::runGame() {
       if (bothOutOfShells) {
           m_remaining_steps--;
       }
-      if (m_remaining_steps < 0) {
-        m_gameOver = true;
-        m_gameResult = "Tie - Both tanks out of shells";
-    }
+      
+      // Check if the game is over after this step
+      m_gameOver = checkGameOver();
   }
   
   // Log the final game result
