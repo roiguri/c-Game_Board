@@ -3,7 +3,7 @@
 #include "algo/chase_algorithm.h"
 #include "algo/defensive_algorithm.h"
 #include "game_board.h"
-#include "tank.h"
+#include "objects/tank.h"
 #include "objects/shell.h"
 #include "test/mock_algorithm.h"
 

@@ -42,7 +42,7 @@ set(TEST_SOURCES
     test/game_board_test.cpp
     test/objects/game_object_test.cpp
     test/objects/shell_test.cpp
-    test/tank_test.cpp
+    test/objects/tank_test.cpp
     test/file_loader_test.cpp
     test/collision_handler_test.cpp
     test/game_manager_test.cpp

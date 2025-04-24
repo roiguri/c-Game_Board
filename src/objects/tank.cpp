@@ -1,4 +1,4 @@
-#include "tank.h"
+#include "objects/tank.h"
 
 Tank::Tank(int playerId, const Point& position, Direction direction)
     : GameObject(playerId, position, direction),

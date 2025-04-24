@@ -1,7 +1,7 @@
 // demo_visualization.cpp
 #include "bonus/visualization/visualization.h"
 #include "game_board.h"
-#include "tank.h"
+#include "objects/tank.h"
 #include "objects/shell.h"
 #include <iostream>
 

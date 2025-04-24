@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "collision_handler.h"
-#include "tank.h"
+#include "objects/tank.h"
 #include "objects/shell.h"
 #include "game_board.h"
 #include "utils/direction.h"

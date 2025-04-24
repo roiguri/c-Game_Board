@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "algo/defensive_algorithm.h"
 #include "game_board.h"
-#include "tank.h"
+#include "objects/tank.h"
 #include "objects/shell.h"
 
 class DefensiveAlgorithmTest : public ::testing::Test {

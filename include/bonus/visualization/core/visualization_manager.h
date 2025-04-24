@@ -5,7 +5,7 @@
 #include <string>
 #include "bonus/visualization/core/visualizer_base.h"
 #include "game_board.h"
-#include "tank.h"
+#include "objects/tank.h"
 #include "objects/shell.h"
 
 /**

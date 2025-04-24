@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "tank.h"
+#include "objects/tank.h"
 
 class TankTest : public ::testing::Test {
 protected:

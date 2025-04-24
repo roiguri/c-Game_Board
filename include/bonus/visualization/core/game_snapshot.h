@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include "game_board.h"
-#include "tank.h"
+#include "objects/tank.h"
 #include "objects/shell.h"
 
 /**
