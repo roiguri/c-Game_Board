@@ -1,6 +1,6 @@
 #include "utils/action.h"
 
-std::string actionToString(Action action) {
+std::string actionToString(const Action action) {
     switch (action) {
         case Action::MoveForward:
             return "Move Forward";
@@ -22,7 +22,7 @@ std::string actionToString(Action action) {
             return "Unknown Action";
     }
 }
-std::ostream& operator<<(std::ostream& os, Action action) {
+std::ostream& operator<<(std::ostream& os, const Action action) {
   os << actionToString(action);
   return os;
 }
