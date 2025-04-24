@@ -3,6 +3,7 @@
 #include "game_board.h"
 #include "objects/tank.h"
 #include "objects/shell.h"
+#include "utils/midpoint.h"
 
 /**
  * @class CollisionHandler
@@ -34,7 +35,7 @@ public:
 
 private:
     // TODO: consider changing to a set
-    std::vector<std::pair<float, float>> m_pathExplosions;   
+    std::vector<MidPoint> m_pathExplosions;   
     std::vector<Point> m_positionExplosions;
     int m_boardWidth;
     int m_boardHeight;
@@ -74,13 +75,7 @@ private:
     bool pathCrossedMidpoint(
       const Point& prev, 
       const Point& curr, 
-      float mx, 
-      float my
-    ) const;
-
-    std::pair<float, float> computeMidpoint(
-      const Point& a, 
-      const Point& b
+      const MidPoint& midpoint
     ) const;
 
     // For Test purposes
