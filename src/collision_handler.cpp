@@ -58,8 +58,10 @@ void CollisionHandler::detectPathCollisions(
   const size_t n = objects.size();
   for (size_t i = 0; i < n; ++i) {
       for (size_t j = i + 1; j < n; ++j) {
-          if (objects[i].prev == objects[j].curr &&
-              objects[i].curr == objects[j].prev) {
+          if (MidPoint::midpointsMatch(
+                      objects[i].prev, objects[i].curr,
+                      objects[j].prev, objects[j].curr,
+                      m_boardWidth, m_boardHeight)) {
 
               markPathExplosionAt(objects[i].prev, objects[i].curr);
           }
