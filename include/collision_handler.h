@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <set>
 #include "game_board.h"
 #include "objects/tank.h"
 #include "objects/shell.h"
@@ -34,9 +35,8 @@ public:
     );
 
 private:
-    // TODO: consider changing to a set
-    std::vector<MidPoint> m_pathExplosions;   
-    std::vector<Point> m_positionExplosions;
+    std::set<MidPoint> m_pathExplosions;   
+    std::set<Point> m_positionExplosions;
     int m_boardWidth;
     int m_boardHeight;
 

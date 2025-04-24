@@ -131,32 +131,34 @@ bool CollisionHandler::applyPathExplosions(std::vector<Tank>& tanks,
 
     for (Tank& tank : tanks) {
         if (!tank.isDestroyed()) {
-            for (const auto& mid : m_pathExplosions) {
-                if (pathCrossedMidpoint(
-                  tank.getPreviousPosition(), 
-                  tank.getPosition(), 
-                  mid)
-                ) {
-                    tank.destroy();
-                    tankDestroyed = true;
-                    break;
-                }
-            }
+          MidPoint tankPath = MidPoint::calculateMidpoint(
+              tank.getPreviousPosition(), 
+              tank.getPosition(),
+              m_boardWidth,
+              m_boardHeight
+          );
+          
+          if (tankPath.getX() != -1 && 
+                m_pathExplosions.find(tankPath) != m_pathExplosions.end()) {
+              tank.destroy();
+              tankDestroyed = true;
+          }
         }
     }
 
     for (Shell& shell : shells) {
         if (!shell.isDestroyed()) {
-            for (const auto& mid : m_pathExplosions) {
-                if (pathCrossedMidpoint(
-                  shell.getPreviousPosition(), 
-                  shell.getPosition(), 
-                  mid)
-                ) {
-                    shell.destroy();
-                    break;
-                }
-            }
+          MidPoint shellPath = MidPoint::calculateMidpoint(
+              shell.getPreviousPosition(), 
+              shell.getPosition(),
+              m_boardWidth,
+              m_boardHeight
+          );
+          
+          if (shellPath.getX() != -1 && 
+              m_pathExplosions.find(shellPath) != m_pathExplosions.end()) {
+              shell.destroy();
+          }
         }
     }
 
@@ -170,24 +172,20 @@ bool CollisionHandler::applyPositionExplosions(std::vector<Tank>& tanks,
 
     for (Tank& tank : tanks) {
         if (!tank.isDestroyed()) {
-            for (const Point& exp : m_positionExplosions) {
-                if (tank.getPosition() == exp) {
-                    tank.destroy();
-                    tankDestroyed = true;
-                    break;
-                }
-            }
+          if (m_positionExplosions.find(tank.getPosition()) != 
+                                                m_positionExplosions.end()) {
+            tank.destroy();
+            tankDestroyed = true;
+          }
         }
     }
 
     for (Shell& shell : shells) {
         if (!shell.isDestroyed()) {
-            for (const Point& exp : m_positionExplosions) {
-                if (shell.getPosition() == exp) {
-                    shell.destroy();
-                    break;
-                }
-            }
+          if (m_positionExplosions.find(shell.getPosition()) != 
+                                                m_positionExplosions.end()) {
+            shell.destroy();
+          }
         }
     }
 
@@ -201,14 +199,15 @@ bool CollisionHandler::applyPositionExplosions(std::vector<Tank>& tanks,
 }
 
 void CollisionHandler::markPositionExplosionAt(const Point& pos) {
-  m_positionExplosions.push_back(pos);
+  m_positionExplosions.insert(pos);
 }
 
 void CollisionHandler::markPathExplosionAt(const Point& from, const Point& to) {
-  MidPoint mp = MidPoint::calculateMidpoint(from, to, m_boardWidth, m_boardHeight);
-  if (mp.getX() != -1) {
-    m_pathExplosions.emplace_back(mp);
-  }
+    MidPoint mp = 
+          MidPoint::calculateMidpoint(from, to, m_boardWidth, m_boardHeight);
+    if (mp.getX() != -1) {
+      m_pathExplosions.insert(mp);
+    }
 }
 
 bool CollisionHandler::pathCrossedMidpoint(
@@ -216,7 +215,8 @@ bool CollisionHandler::pathCrossedMidpoint(
   const Point& curr, 
   const MidPoint& midpoint
 ) const {
-    MidPoint calculatedMp = MidPoint::calculateMidpoint(prev, curr, m_boardWidth, m_boardHeight);
+    MidPoint calculatedMp = 
+          MidPoint::calculateMidpoint(prev, curr, m_boardWidth, m_boardHeight);
     return calculatedMp == midpoint;
 }
 
