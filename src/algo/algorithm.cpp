@@ -17,6 +17,9 @@ bool Algorithm::isInDanger(const GameBoard& gameBoard, const Tank& tank,
 
 bool Algorithm::isInDanger(const GameBoard& gameBoard, const Point& position, 
                          const std::vector<Shell>& shells, int lookAheadSteps) const {
+    if (gameBoard.isMine(position)) {
+        return true;
+    }
     for (const Shell& shell : shells) {
         if (shell.isDestroyed()) {
             continue;
@@ -81,28 +84,11 @@ std::vector<Algorithm::SafeMoveOption> Algorithm::getSafeMoveOptions(
 ) const {
     std::vector<SafeMoveOption> safeOptions;
     Direction currentDir = tank.getDirection();
-    
-    // Check forward movement
-    Point forwardPos = tank.getNextForwardPosition();
-    forwardPos = gameBoard.wrapPosition(forwardPos);
-    
-    // TODO: extract to helper function
-    bool canMove = gameBoard.canMoveTo(forwardPos) && forwardPos != enemyTank.getPosition();
-    bool safeFromShells = !isInDanger(gameBoard, forwardPos, shells);
-    bool safeFromEnemy = !avoidEnemySight || !isExposedToEnemy(gameBoard, forwardPos, enemyTank);
-    
-    if (canMove && safeFromShells && safeFromEnemy) {
-        safeOptions.push_back({
-            forwardPos, 
-            Action::MoveForward, 
-            1
-        });
-    }
+
+    bool canMove, safeFromShells, safeFromEnemy;
     
     // Check all other directions
-    for (const Direction& dir : ALL_DIRECTIONS) {
-        if (dir == currentDir) continue;  // Already checked forward
-        
+    for (const Direction& dir : ALL_DIRECTIONS) {        
         Point newPos = gameBoard.wrapPosition(tank.getPosition() + getDirectionDelta(dir));
         
         canMove = gameBoard.canMoveTo(newPos) && newPos != enemyTank.getPosition();
@@ -110,10 +96,12 @@ std::vector<Algorithm::SafeMoveOption> Algorithm::getSafeMoveOptions(
         safeFromEnemy = !avoidEnemySight || !isExposedToEnemy(gameBoard, newPos, enemyTank);
         
         if (canMove && safeFromShells && safeFromEnemy) {            
-            int cost = calculateMoveCost(tank, newPos, dir);
+          Action tankAction = getRotationToDirection(currentDir, dir);
+          tankAction = (tankAction == Action::None) ? Action::MoveForward : tankAction;
+          int cost = calculateMoveCost(tank, newPos, dir);
             safeOptions.push_back({
                 newPos,
-                getRotationToDirection(currentDir, dir),  // Return first rotation action
+                tankAction,
                 cost
             });
         }

@@ -36,6 +36,8 @@ public:
     bool isWall(const Point& position) const;
     bool damageWall(const Point& position);
     int getWallHealth(const Point& position) const;
+
+    bool isMine(const Point& position) const;
     
     // Position utilities
     Point wrapPosition(const Point& position) const;
