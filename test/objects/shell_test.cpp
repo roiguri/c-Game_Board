@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "shell.h"
+#include "objects/shell.h"
 #include "utils/point.h"
 #include "utils/direction.h"
 

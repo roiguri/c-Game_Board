@@ -2,7 +2,7 @@
 #include "bonus/visualization/visualization.h"
 #include "game_board.h"
 #include "tank.h"
-#include "shell.h"
+#include "objects/shell.h"
 #include <iostream>
 
 int main() {

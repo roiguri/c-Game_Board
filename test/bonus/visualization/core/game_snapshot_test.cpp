@@ -2,7 +2,7 @@
 #include "bonus/visualization/core/game_snapshot.h"
 #include "game_board.h"
 #include "tank.h"
-#include "shell.h"
+#include "objects/shell.h"
 
 class GameSnapshotTest : public ::testing::Test {
 protected:

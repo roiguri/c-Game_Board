@@ -40,7 +40,8 @@ set(TEST_SOURCES
     test/utils/direction_test.cpp
     test/utils/action_test.cpp
     test/game_board_test.cpp
-    test/shell_test.cpp
+    test/objects/game_object_test.cpp
+    test/objects/shell_test.cpp
     test/tank_test.cpp
     test/file_loader_test.cpp
     test/collision_handler_test.cpp

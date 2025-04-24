@@ -4,7 +4,7 @@
 #include <string>
 #include "game_board.h"
 #include "tank.h"
-#include "shell.h"
+#include "objects/shell.h"
 
 /**
  * @brief Lightweight representation of Tank state for visualization

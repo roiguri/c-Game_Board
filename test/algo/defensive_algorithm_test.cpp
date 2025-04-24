@@ -2,7 +2,7 @@
 #include "algo/defensive_algorithm.h"
 #include "game_board.h"
 #include "tank.h"
-#include "shell.h"
+#include "objects/shell.h"
 
 class DefensiveAlgorithmTest : public ::testing::Test {
 protected:
