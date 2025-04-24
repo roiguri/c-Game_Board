@@ -41,37 +41,55 @@ private:
     int m_boardHeight;
 
 
+    // Detects path collisions caused by object crossing paths
     void detectPathCollisions(
         std::vector<Tank>& tanks,
         std::vector<Shell>& shells
     );
 
+    // Detects position collisions where two objects occupy the same space
     void detectPositionCollisions(
         std::vector<Tank>& tanks,
         std::vector<Shell>& shells
     );
 
+    // Checks for shell-wall collisions and marks explosions
     void checkShellWallCollisions(
         std::vector<Shell>& shells,
         GameBoard& board
     );
 
+    // Checks for tank-mine collisions and marks explosions
     bool checkTankMineCollisions(
         std::vector<Tank>& tanks,
         GameBoard& board
     );
 
-    bool applyPathExplosions(std::vector<Tank>& tanks,
-      std::vector<Shell>& shells);
+    // Applies path explosions to tanks and shells
+    // and marks them as destroyed if they cross a marked path
+    // Returns true if any tank was destroyed
+    bool applyPathExplosions(
+      std::vector<Tank>& tanks,
+      std::vector<Shell>& shells
+    );
 
-    bool applyPositionExplosions(std::vector<Tank>& tanks,
-              std::vector<Shell>& shells,
-              GameBoard& board);
+    // Applies position explosions to tanks and shells
+    // and marks them as destroyed if they occupy a marked position
+    // Returns true if any tank was destroyed
+    bool applyPositionExplosions(
+      std::vector<Tank>& tanks,
+      std::vector<Shell>& shells,
+      GameBoard& board
+    );
 
+    // Marks a position for explosion
     void markPositionExplosionAt(const Point& pos);
 
+    // Marks a path for explosion between two points
     void markPathExplosionAt(const Point& from, const Point& to);
 
+    // Checks if the path between two points crossed a midpoint
+    // and marks it for explosion
     bool pathCrossedMidpoint(
       const Point& prev, 
       const Point& curr, 
