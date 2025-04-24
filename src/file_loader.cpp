@@ -10,7 +10,8 @@ std::vector<std::string> FileLoader::loadBoardFile(
 ) {
     std::ifstream inputFile(filePath);
     if (!inputFile.is_open()) {
-        std::cerr << "Error: Could not open file " << filePath << std::endl;
+        std::cerr << "Error: Could not open file '" << filePath
+          << "'" << std::endl;
         return std::vector<std::string>();
     }
     
@@ -28,13 +29,14 @@ std::vector<std::string> FileLoader::loadBoardFile(
     }
     
     if (!parseDimensions(lines[0], width, height)) {
-        std::cerr << "Error: First line must contain valid board dimensions" << std::endl;
+        std::cerr << "Error: First line must contain valid board dimensions"
+          << std::endl;
         return std::vector<std::string>();
     }
     
-    // Check for valid dimensions
     if (width <= 0 || height <= 0) {
-        std::cerr << "Error: Invalid board dimensions: " << width << "x" << height << std::endl;
+        std::cerr << "Error: Invalid board dimensions: " << width << "x" 
+          << height << std::endl;
         return std::vector<std::string>();
     }
     lines.erase(lines.begin());
