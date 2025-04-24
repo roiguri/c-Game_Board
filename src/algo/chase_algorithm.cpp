@@ -42,7 +42,7 @@ Action ChaseAlgorithm::getNextAction(
         return followCurrentPath(gameBoard, myTank, shells);
     }
     
-    return (myTank.getPosition().x % 2 == 0) ? 
+    return (myTank.getPosition().getX() % 2 == 0) ? 
             Action::RotateRightQuarter : Action::RotateLeftQuarter;
 }
 

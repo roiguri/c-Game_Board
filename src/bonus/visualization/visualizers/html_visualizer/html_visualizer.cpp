@@ -182,8 +182,8 @@ std::string HTMLVisualizer::generateGameDataJS() const {
                 js << ",\n";
             }
             js << "                {\n";
-            js << "                    x: " << position.x << ",\n";
-            js << "                    y: " << position.y << ",\n";
+            js << "                    x: " << position.getX() << ",\n";
+            js << "                    y: " << position.getY() << ",\n";
             js << "                    health: " << health << "\n";
             js << "                }";
             wallCount++;
@@ -201,8 +201,8 @@ std::string HTMLVisualizer::generateGameDataJS() const {
             
             js << "                {\n";
             js << "                    playerId: " << tank.playerId << ",\n";
-            js << "                    position: { x: " << tank.position.x 
-               << ", y: " << tank.position.y << " },\n";
+            js << "                    position: { x: " << tank.position.getX() 
+               << ", y: " << tank.position.getY() << " },\n";
             js << "                    direction: " << static_cast<int>(tank.direction) << ",\n";
             js << "                    remainingShells: " << tank.remainingShells << ",\n";
             js << "                    destroyed: " << (tank.destroyed ? "true" : "false") << "\n";
@@ -223,8 +223,8 @@ std::string HTMLVisualizer::generateGameDataJS() const {
             
             js << "                {\n";
             js << "                    playerId: " << shell.playerId << ",\n";
-            js << "                    position: { x: " << shell.position.x 
-               << ", y: " << shell.position.y << " },\n";
+            js << "                    position: { x: " << shell.position.getX() 
+               << ", y: " << shell.position.getY() << " },\n";
             js << "                    direction: " << static_cast<int>(shell.direction) << ",\n";
             js << "                    destroyed: " << (shell.destroyed ? "true" : "false") << "\n";
             js << "                }";

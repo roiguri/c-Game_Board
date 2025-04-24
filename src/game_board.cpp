@@ -133,26 +133,26 @@ bool GameBoard::initialize(const std::vector<std::string>& boardLines,
 GameBoard::CellType GameBoard::getCellType(int x, int y) const {
     Point wrapped = wrapPosition(Point(x, y));
 
-    return m_board[wrapped.y][wrapped.x];
+    return m_board[wrapped.getY()][wrapped.getX()];
 }
 
 GameBoard::CellType GameBoard::getCellType(const Point& position) const {
-    return getCellType(position.x, position.y);
+    return getCellType(position.getX(), position.getY());
 }
 
 void GameBoard::setCellType(int x, int y, CellType type) {
     Point wrapped = wrapPosition(Point(x, y));
     
     // If we're setting a new wall, initialize its health
-    if (type == CellType::Wall && m_board[wrapped.y][wrapped.x] != CellType::Wall) {
+    if (type == CellType::Wall && m_board[wrapped.getY()][wrapped.getX()] != CellType::Wall) {
         m_wallHealth[wrapped] = WALL_STARTING_HEALTH;
     }
     
-    m_board[wrapped.y][wrapped.x] = type;
+    m_board[wrapped.getY()][wrapped.getX()] = type;
 }
 
 void GameBoard::setCellType(const Point& position, CellType type) {
-    setCellType(position.x, position.y, type);
+    setCellType(position.getX(), position.getY(), type);
 }
 
 int GameBoard::getWidth() const {
@@ -206,8 +206,8 @@ int GameBoard::getWallHealth(const Point& position) const {
 
 // TODO: add to documentation - range of values supported
 Point GameBoard::wrapPosition(const Point& position) const {   
-    int wrappedX = ((position.x + m_width) % m_width);
-    int wrappedY = ((position.y + m_height) % m_height);
+    int wrappedX = ((position.getX() + m_width) % m_width);
+    int wrappedY = ((position.getY() + m_height) % m_height);
     
     return Point(wrappedX, wrappedY);
 }
@@ -215,7 +215,7 @@ Point GameBoard::wrapPosition(const Point& position) const {
 bool GameBoard::canMoveTo(const Point& position) const {
   Point wrapped = wrapPosition(position);
   
-  return m_board[wrapped.y][wrapped.x] != CellType::Wall;
+  return m_board[wrapped.getY()][wrapped.getX()] != CellType::Wall;
 }
 
 std::string GameBoard::toString() const {

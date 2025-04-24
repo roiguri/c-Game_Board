@@ -101,8 +101,8 @@ std::string GameSnapshot::toJson() const {
         json << "    {" << std::endl;
         json << "      \"playerId\": " << tank.playerId << "," << std::endl;
         json << "      \"position\": {" << std::endl;
-        json << "        \"x\": " << tank.position.x << "," << std::endl;
-        json << "        \"y\": " << tank.position.y << std::endl;
+        json << "        \"x\": " << tank.position.getX() << "," << std::endl;
+        json << "        \"y\": " << tank.position.getY() << std::endl;
         json << "      }," << std::endl;
         json << "      \"direction\": " << static_cast<int>(tank.direction) << "," << std::endl;
         json << "      \"remainingShells\": " << tank.remainingShells << "," << std::endl;
@@ -122,8 +122,8 @@ std::string GameSnapshot::toJson() const {
         json << "    {" << std::endl;
         json << "      \"playerId\": " << shell.playerId << "," << std::endl;
         json << "      \"position\": {" << std::endl;
-        json << "        \"x\": " << shell.position.x << "," << std::endl;
-        json << "        \"y\": " << shell.position.y << std::endl;
+        json << "        \"x\": " << shell.position.getX() << "," << std::endl;
+        json << "        \"y\": " << shell.position.getY() << std::endl;
         json << "      }," << std::endl;
         json << "      \"direction\": " << static_cast<int>(shell.direction) << "," << std::endl;
         json << "      \"destroyed\": " << (shell.destroyed ? "true" : "false") << std::endl;

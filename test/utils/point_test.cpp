@@ -5,14 +5,14 @@
 
 TEST(PointTest, DefaultConstructor) {
     Point p;
-    EXPECT_EQ(p.x, 0);
-    EXPECT_EQ(p.y, 0);
+    EXPECT_EQ(p.getX(), 0);
+    EXPECT_EQ(p.getY(), 0);
 }
 
 TEST(PointTest, ParameterizedConstructor) {
     Point p(5, 10);
-    EXPECT_EQ(p.x, 5);
-    EXPECT_EQ(p.y, 10);
+    EXPECT_EQ(p.getX(), 5);
+    EXPECT_EQ(p.getY(), 10);
 }
 
 TEST(PointTest, EqualityOperator) {
@@ -38,8 +38,8 @@ TEST(PointTest, AdditionOperator) {
     Point p2(2, 5);
     Point result = p1 + p2;
     
-    EXPECT_EQ(result.x, 5);
-    EXPECT_EQ(result.y, 9);
+    EXPECT_EQ(result.getX(), 5);
+    EXPECT_EQ(result.getY(), 9);
 }
 
 TEST(PointTest, SubtractionOperator) {
@@ -47,8 +47,8 @@ TEST(PointTest, SubtractionOperator) {
     Point p2(3, 5);
     Point result = p1 - p2;
     
-    EXPECT_EQ(result.x, 4);
-    EXPECT_EQ(result.y, 7);
+    EXPECT_EQ(result.getX(), 4);
+    EXPECT_EQ(result.getY(), 7);
 }
 
 TEST(PointTest, LessThanOperator) {
@@ -83,23 +83,6 @@ TEST(PointTest, StreamInsertionOperator) {
     EXPECT_EQ(oss.str(), "(3,4)");
 }
 
-
-TEST(PointTest, ManhattanDistance) {
-  Point p1(1, 2);
-  Point p2(4, 6);
-  
-  int distance = Point::manhattanDistance(p1, p2);
-  EXPECT_EQ(distance, 7); // |4-1| + |6-2| = 3 + 4 = 7
-}
-
-TEST(PointTest, ManhattanDistanceWithNegativeCoordinates) {
-  Point p1(-2, 3);
-  Point p2(5, -1);
-  
-  int distance = Point::manhattanDistance(p1, p2);
-  EXPECT_EQ(distance, 11); // |5-(-2)| + |(-1)-3| = 7 + 4 = 11
-}
-
 TEST(PointTest, EuclideanDistance) {
   Point p1(0, 0);
   Point p2(3, 4);
@@ -116,17 +99,9 @@ TEST(PointTest, EuclideanDistanceFloatingPoint) {
   EXPECT_DOUBLE_EQ(distance, 5.0); // sqrt((4-1)² + (5-1)²) = sqrt(9 + 16) = sqrt(25) = 5
 }
 
-TEST(PointTest, EdgeCases) {
-  // Testing with large values
-  Point p1(1000000, 2000000);
-  Point p2(3000000, 5000000);
-  
-  EXPECT_EQ(Point::manhattanDistance(p1, p2), 5000000);
-  
-  // Testing with zero difference
-  Point p3(42, 42);
+TEST(PointTest, ZeroDifference) {
+    Point p3(42, 42);
   Point p4(42, 42);
   
-  EXPECT_EQ(Point::manhattanDistance(p3, p4), 0);
   EXPECT_DOUBLE_EQ(Point::euclideanDistance(p3, p4), 0.0);
 }

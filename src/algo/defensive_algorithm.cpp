@@ -32,6 +32,6 @@ Action DefensiveAlgorithm::getNextAction(
         }
     }
     
-    return (myTank.getPosition().x % 2 == 0) ? 
+    return (myTank.getPosition().getX() % 2 == 0) ? 
             Action::RotateRightQuarter : Action::RotateLeftQuarter;
 }

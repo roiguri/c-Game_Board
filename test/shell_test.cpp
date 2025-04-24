@@ -24,8 +24,8 @@ class ShellTest : public ::testing::Test {
 
 TEST_F(ShellTest, Constructor) {
     EXPECT_EQ(shell->getPlayerId(), playerId);
-    EXPECT_EQ(shell->getPosition().x, position.x);
-    EXPECT_EQ(shell->getPosition().y, position.y);
+    EXPECT_EQ(shell->getPosition().getX(), position.getX());
+    EXPECT_EQ(shell->getPosition().getY(), position.getY());
     EXPECT_EQ(shell->getDirection(), direction);
     EXPECT_FALSE(shell->isDestroyed());
 }

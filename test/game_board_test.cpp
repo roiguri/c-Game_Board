@@ -496,22 +496,22 @@ TEST_F(GameBoardTest, GetWallHealth_WallAndNonWall) {
 TEST_F(GameBoardTest, WrapPosition_InsideBounds) {
     Point original(2, 3);
     Point wrapped = board.wrapPosition(original);
-    EXPECT_EQ(wrapped.x, 2);
-    EXPECT_EQ(wrapped.y, 3);
+    EXPECT_EQ(wrapped.getX(), 2);
+    EXPECT_EQ(wrapped.getY(), 3);
 }
 
 TEST_F(GameBoardTest, WrapPosition_OutsideBoundsPositive) {
     Point original(7, 8);
     Point wrapped = board.wrapPosition(original);
-    EXPECT_EQ(wrapped.x, 2);
-    EXPECT_EQ(wrapped.y, 3);
+    EXPECT_EQ(wrapped.getX(), 2);
+    EXPECT_EQ(wrapped.getY(), 3);
 }
 
 TEST_F(GameBoardTest, WrapPosition_OutsideBoundsNegative) {
     Point original(-3, -2);
     Point wrapped = board.wrapPosition(original);
-    EXPECT_EQ(wrapped.x, 2);
-    EXPECT_EQ(wrapped.y, 3);
+    EXPECT_EQ(wrapped.getX(), 2);
+    EXPECT_EQ(wrapped.getY(), 3);
 }
 
 // CanMoveTo Tests

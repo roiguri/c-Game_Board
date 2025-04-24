@@ -1,29 +1,34 @@
 #include "utils/point.h"
 #include <cmath>
 
-Point::Point() : x(0), y(0) {}
-Point::Point(int x, int y) : x(x), y(y) {}
+Point::Point() : m_x(0), m_y(0) {}
+Point::Point(int x, int y) : m_x(x), m_y(y) {}
+
 bool Point::operator==(const Point& other) const {
-    return x == other.x && y == other.y;
+    return m_x == other.m_x && m_y == other.m_y;
 }
+
 bool Point::operator!=(const Point& other) const {
     return !(*this == other);
 }
+
 Point Point::operator+(const Point& other) const {
-    return Point(x + other.x, y + other.y);
+    return Point(m_x + other.m_x, m_y + other.m_y);
 }
+
 Point Point::operator-(const Point& other) const {
-    return Point(x - other.x, y - other.y);
+    return Point(m_x - other.m_x, m_y - other.m_y);
 }
+
 bool Point::operator<(const Point& other) const {
-  // First compare x-coordinates, then y-coordinates
-  if (x != other.x) {
-      return x < other.x;
+  if (m_x != other.m_x) {
+      return m_x < other.m_x;
   }
-  return y < other.y;
+  return m_y < other.m_y;
 }
+
 std::string Point::toString() const {
-  return "(" + std::to_string(x) + "," + std::to_string(y) + ")";
+  return "(" + std::to_string(m_x) + "," + std::to_string(m_y) + ")";
 }
 
 std::ostream& operator<<(std::ostream& os, const Point& pt) {
@@ -31,10 +36,6 @@ std::ostream& operator<<(std::ostream& os, const Point& pt) {
     return os;
 }
 
-// TODO: check if the method is necessary
-int Point::manhattanDistance(const Point& a, const Point& b) {
-  return std::abs(a.x - b.x) + std::abs(a.y - b.y);
-}
 double Point::euclideanDistance(const Point& a, const Point& b) {
-  return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2));
+  return std::sqrt(std::pow(a.m_x - b.m_x, 2) + std::pow(a.m_y - b.m_y, 2));
 }

@@ -209,29 +209,29 @@ bool CollisionHandler::pathCrossedMidpoint(const Point& prev, const Point& curr,
 }
 
 std::pair<float, float> CollisionHandler::computeMidpoint(const Point& a, const Point& b) {
-  int dx = b.x - a.x;
-  int dy = b.y - a.y;
+  int dx = b.getX() - a.getX();
+  int dy = b.getY() - a.getY();
 
   float mx, my;
 
   // X axis midpoint
   if (dx == 1 || dx == -1) {
-      mx = (a.x + b.x) / 2.0f;
-  } else if ((a.x == 0 && b.x == m_boardWidth - 1) || (b.x == 0 && a.x == m_boardWidth - 1)) {
+      mx = (a.getX() + b.getX()) / 2.0f;
+  } else if ((a.getX() == 0 && b.getX() == m_boardWidth - 1) || (b.getX() == 0 && a.getX() == m_boardWidth - 1)) {
       // Wraparound on X
       mx = (m_boardWidth - 0.5f);
   } else {
-      mx = (a.x + b.x) / 2.0f;  // fallback for robustness
+      mx = (a.getX() + b.getX()) / 2.0f;  // fallback for robustness
   }
 
   // Y axis midpoint
   if (dy == 1 || dy == -1) {
-      my = (a.y + b.y) / 2.0f;
-  } else if ((a.y == 0 && b.y == m_boardHeight - 1) || (b.y == 0 && a.y == m_boardHeight - 1)) {
+      my = (a.getY() + b.getY()) / 2.0f;
+  } else if ((a.getY() == 0 && b.getY() == m_boardHeight - 1) || (b.getY() == 0 && a.getY() == m_boardHeight - 1)) {
       // Wraparound on Y
       my = (m_boardHeight - 0.5f);
   } else {
-      my = (a.y + b.y) / 2.0f;
+      my = (a.getY() + b.getY()) / 2.0f;
   }
 
   return {mx, my};

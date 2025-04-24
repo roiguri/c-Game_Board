@@ -444,7 +444,7 @@ TEST_F(AlgorithmTest, GetSafeMoveOptions_AvoidEnemySight) {
   // Should include positions in enemy's line of sight
   bool includesExposedPositions = false;
   for (const auto& option : optionsWithoutAvoidance) {
-      if (option.position.x == 2 && option.position.y == 2) {
+      if (option.position.getX() == 2 && option.position.getY() == 2) {
           includesExposedPositions = true;
           break;
       }

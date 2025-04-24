@@ -1008,7 +1008,7 @@ TEST_F(GameManagerTest, RunGame_TankHitsWall) {
   EXPECT_TRUE(badStepFound);
   
   // Tank 1 position should still be in the same row (not in the wall)
-  EXPECT_EQ(manager.getTanks()[1].getPosition().y, 1);
+  EXPECT_EQ(manager.getTanks()[1].getPosition().getY(), 1);
 }
 
 TEST_F(GameManagerTest, RunGame_TanksTryToOccupySameSpace) {
