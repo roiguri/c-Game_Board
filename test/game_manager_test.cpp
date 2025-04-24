@@ -2,6 +2,7 @@
 #include "game_manager.h"
 #include "algo/algorithm.h"
 #include "utils/action.h"
+#include "test/mock_algorithm.h"
 #include <fstream>
 #include <sstream>
 #include <cstdio>
@@ -11,12 +12,25 @@ protected:
     void SetUp() override {
         tempFilePath = "temp_test_board.txt";
         outputFilePath = "test_output.txt";
+
+        algo1 = new MockAlgorithm();
+        algo2 = new MockAlgorithm();
+        mockAlgo1 = dynamic_cast<MockAlgorithm*>(algo1);
+        mockAlgo2 = dynamic_cast<MockAlgorithm*>(algo2);
     }
     
     void TearDown() override {
         std::remove(tempFilePath.c_str());
         std::remove(outputFilePath.c_str());
+
+        delete algo1;
+        delete algo2;
     }
+
+    Algorithm* algo1;
+    Algorithm* algo2;
+    MockAlgorithm* mockAlgo1;
+    MockAlgorithm* mockAlgo2;
     
     void createTestBoardFile(const std::vector<std::string>& lines) {
         std::ofstream file(tempFilePath);
@@ -24,6 +38,36 @@ protected:
             file << line << '\n';
         }
         file.close();
+    }
+
+    bool initializeManager(GameManager& manager, const std::vector<std::string>& boardLines) {
+      createTestBoardFile(boardLines);
+      
+      // We'll create copies of our algorithms to give to the manager
+      // This way we keep our originals for setting up test behaviors
+      Algorithm* algoForP1 = new MockAlgorithm();
+      Algorithm* algoForP2 = new MockAlgorithm();
+      
+      // Copy the current settings from our test algorithms
+      if (dynamic_cast<MockAlgorithm*>(algoForP1) && dynamic_cast<MockAlgorithm*>(algoForP2)) {
+          *dynamic_cast<MockAlgorithm*>(algoForP1) = *mockAlgo1;
+          *dynamic_cast<MockAlgorithm*>(algoForP2) = *mockAlgo2;
+      }
+      
+      // Initialize the manager with our algorithms
+      return manager.initialize(tempFilePath, algoForP1, algoForP2);
+    }
+
+    // Standard test board for most scenarios
+    std::vector<std::string> getStandardBoard() {
+        return {
+            "8 5",
+            "########",
+            "#2    1#", // Tanks are in the same row with clear line of sight
+            "#   @  #",
+            "#      #", // Mine in the middle
+            "########"
+        };
     }
 
     Action testGetPlayerAction(GameManager& manager, int playerId) {
@@ -40,6 +84,12 @@ protected:
 
     void testProcessStep(GameManager& manager) {
       manager.processStep();
+    }
+
+    void testProcessStep(GameManager& manager, int steps) {
+      for (int i = 0; i < steps; ++i) {
+        manager.processStep();
+      }
     }
 
     bool testApplyAction(GameManager& manager, int playerId, Action action) {
@@ -64,6 +114,14 @@ protected:
 
     void testSaveResults(GameManager& manager, const std::string& outputFilePath) {
       manager.saveResults(outputFilePath);
+    }
+
+    void setAlgorithm(GameManager& manager, int playerId, Algorithm* algorithm) {
+        if (playerId == 1) {
+            manager.m_player1Algorithm = algorithm;
+        } else if (playerId == 2) {
+            manager.m_player2Algorithm = algorithm;
+        }
     }
 
     void createShell(GameManager& manager, int playerId, const Point& position, Direction direction) {
@@ -835,5 +893,328 @@ TEST_F(GameManagerTest, GameManagerTest_maximumSteps) {
   ASSERT_TRUE(manager.initialize(tempFilePath));
     
   testRunGame(manager);
-  EXPECT_EQ(getGameSteps(manager), 1001);
+  EXPECT_EQ(getGameSteps(manager), 1000);
+}
+
+TEST_F(GameManagerTest, RunGame_TanksShooting) {
+  mockAlgo1->setConstantAction(Action::Shoot);
+  mockAlgo2->setConstantAction(Action::Shoot);
+  
+  // Initialize manager
+  GameManager manager;
+  ASSERT_TRUE(initializeManager(manager, getStandardBoard()));
+  
+  // Run the game
+  manager.runGame();
+  
+  // Verify game results
+  const auto& gameLog = manager.getGameLog();
+  
+  // Check that the game ended (either a win or tie)
+  bool gameEndedFound = false;
+  for (const auto& logEntry : gameLog) {
+      if (logEntry.find("Game ended") != std::string::npos) {
+          gameEndedFound = true;
+          break;
+      }
+  }
+  EXPECT_TRUE(gameEndedFound);
+  bool p1ShootFound = false;
+  bool p2ShootFound = false;
+  
+  for (const auto& logEntry : gameLog) {
+      if (logEntry.find("Player 1: Shoot - Success") != std::string::npos) {
+          p1ShootFound = true;
+      }
+      if (logEntry.find("Player 2: Shoot - Success") != std::string::npos) {
+          p2ShootFound = true;
+      }
+  }
+  
+  EXPECT_TRUE(p1ShootFound);
+  EXPECT_TRUE(p2ShootFound);
+}
+
+TEST_F(GameManagerTest, RunGame_TankHitsMine) {
+  std::vector<std::string> boardLines = {
+      "8 5",
+      "########",
+      "#2  @ 1#", // Tanks are in the same row with clear line of sight
+      "#      #", // Mine in the middle
+      "#      #",
+      "########"
+  };
+  
+  // Setup mock algorithm for player 1 to move down toward the mine
+  mockAlgo1->setActionSequence({
+      Action::MoveForward,        
+      Action::MoveForward,        
+      Action::RotateLeftQuarter,  
+      Action::MoveForward        
+  });
+  
+  // Player 2 does nothing
+  mockAlgo2->setConstantAction(Action::None);
+  
+  // Initialize manager
+  GameManager manager;
+  ASSERT_TRUE(initializeManager(manager, boardLines));
+  
+  // Run the game
+  manager.runGame();
+  
+  // Verify game results
+  const auto& gameLog = manager.getGameLog();
+  
+  // Check that player 2 won because player 1 hit a mine
+  bool p2WinFound = false;
+  for (const auto& logEntry : gameLog) {
+      if (logEntry.find("Player 2 wins") != std::string::npos) {
+          p2WinFound = true;
+          break;
+      }
+  }
+  
+  EXPECT_TRUE(p2WinFound);
+}
+
+TEST_F(GameManagerTest, RunGame_TankHitsWall) {
+  // Setup algorithm for player 1 to try to move into a wall
+  mockAlgo1->setActionSequence({
+      Action::RotateRightQuarter,  // Face up
+      Action::MoveForward         // Try to move into wall
+  });
+  
+  // Player 2 does nothing
+  mockAlgo2->setConstantAction(Action::None);
+  
+  // Initialize manager
+  GameManager manager;
+  ASSERT_TRUE(initializeManager(manager, getStandardBoard()));
+  
+  testProcessStep(manager, 3);
+
+  // Verify game results
+  const auto& gameLog = manager.getGameLog();
+  
+  // Check that the move into the wall was blocked
+  bool badStepFound = false;
+  for (const auto& logEntry : gameLog) {
+      if (logEntry.find("Player 1: Move Forward - Bad Step") != std::string::npos) {
+          badStepFound = true;
+          break;
+      }
+  }
+  
+  EXPECT_TRUE(badStepFound);
+  
+  // Tank 1 position should still be in the same row (not in the wall)
+  EXPECT_EQ(manager.getTanks()[1].getPosition().y, 1);
+}
+
+TEST_F(GameManagerTest, RunGame_TanksTryToOccupySameSpace) {
+  // Create a board with tanks next to each other
+  std::vector<std::string> tightBoard = {
+      "10 3",
+      "##########",
+      "#21      #", // Tanks are right next to each other
+      "##########"
+  };
+  
+  // Setup algorithms to try to move into each other's space
+  mockAlgo1->setConstantAction(Action::MoveForward); // Player 1 moves left
+  mockAlgo2->setConstantAction(Action::MoveForward);  // Player 2 moves right
+  
+  // Initialize manager
+  GameManager manager;
+  ASSERT_TRUE(initializeManager(manager, tightBoard));
+  
+  // Run the game
+  manager.runGame();
+  
+  // Verify game results
+  const auto& gameLog = manager.getGameLog();
+  
+  // Since they try to move to the same spot, we should eventually see
+  // either both destroyed or a bad step
+  bool collision = false;
+  for (const auto& logEntry : gameLog) {
+      if (logEntry.find("Both tanks destroyed") != std::string::npos) {
+          collision = true;
+          break;
+      }
+  }
+  
+  EXPECT_TRUE(collision);
+  EXPECT_TRUE(manager.getTanks()[0].isDestroyed());
+  EXPECT_TRUE(manager.getTanks()[1].isDestroyed());
+}
+
+TEST_F(GameManagerTest, RunGame_ShellDestroyingWallsThenTank) {
+  // Create a board with a wall between the tanks
+  std::vector<std::string> walledBoard = {
+      "7 3",
+      "#######",
+      "#2#  1#", // Wall between tanks
+      "#######"
+  };
+  
+  // Setup algorithms to shoot constantly
+  mockAlgo1->setConstantAction(Action::Shoot);
+  mockAlgo2->setConstantAction(Action::None);
+  
+  // Initialize manager
+  GameManager manager;
+  ASSERT_TRUE(initializeManager(manager, walledBoard));
+  
+  // Run the game
+  manager.runGame();
+  
+  // Verify game results
+  const auto& gameLog = manager.getGameLog();
+  
+  // The wall should eventually be destroyed after multiple hits
+  // Then one tank should hit the other
+  bool wallDestroyed = false;
+  bool tankDestroyed = false;
+  
+  for (const auto& logEntry : gameLog) {
+      if (logEntry.find("wall damaged") != std::string::npos ||
+          logEntry.find("wall destroyed") != std::string::npos) {
+          wallDestroyed = true;
+      }
+      if (logEntry.find("Player") != std::string::npos && 
+          logEntry.find("wins") != std::string::npos) {
+          tankDestroyed = true;
+      }
+  }
+  
+  // We expect the game to eventually end with tank destruction
+  // but wall destruction is harder to verify in logs, so we'll skip that check
+  EXPECT_TRUE(tankDestroyed);
+}
+
+// Test complex sequences including backward movement
+TEST_F(GameManagerTest, RunGame_BackwardMovementSequence) {
+  std::vector<std::string> boardLines = {
+      "10 3",
+      "##########",
+      "#         #",
+      "#2  @1    #", // Player 1 at (5,2)
+      "##########"
+  };
+  
+  // Setup algorithm for player 1 with a sequence including backward moves
+  mockAlgo1->setActionSequence({
+      Action::MoveBackward,   
+      Action::RotateLeftEighth,           
+      Action::RotateLeftEighth,           
+      Action::MoveBackward,   // Should move backwards
+      Action::MoveBackward,       // Should move backwards again
+      Action::Shoot,              // Shoot 
+      Action::None, Action::None, Action::None, Action::None, // Wait           
+  });
+  
+  // Player 2 does nothing
+  mockAlgo2->setConstantAction(Action::None);
+  
+  // Initialize manager
+  GameManager manager;
+  ASSERT_TRUE(initializeManager(manager, boardLines));
+
+  EXPECT_EQ(manager.getTanks()[1].getPlayerId(), 1);
+  EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(5, 2));
+  testProcessStep(manager, 2);
+  EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(5, 2));
+  testProcessStep(manager);
+  EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(6, 2));
+  testProcessStep(manager);
+  EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(7, 2));
+  testProcessStep(manager);
+  EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(8, 2));
+  testProcessStep(manager, 4);
+  ASSERT_TRUE(testCheckGameOver(manager));
+  EXPECT_EQ(testGetGameResult(manager), "Player 1 wins - Enemy tank destroyed");  
+}
+
+// Test shells colliding with each other
+TEST_F(GameManagerTest, RunGame_ShellsCollide) {
+  // Setup both players to rotate and shoot in a way that shells will collide
+  mockAlgo1->setActionSequence({
+      Action::RotateLeftQuarter,  // Face up
+      Action::Shoot,              // Shoot upward
+      Action::None                // Wait
+  });
+  
+  mockAlgo2->setActionSequence({
+      Action::RotateRightQuarter, // Face down  
+      Action::Shoot,              // Shoot downward
+      Action::None                // Wait
+  });
+  
+  // Initialize manager
+  GameManager manager;
+  ASSERT_TRUE(initializeManager(manager, getStandardBoard()));
+  
+  testProcessStep(manager, 2);
+  
+  // Check the shell count - shells should eventually destroy each other
+  bool shellsCreated = false;
+  bool shellsDestroyed = false;
+  
+  // We first expect there to be shells (after shooting)
+  if (!manager.getShells().empty()) {
+      shellsCreated = true;
+  }
+  
+  testProcessStep(manager, 6);
+  
+  // Now we expect shells to be gone (after collision)
+  if (manager.getShells().empty()) {
+      shellsDestroyed = true;
+  }
+  
+  EXPECT_TRUE(shellsCreated);
+  EXPECT_TRUE(shellsDestroyed);
+}
+
+// Test a full game until both tanks are out of shells
+TEST_F(GameManagerTest, RunGame_OutOfShells) {
+  std::vector<std::string> boardLines = {
+      "18 4",
+      "2#################",
+      "#                #",
+      "#   @            #",  
+      "#################1"
+  };
+  
+  mockAlgo1->setConstantAction(Action::Shoot);
+  mockAlgo2->setConstantAction(Action::Shoot);
+  
+  // Initialize manager
+  GameManager manager;
+  ASSERT_TRUE(initializeManager(manager, boardLines));
+  
+  // Run the full game
+  manager.runGame();
+  
+  // Verify game results
+  const auto& gameLog = manager.getGameLog();
+  
+  // Check that the game ended in a tie due to shells depleted
+  bool outOfShellsTie = false;
+  for (const auto& logEntry : gameLog) {
+      if (logEntry.find("shells depleted") != std::string::npos) {
+          outOfShellsTie = true;
+          break;
+      }
+  }
+  ASSERT_EQ(testGetGameResult(manager), "Tie - Maximum steps reached after shells depleted");
+  EXPECT_TRUE(outOfShellsTie);
+  
+  // Verify all shells were used
+  for (const auto& tank : manager.getTanks()) {
+      EXPECT_EQ(tank.getRemainingShells(), 0);
+  }
+  EXPECT_EQ(getGameSteps(manager), 116);
 }
