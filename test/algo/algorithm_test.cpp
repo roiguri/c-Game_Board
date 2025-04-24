@@ -4,7 +4,7 @@
 #include "algo/defensive_algorithm.h"
 #include "game_board.h"
 #include "tank.h"
-#include "shell.h"
+#include "objects/shell.h"
 #include "test/mock_algorithm.h"
 
 class AlgorithmTest : public ::testing::Test {

@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "collision_handler.h"
 #include "tank.h"
-#include "shell.h"
+#include "objects/shell.h"
 #include "game_board.h"
 #include "utils/direction.h"
 

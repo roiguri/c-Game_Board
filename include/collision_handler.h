@@ -2,7 +2,7 @@
 #include <vector>
 #include "game_board.h"
 #include "tank.h"
-#include "shell.h"
+#include "objects/shell.h"
 
 class CollisionHandler {
 public:

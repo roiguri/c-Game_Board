@@ -5,7 +5,7 @@
 #include <memory>
 #include "game_board.h"
 #include "tank.h"
-#include "shell.h"
+#include "objects/shell.h"
 #include "algo/algorithm.h"
 #include "collision_handler.h"
 

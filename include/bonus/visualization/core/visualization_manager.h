@@ -6,7 +6,7 @@
 #include "bonus/visualization/core/visualizer_base.h"
 #include "game_board.h"
 #include "tank.h"
-#include "shell.h"
+#include "objects/shell.h"
 
 /**
  * @brief Manager class that coordinates multiple visualizers
