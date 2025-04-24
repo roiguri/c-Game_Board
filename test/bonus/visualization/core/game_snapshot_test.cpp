@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "bonus/visualization/core/game_snapshot.h"
 #include "game_board.h"
-#include "tank.h"
+#include "objects/tank.h"
 #include "objects/shell.h"
 
 class GameSnapshotTest : public ::testing::Test {

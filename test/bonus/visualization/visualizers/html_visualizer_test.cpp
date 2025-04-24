@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "bonus/visualization/visualizers/html_visualizer/html_visualizer.h"
 #include "game_board.h"
-#include "tank.h"
+#include "objects/tank.h"
 #include "objects/shell.h"
 #include <fstream>
 #include <filesystem>

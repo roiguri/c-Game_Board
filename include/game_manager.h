@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 #include "game_board.h"
-#include "tank.h"
+#include "objects/tank.h"
 #include "objects/shell.h"
 #include "algo/algorithm.h"
 #include "collision_handler.h"

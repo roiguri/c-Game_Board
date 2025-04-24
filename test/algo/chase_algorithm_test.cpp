@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "algo/chase_algorithm.h"
 #include "game_board.h"
-#include "tank.h"
+#include "objects/tank.h"
 #include "objects/shell.h"
 
 class ChaseAlgorithmTest : public ::testing::Test {

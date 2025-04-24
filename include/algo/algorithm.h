@@ -4,7 +4,7 @@
 #include "utils/point.h"
 #include "utils/direction.h"
 #include "game_board.h"
-#include "tank.h"
+#include "objects/tank.h"
 #include "objects/shell.h"
 #include <vector>
 #include <memory>
