@@ -10,7 +10,7 @@ protected:
     CollisionHandler handler;
     GameBoard board{10, 10};
 
-    const std::vector<std::pair<float, float>>& getPathExplosions() const {
+    const std::vector<MidPoint>& getPathExplosions() const {
         return handler.m_pathExplosions;
     }
 
@@ -65,8 +65,11 @@ TEST_F(CollisionHandlerTest, DetectPathCollisions_ShellsSwap_ExplosionLogged) {
     handler.resolveAllCollisions(tanks, shells, board);
 
     ASSERT_EQ(getPathExplosions().size(), 1);
-    EXPECT_FLOAT_EQ(getPathExplosions()[0].first, 1.5f);
-    EXPECT_FLOAT_EQ(getPathExplosions()[0].second, 1.5f);
+    MidPoint mp = getPathExplosions()[0];
+    EXPECT_EQ(mp.getX(), 1);
+    EXPECT_EQ(mp.getY(), 1);
+    EXPECT_TRUE(mp.isHalfX());
+    EXPECT_TRUE(mp.isHalfY());
 }
 
 // Test: A tank and shell do not intersect → no explosion
@@ -102,8 +105,11 @@ TEST_F(CollisionHandlerTest, DetectPathCollisions_TanksSwap_ExplosionLogged) {
     handler.resolveAllCollisions(tanks, shells, board);
 
     ASSERT_EQ(getPathExplosions().size(), 1);
-    EXPECT_FLOAT_EQ(getPathExplosions()[0].first, 3.5f);
-    EXPECT_FLOAT_EQ(getPathExplosions()[0].second, 3.5f);
+    MidPoint mp = getPathExplosions()[0];
+    EXPECT_EQ(mp.getX(), 3);
+    EXPECT_EQ(mp.getY(), 3);
+    EXPECT_TRUE(mp.isHalfX());
+    EXPECT_TRUE(mp.isHalfY());
 }
 
 TEST_F(CollisionHandlerTest, ApplyPathExplosion_DestroysCrossingShell) {
@@ -398,9 +404,11 @@ TEST_F(CollisionHandlerTest, Resolve_ShellsCrossMidpoint_AllDestroyed) {
   }
 
   // Midpoints: all are (0.5, 0.5)
-  for (const auto& [x, y] : getPathExplosions()) {
-      EXPECT_FLOAT_EQ(x, 0.5f);
-      EXPECT_FLOAT_EQ(y, 0.5f);
+  for (MidPoint mp : getPathExplosions()) {
+      EXPECT_EQ(mp.getX(), 0);
+      EXPECT_EQ(mp.getY(), 0);
+      EXPECT_TRUE(mp.isHalfX());
+      EXPECT_TRUE(mp.isHalfY());
   }
 
   EXPECT_FALSE(result);
@@ -445,11 +453,11 @@ TEST_F(CollisionHandlerTest, Resolve_ShellHitsTank_BothDestroyed) {
 }
 
 TEST_F(CollisionHandlerTest, Resolve_TankShellPathCross_BothDestroyed) {
-  Tank tank(0, Point(0, 0), Direction::DownRight);
+  Tank tank(0, Point(1, 1), Direction::DownRight);
   Shell shell(1, Point(2, 2), Direction::UpLeft);
 
   tank.setPosition(Point(2, 2));     // prev: (0,0), curr: (2,2)
-  shell.setPosition(Point(0, 0));    // prev: (2,2), curr: (0,0)
+  shell.setPosition(Point(1, 1));    // prev: (2,2), curr: (0,0)
 
   std::vector<Tank> tanks{tank};
   std::vector<Shell> shells{shell};
@@ -461,8 +469,11 @@ TEST_F(CollisionHandlerTest, Resolve_TankShellPathCross_BothDestroyed) {
   EXPECT_TRUE(result);
 
   ASSERT_EQ(getPathExplosions().size(), 1);
-  EXPECT_FLOAT_EQ(getPathExplosions()[0].first, 1.0f);
-  EXPECT_FLOAT_EQ(getPathExplosions()[0].second, 1.0f);
+  MidPoint mp = getPathExplosions()[0];
+  EXPECT_EQ(mp.getX(), 1);
+  EXPECT_EQ(mp.getY(), 1);
+  EXPECT_TRUE(mp.isHalfX());
+  EXPECT_TRUE(mp.isHalfY());
 }
 
 TEST_F(CollisionHandlerTest, Resolve_NoCollisions_AllSurvive) {
@@ -562,8 +573,11 @@ TEST_F(CollisionHandlerTest, Resolve_WraparoundShellPathCrossing_BothDestroyed) 
   EXPECT_FALSE(result);
 
   ASSERT_EQ(getPathExplosions().size(), 1);
-  EXPECT_FLOAT_EQ(getPathExplosions()[0].first, 9.5f);
-  EXPECT_FLOAT_EQ(getPathExplosions()[0].second, 0.0f);
+  MidPoint mp = getPathExplosions()[0];
+  EXPECT_EQ(mp.getX(), 9);
+  EXPECT_EQ(mp.getY(), 0);
+  EXPECT_TRUE(mp.isHalfX());
+  EXPECT_FALSE(mp.isHalfY());
 }
 
 TEST_F(CollisionHandlerTest, Resolve_WraparoundX_CollisionMidpointCorrect) {
@@ -582,8 +596,11 @@ TEST_F(CollisionHandlerTest, Resolve_WraparoundX_CollisionMidpointCorrect) {
   EXPECT_TRUE(shells[1].isDestroyed());
 
   ASSERT_EQ(getPathExplosions().size(), 1);
-  EXPECT_FLOAT_EQ(getPathExplosions()[0].first, 9.5f);
-  EXPECT_FLOAT_EQ(getPathExplosions()[0].second, 5.0f);
+  MidPoint mp = getPathExplosions()[0];
+  EXPECT_EQ(mp.getX(), 9);
+  EXPECT_EQ(mp.getY(), 5);
+  EXPECT_TRUE(mp.isHalfX());
+  EXPECT_FALSE(mp.isHalfY());
   EXPECT_FALSE(result);
 }
 
@@ -603,8 +620,11 @@ TEST_F(CollisionHandlerTest, Resolve_WraparoundY_CollisionMidpointCorrect) {
   EXPECT_TRUE(shells[1].isDestroyed());
 
   ASSERT_EQ(getPathExplosions().size(), 1);
-  EXPECT_FLOAT_EQ(getPathExplosions()[0].first, 5.0f);
-  EXPECT_FLOAT_EQ(getPathExplosions()[0].second, 9.5f);
+  MidPoint mp = getPathExplosions()[0];
+  EXPECT_EQ(mp.getX(), 5);
+  EXPECT_EQ(mp.getY(), 9);
+  EXPECT_FALSE(mp.isHalfX());
+  EXPECT_TRUE(mp.isHalfY());
   EXPECT_FALSE(result);
 }
 
@@ -624,8 +644,11 @@ TEST_F(CollisionHandlerTest, Resolve_WraparoundCornerDiagonal_CollisionMidpointC
   EXPECT_TRUE(shells[1].isDestroyed());
 
   ASSERT_EQ(getPathExplosions().size(), 1);
-  EXPECT_FLOAT_EQ(getPathExplosions()[0].first, 9.5f);
-  EXPECT_FLOAT_EQ(getPathExplosions()[0].second, 9.5f);
+  MidPoint mp = getPathExplosions()[0];
+  EXPECT_EQ(mp.getX(), 9);
+  EXPECT_EQ(mp.getY(), 9);
+  EXPECT_TRUE(mp.isHalfX());
+  EXPECT_TRUE(mp.isHalfY());
   EXPECT_FALSE(result);
 }
 

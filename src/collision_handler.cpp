@@ -135,8 +135,7 @@ bool CollisionHandler::applyPathExplosions(std::vector<Tank>& tanks,
                 if (pathCrossedMidpoint(
                   tank.getPreviousPosition(), 
                   tank.getPosition(), 
-                  mid.first, 
-                  mid.second)
+                  mid)
                 ) {
                     tank.destroy();
                     tankDestroyed = true;
@@ -152,8 +151,7 @@ bool CollisionHandler::applyPathExplosions(std::vector<Tank>& tanks,
                 if (pathCrossedMidpoint(
                   shell.getPreviousPosition(), 
                   shell.getPosition(), 
-                  mid.first, 
-                  mid.second)
+                  mid)
                 ) {
                     shell.destroy();
                     break;
@@ -207,51 +205,18 @@ void CollisionHandler::markPositionExplosionAt(const Point& pos) {
 }
 
 void CollisionHandler::markPathExplosionAt(const Point& from, const Point& to) {
-  auto [mx, my] = computeMidpoint(from, to);
-  m_pathExplosions.emplace_back(mx, my);
+  MidPoint mp = MidPoint::calculateMidpoint(from, to, m_boardWidth, m_boardHeight);
+  if (mp.getX() != -1) {
+    m_pathExplosions.emplace_back(mp);
+  }
 }
 
 bool CollisionHandler::pathCrossedMidpoint(
   const Point& prev, 
   const Point& curr, 
-  float mx, float my
+  const MidPoint& midpoint
 ) const {
-    auto [computed_mx, computed_my] = computeMidpoint(prev, curr);
-    return std::abs(computed_mx - mx) < 1e-5f 
-           && std::abs(computed_my - my) < 1e-5f;
-}
-
-std::pair<float, float> CollisionHandler::computeMidpoint(
-  const Point& a, 
-  const Point& b
-) const {
-  int dx = b.getX() - a.getX();
-  int dy = b.getY() - a.getY();
-
-  float mx, my;
-
-  // X axis midpoint
-  if (dx == 1 || dx == -1) {
-      mx = (a.getX() + b.getX()) / 2.0f;
-  } else if ((a.getX() == 0 && b.getX() == m_boardWidth - 1) || 
-             (b.getX() == 0 && a.getX() == m_boardWidth - 1)) {
-      // Wraparound on X
-      mx = (m_boardWidth - 0.5f);
-  } else {
-      mx = (a.getX() + b.getX()) / 2.0f;
-  }
-
-  // Y axis midpoint
-  if (dy == 1 || dy == -1) {
-      my = (a.getY() + b.getY()) / 2.0f;
-  } else if ((a.getY() == 0 && b.getY() == m_boardHeight - 1) || 
-             (b.getY() == 0 && a.getY() == m_boardHeight - 1)) {
-      // Wraparound on Y
-      my = (m_boardHeight - 0.5f);
-  } else {
-      my = (a.getY() + b.getY()) / 2.0f;
-  }
-
-  return {mx, my};
+    MidPoint calculatedMp = MidPoint::calculateMidpoint(prev, curr, m_boardWidth, m_boardHeight);
+    return calculatedMp == midpoint;
 }
 
