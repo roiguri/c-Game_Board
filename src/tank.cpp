@@ -1,47 +1,15 @@
 #include "tank.h"
 
 Tank::Tank(int playerId, const Point& position, Direction direction)
-    : m_playerId(playerId),
-      m_position(position),
-      m_previousPosition(position),
-      m_direction(direction),
+    : GameObject(playerId, position, direction),
       m_remainingShells(INITIAL_SHELLS),
-      m_destroyed(false),
       m_shootCooldown(0),
       m_backwardCounter(0),
       m_continuousBackward(false) {
 }
 
-Tank::~Tank() {
-    // Nothing to clean up
-}
-
-int Tank::getPlayerId() const {
-    return m_playerId;
-}
-
-Point Tank::getPosition() const {
-    return m_position;
-}
-
-Point Tank::getPreviousPosition() const {
-  return m_previousPosition;
-}
-
-void Tank::updatePreviousPosition() {
-  m_previousPosition = m_position;
-}
-
-Direction Tank::getDirection() const {
-    return m_direction;
-}
-
 int Tank::getRemainingShells() const {
   return m_remainingShells;
-}
-
-bool Tank::isDestroyed() const {
-  return m_destroyed;
 }
 
 bool Tank::canShoot() const {
@@ -62,23 +30,10 @@ bool Tank::isContinuousBackward() const {
   return m_continuousBackward;
 }
 
-void Tank::setPosition(const Point& position) {
-    m_previousPosition = m_position;
-    m_position = position;
-}
-
-void Tank::setDirection(Direction direction) {
-    m_direction = direction;
-}
-
 void Tank::decrementShells() {
   if (m_remainingShells > 0) {
       m_remainingShells--;
   }
-}
-
-void Tank::destroy() {
-  m_destroyed = true;
 }
 
 void Tank::updateCooldowns() {
