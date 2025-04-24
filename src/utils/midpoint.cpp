@@ -122,6 +122,14 @@ bool MidPoint::operator!=(const MidPoint& other) const {
     return !(*this == other);
 }
 
+bool MidPoint::operator<(const MidPoint& other) const {
+  if (getX() != other.getX()) return getX() < other.getX();
+  if (getY() != other.getY()) return getY() < other.getY();
+  if (m_halfX != other.m_halfX) return !m_halfX;
+  if (m_halfY != other.m_halfY) return !m_halfY;
+  return false;
+}
+
 std::string MidPoint::toString() const {
     std::string xStr = std::to_string(getX()) + (m_halfX ? ".5" : "");
     std::string yStr = std::to_string(getY()) + (m_halfY ? ".5" : "");

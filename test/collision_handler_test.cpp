@@ -466,10 +466,10 @@ TEST_F(CollisionHandlerTest, Resolve_ShellHitsTank_BothDestroyed) {
 
 TEST_F(CollisionHandlerTest, Resolve_TankShellPathCross_BothDestroyed) {
   Tank tank(0, Point(1, 1), Direction::DownRight);
-  Shell shell(1, Point(2, 2), Direction::UpLeft);
+  Shell shell(1, Point(1, 2), Direction::UpLeft);
 
   tank.setPosition(Point(2, 2));     // prev: (0,0), curr: (2,2)
-  shell.setPosition(Point(1, 1));    // prev: (2,2), curr: (0,0)
+  shell.setPosition(Point(2, 1));    // prev: (2,2), curr: (0,0)
 
   std::vector<Tank> tanks{tank};
   std::vector<Shell> shells{shell};
@@ -665,3 +665,59 @@ TEST_F(CollisionHandlerTest, Resolve_WraparoundCornerDiagonal_CollisionMidpointC
   EXPECT_FALSE(result);
 }
 
+TEST_F(CollisionHandlerTest, DetectPathCrossings_PathsCross_ExplosionLogged) {
+  // Create a board
+  GameBoard board{10, 10};
+
+  Tank t1(1, Point(1, 1), Direction::DownRight);
+  Tank t2(2, Point(1, 2), Direction::UpRight);
+  t1.setPosition(Point(2, 2));  
+  t2.setPosition(Point(2, 1));
+  
+  std::vector<Tank> tanks{t1, t2};
+  std::vector<Shell> shells;
+  
+  bool result = resolveAll(tanks, shells);
+  
+  // Get the path explosions for testing
+  auto midpoint = *getPathExplosions().begin();
+  
+  // The midpoint should be at (0.5, 0.5)
+  EXPECT_EQ(midpoint.getX(), 1);
+  EXPECT_EQ(midpoint.getY(), 1);
+  EXPECT_TRUE(midpoint.isHalfX());
+  EXPECT_TRUE(midpoint.isHalfY());
+  
+  // Both tanks should be destroyed
+  EXPECT_TRUE(tanks[0].isDestroyed());
+  EXPECT_TRUE(tanks[1].isDestroyed());
+}
+
+TEST_F(CollisionHandlerTest, DetectPathCrossings_NonAdjacentPaths_NoExplosion) {
+  // Create a board
+  GameBoard board{10, 10};
+  
+  // Create objects that move on separate paths 
+  // a(0,0) -> b(1,1) and c(2,2) -> d(3,3)
+  Tank t1(0, Point(0, 0), Direction::DownRight);
+  t1.setPosition(Point(1, 1));
+  
+  Tank t2(1, Point(2, 2), Direction::DownRight);
+  t2.setPosition(Point(3, 3));
+  
+  std::vector<Tank> tanks{t1, t2};
+  std::vector<Shell> shells;
+  
+  CollisionHandler handler;
+  handler.resolveAllCollisions(tanks, shells, board);
+  
+  // Get the path explosions for testing
+  const auto& pathExplosions = getPathExplosions();
+  
+  // There should be no path explosions
+  EXPECT_TRUE(pathExplosions.empty());
+  
+  // Both tanks should be intact
+  EXPECT_FALSE(tanks[0].isDestroyed());
+  EXPECT_FALSE(tanks[1].isDestroyed());
+}

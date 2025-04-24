@@ -125,6 +125,14 @@ public:
      * @return true if the midpoints are not equal, false otherwise
      */
     bool operator!=(const MidPoint& other) const;
+
+    /**
+     * @brief Compares two midpoints for less-than relation
+     * 
+     * @param other The midpoint to compare with
+     * @return true if this midpoint is less than the other, false otherwise
+     */
+    bool operator<(const MidPoint& other) const;
     
     /**
      * @brief Converts to string representation
