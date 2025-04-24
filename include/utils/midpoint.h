@@ -59,6 +59,23 @@ public:
      * @return The midpoint between a and b
      */
     static MidPoint calculateMidpoint(const Point& a, const Point& b);
+
+    /**
+     * @brief Calculate the midpoint between two points considering board
+     *  wrapping
+     *
+     * @param a First point
+     * @param b Second point
+     * @param boardWidth The width of the board for wrapping calculation
+     * @param boardHeight The height of the board for wrapping calculation
+     * @return The midpoint between a and b, considering wraparound
+     */
+    static MidPoint calculateMidpoint(
+      const Point& a, 
+      const Point& b, 
+      int boardWidth, 
+      int boardHeight
+    );
     
     /**
      * @brief Check if the midpoints between two pairs of points are the same
@@ -71,6 +88,27 @@ public:
      */
     static bool midpointsMatch(const Point& a1, const Point& a2, 
                                const Point& b1, const Point& b2);
+
+    /**
+     * @brief Check if the midpoints between two pairs of points are the same
+     *  considering board wrapping
+     * 
+     * @param a1 First point of first pair
+     * @param a2 Second point of first pair
+     * @param b1 First point of second pair
+     * @param b2 Second point of second pair
+     * @param boardWidth The width of the board for wrapping calculation
+     * @param boardHeight The height of the board for wrapping calculation
+     * @return true if the midpoints are the same, false otherwise
+     */
+    static bool midpointsMatch(
+      const Point& a1, 
+      const Point& a2, 
+      const Point& b1, 
+      const Point& b2,
+      int boardWidth, 
+      int boardHeight
+    );
     
     /**
      * @brief Compares two midpoints for equality
