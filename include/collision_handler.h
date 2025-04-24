@@ -88,14 +88,6 @@ private:
     // Marks a path for explosion between two points
     void markPathExplosionAt(const Point& from, const Point& to);
 
-    // Checks if the path between two points crossed a midpoint
-    // and marks it for explosion
-    bool pathCrossedMidpoint(
-      const Point& prev, 
-      const Point& curr, 
-      const MidPoint& midpoint
-    ) const;
-
     // For Test purposes
     friend class CollisionHandlerTest;
 };

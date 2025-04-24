@@ -210,13 +210,3 @@ void CollisionHandler::markPathExplosionAt(const Point& from, const Point& to) {
     }
 }
 
-bool CollisionHandler::pathCrossedMidpoint(
-  const Point& prev, 
-  const Point& curr, 
-  const MidPoint& midpoint
-) const {
-    MidPoint calculatedMp = 
-          MidPoint::calculateMidpoint(prev, curr, m_boardWidth, m_boardHeight);
-    return calculatedMp == midpoint;
-}
-
