@@ -2,7 +2,6 @@
 #include "utils/direction.h"
 #include <algorithm>
 #include <set>
-#include <iostream>
 
 ChaseAlgorithm::ChaseAlgorithm() : m_lastTargetPosition(-1, -1) {}
 
@@ -56,11 +55,6 @@ void ChaseAlgorithm::updatePathToTarget(const GameBoard& gameBoard, const Point&
     
     if (needNewPath) {
         m_currentPath = findPathBFS(gameBoard, start, target);
-        std::cout << "Path size: " << m_currentPath.size() << std::endl;
-        std::cout << "Path: " << std::endl;
-        for (const auto& point : m_currentPath) {
-            std::cout << point << std::endl;
-        }
         m_lastTargetPosition = target;
     }
 }
@@ -93,10 +87,6 @@ Action ChaseAlgorithm::followCurrentPath(
     
     Direction targetDirection = getLineOfSightDirection(gameBoard, myTank.getPosition(), nextPoint).value();
     if (targetDirection != myTank.getDirection()) {
-        std::cout << "Rotating to: " << targetDirection << std::endl;
-        std::cout << "Current direction: " << myTank.getDirection() << std::endl;
-        std::cout << "Current position: " << myTank.getPosition() << std::endl;
-        std::cout << "Next point: " << nextPoint << std::endl;
         return getRotationToDirection(myTank.getDirection(), targetDirection);
     }
     return Action::MoveForward;
