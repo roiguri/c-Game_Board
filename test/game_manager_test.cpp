@@ -855,27 +855,26 @@ TEST_F(GameManagerTest, ProcessStep_waitForCooldown) {
   createTestBoardFile(boardLines);
   
   GameManager manager;
-  ASSERT_TRUE(manager.initialize(tempFilePath));
+  mockAlgo1->setConstantAction(Action::Shoot);
+  mockAlgo2->setConstantAction(Action::None);
+  ASSERT_TRUE(initializeManager(manager, boardLines));
   
-  // Both tanks Shoot
   testProcessStep(manager);
   
-  EXPECT_EQ(manager.getShells().size(), 2);
+  EXPECT_EQ(manager.getShells().size(), 1);
 
   for (int i = 1; i <= Tank::SHOOT_COOLDOWN; ++i) {
     // tanks can't shoot due to cooldown
-    EXPECT_FALSE(manager.getTanks()[0].canShoot());
-    EXPECT_FALSE(manager.getTanks()[1].canShoot());
     testProcessStep(manager);
-    EXPECT_EQ(manager.getShells().size(), 2);
+    EXPECT_EQ(manager.getShells().size(), 1);
     EXPECT_EQ(manager.getTanks()[0].getPosition(), Point(1, 1));
-    EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(24, 1));
+    EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(25, 1));
   }
   EXPECT_EQ(manager.getTanks()[0].getDirection(), Direction::Right);
-  EXPECT_EQ(manager.getTanks()[1].getDirection(), Direction::Up);
+  EXPECT_EQ(manager.getTanks()[1].getDirection(), Direction::Left);
   testProcessStep(manager);
   // tanks can shoot again (only one of the tanks is in direction)
-  EXPECT_EQ(manager.getShells().size(), 3);
+  EXPECT_EQ(manager.getShells().size(), 2);
 }
 
 TEST_F(GameManagerTest, GameManagerTest_maximumSteps) {

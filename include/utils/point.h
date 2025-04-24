@@ -4,6 +4,13 @@
 #include <cmath>
 #include <ostream>
 
+/**
+ * @class Point
+ * @brief Represents a 2D coordinate in the game world
+ * 
+ * Provides basic 2D point functionality with operations for comparing,
+ * combining points, and calculating distances between points.
+ */
 class Point {
 public:
     Point();
@@ -20,7 +27,6 @@ public:
     std::string toString() const;
     static int manhattanDistance(const Point& a, const Point& b);
     static double euclideanDistance(const Point& a, const Point& b);
-};
 
-// TODO: is this the right way?
-std::ostream& operator<<(std::ostream& os, const Point& pt);
+    friend std::ostream& operator<<(std::ostream& os, const Point& pt);
+};
