@@ -15,20 +15,18 @@ std::string directionToString(Direction direction) {
 }
 
 Direction rotateLeft(Direction direction, bool quarterTurn) {
-    int step = quarterTurn ? 2 : 1; // 2 steps for 1/4 turn, 1 step for 1/8 turn
+    int step = quarterTurn ? 2 : 1;
     int directionIndex = static_cast<int>(direction);
     
-    // Rotate left by adding steps (modulo 8 to wrap around)
-    directionIndex = (directionIndex - step + 8) % 8;  // (add 8 and modulo 8 to handle negative values)
+    directionIndex = (directionIndex - step + 8) % 8;
     
     return static_cast<Direction>(directionIndex);
 }
 
 Direction rotateRight(Direction direction, bool quarterTurn) {
-    int step = quarterTurn ? 2 : 1; // 2 steps for 1/4 turn, 1 step for 1/8 turn
+    int step = quarterTurn ? 2 : 1;
     int directionIndex = static_cast<int>(direction);
     
-    // Rotate right by subtracting steps
     directionIndex = (directionIndex + step) % 8;
     
     return static_cast<Direction>(directionIndex);
@@ -68,7 +66,7 @@ std::optional<Direction> getDirectionToPoint(const Point& from, const Point& to)
           return dir;
       }
   }
-  return std::nullopt; // Points are not adjacent
+  return std::nullopt;
 }
 
 std::ostream& operator<<(std::ostream& os, Direction dir) {

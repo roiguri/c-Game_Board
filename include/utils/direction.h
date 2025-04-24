@@ -6,7 +6,11 @@
 #include <optional>
 
 /**
- * Represents the 8 possible directions for tank movement and shooting.
+ * @class Direction
+ * @brief Represents the 8 possible directions for movement and orientation
+ *
+ * Defines all cardinal and intercardinal directions used for game movement,
+ * rotation, and projectile travel in the game.
  */
 enum class Direction {
     Up,       
@@ -20,16 +24,17 @@ enum class Direction {
 };
 
 /**
- * Represents the 8 possible directions for tank movement and shooting.
- * This is a constant array of all possible directions.
+ * @brief Array of all possible directions.
+ * 
+ * The array contains all the directions in a clockwise order, starting from Up.
  */
-static const Direction ALL_DIRECTIONS[] = {
+static constexpr Direction ALL_DIRECTIONS[] = {
   Direction::Up, Direction::UpRight, Direction::Right, Direction::DownRight,
   Direction::Down, Direction::DownLeft, Direction::Left, Direction::UpLeft
 };
 
 /**
- * Converts a Direction enum value to its string representation.
+ * @brief Converts a Direction enum value to its string representation.
  * 
  * @param direction The direction to convert
  * @return String representation of the direction (e.g., "Up", "UpRight", etc.)
@@ -37,25 +42,27 @@ static const Direction ALL_DIRECTIONS[] = {
 std::string directionToString(Direction direction);
 
 /**
- * Rotates a direction counter-clockwise.
+ * @brief Rotates a direction counter-clockwise.
  * 
  * @param direction The current direction
- * @param quarterTurn If true, rotates by 90 degrees (1/4 turn), otherwise 45 degrees (1/8 turn)
+ * @param quarterTurn If true, rotates by 90 degrees (1/4 turn), otherwise 45
+ *  degrees (1/8 turn)
  * @return The new direction after rotation
  */
 Direction rotateLeft(Direction direction, bool quarterTurn = false);
 
 /**
- * Rotates a direction clockwise.
+ * @brief Rotates a direction clockwise.
  * 
  * @param direction The current direction
- * @param quarterTurn If true, rotates by 90 degrees (1/4 turn), otherwise 45 degrees (1/8 turn)
+ * @param quarterTurn If true, rotates by 90 degrees (1/4 turn), otherwise 45
+ *  degrees (1/8 turn)
  * @return The new direction after rotation
  */
 Direction rotateRight(Direction direction, bool quarterTurn = false);
 
 /**
- * Gets the delta movement Point for a given direction.
+ * @brief Gets the delta movement Point for a given direction.
  * 
  * @param direction The direction of movement
  * @param magnitude The magnitude of movement (default 1)
@@ -64,16 +71,22 @@ Direction rotateRight(Direction direction, bool quarterTurn = false);
 Point getDirectionDelta(Direction direction, int magnitude = 1);
 
 /**
- * @brief Calculates the direction needed to move from one adjacent point to another.
- * @param from The starting point.
- * @param to The target adjacent point.
- * @return Optional of Direction enum value needed to move from 'from' to 'to'.
+ * @brief Calculates the direction needed to move from one point to another
+ *   adjacent point.
+ * 
+ * @pre Points must be directly adjacent (including diagonals)
+ * 
+ * @param from The starting point
+ * @param to The target point
+ * @return Direction to move from 'from' to 'to', or nullopt if points are
+ *  not adjacent
  */
-std::optional<Direction> getDirectionToPoint(const Point& from, const Point& to);
+std::optional<Direction> getDirectionToPoint(
+  const Point& from, const Point& to);
 
 
 /**
- * Overloads the << operator to print the Direction enum value.
+ * @brief Overloads the << operator to print the Direction enum value.
  * 
  * @param os The output stream
  * @param dir The direction to print
