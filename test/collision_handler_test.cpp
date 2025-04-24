@@ -52,7 +52,7 @@ protected:
 };
 
 // Test: Two shells swap positions → explosion at midpoint
-TEST_F(CollisionHandlerTest, DetectPathCrossings_ShellsSwap_ExplosionLogged) {
+TEST_F(CollisionHandlerTest, DetectPathCollisions_ShellsSwap_ExplosionLogged) {
     Shell s1(0, Point(2, 2), Direction::DownRight);
     Shell s2(1, Point(1, 1), Direction::UpLeft);
 
@@ -70,7 +70,7 @@ TEST_F(CollisionHandlerTest, DetectPathCrossings_ShellsSwap_ExplosionLogged) {
 }
 
 // Test: A tank and shell do not intersect → no explosion
-TEST_F(CollisionHandlerTest, DetectPathCrossings_NoIntersection_NoExplosion) {
+TEST_F(CollisionHandlerTest, DetectPathCollisions_NoIntersection_NoExplosion) {
     Tank t1(0, Point(4, 3), Direction::Right);
     Shell s1(1, Point(0, 0), Direction::Left);
 
@@ -89,7 +89,7 @@ TEST_F(CollisionHandlerTest, DetectPathCrossings_NoIntersection_NoExplosion) {
 }
 
 // Test: Tank-tank crossing → explosion logged at midpoint
-TEST_F(CollisionHandlerTest, DetectPathCrossings_TanksSwap_ExplosionLogged) {
+TEST_F(CollisionHandlerTest, DetectPathCollisions_TanksSwap_ExplosionLogged) {
     Tank t1(0, Point(4, 4), Direction::Down);
     Tank t2(1, Point(3, 3), Direction::Up);
 
