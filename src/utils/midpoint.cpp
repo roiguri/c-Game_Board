@@ -32,6 +32,62 @@ MidPoint MidPoint::calculateMidpoint(const Point& a, const Point& b) {
     return MidPoint(midX, midY, xIsOdd, yIsOdd);
 }
 
+MidPoint MidPoint::calculateMidpoint(
+  const Point& a, 
+  const Point& b, 
+  int boardWidth, 
+  int boardHeight
+) {
+  int ax = a.getX();
+  int ay = a.getY();
+  int bx = b.getX();
+  int by = b.getY();
+
+  bool adjacentX = (std::abs(bx - ax) == 1) || (std::abs(bx - ax) == 0) ||
+                  (std::abs(bx - ax) == boardWidth - 1);
+
+  bool adjacentY = (std::abs(by - ay) == 1) || (std::abs(by - ay) == 0) ||
+                  (std::abs(by - ay) == boardHeight - 1);
+                  
+  if (!adjacentX && !adjacentY) { // Not adjacent
+      return MidPoint(-1, -1, false, false);
+  }
+
+  int midX, midY;
+  bool halfX = false;
+  bool halfY = false;
+
+  if (std::abs(bx - ax) == 1) {
+      // Simple adjacency
+      midX = std::min(ax, bx);
+      halfX = true;
+  } else if (std::abs(bx - ax) == boardWidth - 1) {
+      // Wraparound adjacency
+      midX = boardWidth - 1;
+      halfX = true;
+  } else {
+      // Same X coordinate
+      midX = ax;
+      halfX = false;
+  }
+
+  if (std::abs(by - ay) == 1) {
+      // Simple adjacency
+      midY = std::min(ay, by);
+      halfY = true;
+  } else if (std::abs(by - ay) == boardHeight - 1) {
+      // Wraparound adjacency
+      midY = boardHeight - 1;
+      halfY = true;
+  } else {
+      // Same Y coordinate
+      midY = ay;
+      halfY = false;
+  }
+
+  return MidPoint(midX, midY, halfX, halfY);
+}
+
 bool MidPoint::midpointsMatch(const Point& a1, const Point& a2, 
                              const Point& b1, const Point& b2) {
     // Calculate both midpoints
@@ -39,6 +95,19 @@ bool MidPoint::midpointsMatch(const Point& a1, const Point& a2,
     MidPoint midpoint2 = calculateMidpoint(b1, b2);
     
     // Compare them
+    return midpoint1 == midpoint2;
+}
+
+bool MidPoint::midpointsMatch(
+  const Point& a1, 
+  const Point& a2, 
+  const Point& b1, 
+  const Point& b2,
+  int boardWidth,
+  int boardHeight
+) {
+    MidPoint midpoint1 = calculateMidpoint(a1, a2, boardWidth, boardHeight);
+    MidPoint midpoint2 = calculateMidpoint(b1, b2, boardWidth, boardHeight);
     return midpoint1 == midpoint2;
 }
 
