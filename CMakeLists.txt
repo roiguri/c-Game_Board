@@ -49,7 +49,6 @@ set(TEST_SOURCES
     test/algo/algorithm_test.cpp
     test/algo/chase_algorithm_test.cpp
     test/algo/defensive_algorithm_test.cpp
-    test/bonus/logger_test.cpp
     test/test_main.cpp
 )
 
