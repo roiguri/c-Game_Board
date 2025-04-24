@@ -167,6 +167,10 @@ bool GameBoard::isWall(const Point& position) const {
     return getCellType(position) == CellType::Wall;
 }
 
+bool GameBoard::isMine(const Point& position) const {
+    return getCellType(position) == CellType::Mine;
+}
+
 bool GameBoard::damageWall(const Point& position) {
     Point wrapped = wrapPosition(position);
     
