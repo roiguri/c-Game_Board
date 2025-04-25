@@ -23,14 +23,6 @@ public:
      * @param config Configuration to use
      */
     explicit BoardGenerator(const BoardConfig& config);
-    
-    /**
-     * @brief Load configuration from file
-     * 
-     * @param configPath Path to configuration file
-     * @return true if configuration was loaded successfully
-     */
-    bool loadConfig(const std::string& configPath);
 
     /**
      * @brief Get the current configuration
@@ -93,7 +85,4 @@ private:
     
     // BFS helper for connectivity check
     bool canReach(int startX, int startY, int endX, int endY);
-    
-    // Parse a key-value pair from config file
-    bool parseConfigValue(const std::string& key, const std::string& value);
 };

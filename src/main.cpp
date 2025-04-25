@@ -1,4 +1,5 @@
 #include "bonus/board_generator.h"
+#include "bonus/config/board_config.h"
 #include <string>
 #include <fstream>
 #include <filesystem>
@@ -35,14 +36,17 @@ int runGameWithFile(const std::string& filePath) {
 }
 
 // Generate a board with the given configuration
-int generateBoard(const std::string& configPath, bool saveToFile) {
+int generateBoard(const std::string& boardConfigPath, bool saveToFile) {
     BoardGenerator generator;
-    if (!configPath.empty()) {
-        if (!generator.loadConfig(configPath)) {
-            std::cerr << "Failed to load configuration file: " << configPath << std::endl;
-            return 1;
+    if (!boardConfigPath.empty()) {
+        BoardConfig boardConfig;
+        if (boardConfig.loadFromFile(boardConfigPath)) {
+            generator.setConfig(boardConfig);
+            std::cout << "Using configuration from: " << boardConfigPath << std::endl;
+        } else {
+            std::cerr << "Failed to load configuration file: " << 
+              boardConfigPath << std::endl;
         }
-        std::cout << "Using configuration from: " << configPath << std::endl;
     } else {
         std::cout << "Using default board configuration" << std::endl;
     }
@@ -67,14 +71,16 @@ int generateBoard(const std::string& configPath, bool saveToFile) {
 }
 
 // Generate a board and run the game with it
-int generateAndRunGame(const std::string& configPath) {
+int generateAndRunGame(const std::string& boardConfigPath) {
     BoardGenerator generator;
-    if (!configPath.empty()) {
-        if (!generator.loadConfig(configPath)) {
-            std::cerr << "Failed to load configuration file: " << configPath << std::endl;
-            return 1;
-        }
-        std::cout << "Using configuration from: " << configPath << std::endl;
+
+    if (!boardConfigPath.empty()) {
+        BoardConfig boardConfig;
+        if (boardConfig.loadFromFile(boardConfigPath)) {
+            generator.setConfig(boardConfig);
+        } else {
+            std::cerr << "Failed to load configuration file: " << 
+              boardConfigPath << std::endl;        }
     } else {
         std::cout << "Using default board configuration" << std::endl;
     }
@@ -117,16 +123,16 @@ int generateAndRunGame(const std::string& configPath) {
 
 // Print usage information
 void printUsage() {
-    std::cout << "Usage:" << std::endl;
-    std::cout << "  tanks_game <game_board_input_file>" << std::endl;
-    std::cout << "  tanks_game --only_generate [--config-path=<path>]" << std::endl;
-    std::cout << "  tanks_game --run_generated [--config-path=<path>]" << std::endl;
+  std::cout << "Usage:" << std::endl;
+  std::cout << "  tanks_game <game_board_input_file>" << std::endl;
+  std::cout << "  tanks_game --only_generate [--board-config=<path>]" << std::endl;
+  std::cout << "  tanks_game --run_generated [--board-config=<path>]" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
     bool onlyGenerate = false;
     bool runGenerated = false;
-    std::string configPath = "";
+    std::string boardConfigPath = "";
     
     // Parse command line arguments
     for (int i = 1; i < argc; ++i) {
@@ -135,8 +141,8 @@ int main(int argc, char* argv[]) {
             onlyGenerate = true;
         } else if (arg == "--run_generated") {
             runGenerated = true;
-        } else if (arg.find("--config-path=") == 0) {
-            configPath = arg.substr(14); // Extract path after "="
+        } else if (arg.find("--board-config=") == 0) {
+            boardConfigPath = arg.substr(15); // Extract path after "="
         } else if (!onlyGenerate && !runGenerated) {
             // Regular game mode with specified board file
             return runGameWithFile(arg);
@@ -145,9 +151,9 @@ int main(int argc, char* argv[]) {
     
     // Handle generation modes
     if (onlyGenerate) {
-        return generateBoard(configPath, true);
+        return generateBoard(boardConfigPath, true);
     } else if (runGenerated) {
-        return generateAndRunGame(configPath);
+        return generateAndRunGame(boardConfigPath);
     }
     
     // If we get here, invalid arguments were provided

@@ -193,58 +193,6 @@ TEST_F(BoardGeneratorTest, CustomConfigConstructor) {
     EXPECT_EQ(retrievedConfig.seed, 12345);
 }
 
-// Test loading configuration from file
-TEST_F(BoardGeneratorTest, LoadConfig) {
-    std::string configContent = 
-        "dimensions: 25 20\n"
-        "wall_density: 0.4\n"
-        "mine_density: 0.08\n"
-        "symmetry: vertical\n"
-        "seed: 54321\n";
-    
-    std::string filename = writeTestConfig(configContent);
-    
-    BoardGenerator generator;
-    EXPECT_TRUE(generator.loadConfig(filename));
-    
-    const BoardConfig& config = generator.getConfig();
-    EXPECT_EQ(config.width, 25);
-    EXPECT_EQ(config.height, 20);
-    EXPECT_FLOAT_EQ(config.wallDensity, 0.4f);
-    EXPECT_FLOAT_EQ(config.mineDensity, 0.08f);
-    EXPECT_EQ(config.symmetry, "vertical");
-    EXPECT_EQ(config.seed, 54321);
-    
-    // Cleanup
-    std::remove(filename.c_str());
-}
-
-// Test loading invalid configuration file
-TEST_F(BoardGeneratorTest, LoadInvalidConfig) {
-    std::string configContent = 
-        "dimensions: 3 3\n" // Too small
-        "wall_density: 1.5\n" // Out of range
-        "mine_density: -0.1\n" // Out of range
-        "symmetry: invalid\n" // Invalid value
-        "seed: abc\n"; // Not a number
-    
-    std::string filename = writeTestConfig(configContent);
-    
-    BoardGenerator generator;
-    EXPECT_TRUE(generator.loadConfig(filename)); // Parsing shouldn't fail completely
-    
-    const BoardConfig& config = generator.getConfig();
-    // Should retain default values for invalid entries
-    EXPECT_EQ(config.width, 15);
-    EXPECT_EQ(config.height, 10);
-    EXPECT_FLOAT_EQ(config.wallDensity, 0.25f);
-    EXPECT_FLOAT_EQ(config.mineDensity, 0.05f);
-    EXPECT_EQ(config.symmetry, "none");
-    
-    // Cleanup
-    std::remove(filename.c_str());
-}
-
 // Test basic board generation
 TEST_F(BoardGeneratorTest, GenerateBasicBoard) {
     BoardGenerator generator;
