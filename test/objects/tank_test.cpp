@@ -423,3 +423,30 @@ TEST_F(TankTest, UpdatePreviousPosition_ExplicitUpdate) {
   // Check that previous position was updated correctly
   EXPECT_EQ(tank.getPreviousPosition(), oldPosition);
 }
+TEST_F(TankTest, DoNothing_SavesPreviousPosition) {
+  Point originalPosition = Point(3, 4);
+  EXPECT_EQ(tank->getPreviousPosition(), originalPosition);
+  EXPECT_EQ(tank->getPosition(), originalPosition);
+  Point newPosition = Point(5, 5);
+  tank->setPosition(newPosition);
+
+  tank->doNothing();
+  
+  EXPECT_EQ(tank->getPreviousPosition(), newPosition);
+  EXPECT_EQ(tank->getPosition(), newPosition);
+}
+
+TEST_F(TankTest, DoNothing_ProcessesBackwardMovement) {
+  Point backwardPosition = tank->getNextBackwardPosition();
+  EXPECT_TRUE(tank->requestMoveBackward(backwardPosition));
+  EXPECT_EQ(tank->getBackwardCounter(), 1);
+  
+  tank->doNothing();
+  EXPECT_EQ(tank->getBackwardCounter(), 2);
+  
+  tank->doNothing();
+  // After the third step, the backward movement completes
+  EXPECT_EQ(tank->getBackwardCounter(), 0);
+  EXPECT_EQ(tank->getPosition(), backwardPosition);
+  EXPECT_TRUE(tank->isContinuousBackward());
+}

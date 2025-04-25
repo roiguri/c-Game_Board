@@ -159,6 +159,15 @@ public:
      */
     Point getNextBackwardPosition() const;
 
+    /**
+     * @brief Update tank state when no action is taken
+     * 
+     * Update backward movement state and previous position.
+     * 
+     * @return 
+     */
+    void doNothing();
+
 private:
     // Execute the actual backward movement to the stored position
     void moveBackward();

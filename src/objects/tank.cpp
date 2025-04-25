@@ -83,8 +83,8 @@ bool Tank::isInBackwardMovement() {
     m_backwardCounter++;
     
     if (m_backwardCounter > BACKWARD_DELAY) {
-        moveBackward();          
-        return true;
+      moveBackward();          
+      return true;
     }
     return true;
   }
@@ -135,4 +135,9 @@ Point Tank::getNextForwardPosition() const {
 
 Point Tank::getNextBackwardPosition() const {
   return m_position - getDirectionDelta(m_direction);
+}
+
+void Tank::doNothing() {
+  m_previousPosition = m_position;
+  isInBackwardMovement();
 }
