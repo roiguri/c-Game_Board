@@ -86,6 +86,9 @@ if(ENABLE_TESTING)
     
     set(TEST_SOURCES
         test/bonus/board_generator_test.cpp
+        test/bonus/config/configuration_base_test.cpp
+        test/bonus/config/board_config_test.cpp
+        test/bonus/config/game_config_test.cpp
         test/utils/point_test.cpp
         test/utils/direction_test.cpp
         test/utils/action_test.cpp
