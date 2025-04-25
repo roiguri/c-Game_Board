@@ -18,15 +18,27 @@ Mock objects for testing algorithmic behavior in isolation
 Test fixtures for complex test scenarios
 * Configuration of gtest enviroment was done with AI
 
-Instructions to run:
+*Instructions to run:*
 
 Visualization:
-./tank_battle <input_file>
-# Visualization HTML generated as output_<input_file>_visualization.html
-# Open in any browser to view the interactive game replay
+
+  Build the project with:
+    mkdir build && cd build
+    cmake -DENABLE_VISUALIZATION=ON ..
+    make
+
+  Then Run:
+    ./tanks_game <input_file>
+  
+  # Visualization HTML generated as output_<input_file>_visualization.html
+  # Open in any browser to view the interactive game replay
 
 Tests:
-cd build
-cmake ..
-make
-./bin/tests/tank_battle_tests
+
+  Build the project with:
+    mkdir build && cd build
+    cmake -DENABLE_TESTING=ON -DENABLE_VISUALIZATION=ON ..
+    make
+
+  Run tests with:
+    ./bin/tests/tanks_game_tests
