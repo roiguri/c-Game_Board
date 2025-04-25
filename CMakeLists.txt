@@ -39,6 +39,7 @@ set(TEST_SOURCES
     test/utils/point_test.cpp
     test/utils/direction_test.cpp
     test/utils/action_test.cpp
+    test/utils/midpoint_test.cpp
     test/game_board_test.cpp
     test/objects/game_object_test.cpp
     test/objects/shell_test.cpp
