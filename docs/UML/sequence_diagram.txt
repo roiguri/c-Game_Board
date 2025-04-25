@@ -1,0 +1,88 @@
+sequenceDiagram
+    participant Main as main()
+    participant GM as GameManager
+    participant FL as FileLoader
+    participant GB as GameBoard
+    participant Algo as Algorithms
+    participant Tanks
+    participant CH as CollisionHandler
+
+    Main->>GM: initialize(inputFilePath)
+    activate GM
+    
+    GM->>FL: loadBoardFile(filePath, width, height)
+    activate FL
+    FL-->>GM: boardLines, width, height
+    deactivate FL
+    
+    GM->>GB: initialize(boardLines, errors, tankPositions)
+    activate GB
+    GB-->>GM: tankPositions, success/failure
+    deactivate GB
+    
+    GM->>GM: createTanks(tankPositions)
+    GM->>GM: createAlgorithms()
+    GM-->>Main: initialization success/failure
+    deactivate GM
+    
+    Main->>GM: runGame()
+    activate GM
+    
+    rect rgb(150, 200, 200, 0.5)
+        Note over GM: Game Loop (repeats until game over)
+        
+        rect rgb(255,255,255,0)
+            Note over Algo, GM: Called once for each algorithm
+            GM->>Algo: getNextAction(board, myTank, enemyTank, shells)
+            activate Algo
+            Algo-->>GM: action for player
+            deactivate Algo
+        end
+        
+        GM->>GM: moveShellsOnce()
+        
+        GM->>CH: resolveAllCollisions(tanks, shells, board)
+        activate CH
+        CH->>CH: detectPathCrossings(tanks, shells)
+        CH->>CH: checkShellWallCollisions(shells, board)
+        CH->>CH: detectPositionCollisions(tanks, shells)
+        CH->>CH: checkTankMineCollisions(tanks, board)
+        CH-->>GM: tankDestroyed (true/false)
+        deactivate CH
+
+        rect rgb(255,255,255,0)
+            Note over GM, Tanks: Same process for both players
+
+            GM->>GM: applyAction(1, player1Action)
+            activate GM
+            
+            GM->>Tanks: moveForward(newPosition)/requestMoveBackward(newPosition)/rotateLeft/Right(quarterTurn)/shoot()
+            activate Tanks
+            Tanks-->>GM: success/failure
+            deactivate Tanks
+            
+            GM->>GM: logAction(1, action, success)
+            deactivate GM
+        end
+        
+        GM->>GM: moveShellsOnce()
+        
+        GM->>CH: resolveAllCollisions(tanks, shells, board)
+        activate CH
+        CH-->>GM: tankDestroyed (true/false)
+        deactivate CH
+
+        GM->>GM: removeDestroyedShells()
+
+        GM->>Tanks: updateCooldowns()
+
+        GM->>GM: checkGameOver()
+    end
+    
+    GM-->>Main: game completed
+    deactivate GM
+    
+    Main->>GM: saveResults(outputFilePath)
+    activate GM
+    GM-->>Main: save success/failure
+    deactivate GM
