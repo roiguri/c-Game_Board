@@ -29,14 +29,14 @@ protected:
     }
 
     // Expose protected methods for testing
-    bool testIsInDanger(
+    bool testIsInDangerFromShells(
         Algorithm* algo,
         const GameBoard& gameBoard,
         const Point& position,
         const std::vector<Shell>& shells,
         int lookAheadSteps = 3
     ) const {
-        return algo->isInDanger(gameBoard, position, shells, lookAheadSteps);
+        return algo->isInDangerFromShells(gameBoard, position, shells, lookAheadSteps);
     }
   
     std::optional<Direction> testGetLineOfSightDirection(
@@ -131,8 +131,8 @@ TEST_F(AlgorithmTest, Constructor) {
     delete testAlgorithm;
 }
 
-// IsInDanger Tests
-TEST_F(AlgorithmTest, IsInDanger_NoShells) {
+// isInDangerFromShells Tests
+TEST_F(AlgorithmTest, isInDangerFromShells_NoShells) {
     GameBoard board = create5X5TestBoard({
         "#####",
         "#   #",
@@ -143,10 +143,10 @@ TEST_F(AlgorithmTest, IsInDanger_NoShells) {
     Point position(2, 2);
     std::vector<Shell> shells;
     
-    EXPECT_FALSE(testIsInDanger(mockAlgorithm, board, position, shells));
+    EXPECT_FALSE(testIsInDangerFromShells(mockAlgorithm, board, position, shells));
 }
 
-TEST_F(AlgorithmTest, IsInDanger_DirectHit) {
+TEST_F(AlgorithmTest, isInDangerFromShells_DirectHit) {
     GameBoard board = create5X5TestBoard({
         "#####",
         "#   #",
@@ -159,10 +159,10 @@ TEST_F(AlgorithmTest, IsInDanger_DirectHit) {
     std::vector<Shell> shells;
     shells.push_back(Shell(2, Point(2, 2), Direction::Left)); // Shell at same position
     
-    EXPECT_TRUE(testIsInDanger(mockAlgorithm, board, position, shells));
+    EXPECT_TRUE(testIsInDangerFromShells(mockAlgorithm, board, position, shells));
 }
 
-TEST_F(AlgorithmTest, IsInDanger_ShellInPath) {
+TEST_F(AlgorithmTest, isInDangerFromShells_ShellInPath) {
     GameBoard board = create5X5TestBoard({
         "#####",
         "#   #",
@@ -175,10 +175,10 @@ TEST_F(AlgorithmTest, IsInDanger_ShellInPath) {
     std::vector<Shell> shells;
     shells.push_back(Shell(2, Point(3, 2), Direction::Left)); // Shell will hit position
     
-    EXPECT_TRUE(testIsInDanger(mockAlgorithm, board, position, shells, 1));
+    EXPECT_TRUE(testIsInDangerFromShells(mockAlgorithm, board, position, shells, 1));
 }
 
-TEST_F(AlgorithmTest, IsInDanger_ShellFarInPath) {
+TEST_F(AlgorithmTest, isInDangerFromShells_ShellFarInPath) {
   GameBoard board = create5X5TestBoard({
       "## ##",
       "#   #",
@@ -192,10 +192,10 @@ TEST_F(AlgorithmTest, IsInDanger_ShellFarInPath) {
   std::vector<Shell> shells;
   shells.push_back(Shell(2, Point(2, 0), Direction::Down)); // Shell will hit position
   
-  EXPECT_TRUE(testIsInDanger(mockAlgorithm, board, position, shells, 2));
+  EXPECT_TRUE(testIsInDangerFromShells(mockAlgorithm, board, position, shells, 2));
 }
 
-TEST_F(AlgorithmTest, IsInDanger_ShellBlocked) {
+TEST_F(AlgorithmTest, isInDangerFromShells_ShellBlocked) {
     GameBoard board = create5X5TestBoard({
         "#####",
         "#   #",
@@ -208,7 +208,7 @@ TEST_F(AlgorithmTest, IsInDanger_ShellBlocked) {
     std::vector<Shell> shells;
     shells.push_back(Shell(2, Point(3, 2), Direction::Left)); // Shell would hit but blocked by wall
     
-    EXPECT_FALSE(testIsInDanger(mockAlgorithm, board, position, shells, 2));
+    EXPECT_FALSE(testIsInDangerFromShells(mockAlgorithm, board, position, shells, 2));
 }
 
 // Line of Sight Tests

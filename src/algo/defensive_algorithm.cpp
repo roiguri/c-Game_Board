@@ -14,7 +14,7 @@ Action DefensiveAlgorithm::getNextAction(
     const Tank& enemyTank,
     const std::vector<Shell>& shells
 ) {
-    if (isInDanger(gameBoard, myTank, shells)) {
+    if (isInDangerFromShells(gameBoard, myTank, shells)) {
         Action safeAction = findOptimalSafeMove(gameBoard, myTank, enemyTank, shells, false);
         if (safeAction != Action::None) {
             return safeAction;
@@ -31,7 +31,13 @@ Action DefensiveAlgorithm::getNextAction(
             return evasiveAction;
         }
     }
+
+    Point nextPosition = myTank.getNextForwardPosition();
+    if (isPositionSafe(gameBoard, nextPosition, enemyTank,
+                       shells, /* avoidEnemySight */ true)) {
+        return Action::MoveForward;
+    }
     
     return (myTank.getPosition().getX() % 2 == 0) ? 
-            Action::RotateRightQuarter : Action::RotateLeftQuarter;
+            Action::RotateRightEighth : Action::RotateLeftEighth;
 }

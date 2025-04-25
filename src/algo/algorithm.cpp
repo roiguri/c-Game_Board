@@ -10,12 +10,12 @@ Algorithm::Algorithm() {
 Algorithm::~Algorithm() {
 }
 
-bool Algorithm::isInDanger(const GameBoard& gameBoard, const Tank& tank, 
+bool Algorithm::isInDangerFromShells(const GameBoard& gameBoard, const Tank& tank, 
                          const std::vector<Shell>& shells, int lookAheadSteps) const {
-    return isInDanger(gameBoard, tank.getPosition(), shells, lookAheadSteps);
+    return isInDangerFromShells(gameBoard, tank.getPosition(), shells, lookAheadSteps);
 }
 
-bool Algorithm::isInDanger(const GameBoard& gameBoard, const Point& position, 
+bool Algorithm::isInDangerFromShells(const GameBoard& gameBoard, const Point& position, 
                          const std::vector<Shell>& shells, int lookAheadSteps) const {
     if (gameBoard.isMine(position)) {
         return true;
@@ -53,7 +53,7 @@ Action Algorithm::findOptimalSafeMove(
   const std::vector<Shell>& shells, 
   bool avoidEnemySight
 ) const {
-    bool currentPositionSafe = !isInDanger(gameBoard, tank, shells);
+    bool currentPositionSafe = !isInDangerFromShells(gameBoard, tank, shells);
       
     bool exposedToEnemy = avoidEnemySight && 
                          isExposedToEnemy(gameBoard, tank.getPosition(), enemyTank);
@@ -82,18 +82,13 @@ std::vector<Algorithm::SafeMoveOption> Algorithm::getSafeMoveOptions(
 ) const {
     std::vector<SafeMoveOption> safeOptions;
     Direction currentDir = tank.getDirection();
-
-    bool canMove, safeFromShells, safeFromEnemy;
     
     // Check all other directions
     for (const Direction& dir : ALL_DIRECTIONS) {        
         Point newPos = gameBoard.wrapPosition(tank.getPosition() + getDirectionDelta(dir));
         
-        canMove = gameBoard.canMoveTo(newPos) && newPos != enemyTank.getPosition();
-        safeFromShells = !isInDanger(gameBoard, newPos, shells);
-        safeFromEnemy = !avoidEnemySight || !isExposedToEnemy(gameBoard, newPos, enemyTank);
-        
-        if (canMove && safeFromShells && safeFromEnemy) {            
+        if (isPositionSafe(gameBoard, newPos, enemyTank, 
+                           shells, avoidEnemySight)) {            
           Action tankAction = getRotationToDirection(currentDir, dir);
           tankAction = (tankAction == Action::None) ? Action::MoveForward : tankAction;
           int cost = calculateMoveCost(tank, newPos, dir);
@@ -109,11 +104,8 @@ std::vector<Algorithm::SafeMoveOption> Algorithm::getSafeMoveOptions(
     Point backwardPos = tank.getNextBackwardPosition();
     backwardPos = gameBoard.wrapPosition(backwardPos);
     
-    canMove = gameBoard.canMoveTo(backwardPos) && backwardPos != enemyTank.getPosition();
-    safeFromShells = !isInDanger(gameBoard, backwardPos, shells);
-    safeFromEnemy = !avoidEnemySight || !isExposedToEnemy(gameBoard, backwardPos, enemyTank);
-    
-    if (canMove && safeFromShells && safeFromEnemy) {
+    if (isPositionSafe(gameBoard, backwardPos, enemyTank, 
+                       shells, avoidEnemySight)) {
         int cost = tank.isContinuousBackward() ? 1 : 3;  // Initial backward takes 3 steps        
         safeOptions.push_back({
             backwardPos,
@@ -123,6 +115,21 @@ std::vector<Algorithm::SafeMoveOption> Algorithm::getSafeMoveOptions(
     }
     
     return safeOptions;
+}
+
+bool Algorithm::isPositionSafe(
+  const GameBoard& gameBoard, 
+  const Point& position,
+  const Tank& enemyTank,
+  const std::vector<Shell>& shells,
+  bool avoidEnemySight
+) const {
+  bool canMove = gameBoard.canMoveTo(position) && position != enemyTank.getPosition() 
+                 && !gameBoard.isMine(position);
+  bool safeFromShells = !isInDangerFromShells(gameBoard, position, shells);
+  bool safeFromEnemy = !avoidEnemySight || !isExposedToEnemy(gameBoard, position, enemyTank);
+
+  return canMove && safeFromShells && safeFromEnemy;
 }
 
 bool Algorithm::isExposedToEnemy(
