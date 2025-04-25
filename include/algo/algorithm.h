@@ -44,11 +44,19 @@ public:
         const std::vector<Shell>& shells
     ) = 0;
 protected:
-    bool isInDanger(const GameBoard& gameBoard, const Tank& tank, 
-                   const std::vector<Shell>& shells, int lookAheadSteps = 3) const;
+    bool isPositionSafe(
+      const GameBoard& gameBoard, 
+      const Point& position,
+      const Tank& enemyTank,
+      const std::vector<Shell>& shells,
+      bool avoidEnemySight = false
+    ) const;
+
+    bool isInDangerFromShells(const GameBoard& gameBoard, const Tank& tank, 
+              const std::vector<Shell>& shells, int lookAheadSteps = 3) const;
     
-    bool isInDanger(const GameBoard& gameBoard, const Point& position, 
-                   const std::vector<Shell>& shells, int lookAheadSteps = 3) const;
+    bool isInDangerFromShells(const GameBoard& gameBoard, const Point& position, 
+              const std::vector<Shell>& shells, int lookAheadSteps = 3) const;
     
     struct SafeMoveOption {
         Point position;

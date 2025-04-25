@@ -148,8 +148,8 @@ TEST_F(ChaseAlgorithmTest, Priority4_Chase_NoPathAvailable) {
     Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
     
     // No path available, should rotate to scan
-    EXPECT_TRUE(action == Action::RotateRightQuarter || 
-                action == Action::RotateLeftQuarter);
+    EXPECT_TRUE(action == Action::RotateRightEighth || 
+                action == Action::RotateLeftEighth);
 }
 
 // Combined priorities tests

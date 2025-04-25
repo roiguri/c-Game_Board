@@ -98,10 +98,10 @@ TEST_F(DefensiveAlgorithmTest, Priority1_AvoidShells_NoSafeMove) {
     Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
     
     // With no safe moves, should rotate
-    EXPECT_EQ(action, Action::RotateRightQuarter);
+    EXPECT_EQ(action, Action::RotateRightEighth);
     EXPECT_TRUE(action == Action::None || 
-                action == Action::RotateRightQuarter || 
-                action == Action::RotateLeftQuarter);
+                action == Action::RotateRightEighth || 
+                action == Action::RotateLeftEighth);
 }
 
 // Test Priority 2: Shoot if in direction and have line of sight
@@ -208,8 +208,8 @@ TEST_F(DefensiveAlgorithmTest, Priority3_RunAway_EnemyNoLineOfSight) {
     Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
     
     // Not in danger, shouldn't need to run, might rotate to scan
-    EXPECT_TRUE(action == Action::RotateRightQuarter || 
-                action == Action::RotateLeftQuarter);
+    EXPECT_TRUE(action == Action::RotateRightEighth || 
+                action == Action::RotateLeftEighth);
 }
 
 TEST_F(DefensiveAlgorithmTest, Priority3_RunAway_NowhereToHide) {
@@ -229,7 +229,7 @@ TEST_F(DefensiveAlgorithmTest, Priority3_RunAway_NowhereToHide) {
     Action action = algorithm->getNextAction(board, myTank, enemyTank, shells);
     
     // Nowhere to hide, should shoot since it can
-    EXPECT_EQ(action, Action::RotateLeftQuarter);
+    EXPECT_EQ(action, Action::RotateLeftEighth);
 }
 
 // Combined priority tests

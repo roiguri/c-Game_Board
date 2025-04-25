@@ -14,7 +14,7 @@ Action ChaseAlgorithm::getNextAction(
     const std::vector<Shell>& shells
 ) {
     // Priority 1: Avoid shells
-    if (isInDanger(gameBoard, myTank, shells)) {
+    if (isInDangerFromShells(gameBoard, myTank, shells)) {
         Action safeAction = findOptimalSafeMove(gameBoard, myTank, enemyTank, shells, false);
         if (safeAction != Action::None) {
             return safeAction;
@@ -43,7 +43,7 @@ Action ChaseAlgorithm::getNextAction(
     }
     
     return (myTank.getPosition().getX() % 2 == 0) ? 
-            Action::RotateRightQuarter : Action::RotateLeftQuarter;
+            Action::RotateRightEighth : Action::RotateLeftEighth;
 }
 
 void ChaseAlgorithm::updatePathToTarget(const GameBoard& gameBoard, const Point& start, 
@@ -81,7 +81,7 @@ Action ChaseAlgorithm::followCurrentPath(
       }
     }
 
-    if (isInDanger(gameBoard, nextPoint, shells, 2)) {
+    if (isInDangerFromShells(gameBoard, nextPoint, shells, 2)) {
         return Action::None;
     }
     
