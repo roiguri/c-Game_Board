@@ -5,18 +5,7 @@
 #include <vector>
 #include <map>
 #include "game_board.h"
-
-/**
- * @brief Configuration for board generation
- */
-struct BoardConfig {
-    int width = 15;
-    int height = 10;
-    float wallDensity = 0.25f;
-    float mineDensity = 0.05f;
-    std::string symmetry = "none"; // none, horizontal, vertical, diagonal
-    int seed = -1; // -1 for random seed
-};
+#include "bonus/config/board_config.h"
 
 /**
  * @brief Generates game boards based on configuration
@@ -42,6 +31,20 @@ public:
      * @return true if configuration was loaded successfully
      */
     bool loadConfig(const std::string& configPath);
+
+    /**
+     * @brief Get the current configuration
+     * 
+     * @return Current configuration
+     */
+    const BoardConfig& getConfig() const;
+
+    /**
+     * @brief Set the configuration
+     * 
+     * @param config Configuration to set
+     */
+    void setConfig(const BoardConfig& config);
     
     /**
      * @brief Generate a game board
@@ -64,18 +67,6 @@ public:
      * @return Vector of strings representing the board
      */
     std::vector<std::string> getBoardLines() const;
-    
-    /**
-     * @brief Get the current configuration
-     */
-    const BoardConfig& getConfig() const;
-    
-    /**
-     * @brief Set configuration directly
-     * 
-     * @param config New configuration to use
-     */
-    void setConfig(const BoardConfig& config);
     
 private:
     BoardConfig m_config;
