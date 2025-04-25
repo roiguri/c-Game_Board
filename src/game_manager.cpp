@@ -327,6 +327,7 @@ bool GameManager::applyAction(int playerId, Action action) {
           break;
           
       case Action::None:
+          playerTank.doNothing(); // update tank state
           actionResult = true;  // No action is always "successful"
           break;
           

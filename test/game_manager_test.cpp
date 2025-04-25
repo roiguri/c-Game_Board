@@ -552,6 +552,58 @@ TEST_F(GameManagerTest, MoveShellsOnce_ShellMovementAndCollision) {
   EXPECT_EQ(shellsAfterFirstMove[0].getPosition(), Point(2, 1));
 }
 
+TEST_F(GameManagerTest, ApplyAction_DoNothing) {
+  // Create a basic test board 
+  std::vector<std::string> boardLines = getStandardBoard();
+  createTestBoardFile(boardLines);
+  
+  GameManager manager;
+  ASSERT_TRUE(manager.initialize(tempFilePath));
+  
+  // Capture initial state
+  auto initialTanks = manager.getTanks();
+  ASSERT_EQ(initialTanks.size(), 2);
+  Point initialPos1 = initialTanks[1].getPosition(); // Player 1
+  Point initialPos2 = initialTanks[0].getPosition(); // Player 2
+  Direction initialDir1 = initialTanks[1].getDirection();
+  Direction initialDir2 = initialTanks[0].getDirection();
+  
+  // Verify positions and directions are unchanged
+  auto finalTanks = manager.getTanks();
+  EXPECT_EQ(finalTanks[1].getPosition(), initialPos1);
+  EXPECT_EQ(finalTanks[0].getPosition(), initialPos2);
+
+  bool p1Result = testApplyAction(manager, 1, Action::MoveForward);
+  bool p2Result = testApplyAction(manager, 2, Action::MoveForward);
+
+  Point newPosition1 = Point(5, 1);
+  Point newPosition2 = Point(2, 1);
+  
+  EXPECT_EQ(manager.getTanks()[1].getPreviousPosition(), initialPos1);
+  EXPECT_EQ(manager.getTanks()[0].getPreviousPosition(), initialPos2);
+  EXPECT_EQ(manager.getTanks()[1].getPosition(), newPosition1);
+  EXPECT_EQ(manager.getTanks()[0].getPosition(), newPosition2);
+
+  // Apply "do nothing" action for both players
+  p1Result = testApplyAction(manager, 1, Action::None);
+  p2Result = testApplyAction(manager, 2, Action::None);
+  
+  // Verify action was successful
+  EXPECT_TRUE(p1Result);
+  EXPECT_TRUE(p2Result);
+
+  EXPECT_TRUE(manager.getTanks()[1].getPosition() == newPosition1);
+  EXPECT_TRUE(manager.getTanks()[0].getPosition() == newPosition2);
+  EXPECT_TRUE(manager.getTanks()[1].getPreviousPosition() == newPosition1);
+  EXPECT_TRUE(manager.getTanks()[0].getPreviousPosition() == newPosition2);
+  
+  // Check that the action was logged
+  const auto& log = manager.getGameLog();
+  ASSERT_GE(log.size(), 2);
+  EXPECT_TRUE(log[log.size()-2].find("Player 1: None - Success") != std::string::npos);
+  EXPECT_TRUE(log[log.size()-1].find("Player 2: None - Success") != std::string::npos);
+}
+
 TEST_F(GameManagerTest, MoveShellsOnce_EdgeWrapping) {
   // Create a board with tank 1 at position (5,1) and open edges for wrapping
   std::vector<std::string> boardLines = {
@@ -1217,3 +1269,4 @@ TEST_F(GameManagerTest, RunGame_OutOfShells) {
   }
   EXPECT_EQ(getGameSteps(manager), 116);
 }
+
