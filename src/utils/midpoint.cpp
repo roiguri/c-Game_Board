@@ -21,11 +21,9 @@ MidPoint MidPoint::calculateMidpoint(const Point& a, const Point& b) {
     int xDiff = b.getX() - a.getX();
     int yDiff = b.getY() - a.getY();
     
-    // Check if the points are adjacent or one step apart
     bool xIsOdd = (std::abs(xDiff) == 1);
     bool yIsOdd = (std::abs(yDiff) == 1);
     
-    // Calculate the midpoint coordinates
     int midX = (a.getX() + b.getX()) / 2;
     int midY = (a.getY() + b.getY()) / 2;
     
@@ -90,11 +88,8 @@ MidPoint MidPoint::calculateMidpoint(
 
 bool MidPoint::midpointsMatch(const Point& a1, const Point& a2, 
                              const Point& b1, const Point& b2) {
-    // Calculate both midpoints
     MidPoint midpoint1 = calculateMidpoint(a1, a2);
     MidPoint midpoint2 = calculateMidpoint(b1, b2);
-    
-    // Compare them
     return midpoint1 == midpoint2;
 }
 
