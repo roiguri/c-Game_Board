@@ -212,8 +212,14 @@ void BoardGenerator::placeWalls() {
     // Calculate how many wall cells to place based on density
     int boardArea = m_config.width * m_config.height;
     int interiorArea = boardArea - 2; // Subtract tank positions
+
+    int symmetryFactor = 1;
+    if (m_config.symmetry != "none") {
+        symmetryFactor = 2;
+    }
     
-    int wallsToPlace = static_cast<int>(interiorArea * m_config.wallDensity);
+    int wallsToPlace = static_cast<int>((interiorArea * m_config.wallDensity)
+                                                       / symmetryFactor);
     
     // Create a list of candidate positions
     std::vector<std::pair<int, int>> candidates;
@@ -243,6 +249,26 @@ void BoardGenerator::placeWalls() {
             continue;
         }
         
+        bool isPrimaryPosition = true;
+        
+        if (m_config.symmetry == "horizontal") {
+            int mirrorX = m_config.width - 1 - x;
+            isPrimaryPosition = (x <= mirrorX);
+        } 
+        else if (m_config.symmetry == "vertical") {
+            int mirrorY = m_config.height - 1 - y;
+            isPrimaryPosition = (y <= mirrorY);
+        }
+        else if (m_config.symmetry == "diagonal") {
+            int mirrorX = m_config.width - 1 - x;
+            int mirrorY = m_config.height - 1 - y;
+            isPrimaryPosition = (x <= mirrorX && y <= mirrorY);
+        }
+        
+        if (!isPrimaryPosition) {
+            continue;
+        }
+        
         // Place wall and apply symmetry
         applySymmetry(x, y, '#');
         wallsPlaced++;
@@ -259,9 +285,16 @@ void BoardGenerator::placeWalls() {
 
 void BoardGenerator::placeMines() {
     // Calculate how many mine cells to place based on density
-    int interiorArea = (m_config.width - 1) * (m_config.height - 1) - 2; // Exclude tanks
-    int minesToPlace = static_cast<int>(interiorArea * m_config.mineDensity);
-    
+    int boardArea = m_config.width * m_config.height - 2; // Exclude tanks
+
+    int symmetryFactor = 1;
+    if (m_config.symmetry != "none") {
+        symmetryFactor = 2;
+    }
+
+    int minesToPlace = static_cast<int>((boardArea * m_config.mineDensity) 
+                                                       / symmetryFactor);
+
     // Create a list of candidate positions (cells not occupied by tanks or walls)
     std::vector<std::pair<int, int>> candidates;
     for (int y = 0; y < m_config.height; ++y) {
@@ -287,6 +320,26 @@ void BoardGenerator::placeMines() {
         
         // Skip if already occupied
         if (m_board[y][x] != ' ') {
+            continue;
+        }
+
+        bool isPrimaryPosition = true;
+        
+        if (m_config.symmetry == "horizontal") {
+            int mirrorX = m_config.width - 1 - x;
+            isPrimaryPosition = (x <= mirrorX);
+        } 
+        else if (m_config.symmetry == "vertical") {
+            int mirrorY = m_config.height - 1 - y;
+            isPrimaryPosition = (y <= mirrorY);
+        }
+        else if (m_config.symmetry == "diagonal") {
+            int mirrorX = m_config.width - 1 - x;
+            int mirrorY = m_config.height - 1 - y;
+            isPrimaryPosition = (x <= mirrorX && y <= mirrorY);
+        }
+        
+        if (!isPrimaryPosition) {
             continue;
         }
         
