@@ -1,0 +1,32 @@
+Visualization System
+
+- HTML-based game visualization with interactive playback
+- Step-by-step replay of the entire game with animation controls
+- Displays a description of chosen actions and their outcome.
+- Displays tank positions, directions, shells, mines, walls, and wall health
+- Shows player stats (shells remaining, active/destroyed status)
+- Supports countdown timer display
+- A visualiztion manager enables using multiple visuzlizers - provides an API
+  for easier integration with different visualizers.
+* Mostly done with AI
+
+Google Test Framework Integration
+
+Tests for all components: GameBoard, Tank, Shell, Algorithms, Collision, Etc
+Edge case testing for board wrapping, collisions, and game rules
+Mock objects for testing algorithmic behavior in isolation
+Test fixtures for complex test scenarios
+* Configuration of gtest enviroment was done with AI
+
+Instructions to run:
+
+Visualization:
+./tank_battle <input_file>
+# Visualization HTML generated as output_<input_file>_visualization.html
+# Open in any browser to view the interactive game replay
+
+Tests:
+cd build
+cmake ..
+make
+./bin/tests/tank_battle_tests
