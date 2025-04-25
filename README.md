@@ -26,7 +26,7 @@ Two output files are generated:
 
 ## Building the Project
 
-Steps:
+### Standard Build (no bonus tests or visualization):
 
 ```bash
 mkdir build && cd build
@@ -34,11 +34,18 @@ cmake ..
 make
 ```
 
+## Complete build
+```bash
+mkdir build && cd build
+cmake -DENABLE_TESTING=ON -DENABLE_VISUALIZATION=ON ..
+make
+```
+
 ## Running the Game
 ```bash
-./tank_battle <game_board_input_file>
-Output in: output_<game_board_input_file>.txt.
+./tanks_game <input_file>
 ```
+Output will be generated in in: <input_file_path>/output_<input_file>.txt.
 
 ## Algorithms
 Algorithm Options:
@@ -47,6 +54,13 @@ Algorithm Options:
 Both algorithms avoid mines and react to shells.
 
 ## Bonus Features
-Details in bonus.txt:
-- Interactive HTML visualization.
-- Comprehensive Google Test suite.
+Details in docs/bonus.txt
+
+### Running Tests
+If tests are enabled in the build
+```bash
+./bin/tests/tanks_game_tests
+```
+
+### Visualization
+If visualization is enabled in the build, an HTML visualization will be generated alongside the output file.
