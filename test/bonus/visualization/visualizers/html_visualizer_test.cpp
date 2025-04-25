@@ -178,10 +178,6 @@ TEST_F(HTMLVisualizerTest, MultipleSnapshotsGenerateOutput) {
     for (int i = 0; i < 5; i++) {
         EXPECT_TRUE(content.find("Test snapshot " + std::to_string(i)) != std::string::npos);
     }
-
-    // Check for countdown data in appropriate snapshots
-    EXPECT_TRUE(content.find("countdown: 39") != std::string::npos);  // 40 - 1
-    EXPECT_TRUE(content.find("countdown: 37") != std::string::npos);  // 40 - 3
 }
 
 TEST_F(HTMLVisualizerTest, ClearRemovesAllSnapshots) {

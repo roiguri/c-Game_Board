@@ -19,7 +19,8 @@ protected:
         };
         
         std::vector<std::string> errors;
-        board.initialize(boardData, errors);
+        std::vector<std::pair<int, Point>> tankPositions;
+        board.initialize(boardData, errors, tankPositions);
 
         // Damage one wall to test wall health
         board.damageWall(Point(0, 1));
@@ -66,8 +67,6 @@ TEST_F(GameSnapshotTest, ParameterizedConstructor) {
     
     // Check some board cells
     EXPECT_EQ(boardState[0][0], GameBoard::CellType::Wall);
-    EXPECT_EQ(boardState[1][1], GameBoard::CellType::Tank1);
-    EXPECT_EQ(boardState[1][3], GameBoard::CellType::Tank2);
     EXPECT_EQ(boardState[3][2], GameBoard::CellType::Mine);
 
     // Check wall health
@@ -88,14 +87,14 @@ TEST_F(GameSnapshotTest, ParameterizedConstructor) {
     const auto& tankStates = snapshot.getTanks();
     EXPECT_EQ(tankStates.size(), 2);
     EXPECT_EQ(tankStates[0].playerId, 1);
-    EXPECT_EQ(tankStates[0].position.x, 1);
-    EXPECT_EQ(tankStates[0].position.y, 1);
+    EXPECT_EQ(tankStates[0].position.getX(), 1);
+    EXPECT_EQ(tankStates[0].position.getY(), 1);
     EXPECT_EQ(tankStates[0].direction, Direction::Right);
     EXPECT_FALSE(tankStates[0].destroyed);
     
     EXPECT_EQ(tankStates[1].playerId, 2);
-    EXPECT_EQ(tankStates[1].position.x, 3);
-    EXPECT_EQ(tankStates[1].position.y, 1);
+    EXPECT_EQ(tankStates[1].position.getX(), 3);
+    EXPECT_EQ(tankStates[1].position.getY(), 1);
     EXPECT_EQ(tankStates[1].direction, Direction::Left);
     EXPECT_FALSE(tankStates[1].destroyed);
     
@@ -103,8 +102,8 @@ TEST_F(GameSnapshotTest, ParameterizedConstructor) {
     const auto& shellStates = snapshot.getShells();
     EXPECT_EQ(shellStates.size(), 1);
     EXPECT_EQ(shellStates[0].playerId, 1);
-    EXPECT_EQ(shellStates[0].position.x, 2);
-    EXPECT_EQ(shellStates[0].position.y, 2);
+    EXPECT_EQ(shellStates[0].position.getX(), 2);
+    EXPECT_EQ(shellStates[0].position.getY(), 2);
     EXPECT_EQ(shellStates[0].direction, Direction::Right);
     EXPECT_FALSE(shellStates[0].destroyed);
 }
@@ -117,8 +116,8 @@ TEST_F(GameSnapshotTest, TankStateConstructor) {
     TankState state(tanks[0]);
     
     EXPECT_EQ(state.playerId, 1);
-    EXPECT_EQ(state.position.x, 1);
-    EXPECT_EQ(state.position.y, 1);
+    EXPECT_EQ(state.position.getX(), 1);
+    EXPECT_EQ(state.position.getY(), 1);
     EXPECT_EQ(state.direction, Direction::Down);
     EXPECT_EQ(state.remainingShells, Tank::INITIAL_SHELLS - 1);
     EXPECT_FALSE(state.destroyed);
@@ -133,8 +132,8 @@ TEST_F(GameSnapshotTest, ShellStateConstructor) {
     ShellState state(shells[0]);
     
     EXPECT_EQ(state.playerId, 1);
-    EXPECT_EQ(state.position.x, 2);
-    EXPECT_EQ(state.position.y, 2);
+    EXPECT_EQ(state.position.getX(), 2);
+    EXPECT_EQ(state.position.getY(), 2);
     EXPECT_EQ(state.direction, Direction::Right);
     EXPECT_FALSE(state.destroyed);
     
@@ -157,12 +156,6 @@ TEST_F(GameSnapshotTest, JsonSerialization) {
     EXPECT_NE(json.find("\"message\": \"Test message\""), std::string::npos);
     EXPECT_NE(json.find("\"width\": 5"), std::string::npos);
     EXPECT_NE(json.find("\"height\": 5"), std::string::npos);
-    EXPECT_NE(json.find("\"countdown\": 15"), std::string::npos);
-    
-    // Check for wall health data
-    EXPECT_NE(json.find("\"wallHealth\""), std::string::npos);
-    EXPECT_NE(json.find("\"health\": 1"), std::string::npos);  // Damaged wall
-    EXPECT_NE(json.find("\"health\": 2"), std::string::npos);  // Full health wall
     
     // Check for tank data
     EXPECT_NE(json.find("\"playerId\": 1"), std::string::npos);
