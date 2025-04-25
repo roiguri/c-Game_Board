@@ -35,6 +35,10 @@ public:
      */
     ~GameManager();
 
+    // Delete copy constructor and assignment operator
+    GameManager(const GameManager&) = delete;
+    GameManager& operator=(const GameManager&) = delete;
+
     /**
      * @brief Initialize the game with a board file
      * 
@@ -61,15 +65,7 @@ public:
      */
     bool saveResults(const std::string& outputFilePath);
 
-    // Accessors
-    std::vector<Tank> getTanks() const;
-    std::vector<Shell> getShells() const;
-    const std::vector<std::string>& getGameLog() const;
-    GameBoard getGameBoard() const;
 private:
-    // For testing purposes
-    friend class GameManagerTest;
-
     // Core game state
     GameBoard m_board;
     std::vector<Tank> m_tanks;
@@ -88,87 +84,49 @@ private:
     std::vector<std::string> m_gameLog;
     CollisionHandler m_collisionHandler;
     
+    // Get the tank object for a player
     Tank& getPlayerTank(int playerId);
 
     // Game step methods
-    /**
-     * @brief Process a single step of the game
-     * 
-     * Gets actions from algorithms, applies them, moves shells, and checks for game over
-     */
+    // Process a single step of the game
     void processStep();
     
-    /**
-     * @brief Get the next action for a player from their algorithm
-     * 
-     * @param playerId The ID of the player (1 or 2)
-     * @return Action The chosen action
-     */
+    // Get the next action for a player from their algorithm
     Action getPlayerAction(int playerId);
     
-    /**
-     * @brief Apply an action for a player
-     * 
-     * Validates and executes the action, updating the game state
-     * 
-     * @param playerId The ID of the player (1 or 2)
-     * @param action The action to apply
-     * @return true if the action was valid and applied, false otherwise
-     */
+    // Apply an action for a player
+    // Validates and executes the action, updating the game state
     bool applyAction(int playerId, Action action);
     
-    /**
-     * @brief Move all active shells according to their velocity
-     * 
-     * Updates shell positions considering board wrapping
-     */
+    // Move all active shells one cell in their direction
     void moveShellsOnce();
     
-    /**
-     * @brief Check if the game has ended
-     * 
-     * Determines if a tank was destroyed or other end conditions have been met
-     * 
-     * @return true if the game is over, false otherwise
-     */
+    // Check if the game has ended
+    // Determines if a tank was destroyed or other end conditions have been met
     bool checkGameOver();
     
-    /**
-     * @brief Log an action taken by a player
-     * 
-     * @param playerId The ID of the player (1 or 2)
-     * @param action The action taken
-     * @param valid Whether the action was valid
-     */
+    // Log an action taken by a player
     void logAction(int playerId, Action action, bool valid);
     
     // Helper methods
-    /**
-     * @brief Create algorithm instances for both players
-     */
-    void createAlgorithms(Algorithm* player1Algorithm, Algorithm* player2Algorithm);
 
-    /**
-     * @brief Create tanks based on the current board state
-     * 
-     * Scans the board for tank positions and initializes them
-     */
+    // Create algorithm instances for both players
+    void createAlgorithms(
+      Algorithm* player1Algorithm, 
+      Algorithm* player2Algorithm
+    );
+
+    // Create tank objects based on tank positions
     void createTanks(std::vector<std::pair<int, Point>> tankPositions);
 
-    /**
-     * @brief Save recoverable errors to input_errors.txt file
-     * 
-     * Saves errors encountered during board initialization
-     */
+    // Save recoverable errors to input_errors.txt file
     bool saveErrorsToFile(const std::vector<std::string>& errors) const;
 
-    /**
-     * @brief Remove any destroyed shells from the game
-     * 
-     * Cleans up shells marked as destroyed to prevent memory leaks
-     * and ensure proper game state
-     */
+    // Remove any destroyed shells from the game
     void removeDestroyedShells();
+
+    // For testing purposes
+    friend class GameManagerTest;
 
     #ifdef ENABLE_VISUALIZATION
     std::unique_ptr<VisualizationManager> m_visualizationManager;

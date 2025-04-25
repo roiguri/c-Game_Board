@@ -152,8 +152,14 @@ protected:
         }
     }
 
-    std::vector<std::string> getLogEntries(GameManager& manager) {
-        return manager.m_gameLog;
+    const std::vector<std::string>& getGameLog(GameManager& manager) const {
+      return manager.m_gameLog;
+    }
+    std::vector<Tank> getTanks(GameManager& manager) const {
+        return manager.m_tanks;
+    }
+    std::vector<Shell> getShells(GameManager& manager) const {
+        return manager.m_shells;
     }
   
     // Helper to check if the game ended with the expected result
@@ -286,7 +292,7 @@ TEST_F(GameManagerTest, GetTanks_EmptyBeforeInit) {
   GameManager manager;
   
   // Before initialization, tanks vector should be empty
-  EXPECT_TRUE(manager.getTanks().empty());
+  EXPECT_TRUE(getTanks(manager).empty());
 }
 
 // Test tank creation with normal board
@@ -304,7 +310,7 @@ TEST_F(GameManagerTest, Initialize_NormalTankCreation) {
   GameManager manager;
   EXPECT_TRUE(manager.initialize(tempFilePath));
   
-  const auto& tanks = manager.getTanks();
+  const auto& tanks = getTanks(manager);
   ASSERT_EQ(tanks.size(), 2);
   
   // Check player 1's tank
@@ -333,7 +339,7 @@ TEST_F(GameManagerTest, Initialize_MultipleTanksOnePlayer) {
   GameManager manager;
   EXPECT_TRUE(manager.initialize(tempFilePath));
   
-  const auto& tanks = manager.getTanks();
+  const auto& tanks = getTanks(manager);
   ASSERT_EQ(tanks.size(), 2);
   
   // Should keep the first tank found (top-to-bottom, left-to-right scan)
@@ -359,7 +365,7 @@ TEST_F(GameManagerTest, Initialize_MultipleTanksBothPlayers) {
   GameManager manager;
   EXPECT_TRUE(manager.initialize(tempFilePath));
   
-  const auto& tanks = manager.getTanks();
+  const auto& tanks = getTanks(manager);
   ASSERT_EQ(tanks.size(), 2);
   
   // Should keep the first tanks found
@@ -485,7 +491,7 @@ TEST_F(GameManagerTest, LogAction_FormatsCorrectly) {
   testLogAction(manager, 1, Action::MoveForward, true);
   
   // Check log entry format
-  const auto& log = manager.getGameLog();
+  const auto& log = getGameLog(manager);
   ASSERT_EQ(log.size(), 1);
   EXPECT_EQ(log[0], "Player 1: Move Forward - Success");
   
@@ -507,7 +513,7 @@ TEST_F(GameManagerTest, GetGameLog_MultipleEntries) {
   testLogAction(manager, 1, Action::Shoot, true);
   
   // Get the log
-  const auto& log = manager.getGameLog();
+  const auto& log = getGameLog(manager);
   
   // Check that the log contains all entries
   ASSERT_EQ(log.size(), 3);
@@ -530,7 +536,7 @@ TEST_F(GameManagerTest, MoveShellsOnce_ShellMovementAndCollision) {
   ASSERT_TRUE(manager.initialize(tempFilePath));
   
   // Verify tank positions and directions
-  auto initialTanks = manager.getTanks();
+  auto initialTanks = getTanks(manager);
   ASSERT_EQ(initialTanks.size(), 2);
   EXPECT_EQ(initialTanks[0].getPosition(), Point(1, 1)); // Tank 2
   EXPECT_EQ(initialTanks[1].getPosition(), Point(5, 1)); // Tank 1
@@ -539,7 +545,7 @@ TEST_F(GameManagerTest, MoveShellsOnce_ShellMovementAndCollision) {
   ASSERT_TRUE(testApplyAction(manager, 2, Action::Shoot));
   
   // Get the shell
-  auto shellsBeforeMove = manager.getShells();
+  auto shellsBeforeMove = getShells(manager);
   ASSERT_EQ(shellsBeforeMove.size(), 1);
   EXPECT_EQ(shellsBeforeMove[0].getPosition(), Point(1, 1));
   
@@ -547,7 +553,7 @@ TEST_F(GameManagerTest, MoveShellsOnce_ShellMovementAndCollision) {
   testMoveShellsOnce(manager);
   
   // Verify shell moved one step right
-  auto shellsAfterFirstMove = manager.getShells();
+  auto shellsAfterFirstMove = getShells(manager);
   ASSERT_EQ(shellsAfterFirstMove.size(), 1);
   EXPECT_EQ(shellsAfterFirstMove[0].getPosition(), Point(2, 1));
 }
@@ -561,7 +567,7 @@ TEST_F(GameManagerTest, ApplyAction_DoNothing) {
   ASSERT_TRUE(manager.initialize(tempFilePath));
   
   // Capture initial state
-  auto initialTanks = manager.getTanks();
+  auto initialTanks = getTanks(manager);
   ASSERT_EQ(initialTanks.size(), 2);
   Point initialPos1 = initialTanks[1].getPosition(); // Player 1
   Point initialPos2 = initialTanks[0].getPosition(); // Player 2
@@ -569,7 +575,7 @@ TEST_F(GameManagerTest, ApplyAction_DoNothing) {
   Direction initialDir2 = initialTanks[0].getDirection();
   
   // Verify positions and directions are unchanged
-  auto finalTanks = manager.getTanks();
+  auto finalTanks = getTanks(manager);
   EXPECT_EQ(finalTanks[1].getPosition(), initialPos1);
   EXPECT_EQ(finalTanks[0].getPosition(), initialPos2);
 
@@ -579,10 +585,10 @@ TEST_F(GameManagerTest, ApplyAction_DoNothing) {
   Point newPosition1 = Point(5, 1);
   Point newPosition2 = Point(2, 1);
   
-  EXPECT_EQ(manager.getTanks()[1].getPreviousPosition(), initialPos1);
-  EXPECT_EQ(manager.getTanks()[0].getPreviousPosition(), initialPos2);
-  EXPECT_EQ(manager.getTanks()[1].getPosition(), newPosition1);
-  EXPECT_EQ(manager.getTanks()[0].getPosition(), newPosition2);
+  EXPECT_EQ(getTanks(manager)[1].getPreviousPosition(), initialPos1);
+  EXPECT_EQ(getTanks(manager)[0].getPreviousPosition(), initialPos2);
+  EXPECT_EQ(getTanks(manager)[1].getPosition(), newPosition1);
+  EXPECT_EQ(getTanks(manager)[0].getPosition(), newPosition2);
 
   // Apply "do nothing" action for both players
   p1Result = testApplyAction(manager, 1, Action::None);
@@ -592,13 +598,13 @@ TEST_F(GameManagerTest, ApplyAction_DoNothing) {
   EXPECT_TRUE(p1Result);
   EXPECT_TRUE(p2Result);
 
-  EXPECT_TRUE(manager.getTanks()[1].getPosition() == newPosition1);
-  EXPECT_TRUE(manager.getTanks()[0].getPosition() == newPosition2);
-  EXPECT_TRUE(manager.getTanks()[1].getPreviousPosition() == newPosition1);
-  EXPECT_TRUE(manager.getTanks()[0].getPreviousPosition() == newPosition2);
+  EXPECT_TRUE(getTanks(manager)[1].getPosition() == newPosition1);
+  EXPECT_TRUE(getTanks(manager)[0].getPosition() == newPosition2);
+  EXPECT_TRUE(getTanks(manager)[1].getPreviousPosition() == newPosition1);
+  EXPECT_TRUE(getTanks(manager)[0].getPreviousPosition() == newPosition2);
   
   // Check that the action was logged
-  const auto& log = manager.getGameLog();
+  const auto& log = getGameLog(manager);
   ASSERT_GE(log.size(), 2);
   EXPECT_TRUE(log[log.size()-2].find("Player 1: None - Success") != std::string::npos);
   EXPECT_TRUE(log[log.size()-1].find("Player 2: None - Success") != std::string::npos);
@@ -618,7 +624,7 @@ TEST_F(GameManagerTest, MoveShellsOnce_EdgeWrapping) {
   ASSERT_TRUE(manager.initialize(tempFilePath));
   
   // Verify tank 1 position
-  auto initialTanks = manager.getTanks();
+  auto initialTanks = getTanks(manager);
   ASSERT_EQ(initialTanks.size(), 2);
   EXPECT_EQ(initialTanks[0].getPosition(), Point(2, 1)); // Tank 1
   
@@ -627,19 +633,19 @@ TEST_F(GameManagerTest, MoveShellsOnce_EdgeWrapping) {
   
   // Move shell once - should be at (1,1)
   testMoveShellsOnce(manager);
-  EXPECT_EQ(manager.getShells()[0].getPosition(), Point(1, 1));
+  EXPECT_EQ(getShells(manager)[0].getPosition(), Point(1, 1));
   
   // Move shell again - should be at (0,1)
   testMoveShellsOnce(manager);
-  EXPECT_EQ(manager.getShells()[0].getPosition(), Point(0, 1));
+  EXPECT_EQ(getShells(manager)[0].getPosition(), Point(0, 1));
   
   // Move shell again - should wrap to the right edge (6,1)
   testMoveShellsOnce(manager);
-  EXPECT_EQ(manager.getShells()[0].getPosition(), Point(6, 1));
+  EXPECT_EQ(getShells(manager)[0].getPosition(), Point(6, 1));
   
   // Move shell again - should be at (5,1)
   testMoveShellsOnce(manager);
-  EXPECT_EQ(manager.getShells()[0].getPosition(), Point(5, 1));
+  EXPECT_EQ(getShells(manager)[0].getPosition(), Point(5, 1));
 }
 
 // Test checkGameOver with one tank destroyed
@@ -777,7 +783,7 @@ TEST_F(GameManagerTest, SaveResults_WritesGameLog) {
   }
   
   // Check file contents match game log
-  const auto& gameLog = manager.getGameLog();
+  const auto& gameLog = getGameLog(manager);
   ASSERT_EQ(fileContents.size(), gameLog.size());
   
   for (size_t i = 0; i < gameLog.size(); ++i) {
@@ -852,17 +858,17 @@ TEST_F(GameManagerTest, ProcessStep_shellStartsNextToTank) {
   // Both tanks Shoot
   testProcessStep(manager);
   
-  EXPECT_EQ(manager.getShells().size(), 2);
-  EXPECT_EQ(manager.getShells()[0].getPosition(), Point(7, 1));
-  EXPECT_EQ(manager.getShells()[1].getPosition(), Point(2, 1));
+  EXPECT_EQ(getShells(manager).size(), 2);
+  EXPECT_EQ(getShells(manager)[0].getPosition(), Point(7, 1));
+  EXPECT_EQ(getShells(manager)[1].getPosition(), Point(2, 1));
 
   testProcessStep(manager);
 
-  EXPECT_EQ(manager.getShells().size(), 2);
-  EXPECT_EQ(manager.getShells()[0].getPosition(), Point(5, 1));
-  EXPECT_EQ(manager.getShells()[1].getPosition(), Point(4, 1));
-  EXPECT_EQ(manager.getTanks()[0].getDirection(), Direction::Down);
-  EXPECT_EQ(manager.getTanks()[1].getDirection(), Direction::Down);
+  EXPECT_EQ(getShells(manager).size(), 2);
+  EXPECT_EQ(getShells(manager)[0].getPosition(), Point(5, 1));
+  EXPECT_EQ(getShells(manager)[1].getPosition(), Point(4, 1));
+  EXPECT_EQ(getTanks(manager)[0].getDirection(), Direction::Down);
+  EXPECT_EQ(getTanks(manager)[1].getDirection(), Direction::Down);
 }
 
 TEST_F(GameManagerTest, ProcessStep_shellsCollide) {
@@ -882,17 +888,17 @@ TEST_F(GameManagerTest, ProcessStep_shellsCollide) {
   // Both tanks Shoot
   testProcessStep(manager);
   
-  EXPECT_EQ(manager.getShells().size(), 2);
+  EXPECT_EQ(getShells(manager).size(), 2);
 
   testProcessStep(manager);
 
-  EXPECT_EQ(manager.getShells().size(), 2);
+  EXPECT_EQ(getShells(manager).size(), 2);
 
   testProcessStep(manager);
-  EXPECT_EQ(manager.getShells().size(), 0);
+  EXPECT_EQ(getShells(manager).size(), 0);
   // Tanks hide from shells
-  EXPECT_EQ(manager.getTanks()[0].getPosition(), Point(1, 2));
-  EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(8, 2));
+  EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(1, 2));
+  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(8, 2));
 }
 
 TEST_F(GameManagerTest, ProcessStep_waitForCooldown) {
@@ -913,20 +919,20 @@ TEST_F(GameManagerTest, ProcessStep_waitForCooldown) {
   
   testProcessStep(manager);
   
-  EXPECT_EQ(manager.getShells().size(), 1);
+  EXPECT_EQ(getShells(manager).size(), 1);
 
   for (int i = 1; i <= Tank::SHOOT_COOLDOWN; ++i) {
     // tanks can't shoot due to cooldown
     testProcessStep(manager);
-    EXPECT_EQ(manager.getShells().size(), 1);
-    EXPECT_EQ(manager.getTanks()[0].getPosition(), Point(1, 1));
-    EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(25, 1));
+    EXPECT_EQ(getShells(manager).size(), 1);
+    EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(1, 1));
+    EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(25, 1));
   }
-  EXPECT_EQ(manager.getTanks()[0].getDirection(), Direction::Right);
-  EXPECT_EQ(manager.getTanks()[1].getDirection(), Direction::Left);
+  EXPECT_EQ(getTanks(manager)[0].getDirection(), Direction::Right);
+  EXPECT_EQ(getTanks(manager)[1].getDirection(), Direction::Left);
   testProcessStep(manager);
   // tanks can shoot again (only one of the tanks is in direction)
-  EXPECT_EQ(manager.getShells().size(), 2);
+  EXPECT_EQ(getShells(manager).size(), 2);
 }
 
 TEST_F(GameManagerTest, GameManagerTest_maximumSteps) {
@@ -959,7 +965,7 @@ TEST_F(GameManagerTest, RunGame_TanksShooting) {
   manager.runGame();
   
   // Verify game results
-  const auto& gameLog = manager.getGameLog();
+  const auto& gameLog = getGameLog(manager);
   
   // Check that the game ended (either a win or tie)
   bool gameEndedFound = false;
@@ -1015,7 +1021,7 @@ TEST_F(GameManagerTest, RunGame_TankHitsMine) {
   manager.runGame();
   
   // Verify game results
-  const auto& gameLog = manager.getGameLog();
+  const auto& gameLog = getGameLog(manager);
   
   // Check that player 2 won because player 1 hit a mine
   bool p2WinFound = false;
@@ -1046,7 +1052,7 @@ TEST_F(GameManagerTest, RunGame_TankHitsWall) {
   testProcessStep(manager, 3);
 
   // Verify game results
-  const auto& gameLog = manager.getGameLog();
+  const auto& gameLog = getGameLog(manager);
   
   // Check that the move into the wall was blocked
   bool badStepFound = false;
@@ -1060,7 +1066,7 @@ TEST_F(GameManagerTest, RunGame_TankHitsWall) {
   EXPECT_TRUE(badStepFound);
   
   // Tank 1 position should still be in the same row (not in the wall)
-  EXPECT_EQ(manager.getTanks()[1].getPosition().getY(), 1);
+  EXPECT_EQ(getTanks(manager)[1].getPosition().getY(), 1);
 }
 
 TEST_F(GameManagerTest, RunGame_TanksTryToOccupySameSpace) {
@@ -1084,7 +1090,7 @@ TEST_F(GameManagerTest, RunGame_TanksTryToOccupySameSpace) {
   manager.runGame();
   
   // Verify game results
-  const auto& gameLog = manager.getGameLog();
+  const auto& gameLog = getGameLog(manager);
   
   // Since they try to move to the same spot, we should eventually see
   // either both destroyed or a bad step
@@ -1097,8 +1103,8 @@ TEST_F(GameManagerTest, RunGame_TanksTryToOccupySameSpace) {
   }
   
   EXPECT_TRUE(collision);
-  EXPECT_TRUE(manager.getTanks()[0].isDestroyed());
-  EXPECT_TRUE(manager.getTanks()[1].isDestroyed());
+  EXPECT_TRUE(getTanks(manager)[0].isDestroyed());
+  EXPECT_TRUE(getTanks(manager)[1].isDestroyed());
 }
 
 TEST_F(GameManagerTest, RunGame_ShellDestroyingWallsThenTank) {
@@ -1122,7 +1128,7 @@ TEST_F(GameManagerTest, RunGame_ShellDestroyingWallsThenTank) {
   manager.runGame();
   
   // Verify game results
-  const auto& gameLog = manager.getGameLog();
+  const auto& gameLog = getGameLog(manager);
   
   // The wall should eventually be destroyed after multiple hits
   // Then one tank should hit the other
@@ -1173,16 +1179,16 @@ TEST_F(GameManagerTest, RunGame_BackwardMovementSequence) {
   GameManager manager;
   ASSERT_TRUE(initializeManager(manager, boardLines));
 
-  EXPECT_EQ(manager.getTanks()[1].getPlayerId(), 1);
-  EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(5, 2));
+  EXPECT_EQ(getTanks(manager)[1].getPlayerId(), 1);
+  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(5, 2));
   testProcessStep(manager, 2);
-  EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(5, 2));
+  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(5, 2));
   testProcessStep(manager);
-  EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(6, 2));
+  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(6, 2));
   testProcessStep(manager);
-  EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(7, 2));
+  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(7, 2));
   testProcessStep(manager);
-  EXPECT_EQ(manager.getTanks()[1].getPosition(), Point(8, 2));
+  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(8, 2));
   testProcessStep(manager, 4);
   ASSERT_TRUE(testCheckGameOver(manager));
   EXPECT_EQ(testGetGameResult(manager), "Player 1 wins - Enemy tank destroyed");  
@@ -1214,14 +1220,14 @@ TEST_F(GameManagerTest, RunGame_ShellsCollide) {
   bool shellsDestroyed = false;
   
   // We first expect there to be shells (after shooting)
-  if (!manager.getShells().empty()) {
+  if (!getShells(manager).empty()) {
       shellsCreated = true;
   }
   
   testProcessStep(manager, 6);
   
   // Now we expect shells to be gone (after collision)
-  if (manager.getShells().empty()) {
+  if (getShells(manager).empty()) {
       shellsDestroyed = true;
   }
   
@@ -1250,7 +1256,7 @@ TEST_F(GameManagerTest, RunGame_OutOfShells) {
   manager.runGame();
   
   // Verify game results
-  const auto& gameLog = manager.getGameLog();
+  const auto& gameLog = getGameLog(manager);
   
   // Check that the game ended in a tie due to shells depleted
   bool outOfShellsTie = false;
@@ -1264,7 +1270,7 @@ TEST_F(GameManagerTest, RunGame_OutOfShells) {
   EXPECT_TRUE(outOfShellsTie);
   
   // Verify all shells were used
-  for (const auto& tank : manager.getTanks()) {
+  for (const auto& tank : getTanks(manager)) {
       EXPECT_EQ(tank.getRemainingShells(), 0);
   }
   EXPECT_EQ(getGameSteps(manager), 116);
