@@ -164,18 +164,3 @@ TEST_F(GameSnapshotTest, JsonSerialization) {
     // Check for shell data
     EXPECT_NE(json.find("\"direction\": 2"), std::string::npos);  // Direction::Right is 2
 }
-
-// Note: This test is incomplete since the fromJson implementation is a placeholder
-TEST_F(GameSnapshotTest, JsonDeserialization) {
-    // Create a snapshot
-    GameSnapshot original(42, board, tanks, shells, 15, "Test message");
-    
-    // Convert to JSON
-    std::string json = original.toJson();
-    
-    // Parse back from JSON
-    GameSnapshot parsed = GameSnapshot::fromJson(json);
-    
-    // In a real implementation, we would check that the parsed object matches the original
-    // Since our fromJson implementation is a placeholder, we're skipping these checks
-}

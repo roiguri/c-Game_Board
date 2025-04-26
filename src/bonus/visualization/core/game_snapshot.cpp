@@ -140,19 +140,3 @@ std::string GameSnapshot::toJson() const {
     
     return json.str();
 }
-
-GameSnapshot GameSnapshot::fromJson(const std::string& json) {
-    // NOTE: In a real implementation, you would use a proper JSON parser
-    // library like nlohmann/json, rapidjson, or simdjson.
-    // For this educational example, we're skipping the actual parsing.
-    
-    // This is a placeholder implementation
-    GameSnapshot snapshot;
-    
-    // In a real implementation, you would:
-    // 1. Parse the JSON string into a JSON object
-    // 2. Extract step number, message, board state, tanks and shells
-    // 3. Construct and return a valid GameSnapshot
-    
-    return snapshot;
-}

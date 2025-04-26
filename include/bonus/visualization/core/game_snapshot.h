@@ -78,14 +78,6 @@ public:
      */
     std::string toJson() const;
     
-    /**
-     * @brief Create a snapshot from a JSON string
-     * 
-     * @param json The JSON string to parse
-     * @return A GameSnapshot object
-     */
-    static GameSnapshot fromJson(const std::string& json);
-    
 private:
     int m_stepNumber = 0;
     std::vector<std::vector<GameBoard::CellType>> m_boardState;
