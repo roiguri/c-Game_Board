@@ -187,10 +187,8 @@ void GameManager::processStep() {
   #ifdef ENABLE_VISUALIZATION
   if (m_visualizationManager) {
       std::string stepMessage = "Step " + std::to_string(m_currentStep) + ": ";
-      stepMessage += "P1: " + actionToString(player1Action) + 
-                    (player1ActionSuccessful ? " (Success)" : " (Failed)");
-      stepMessage += ", P2: " + actionToString(player2Action) + 
-                    (player2ActionSuccessful ? " (Success)" : " (Failed)");
+      stepMessage += "P1: " + actionToString(player1Action);
+      stepMessage += ", P2: " + actionToString(player2Action);
       
       m_visualizationManager->captureGameState(
           m_currentStep,
