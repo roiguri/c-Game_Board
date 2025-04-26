@@ -92,8 +92,8 @@ protected:
       }
     }
 
-    bool testApplyAction(GameManager& manager, int playerId, Action action) {
-      return manager.applyAction(playerId, action);
+    void testApplyAction(GameManager& manager, int playerId, Action action) {
+      manager.applyAction(playerId, action);
     }
 
     bool testCheckGameOver(GameManager& manager) {
@@ -542,7 +542,7 @@ TEST_F(GameManagerTest, MoveShellsOnce_ShellMovementAndCollision) {
   EXPECT_EQ(initialTanks[1].getPosition(), Point(5, 1)); // Tank 1
   
   // Player 2 shoots (facing right)
-  ASSERT_TRUE(testApplyAction(manager, 2, Action::Shoot));
+  testApplyAction(manager, 2, Action::Shoot);
   
   // Get the shell
   auto shellsBeforeMove = getShells(manager);
@@ -579,8 +579,8 @@ TEST_F(GameManagerTest, ApplyAction_DoNothing) {
   EXPECT_EQ(finalTanks[1].getPosition(), initialPos1);
   EXPECT_EQ(finalTanks[0].getPosition(), initialPos2);
 
-  bool p1Result = testApplyAction(manager, 1, Action::MoveForward);
-  bool p2Result = testApplyAction(manager, 2, Action::MoveForward);
+  testApplyAction(manager, 1, Action::MoveForward);
+  testApplyAction(manager, 2, Action::MoveForward);
 
   Point newPosition1 = Point(5, 1);
   Point newPosition2 = Point(2, 1);
@@ -591,12 +591,8 @@ TEST_F(GameManagerTest, ApplyAction_DoNothing) {
   EXPECT_EQ(getTanks(manager)[0].getPosition(), newPosition2);
 
   // Apply "do nothing" action for both players
-  p1Result = testApplyAction(manager, 1, Action::None);
-  p2Result = testApplyAction(manager, 2, Action::None);
-  
-  // Verify action was successful
-  EXPECT_TRUE(p1Result);
-  EXPECT_TRUE(p2Result);
+  testApplyAction(manager, 1, Action::None);
+  testApplyAction(manager, 2, Action::None);
 
   EXPECT_TRUE(getTanks(manager)[1].getPosition() == newPosition1);
   EXPECT_TRUE(getTanks(manager)[0].getPosition() == newPosition2);
@@ -629,7 +625,7 @@ TEST_F(GameManagerTest, MoveShellsOnce_EdgeWrapping) {
   EXPECT_EQ(initialTanks[0].getPosition(), Point(2, 1)); // Tank 1
   
   // Player 1 shoots (towards left)
-  ASSERT_TRUE(testApplyAction(manager, 1, Action::Shoot));
+  testApplyAction(manager, 1, Action::Shoot);
   
   // Move shell once - should be at (1,1)
   testMoveShellsOnce(manager);
