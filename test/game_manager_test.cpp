@@ -174,6 +174,13 @@ protected:
     int getGameSteps(GameManager& manager) {
         return manager.m_currentStep;
     }
+
+    int getRemainingStepsLimit(GameManager& manager) const { 
+      return manager.m_remaining_steps; 
+    }
+    int getMaximumSteps(GameManager& manager) const { 
+      return manager.m_maximum_steps;
+    }
     
     std::string tempFilePath;
     std::string outputFilePath;
@@ -1265,3 +1272,27 @@ TEST_F(GameManagerTest, RunGame_OutOfShells) {
   EXPECT_EQ(getGameSteps(manager), 116);
 }
 
+TEST_F(GameManagerTest, InitializeConfig_UpdatesAllComponents) {  
+  // Create a custom configuration
+  GameConfig config;
+  config.initialShells = 25;
+  config.shootCooldown = 2;
+  config.wallHealth = 4;
+  config.shellsDepletedCountdown = 20;
+  config.maxGameSteps = 500;
+  
+  // Apply the configuration
+  GameManager::initializeConfig(config);
+  
+  // Verify Tank configuration was updated
+  EXPECT_EQ(Tank::INITIAL_SHELLS, 25);
+  EXPECT_EQ(Tank::SHOOT_COOLDOWN, 2);
+  
+  // Verify GameBoard configuration was updated
+  EXPECT_EQ(GameBoard::WALL_STARTING_HEALTH, 4);
+  
+  GameManager manager;
+  // Verify GameManager configuration was updated
+  EXPECT_EQ(getRemainingStepsLimit(manager), 20);
+  EXPECT_EQ(getMaximumSteps(manager), 500);
+}

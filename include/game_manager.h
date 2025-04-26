@@ -8,6 +8,7 @@
 #include "objects/shell.h"
 #include "algo/algorithm.h"
 #include "collision_handler.h"
+#include "bonus/config/game_config.h"
 
 #ifdef ENABLE_VISUALIZATION
 #include "bonus/visualization/visualization.h"
@@ -40,6 +41,13 @@ public:
     GameManager& operator=(const GameManager&) = delete;
 
     /**
+     * @brief update the game configuration
+     * 
+     * This method is called if a configuration file is provided.
+     */
+    static void initializeConfig(const GameConfig& config);
+
+    /**
      * @brief Initialize the game with a board file
      * 
      * Loads the game board, creates tanks, and initializes algorithms
@@ -66,6 +74,10 @@ public:
     bool saveResults(const std::string& outputFilePath);
 
 private:
+    // Game configuration
+    static int DEFAULT_REMAINING_STEPS;
+    static int DEFAULT_MAXIMUM_STEPS;
+
     // Algorithms
     Algorithm* m_player1Algorithm;
     Algorithm* m_player2Algorithm;

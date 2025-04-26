@@ -7,13 +7,16 @@
 #include <fstream>
 #include <algorithm>
 
+int GameManager::DEFAULT_REMAINING_STEPS = 40;
+int GameManager::DEFAULT_MAXIMUM_STEPS = 1000;
+
 GameManager::GameManager()
     : m_player1Algorithm(nullptr),
       m_player2Algorithm(nullptr),
       m_currentStep(0),
       m_gameOver(false),
-      m_remaining_steps(40),
-      m_maximum_steps(1000) {
+      m_remaining_steps(DEFAULT_REMAINING_STEPS),
+      m_maximum_steps(DEFAULT_MAXIMUM_STEPS) {
 
     #ifdef ENABLE_VISUALIZATION
     m_visualizationManager = createVisualizationManager();
@@ -27,6 +30,14 @@ GameManager::~GameManager() {
     #ifdef ENABLE_VISUALIZATION
     m_visualizationManager.reset();
     #endif
+}
+
+void GameManager::initializeConfig(const GameConfig& config) {
+  DEFAULT_REMAINING_STEPS = config.shellsDepletedCountdown;
+  DEFAULT_MAXIMUM_STEPS = config.maxGameSteps;
+  
+  Tank::initializeConfig(config);
+  GameBoard::initializeConfig(config);
 }
 
 bool GameManager::initialize(const std::string& filePath,
