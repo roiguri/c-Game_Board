@@ -1,5 +1,6 @@
 dimensions: 15 10
 wall_density: 0.25
 mine_density: 0.25
-symmetry: none
-seed: -1
+symmetry: vertical
+# remove field for randome results
+seed: 0
