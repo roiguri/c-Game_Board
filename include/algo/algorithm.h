@@ -89,7 +89,7 @@ protected:
       const Point& position,
       const Tank& enemyTank) const;
     
-    int calculateMoveCost(const Tank& tank, const Point& targetPos, Direction targetDir) const;
+    int calculateMoveCost(const Tank& tank, Direction targetDir) const;
     
     // Targeting utilities
     bool canHitTarget(const GameBoard& gameBoard, const Tank& shooter, 

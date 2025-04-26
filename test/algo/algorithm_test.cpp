@@ -92,10 +92,9 @@ protected:
     int testCalculateMoveCost(
         Algorithm* algo,
         const Tank& tank,
-        const Point& targetPos,
         Direction targetDir
     ) const {
-        return algo->calculateMoveCost(tank, targetPos, targetDir);
+        return algo->calculateMoveCost(tank, targetDir);
     }
   
     bool testCanHitTarget(
@@ -499,7 +498,7 @@ TEST_F(AlgorithmTest, CalculateMoveCost_AlreadyFacingTarget) {
     Tank tank(1, Point(2, 2), Direction::Right);
     
     // Already facing target direction
-    int cost = testCalculateMoveCost(mockAlgorithm, tank, Point(3, 2), Direction::Right);
+    int cost = testCalculateMoveCost(mockAlgorithm, tank, Direction::Right);
     EXPECT_EQ(cost, 1);
 }
 
@@ -507,11 +506,11 @@ TEST_F(AlgorithmTest, CalculateMoveCost_SingleRotation) {
     Tank tank(1, Point(2, 2), Direction::Right);
     
     // 1/8 turn (45 degrees)
-    int cost1 = testCalculateMoveCost(mockAlgorithm, tank, Point(3, 3), Direction::DownRight);
+    int cost1 = testCalculateMoveCost(mockAlgorithm, tank, Direction::DownRight);
     EXPECT_EQ(cost1, 2);  // 1 rotate + 1 move
     
     // 1/4 turn (90 degrees)
-    int cost2 = testCalculateMoveCost(mockAlgorithm, tank, Point(2, 3), Direction::Down);
+    int cost2 = testCalculateMoveCost(mockAlgorithm, tank, Direction::Down);
     EXPECT_EQ(cost2, 2);  // 1 rotate + 1 move
 }
 
@@ -519,11 +518,11 @@ TEST_F(AlgorithmTest, CalculateMoveCost_MultipleRotations) {
     Tank tank(1, Point(2, 2), Direction::Right);
     
     // 3/8 turn (135 degrees)
-    int cost1 = testCalculateMoveCost(mockAlgorithm, tank, Point(1, 3), Direction::DownLeft);
+    int cost1 = testCalculateMoveCost(mockAlgorithm, tank, Direction::DownLeft);
     EXPECT_EQ(cost1, 3);  // 2 rotates + 1 move
     
     // 1/2 turn (180 degrees)
-    int cost2 = testCalculateMoveCost(mockAlgorithm, tank, Point(1, 2), Direction::Left);
+    int cost2 = testCalculateMoveCost(mockAlgorithm, tank, Direction::Left);
     EXPECT_EQ(cost2, 3);  // 2 rotates + 1 move
 }
 

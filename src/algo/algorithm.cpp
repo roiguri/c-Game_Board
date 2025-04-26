@@ -91,7 +91,7 @@ std::vector<Algorithm::SafeMoveOption> Algorithm::getSafeMoveOptions(
                            shells, avoidEnemySight)) {            
           Action tankAction = getRotationToDirection(currentDir, dir);
           tankAction = (tankAction == Action::None) ? Action::MoveForward : tankAction;
-          int cost = calculateMoveCost(tank, newPos, dir);
+          int cost = calculateMoveCost(tank, dir);
             safeOptions.push_back({
                 newPos,
                 tankAction,
@@ -144,7 +144,7 @@ bool Algorithm::isExposedToEnemy(
     return dirOpt.has_value();
 }
 
-int Algorithm::calculateMoveCost(const Tank& tank, const Point& targetPos, Direction targetDir) const {
+int Algorithm::calculateMoveCost(const Tank& tank, Direction targetDir) const {
     Direction currentDir = tank.getDirection();
     
     // If already facing the right direction, just need 1 step to move
@@ -277,7 +277,7 @@ Action Algorithm::getRotationToDirection(Direction current, Direction target) co
   bool rotateClockwise = (stepsClockwise <= stepsCounterClockwise);
   
   // Return the appropriate first rotation
-  if (stepsClockwise <= stepsCounterClockwise) {
+  if (rotateClockwise) {
     // Rotate clockwise, always use quarter turn for multi-step rotations
     return Action::RotateRightQuarter;
   } else {
