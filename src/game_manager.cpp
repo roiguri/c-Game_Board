@@ -149,7 +149,7 @@ void GameManager::processStep() {
 
   moveShellsOnce();
 
-  bool tankDestroyed = m_collisionHandler.resolveAllCollisions(
+  m_collisionHandler.resolveAllCollisions(
     m_tanks, m_shells, m_board
   );
 
@@ -169,12 +169,12 @@ void GameManager::processStep() {
   }
   #endif
   
-  bool player1ActionSuccessful = applyAction(1, player1Action);
-  bool player2ActionSuccessful = applyAction(2, player2Action);
+  applyAction(1, player1Action);
+  applyAction(2, player2Action);
 
   moveShellsOnce();
 
-  tankDestroyed = m_collisionHandler.resolveAllCollisions(
+  m_collisionHandler.resolveAllCollisions(
     m_tanks, m_shells, m_board
   );
   
@@ -229,15 +229,15 @@ Tank& GameManager::getPlayerTank(int playerId) {
   return m_tanks[0];
 }
 
-bool GameManager::applyAction(int playerId, Action action) {
+void GameManager::applyAction(int playerId, Action action) {
   if (playerId != 1 && playerId != 2) {
-      return false;
+      return;
   }
   
   Tank& playerTank = getPlayerTank(playerId);
   
   if (playerTank.isDestroyed()) {
-      return false;
+      return;
   }
   
   bool actionResult = false;
@@ -300,7 +300,6 @@ bool GameManager::applyAction(int playerId, Action action) {
           break;
   }  
   logAction(playerId, action, actionResult);
-  return actionResult;
 }
 
 void GameManager::moveShellsOnce() {

@@ -66,23 +66,23 @@ public:
     bool saveResults(const std::string& outputFilePath);
 
 private:
+    // Algorithms
+    Algorithm* m_player1Algorithm;
+    Algorithm* m_player2Algorithm;
+
+    // Game state tracking
+    int m_currentStep;
+    bool m_gameOver;
+    int m_remaining_steps;
+    int m_maximum_steps;
+    std::string m_gameResult;
+    std::vector<std::string> m_gameLog;
+    CollisionHandler m_collisionHandler;
+
     // Core game state
     GameBoard m_board;
     std::vector<Tank> m_tanks;
     std::vector<Shell> m_shells;
-    
-    // Algorithms
-    Algorithm* m_player1Algorithm;
-    Algorithm* m_player2Algorithm;
-    
-    // Game state tracking
-    int m_currentStep;
-    int m_remaining_steps;
-    int m_maximum_steps;
-    bool m_gameOver;
-    std::string m_gameResult;
-    std::vector<std::string> m_gameLog;
-    CollisionHandler m_collisionHandler;
     
     // Get the tank object for a player
     Tank& getPlayerTank(int playerId);
@@ -96,7 +96,7 @@ private:
     
     // Apply an action for a player
     // Validates and executes the action, updating the game state
-    bool applyAction(int playerId, Action action);
+    void applyAction(int playerId, Action action);
     
     // Move all active shells one cell in their direction
     void moveShellsOnce();
