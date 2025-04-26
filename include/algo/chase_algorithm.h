@@ -40,10 +40,6 @@ public:
     ) override;
 
 private:
-    // Expose the test class to allow access to private members
-    // for unit testing
-    friend class ChaseAlgorithmTest;
-
     // State members
     std::vector<Point> m_currentPath;
     Point m_lastTargetPosition; 
@@ -55,4 +51,8 @@ private:
     
     std::vector<Point> findPathBFS(const GameBoard& gameBoard, const Point& start, 
                                   const Point& target) const;
+    
+    // Expose the test class to allow access to private members
+    // for unit testing
+    friend class ChaseAlgorithmTest;
 };                              

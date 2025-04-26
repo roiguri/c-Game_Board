@@ -24,6 +24,10 @@ protected:
     }
     
     ChaseAlgorithm* algorithm;
+
+    std::vector<Point> getCurrentPath() const {
+        return algorithm->m_currentPath;
+    }
 };
 
 // Test Priority 1: Avoid shells
@@ -222,4 +226,114 @@ TEST_F(ChaseAlgorithmTest, EdgeCase_NoShellsRemaining) {
     // Can't shoot, but should still prioritize chasing over rotating
     EXPECT_NE(action, Action::Shoot);
     EXPECT_EQ(action, Action::RotateLeftEighth);
+}
+
+TEST_F(ChaseAlgorithmTest, RecalculatesPathWhenOffTrack) {
+  std::vector<std::string> boardLines = {
+      " ######",
+      "#     #",
+      "#1    #",
+      "#     #",
+      "#    2#",
+      "#     #",
+      "#######"
+  };
+  GameBoard board = createTestBoard(boardLines);
+  
+  // Set up initial positions
+  Tank myTank(1, Point(1, 2), Direction::Right);
+  Tank enemyTank(2, Point(5, 4), Direction::Left);
+  std::vector<Shell> shells;
+  
+  // First generate a path
+  algorithm->getNextAction(board, myTank, enemyTank, shells);
+  
+  // Get the initial path
+  std::vector<Point> originalPath = getCurrentPath();
+  
+  // Move tank to a position off the expected path
+  Point newPosition(0, 0);
+  bool positionInPath = false;
+  for (const auto& point : originalPath) {
+      if (point == newPosition) {
+          positionInPath = true;
+          break;
+      }
+  }
+  ASSERT_FALSE(positionInPath) << "Test setup error: new position should not be on the original path";
+  
+  myTank = Tank(1, newPosition, Direction::Right);
+  
+  // Call again - should trigger recalculation
+  algorithm->getNextAction(board, myTank, enemyTank, shells);
+  
+  // Get the new path
+  std::vector<Point> newPath = getCurrentPath();
+  
+  // Verify path was recalculated
+  bool pathsAreDifferent = originalPath.size() != newPath.size() ||
+                          !std::equal(originalPath.begin(), originalPath.end(), newPath.begin());
+  EXPECT_TRUE(pathsAreDifferent) << "Path should be recalculated when tank moves off track";
+  
+  // The first point in the new path should be adjacent to the tank's current position
+  bool firstPointIsAdjacent = false;
+  if (!newPath.empty()) {
+      double distance = Point::euclideanDistance(newPath.front(), newPosition);
+      firstPointIsAdjacent = (distance <= 1.5);
+  }
+  EXPECT_TRUE(firstPointIsAdjacent) << "First point in new path should be adjacent to the tank's position";
+}
+
+TEST_F(ChaseAlgorithmTest, RecalculatesPathWhenTargetMoves) {
+  std::vector<std::string> boardLines = {
+      "#######",
+      "#     #",
+      "#1    #",
+      "#     #",
+      "#    2#",
+      "#     #",
+      "#######"
+  };
+  GameBoard board = createTestBoard(boardLines);
+  
+  // Set up initial positions
+  Tank myTank(1, Point(1, 2), Direction::Right);
+  Tank enemyTank(2, Point(5, 4), Direction::Left);
+  std::vector<Shell> shells;
+  
+  // First generate a path
+  algorithm->getNextAction(board, myTank, enemyTank, shells);
+  
+  // Get the initial path
+  std::vector<Point> originalPath = getCurrentPath();
+  ASSERT_FALSE(originalPath.empty()) << "Initial path should not be empty";
+  
+  // Store the last target position
+  Point originalTarget = enemyTank.getPosition();
+  
+  // Move target significantly (more than 1.5 Euclidean distance)
+  Point newEnemyPosition(2, 5);
+  double distance = Point::euclideanDistance(originalTarget, newEnemyPosition);
+  ASSERT_GT(distance, 1.5) << "Target should have moved more than 1.5 distance";
+  
+  enemyTank = Tank(2, newEnemyPosition, Direction::Left);
+  
+  // Call again - should trigger recalculation
+  algorithm->getNextAction(board, myTank, enemyTank, shells);
+  
+  // Get the new path
+  std::vector<Point> newPath = getCurrentPath();
+  
+  // Verify path was recalculated
+  bool pathsAreDifferent = originalPath.size() != newPath.size() ||
+                          !std::equal(originalPath.begin(), originalPath.end(), newPath.begin());
+  EXPECT_TRUE(pathsAreDifferent) << "Path should be recalculated when target moves significantly";
+  
+  // Verify the last point in the new path is close to the new enemy position
+  // (Might not be exactly at enemy position due to obstacles)
+  if (!newPath.empty()) {
+      Point lastPoint = newPath.back();
+      bool pathLeadsToTarget = Point::euclideanDistance(lastPoint, newEnemyPosition) <= 2.0;
+      EXPECT_TRUE(pathLeadsToTarget) << "New path should lead toward the new target position";
+  }
 }
