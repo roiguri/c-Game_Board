@@ -26,7 +26,7 @@ public:
      * @param width The width of the board
      * @param height The height of the board
      */
-    GameBoard(int width, int height);
+    GameBoard(size_t width, size_t height);
     
     /**
      * @brief Types of cells that can exist on the game board
@@ -173,17 +173,17 @@ public:
      * 
      * @return The width in number of cells
      */
-    int getWidth() const;
+    size_t getWidth() const;
 
     /**
      * @brief Gets the height of the game board
      * 
      * @return The height in number of cells
      */
-    int getHeight() const;
+    size_t getHeight() const;
 private:
     std::vector<std::vector<CellType>> m_board;
     std::map<Point, int> m_wallHealth;
-    int m_width;
-    int m_height;
+    size_t m_width;
+    size_t m_height;
 };
