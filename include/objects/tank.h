@@ -1,6 +1,7 @@
 #pragma once
 
 #include "objects/game_object.h"
+#include "bonus/config/game_config.h"
 
 /**
  * @class Tank
@@ -12,13 +13,13 @@
 class Tank : public GameObject {
 public:
     /** Maximum number of shells available at the start of the game */
-    static constexpr int INITIAL_SHELLS = 16;
+    static int INITIAL_SHELLS;
 
     /** Number of game steps a tank must wait between consecutive shots */
-    static constexpr int SHOOT_COOLDOWN = 4;
+    static int SHOOT_COOLDOWN;
 
     /** Number of game steps a tank must wait before executing a backward move */
-    static constexpr int BACKWARD_DELAY = 2;
+    static int BACKWARD_DELAY;
 
     /**
      * @brief Constructs a new Tank object
@@ -28,6 +29,13 @@ public:
      * @param direction The initial direction of the tank
      */
     Tank(int playerId, const Point& position, Direction direction);
+
+    /**
+     * @brief Initialize tank parameters from a game configuration
+     * 
+     * @param config The game configuration to apply
+     */
+    static void initializeConfig(const GameConfig& config);
 
 
     /**

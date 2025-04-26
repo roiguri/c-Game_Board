@@ -9,11 +9,20 @@ protected:
         position = Point(3, 4);
         direction = Direction::Right;
         tank = new Tank(playerId, position, direction);
+
+        originalInitialShells = Tank::INITIAL_SHELLS;
+        originalShootCooldown = Tank::SHOOT_COOLDOWN;
     }
 
     void TearDown() override {
+        Tank::INITIAL_SHELLS = originalInitialShells;
+        Tank::SHOOT_COOLDOWN = originalShootCooldown;
+      
         delete tank;
     }
+
+    int originalInitialShells;
+    int originalShootCooldown;
 
     // Common test data
     int playerId;
@@ -449,4 +458,74 @@ TEST_F(TankTest, DoNothing_ProcessesBackwardMovement) {
   EXPECT_EQ(tank->getBackwardCounter(), 0);
   EXPECT_EQ(tank->getPosition(), backwardPosition);
   EXPECT_TRUE(tank->isContinuousBackward());
+}
+
+// Test that default tank values are used when no configuration is applied
+TEST_F(TankTest, DefaultTankValues) {
+    // Create a tank with default configuration
+    Tank tank(1, Point(0, 0), Direction::Up);
+    
+    // Check that it uses the default values
+    EXPECT_EQ(tank.getRemainingShells(), 16);
+    EXPECT_TRUE(tank.shoot()); // Can't shoot immediately (cooldown = 0)
+    
+    // After 4 steps, should be able to shoot again
+    for (int i = 0; i <= 4; ++i) {
+        tank.updateCooldowns();
+    }
+    EXPECT_TRUE(tank.canShoot());
+}
+
+// Test that tank values can be configured
+TEST_F(TankTest, ConfigurableTankValues) {
+    // Create a custom configuration
+    GameConfig config;
+    config.initialShells = 5;
+    config.shootCooldown = 2;
+    
+    // Apply the configuration
+    Tank::initializeConfig(config);
+    
+    // Create a tank with the new configuration
+    Tank tank(1, Point(0, 0), Direction::Up);
+    
+    // Check that it uses the configured values
+    EXPECT_EQ(tank.getRemainingShells(), 5);
+    EXPECT_TRUE(tank.shoot());
+    
+    // After 2 steps (new cooldown value), should be able to shoot again
+    for (int i = 0; i <= 2; ++i) {
+        tank.updateCooldowns();
+    }
+    EXPECT_TRUE(tank.canShoot());
+}
+
+// Test extreme configuration values
+TEST_F(TankTest, ExtremeConfigurationValues) {
+    // Create a configuration with extreme values
+    GameConfig config;
+    config.initialShells = 100;  // Very high
+    config.shootCooldown = 0;    // No cooldown
+    
+    // Apply the configuration
+    Tank::initializeConfig(config);
+    
+    // Create a tank with the extreme configuration
+    Tank tank(1, Point(0, 0), Direction::Up);
+    
+    // Check initial shells
+    EXPECT_EQ(tank.getRemainingShells(), 100);
+    
+    // With no cooldown, should be able to shoot immediately after shooting
+    tank.updateCooldowns(); // Reset any cooldowns
+    EXPECT_TRUE(tank.shoot());
+    tank.updateCooldowns();
+    EXPECT_TRUE(tank.canShoot());
+    
+    // After many shots, shells should decrease correctly
+    for (int i = 0; i < 50; ++i) {
+        EXPECT_TRUE(tank.shoot());
+        tank.updateCooldowns();
+    }
+    EXPECT_EQ(tank.getRemainingShells(), 49);
 }

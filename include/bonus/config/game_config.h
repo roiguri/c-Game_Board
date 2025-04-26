@@ -15,7 +15,6 @@ public:
     // Tank properties
     int initialShells = 16;
     int shootCooldown = 4;
-    int backwardDelay = 2;
     
     // Wall properties
     int wallHealth = 2;

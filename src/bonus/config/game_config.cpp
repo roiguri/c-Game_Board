@@ -16,9 +16,6 @@ bool GameConfig::parseConfigValue(
     else if (key == "shoot_cooldown") {
         return parseIntValue(value, shootCooldown, 0, 20);
     }
-    else if (key == "backward_delay") {
-        return parseIntValue(value, backwardDelay, 0, 10);
-    }
     else if (key == "wall_health") {
         return parseIntValue(value, wallHealth, 1, 10);
     }

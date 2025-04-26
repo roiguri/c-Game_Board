@@ -1,5 +1,15 @@
 #include "objects/tank.h"
 
+// Initialize static variables with default values
+int Tank::INITIAL_SHELLS = 16;
+int Tank::SHOOT_COOLDOWN = 4;
+int Tank::BACKWARD_DELAY = 2;
+
+void Tank::initializeConfig(const GameConfig& config) {
+  INITIAL_SHELLS = config.initialShells;
+  SHOOT_COOLDOWN = config.shootCooldown;
+}
+
 Tank::Tank(int playerId, const Point& position, Direction direction)
     : GameObject(playerId, position, direction),
       m_remainingShells(INITIAL_SHELLS),

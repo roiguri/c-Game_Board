@@ -26,7 +26,6 @@ TEST_F(GameConfigTest, DefaultConstructor) {
     
     EXPECT_EQ(config.initialShells, 16);
     EXPECT_EQ(config.shootCooldown, 4);
-    EXPECT_EQ(config.backwardDelay, 2);
     EXPECT_EQ(config.wallHealth, 2);
     EXPECT_EQ(config.shellsDepletedCountdown, 40);
     EXPECT_EQ(config.maxGameSteps, 1000);
@@ -37,7 +36,6 @@ TEST_F(GameConfigTest, LoadValidConfig) {
     std::string configContent = 
         "initial_shells: 20\n"
         "shoot_cooldown: 3\n"
-        "backward_delay: 1\n"
         "wall_health: 3\n"
         "shells_depleted_countdown: 30\n"
         "max_game_steps: 500\n";
@@ -49,7 +47,6 @@ TEST_F(GameConfigTest, LoadValidConfig) {
     
     EXPECT_EQ(config.initialShells, 20);
     EXPECT_EQ(config.shootCooldown, 3);
-    EXPECT_EQ(config.backwardDelay, 1);
     EXPECT_EQ(config.wallHealth, 3);
     EXPECT_EQ(config.shellsDepletedCountdown, 30);
     EXPECT_EQ(config.maxGameSteps, 500);
@@ -99,7 +96,6 @@ TEST_F(GameConfigTest, ValueBoundaries) {
     std::string configMin = 
         "initial_shells: 1\n"
         "shoot_cooldown: 0\n"
-        "backward_delay: 0\n"
         "wall_health: 1\n"
         "shells_depleted_countdown: 0\n"
         "max_game_steps: 1\n";
@@ -111,7 +107,6 @@ TEST_F(GameConfigTest, ValueBoundaries) {
     
     EXPECT_EQ(configMinimum.initialShells, 1);
     EXPECT_EQ(configMinimum.shootCooldown, 0);
-    EXPECT_EQ(configMinimum.backwardDelay, 0);
     EXPECT_EQ(configMinimum.wallHealth, 1);
     EXPECT_EQ(configMinimum.shellsDepletedCountdown, 0);
     EXPECT_EQ(configMinimum.maxGameSteps, 1);
@@ -120,7 +115,6 @@ TEST_F(GameConfigTest, ValueBoundaries) {
     std::string configMax = 
         "initial_shells: 100\n"
         "shoot_cooldown: 20\n"
-        "backward_delay: 10\n"
         "wall_health: 10\n"
         "shells_depleted_countdown: 1000\n"
         "max_game_steps: 10000\n";
@@ -132,7 +126,6 @@ TEST_F(GameConfigTest, ValueBoundaries) {
     
     EXPECT_EQ(configMaximum.initialShells, 100);
     EXPECT_EQ(configMaximum.shootCooldown, 20);
-    EXPECT_EQ(configMaximum.backwardDelay, 10);
     EXPECT_EQ(configMaximum.wallHealth, 10);
     EXPECT_EQ(configMaximum.shellsDepletedCountdown, 1000);
     EXPECT_EQ(configMaximum.maxGameSteps, 10000);
