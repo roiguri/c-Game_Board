@@ -2,6 +2,8 @@
 #include <sstream>
 #include <iostream>
 
+int GameBoard::WALL_STARTING_HEALTH = 2; // Default wall health
+
 GameBoard::GameBoard() : m_width(0), m_height(0) {}
 
 GameBoard::GameBoard(size_t width, size_t height) : m_width(width), m_height(height) {
@@ -9,6 +11,10 @@ GameBoard::GameBoard(size_t width, size_t height) : m_width(width), m_height(hei
     for (size_t y = 0; y < height; ++y) {
         m_board[y].resize(width, CellType::Empty);
     }
+}
+
+void GameBoard::initializeConfig(const GameConfig& config) {
+  WALL_STARTING_HEALTH = config.wallHealth;
 }
 
 bool GameBoard::initialize(const std::vector<std::string>& boardLines, 

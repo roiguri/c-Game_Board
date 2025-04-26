@@ -604,3 +604,35 @@ TEST_F(GameBoardTest, ToString_PopulatedBoard) {
     std::string expected = "# #\n @ \n###\n";
     EXPECT_EQ(board.toString(), expected);
 }
+
+TEST_F(GameBoardTest, WallHealth_UsesConfiguredValue) {
+  // Configure with custom value
+  GameConfig config;
+  config.wallHealth = 4;
+  GameBoard::initializeConfig(config);
+  
+  // Create a board and add a wall
+  GameBoard board(5, 5);
+  board.setCellType(Point(1, 1), GameBoard::CellType::Wall);
+  
+  // Check wall has configured health
+  EXPECT_EQ(board.getWallHealth(Point(1, 1)), 4);
+  
+  // Damage wall once
+  board.damageWall(Point(1, 1));
+  EXPECT_EQ(board.getWallHealth(Point(1, 1)), 3);
+  EXPECT_TRUE(board.isWall(Point(1, 1)));
+  
+  // Damage wall three times more to destroy it
+  board.damageWall(Point(1, 1));
+  EXPECT_EQ(board.getWallHealth(Point(1, 1)), 2);
+  EXPECT_TRUE(board.isWall(Point(1, 1)));
+
+  board.damageWall(Point(1, 1));
+  EXPECT_EQ(board.getWallHealth(Point(1, 1)), 1);
+  EXPECT_TRUE(board.isWall(Point(1, 1)));
+  
+  board.damageWall(Point(1, 1));
+  EXPECT_EQ(board.getWallHealth(Point(1, 1)), 0);
+  EXPECT_FALSE(board.isWall(Point(1, 1)));
+}

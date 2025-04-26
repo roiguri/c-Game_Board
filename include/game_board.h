@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include "utils/point.h"
+#include "bonus/config/game_config.h"
 
 /**
  * @class GameBoard
@@ -38,9 +39,19 @@ public:
     };
 
     /**
-     * @brief Constant for wall starting health
+     * @brief Starting health of walls
      */
-    static constexpr int WALL_STARTING_HEALTH = 2;
+    static int WALL_STARTING_HEALTH;
+
+    /**
+     * @brief Initializes the game board configuration
+     * 
+     * Should be called before creating the game board if changing 
+     *  configurations is necessary.
+     * 
+     * @param config The game configuration object
+     */
+    static void initializeConfig(const GameConfig& config);
     
     /**
      * @brief Initializes the board from a vector of strings
