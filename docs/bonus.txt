@@ -10,14 +10,6 @@ Visualization System
   for easier integration with different visualizers.
 * Mostly done with AI
 
-Google Test Framework Integration
-
-Tests for all components: GameBoard, Tank, Shell, Algorithms, Collision, Etc
-Edge case testing for board wrapping, collisions, and game rules
-Mock objects for testing algorithmic behavior in isolation
-Test fixtures for complex test scenarios
-* Configuration of gtest enviroment was done with AI
-
 *Instructions to run:*
 
 Visualization:
@@ -33,12 +25,60 @@ Visualization:
   # Visualization HTML generated as output_<input_file>_visualization.html
   # Open in any browser to view the interactive game replay
 
+Google Test Framework Integration
+
+Tests for all components: GameBoard, Tank, Shell, Algorithms, Collision, Etc
+Edge case testing for board wrapping, collisions, and game rules
+Mock objects for testing algorithmic behavior in isolation
+Test fixtures for complex test scenarios
+* Configuration of gtest enviroment was done with AI
+
+*Instructions to run:*
+
 Tests:
 
   Build the project with:
     mkdir build && cd build
-    cmake -DENABLE_TESTING=ON -DENABLE_VISUALIZATION=ON ..
+    cmake -DENABLE_TESTING=ON ..
     make
 
   Run tests with:
     ./bin/tests/tanks_game_tests
+
+Board Generator
+
+The game includes a random board generator with the following features:
+- Generate boards with customizable dimensions, wall density, and mine density
+- Support for symmetrical boards (horizontal, vertical, diagonal)
+- Reproducible generation using seed values
+- Validation to ensure playable boards
+  - Configuration values are in a certain range.
+  - Both tanks are placed.
+  - Minimum distance between tanks.
+  - A path exists between the tanks.
+
+*Instructions to run:*
+
+- Does not require a special build.
+
+Generate a board without running the game:
+
+./tanks_game --only_generate [--config-path=<path>]
+
+Generate a board and immediately run the game with generated board:
+
+./tanks_game --run_generated [--config-path=<path>]
+
+When running the generator without the --config-path flag, default values are
+used.
+
+*Configuration file format:*
+
+dimensions: <width> <height>
+wall_density: <0.0-0.9>
+mine_density: <0.0-0.5>
+symmetry: <none|horizontal|vertical|diagonal>
+seed: <number> (-1/nothing for random boards)
+
+* Requires txt file extension
+* Example config file in project files
