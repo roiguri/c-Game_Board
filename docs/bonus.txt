@@ -78,7 +78,7 @@ dimensions: <width> <height>
 wall_density: <0.0-0.9>
 mine_density: <0.0-0.5>
 symmetry: <none|horizontal|vertical|diagonal>
-seed: <number> (-1/nothing for random boards)
+seed: <number> (remove field for random boards)
 
 * Requires txt file extension
-* Example config file in project files
+* Example config file with default values in project files

@@ -85,4 +85,4 @@ used.
 | wall_density | 0.0-0.9 | 0.25 |
 | mine_density | 0.0-0.5 | 0.25 |
 | symmetry | none\|horizontal\|vertical\|diagonal | none |
-| seed | \<number\> | -1 (random) |
+| seed | \<number\> | no seed |
