@@ -25,10 +25,8 @@ public:
      * @param tanks The tanks in the game that might be involved in collisions
      * @param shells The shells in the game that might be involved in collisions
      * @param board The game board containing walls and mines
-     * @return true if any tank was destroyed during collision resolution, 
-     *  false otherwise
      */
-    bool resolveAllCollisions(
+    void resolveAllCollisions(
         std::vector<Tank>& tanks,
         std::vector<Shell>& shells,
         GameBoard& board
@@ -60,23 +58,21 @@ private:
     );
 
     // Checks for tank-mine collisions and marks explosions
-    bool checkTankMineCollisions(
+    void checkTankMineCollisions(
         std::vector<Tank>& tanks,
         GameBoard& board
     );
 
     // Applies path explosions to tanks and shells
     // and marks them as destroyed if they cross a marked path
-    // Returns true if any tank was destroyed
-    bool applyPathExplosions(
+    void applyPathExplosions(
       std::vector<Tank>& tanks,
       std::vector<Shell>& shells
     );
 
     // Applies position explosions to tanks and shells
     // and marks them as destroyed if they occupy a marked position
-    // Returns true if any tank was destroyed
-    bool applyPositionExplosions(
+    void applyPositionExplosions(
       std::vector<Tank>& tanks,
       std::vector<Shell>& shells,
       GameBoard& board

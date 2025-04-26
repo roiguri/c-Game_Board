@@ -1,7 +1,7 @@
 #include "collision_handler.h"
 #include <map>
 
-bool CollisionHandler::resolveAllCollisions(
+void CollisionHandler::resolveAllCollisions(
   std::vector<Tank>& tanks,
   std::vector<Shell>& shells,
   GameBoard& board
@@ -12,16 +12,16 @@ bool CollisionHandler::resolveAllCollisions(
   m_boardHeight = board.getHeight();
 
   detectPathCollisions(tanks, shells);
-  bool tankDestroyed = applyPathExplosions(tanks, shells);
+  applyPathExplosions(tanks, shells);
 
   checkShellWallCollisions(shells, board);
   
   detectPositionCollisions(tanks, shells);
-  tankDestroyed |= applyPositionExplosions(tanks, shells, board);
+  applyPositionExplosions(tanks, shells, board);
 
-  tankDestroyed |= checkTankMineCollisions(tanks, board);
+  checkTankMineCollisions(tanks, board);
 
-  return tankDestroyed;
+  return;
 }
 
 
@@ -108,29 +108,25 @@ void CollisionHandler::checkShellWallCollisions(
   }
 }
 
-bool CollisionHandler::checkTankMineCollisions(
+void CollisionHandler::checkTankMineCollisions(
     std::vector<Tank>& tanks, 
     GameBoard& board
   ) {
-  bool tankDestroyed = false;
   for (Tank& tank : tanks) {
       if (tank.isDestroyed()) continue;
 
       Point pos = tank.getPosition();
       if (board.getCellType(pos) == GameBoard::CellType::Mine) {
           tank.destroy();
-          tankDestroyed = true;
           board.setCellType(pos, GameBoard::CellType::Empty);
           markPositionExplosionAt(pos);
       }
   }
-  return tankDestroyed;
+  return;
 }
 
-bool CollisionHandler::applyPathExplosions(std::vector<Tank>& tanks,
+void CollisionHandler::applyPathExplosions(std::vector<Tank>& tanks,
                                            std::vector<Shell>& shells) {
-    bool tankDestroyed = false;
-
     for (Tank& tank : tanks) {
         if (!tank.isDestroyed()) {
           MidPoint tankPath = MidPoint::calculateMidpoint(
@@ -143,7 +139,6 @@ bool CollisionHandler::applyPathExplosions(std::vector<Tank>& tanks,
           if (tankPath.getX() != -1 && 
                 m_pathExplosions.find(tankPath) != m_pathExplosions.end()) {
               tank.destroy();
-              tankDestroyed = true;
           }
         }
     }
@@ -164,20 +159,17 @@ bool CollisionHandler::applyPathExplosions(std::vector<Tank>& tanks,
         }
     }
 
-    return tankDestroyed;
+    return;
 }
 
-bool CollisionHandler::applyPositionExplosions(std::vector<Tank>& tanks,
+void CollisionHandler::applyPositionExplosions(std::vector<Tank>& tanks,
                                                std::vector<Shell>& shells,
                                                GameBoard& board) {
-    bool tankDestroyed = false;
-
     for (Tank& tank : tanks) {
         if (!tank.isDestroyed()) {
           if (m_positionExplosions.find(tank.getPosition()) != 
                                                 m_positionExplosions.end()) {
             tank.destroy();
-            tankDestroyed = true;
           }
         }
     }
@@ -197,7 +189,7 @@ bool CollisionHandler::applyPositionExplosions(std::vector<Tank>& tanks,
       }
     }
 
-    return tankDestroyed;
+    return;
 }
 
 void CollisionHandler::markPositionExplosionAt(const Point& pos) {
