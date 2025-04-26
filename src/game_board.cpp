@@ -4,9 +4,9 @@
 
 GameBoard::GameBoard() : m_width(0), m_height(0) {}
 
-GameBoard::GameBoard(int width, int height) : m_width(width), m_height(height) {
+GameBoard::GameBoard(size_t width, size_t height) : m_width(width), m_height(height) {
     m_board.resize(height);
-    for (int y = 0; y < height; ++y) {
+    for (size_t y = 0; y < height; ++y) {
         m_board[y].resize(width, CellType::Empty);
     }
 }
@@ -23,13 +23,13 @@ bool GameBoard::initialize(const std::vector<std::string>& boardLines,
   
   int tank1Count = 0;
   int tank2Count = 0;
-  for (int y = 0; y < m_height; ++y) {
-      for (int x = 0; x < m_width; ++x) {
+  for (size_t y = 0; y < m_height; ++y) {
+      for (size_t x = 0; x < m_width; ++x) {
           setCellType(x, y, CellType::Empty);
       }
   }
   
-  for (int y = 0; y < m_height; ++y) {
+  for (size_t y = 0; y < m_height; ++y) {
       if (y >= boardLines.size()) {
           errors.push_back("Missing row " + std::to_string(y) + 
             ". Filled with empty spaces.");
@@ -45,7 +45,7 @@ bool GameBoard::initialize(const std::vector<std::string>& boardLines,
           );
       }
       
-      for (int x = 0; x < m_width; ++x) {
+      for (size_t x = 0; x < m_width; ++x) {
           if (x >= line.length()) {
               continue;
           }
@@ -153,11 +153,11 @@ void GameBoard::setCellType(const Point& position, CellType type) {
     setCellType(position.getX(), position.getY(), type);
 }
 
-int GameBoard::getWidth() const {
+size_t GameBoard::getWidth() const {
     return m_width;
 }
 
-int GameBoard::getHeight() const {
+size_t GameBoard::getHeight() const {
     return m_height;
 }
 
@@ -215,8 +215,8 @@ bool GameBoard::canMoveTo(const Point& position) const {
 std::string GameBoard::toString() const {
     std::stringstream ss;
     
-    for (int y = 0; y < m_height; ++y) {
-        for (int x = 0; x < m_width; ++x) {
+    for (size_t y = 0; y < m_height; ++y) {
+        for (size_t x = 0; x < m_width; ++x) {
             CellType cell = m_board[y][x];
             
             switch (cell) {
