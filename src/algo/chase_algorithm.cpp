@@ -15,7 +15,8 @@ Action ChaseAlgorithm::getNextAction(
 ) {
     // Priority 1: Avoid shells
     if (isInDangerFromShells(gameBoard, myTank, shells)) {
-        Action safeAction = findOptimalSafeMove(gameBoard, myTank, enemyTank, shells, false);
+        Action safeAction = 
+          findOptimalSafeMove(gameBoard, myTank, enemyTank, shells, false);
         if (safeAction != Action::None) {
             return safeAction;
         }
@@ -27,7 +28,8 @@ Action ChaseAlgorithm::getNextAction(
     }
     
     // Priority 3: Rotate to face enemy if we have line of sight
-    auto lineOfSightDir = getLineOfSightDirection(gameBoard, myTank.getPosition(), enemyTank.getPosition());
+    auto lineOfSightDir = getLineOfSightDirection(
+      gameBoard, myTank.getPosition(), enemyTank.getPosition());
     if (lineOfSightDir.has_value()) {
         Direction targetDir = lineOfSightDir.value();
         if (targetDir != myTank.getDirection()) {
@@ -36,23 +38,38 @@ Action ChaseAlgorithm::getNextAction(
     }
     
     // Priority 4: Chase the enemy
-    updatePathToTarget(gameBoard, myTank.getPosition(), enemyTank.getPosition());
+    updatePathToTarget(
+      gameBoard, myTank.getPosition(), enemyTank.getPosition());
     
     if (!m_currentPath.empty()) {
-        return followCurrentPath(gameBoard, myTank, shells);
+        Action nextAction = followCurrentPath(gameBoard, myTank, shells);
+        if (nextAction != Action::None) {
+            return nextAction;
+        }
     }
     
     return (myTank.getPosition().getX() % 2 == 0) ? 
             Action::RotateRightEighth : Action::RotateLeftEighth;
 }
 
-void ChaseAlgorithm::updatePathToTarget(const GameBoard& gameBoard, const Point& start, 
-                                       const Point& target) {
-    // Recalculate path if:
-    // 1. Current path is empty
-    // 2. Target has moved since last calculation
-    bool needNewPath = m_currentPath.empty() || (Point::euclideanDistance(m_lastTargetPosition, target) > 1.5);
-    
+void ChaseAlgorithm::updatePathToTarget(
+  const GameBoard& gameBoard, 
+  const Point& start, 
+  const Point& target
+) {
+    bool needNewPath = false;
+    if (m_currentPath.empty()) {
+        needNewPath = true;
+    } else if (Point::euclideanDistance(m_lastTargetPosition, target) > 1.5) {
+        needNewPath = true;
+    } else {
+      Point nextPos = m_currentPath.front();
+      if (std::abs(start.getX() - nextPos.getX()) > 1 || 
+          std::abs(start.getY() - nextPos.getY()) > 1) {
+          needNewPath = true;
+      }
+    }
+
     if (needNewPath) {
         m_currentPath = findPathBFS(gameBoard, start, target);
         m_lastTargetPosition = target;
@@ -85,15 +102,17 @@ Action ChaseAlgorithm::followCurrentPath(
         return Action::None;
     }
     
-    Direction targetDirection = getLineOfSightDirection(gameBoard, myTank.getPosition(), nextPoint).value();
+    Direction targetDirection = getLineOfSightDirection(
+      gameBoard, myTank.getPosition(), nextPoint).value();
     if (targetDirection != myTank.getDirection()) {
         return getRotationToDirection(myTank.getDirection(), targetDirection);
     }
     return Action::MoveForward;
 }
 
-std::vector<Point> ChaseAlgorithm::findPathBFS(const GameBoard& gameBoard, const Point& start, 
-                                             const Point& target) const {
+std::vector<Point> ChaseAlgorithm::findPathBFS(const GameBoard& gameBoard, 
+                                               const Point& start, 
+                                               const Point& target) const {
     if (start == target) {
         return std::vector<Point>();
     }
@@ -118,10 +137,13 @@ std::vector<Point> ChaseAlgorithm::findPathBFS(const GameBoard& gameBoard, const
         
         // Explore all valid neighbors
         for (const Direction& dir : ALL_DIRECTIONS) {
-            Point neighbor = gameBoard.wrapPosition(current + getDirectionDelta(dir));
+            Point neighbor = 
+              gameBoard.wrapPosition(current + getDirectionDelta(dir));
             
             // Skip if already visited or can't move to this position
-            if (visited.count(neighbor) > 0 || !gameBoard.canMoveTo(neighbor) || gameBoard.isMine(neighbor)) {
+            if (visited.count(neighbor) > 0 || 
+                !gameBoard.canMoveTo(neighbor) || 
+                gameBoard.isMine(neighbor)) {
                 continue;
             }
             
