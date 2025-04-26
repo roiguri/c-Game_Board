@@ -571,8 +571,6 @@ TEST_F(GameManagerTest, ApplyAction_DoNothing) {
   ASSERT_EQ(initialTanks.size(), 2);
   Point initialPos1 = initialTanks[1].getPosition(); // Player 1
   Point initialPos2 = initialTanks[0].getPosition(); // Player 2
-  Direction initialDir1 = initialTanks[1].getDirection();
-  Direction initialDir2 = initialTanks[0].getDirection();
   
   // Verify positions and directions are unchanged
   auto finalTanks = getTanks(manager);
@@ -1128,14 +1126,9 @@ TEST_F(GameManagerTest, RunGame_ShellDestroyingWallsThenTank) {
   
   // The wall should eventually be destroyed after multiple hits
   // Then one tank should hit the other
-  bool wallDestroyed = false;
   bool tankDestroyed = false;
   
   for (const auto& logEntry : gameLog) {
-      if (logEntry.find("wall damaged") != std::string::npos ||
-          logEntry.find("wall destroyed") != std::string::npos) {
-          wallDestroyed = true;
-      }
       if (logEntry.find("Player") != std::string::npos && 
           logEntry.find("wins") != std::string::npos) {
           tankDestroyed = true;
@@ -1144,7 +1137,7 @@ TEST_F(GameManagerTest, RunGame_ShellDestroyingWallsThenTank) {
   
   // We expect the game to eventually end with tank destruction
   // but wall destruction is harder to verify in logs, so we'll skip that check
-  EXPECT_TRUE(tankDestroyed);
+  EXPECT_TRUE(tankDestroyed); // Only way to destroy tank is to destroy wall first
 }
 
 // Test complex sequences including backward movement
