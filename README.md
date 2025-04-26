@@ -12,6 +12,7 @@ Specifies board layout:
 
 * First line: `<width> <height>` (dimensions).
 * Subsequent lines: board content (`#`: Wall (2 hits), `1`: Player 1 start, `2`: Player 2 start, `@`: Mine, ` `: Empty).
+* In order to start the game the file must include dimensions and tanks.
 
 ## Output Format
 
@@ -26,7 +27,7 @@ Two output files are generated:
 
 ## Building the Project
 
-### Standard Build (no bonus tests or visualization):
+### Standard build:
 
 ```bash
 mkdir build && cd build
@@ -34,33 +35,54 @@ cmake ..
 make
 ```
 
-## Complete build
+### Running the Game
+```bash
+./tanks_game <input_file>
+```
+Output will be generated in: `<input_file_path>/output_<input_file>.txt.`
+
+
+## Bonus Features
+More details in docs/bonus.txt
+
+### Build with bonus features
 ```bash
 mkdir build && cd build
 cmake -DENABLE_TESTING=ON -DENABLE_VISUALIZATION=ON ..
 make
 ```
 
-## Running the Game
-```bash
-./tanks_game <input_file>
-```
-Output will be generated in in: <input_file_path>/output_<input_file>.txt.
-
-## Algorithms
-Algorithm Options:
-* Chase: Pursues enemy using pathfinding.
-* Defensive: Avoids danger, shoots when safe.
-Both algorithms avoid mines and react to shells.
-
-## Bonus Features
-Details in docs/bonus.txt
-
-### Running Tests
-If tests are enabled in the build
+### 1. GTest
+If tests are enabled, run the tests with:
 ```bash
 ./bin/tests/tanks_game_tests
 ```
 
 ### Visualization
 If visualization is enabled in the build, an HTML visualization will be generated alongside the output file.
+
+### Board Generator
+#### Usage:
+
+Generate a board without running the game:
+```bash
+./tanks_game --only_generate [--config-path=<path>]
+```
+
+Generate a board and immediately run the game:
+```bash
+./tanks_game --run_generated [--config-path=<path>]
+```
+
+When running the generator without the --config-path flag, default values are
+used.
+
+#### Configuration File Format:
+
+| Parameter | Value | Default Value |
+|:---------:|:-----:|:-------------:|
+| dimensions | \<width\> \<height\> | 15 10 |
+| wall_density | 0.0-0.9 | 0.25 |
+| mine_density | 0.0-0.5 | 0.25 |
+| symmetry | none\|horizontal\|vertical\|diagonal | none |
+| seed | \<number\> | -1 (random) |
