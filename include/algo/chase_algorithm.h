@@ -40,17 +40,33 @@ public:
     ) override;
 
 private:
-    // State members
+    // Stores current path being followed
     std::vector<Point> m_currentPath;
+
+    // Last known position of target for path recalculation
     Point m_lastTargetPosition; 
 
-    void updatePathToTarget(const GameBoard& gameBoard, const Point& start, 
-                           const Point& target);
+    // Recalculates path if target has moved significantly or tank deviated 
+    //  from its route
+    void updatePathToTarget(
+      const GameBoard& gameBoard, 
+      const Point& start, 
+      const Point& target
+    );
     
-    Action followCurrentPath(const GameBoard& gameBoard, const Tank& myTank, const std::vector<Shell>& shells);
+    // Determines next action to follow current path while avoiding danger
+    Action followCurrentPath(
+      const GameBoard& gameBoard, 
+      const Tank& myTank, 
+      const std::vector<Shell>& shells
+    );
     
-    std::vector<Point> findPathBFS(const GameBoard& gameBoard, const Point& start, 
-                                  const Point& target) const;
+    // Finds shortest path between points using breadth-first search
+    std::vector<Point> findPathBFS(
+      const GameBoard& gameBoard, 
+      const Point& start, 
+      const Point& target
+    ) const;
     
     // Expose the test class to allow access to private members
     // for unit testing

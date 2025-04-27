@@ -10,13 +10,21 @@ Algorithm::Algorithm() {
 Algorithm::~Algorithm() {
 }
 
-bool Algorithm::isInDangerFromShells(const GameBoard& gameBoard, const Tank& tank, 
-                         const std::vector<Shell>& shells, int lookAheadSteps) const {
+bool Algorithm::isInDangerFromShells(
+  const GameBoard& gameBoard, 
+  const Tank& tank, 
+  const std::vector<Shell>& shells, 
+  int lookAheadSteps
+) const {
     return isInDangerFromShells(gameBoard, tank.getPosition(), shells, lookAheadSteps);
 }
 
-bool Algorithm::isInDangerFromShells(const GameBoard& gameBoard, const Point& position, 
-                         const std::vector<Shell>& shells, int lookAheadSteps) const {
+bool Algorithm::isInDangerFromShells(
+  const GameBoard& gameBoard, 
+  const Point& position, 
+  const std::vector<Shell>& shells, 
+  int lookAheadSteps
+) const {
     if (gameBoard.isMine(position)) {
         return true;
     }
@@ -32,9 +40,9 @@ bool Algorithm::isInDangerFromShells(const GameBoard& gameBoard, const Point& po
         // Predict shell trajectory
         Point shellPos = shell.getPosition();
         Direction shellDir = shell.getDirection();
-        // TODO: consider using a constant for the number of steps
         for (int step = 0; step < lookAheadSteps * 2; ++step) {
-            shellPos = gameBoard.wrapPosition(shellPos + getDirectionDelta(shellDir));
+            shellPos = 
+              gameBoard.wrapPosition(shellPos + getDirectionDelta(shellDir));
             if (gameBoard.isWall(shellPos)) {
                 break;
             }
@@ -56,7 +64,7 @@ Action Algorithm::findOptimalSafeMove(
     bool currentPositionSafe = !isInDangerFromShells(gameBoard, tank, shells);
       
     bool exposedToEnemy = avoidEnemySight && 
-                         isExposedToEnemy(gameBoard, tank.getPosition(), enemyTank);
+        isExposedToEnemy(gameBoard, tank.getPosition(), enemyTank);
 
     if (currentPositionSafe && (!avoidEnemySight || !exposedToEnemy)) {
         return Action::None;
@@ -83,14 +91,15 @@ std::vector<Algorithm::SafeMoveOption> Algorithm::getSafeMoveOptions(
     std::vector<SafeMoveOption> safeOptions;
     Direction currentDir = tank.getDirection();
     
-    // Check all other directions
     for (const Direction& dir : ALL_DIRECTIONS) {        
-        Point newPos = gameBoard.wrapPosition(tank.getPosition() + getDirectionDelta(dir));
+        Point newPos = 
+          gameBoard.wrapPosition(tank.getPosition() + getDirectionDelta(dir));
         
         if (isPositionSafe(gameBoard, newPos, enemyTank, 
                            shells, avoidEnemySight)) {            
           Action tankAction = getRotationToDirection(currentDir, dir);
-          tankAction = (tankAction == Action::None) ? Action::MoveForward : tankAction;
+          tankAction = (tankAction == Action::None) ? 
+                        Action::MoveForward : tankAction;
           int cost = calculateMoveCost(tank, dir);
             safeOptions.push_back({
                 newPos,
@@ -100,13 +109,12 @@ std::vector<Algorithm::SafeMoveOption> Algorithm::getSafeMoveOptions(
         }
     }
     
-    // Check backward movement
     Point backwardPos = tank.getNextBackwardPosition();
     backwardPos = gameBoard.wrapPosition(backwardPos);
     
     if (isPositionSafe(gameBoard, backwardPos, enemyTank, 
                        shells, avoidEnemySight)) {
-        int cost = tank.isContinuousBackward() ? 1 : 3;  // Initial backward takes 3 steps        
+        int cost = tank.isContinuousBackward() ? 1 : 3;        
         safeOptions.push_back({
             backwardPos,
             Action::MoveBackward,
@@ -124,10 +132,12 @@ bool Algorithm::isPositionSafe(
   const std::vector<Shell>& shells,
   bool avoidEnemySight
 ) const {
-  bool canMove = gameBoard.canMoveTo(position) && position != enemyTank.getPosition() 
-                 && !gameBoard.isMine(position);
+  bool canMove = gameBoard.canMoveTo(position) &&
+                 position != enemyTank.getPosition() && 
+                 !gameBoard.isMine(position);
   bool safeFromShells = !isInDangerFromShells(gameBoard, position, shells);
-  bool safeFromEnemy = !avoidEnemySight || !isExposedToEnemy(gameBoard, position, enemyTank);
+  bool safeFromEnemy = 
+    !avoidEnemySight || !isExposedToEnemy(gameBoard, position, enemyTank);
 
   return canMove && safeFromShells && safeFromEnemy;
 }
@@ -140,14 +150,14 @@ bool Algorithm::isExposedToEnemy(
         return false;
     }
     
-    auto dirOpt = getLineOfSightDirection(gameBoard, enemyTank.getPosition(), position);
+    auto dirOpt = 
+      getLineOfSightDirection(gameBoard, enemyTank.getPosition(), position);
     return dirOpt.has_value();
 }
 
 int Algorithm::calculateMoveCost(const Tank& tank, Direction targetDir) const {
     Direction currentDir = tank.getDirection();
     
-    // If already facing the right direction, just need 1 step to move
     if (currentDir == targetDir) {
         return 1;
     }
@@ -170,12 +180,11 @@ int Algorithm::calculateMoveCost(const Tank& tank, Direction targetDir) const {
         rightSteps++;
     }
     
-    // Use the minimum number of rotation steps
     int rotationSteps = std::min(leftSteps, rightSteps);
     
-    // Can optimize with quarter rotations (worth 2 eighth rotations)
+    // Check if can optimize rotations with quarter rotations
     if (rotationSteps >= 2) {
-        rotationSteps = (rotationSteps + 1) / 2;  // Round up for quarter turns
+        rotationSteps = (rotationSteps + 1) / 2;
     }
     
     // Total cost: rotation steps + 1 step to move
@@ -196,10 +205,11 @@ bool Algorithm::canHitTarget(const GameBoard& gameBoard, const Tank& shooter,
     );
 }
 
-std::optional<Direction> Algorithm::getLineOfSightDirection(const GameBoard& gameBoard, 
-                                                         const Point& from, 
-                                                         const Point& to) const {
-    // Check all 8 possible directions
+std::optional<Direction> Algorithm::getLineOfSightDirection(
+  const GameBoard& gameBoard, 
+  const Point& from, 
+  const Point& to
+) const {
     for (const Direction& dir : ALL_DIRECTIONS) {
         if (checkLineOfSightInDirection(gameBoard, from, to, dir)) {
             return dir;
@@ -208,8 +218,12 @@ std::optional<Direction> Algorithm::getLineOfSightDirection(const GameBoard& gam
     return std::nullopt;  // No line of sight found
 }
 
-bool Algorithm::checkLineOfSightInDirection(const GameBoard& gameBoard, const Point& from, 
-                                         const Point& to, Direction direction) const {
+bool Algorithm::checkLineOfSightInDirection(
+  const GameBoard& gameBoard, 
+  const Point& from, 
+  const Point& to,
+  Direction direction
+) const {
     if (from == to) {
         return true;
     }
@@ -237,7 +251,10 @@ bool Algorithm::checkLineOfSightInDirection(const GameBoard& gameBoard, const Po
     return false;
 }
 
-Action Algorithm::getRotationToDirection(Direction current, Direction target) const {
+Action Algorithm::getRotationToDirection(
+  Direction current, 
+  Direction target
+) const {
   if (current == target) {
       return Action::None;
   }
@@ -260,7 +277,6 @@ Action Algorithm::getRotationToDirection(Direction current, Direction target) co
   int stepsClockwise = 0;
   int stepsCounterClockwise = 0;
   
-  // Count steps in each direction
   Direction tempDir = current;
   while (tempDir != target && stepsClockwise < 4) {
       tempDir = rotateRight(tempDir, false);
@@ -276,26 +292,28 @@ Action Algorithm::getRotationToDirection(Direction current, Direction target) co
   // Choose the direction with fewer steps
   bool rotateClockwise = (stepsClockwise <= stepsCounterClockwise);
   
-  // Return the appropriate first rotation
   if (rotateClockwise) {
-    // Rotate clockwise, always use quarter turn for multi-step rotations
     return Action::RotateRightQuarter;
   } else {
-      // Rotate counter-clockwise, always use quarter turn for multi-step rotations
       return Action::RotateLeftQuarter;
   }
 }
 
-Action Algorithm::evaluateOffensiveOptions(const GameBoard& gameBoard, const Tank& myTank, 
-                                         const Tank& enemyTank) const {
+Action Algorithm::evaluateOffensiveOptions(
+  const GameBoard& gameBoard, 
+  const Tank& myTank, 
+  const Tank& enemyTank
+) const {
     if (canHitTarget(gameBoard, myTank, enemyTank.getPosition())) {
         return Action::Shoot;
     }
     
-    // Check if we have line of sight but need to rotate
-    auto lineOfSightDir = getLineOfSightDirection(gameBoard, myTank.getPosition(), enemyTank.getPosition());
+    auto lineOfSightDir = getLineOfSightDirection(
+      gameBoard, myTank.getPosition(), 
+      enemyTank.getPosition());
     if (lineOfSightDir.has_value()) {
-        return getRotationToDirection(myTank.getDirection(), lineOfSightDir.value());
+        return getRotationToDirection(
+          myTank.getDirection(), lineOfSightDir.value());
     }
     
     return Action::None;

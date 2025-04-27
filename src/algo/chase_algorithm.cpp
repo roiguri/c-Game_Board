@@ -48,6 +48,7 @@ Action ChaseAlgorithm::getNextAction(
         }
     }
     
+    // Priority 5: Rotate to scan
     return (myTank.getPosition().getX() % 2 == 0) ? 
             Action::RotateRightEighth : Action::RotateLeftEighth;
 }
@@ -135,12 +136,10 @@ std::vector<Point> ChaseAlgorithm::findPathBFS(const GameBoard& gameBoard,
             break;
         }
         
-        // Explore all valid neighbors
         for (const Direction& dir : ALL_DIRECTIONS) {
             Point neighbor = 
               gameBoard.wrapPosition(current + getDirectionDelta(dir));
             
-            // Skip if already visited or can't move to this position
             if (visited.count(neighbor) > 0 || 
                 !gameBoard.canMoveTo(neighbor) || 
                 gameBoard.isMine(neighbor)) {
@@ -163,7 +162,6 @@ std::vector<Point> ChaseAlgorithm::findPathBFS(const GameBoard& gameBoard,
             current = cameFrom[current];
         }
         
-        // Reverse to get path from start to target
         std::reverse(path.begin(), path.end());
         return path;
     }
