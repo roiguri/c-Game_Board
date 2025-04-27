@@ -36,8 +36,9 @@ make
 ```
 
 ### Running the Game
+From the build directory:
 ```bash
-./tanks_game <input_file>
+./bin/tanks_game <input_file>
 ```
 Output will be generated in: `<input_file_path>/output_<input_file>.txt.`
 

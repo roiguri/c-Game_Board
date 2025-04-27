@@ -2,13 +2,15 @@ Visualization System
 
 - HTML-based game visualization with interactive playback
 - Step-by-step replay of the entire game with animation controls
-- Displays a description of chosen actions and their outcome.
+- Displays a description of chosen actions.
 - Displays tank positions, directions, shells, mines, walls, and wall health
 - Shows player stats (shells remaining, active/destroyed status)
 - Supports countdown timer display
-- A visualiztion manager enables using multiple visuzlizers - provides an API
-  for easier integration with different visualizers.
-* Mostly done with AI
+* Besides the specific html visualizer we create a visualiztion manager to 
+  create a consistent API for integration with other visualizers in the future.
+  (We plan to add more in the future/share visualizers with other students).
+
+*The visualizer class was designed and implemented with the help of AI chatbots
 
 *Instructions to run:*
 
