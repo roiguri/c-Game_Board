@@ -66,12 +66,12 @@ If visualization is enabled in the build, an HTML visualization will be generate
 
 Generate a board without running the game:
 ```bash
-./tanks_game --only_generate [--config-path=<path>]
+./bin/tanks_game --only_generate [--config-path=<path>]
 ```
 
 Generate a board and immediately run the game:
 ```bash
-./tanks_game --run_generated [--config-path=<path>]
+./bin/tanks_game --run_generated [--config-path=<path>]
 ```
 
 When running the generator without the --config-path flag, default values are
