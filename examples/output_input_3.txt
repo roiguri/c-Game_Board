@@ -1,0 +1,155 @@
+Player 1: Shoot - Success
+Player 2: Shoot - Success
+Step 1 completed
+Player 1: Rotate Right 1/4 - Success
+Player 2: Rotate Left 1/4 - Success
+Step 2 completed
+Player 1: Rotate Right 1/4 - Success
+Player 2: Move Forward - Success
+Step 3 completed
+Player 1: Rotate Left 1/8 - Success
+Player 2: Move Forward - Success
+Step 4 completed
+Player 1: Move Forward - Success
+Player 2: Rotate Left 1/8 - Success
+Step 5 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 6 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 7 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 8 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 9 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 10 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 11 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 12 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 13 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 14 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 15 completed
+Player 1: Rotate Right 1/8 - Success
+Player 2: Move Forward - Success
+Step 16 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 17 completed
+Player 1: Rotate Left 1/8 - Success
+Player 2: Move Forward - Success
+Step 18 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 19 completed
+Player 1: Rotate Left 1/8 - Success
+Player 2: Move Forward - Success
+Step 20 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 21 completed
+Player 1: Rotate Left 1/8 - Success
+Player 2: Move Forward - Success
+Step 22 completed
+Player 1: Move Forward - Success
+Player 2: Rotate Right 1/8 - Success
+Step 23 completed
+Player 1: Rotate Right 1/8 - Success
+Player 2: Move Forward - Success
+Step 24 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 25 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 26 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 27 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 28 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 29 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 30 completed
+Player 1: Move Forward - Success
+Player 2: Rotate Right 1/8 - Success
+Step 31 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 32 completed
+Player 1: Move Forward - Success
+Player 2: Rotate Left 1/8 - Success
+Step 33 completed
+Player 1: Rotate Left 1/8 - Success
+Player 2: Move Forward - Success
+Step 34 completed
+Player 1: Rotate Right 1/8 - Success
+Player 2: Move Forward - Success
+Step 35 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 36 completed
+Player 1: Rotate Right 1/8 - Success
+Player 2: Move Forward - Success
+Step 37 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 38 completed
+Player 1: Rotate Left 1/8 - Success
+Player 2: Move Forward - Success
+Step 39 completed
+Player 1: Move Forward - Success
+Player 2: Rotate Left 1/8 - Success
+Step 40 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 41 completed
+Player 1: Move Forward - Success
+Player 2: Rotate Right 1/8 - Success
+Step 42 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 43 completed
+Player 1: Move Forward - Success
+Player 2: Rotate Right 1/8 - Success
+Step 44 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 45 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 46 completed
+Player 1: Move Forward - Success
+Player 2: Rotate Right 1/8 - Success
+Step 47 completed
+Player 1: Move Forward - Success
+Player 2: Rotate Right 1/8 - Success
+Step 48 completed
+Player 1: Rotate Left 1/8 - Success
+Player 2: Rotate Right 1/8 - Success
+Step 49 completed
+Player 1: Move Forward - Success
+Player 2: Move Forward - Success
+Step 50 completed
+Player 1: Rotate Right 1/8 - Success
+Player 2: Shoot - Success
+Step 51 completed
+Game ended after 51 steps
+Result: Player 2 wins - Enemy tank destroyed
