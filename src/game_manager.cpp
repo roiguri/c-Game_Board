@@ -32,16 +32,18 @@ GameManager::~GameManager() {
 bool GameManager::initialize(const std::string& filePath,
                              Algorithm* player1Algorithm,
                              Algorithm* player2Algorithm) {
-    int boardWidth = 0;
-    int boardHeight = 0;
+    int rows = 0;
+    int cols = 0;
+    int maxSteps = 0;
+    int numShells = 0;
     std::vector<std::string> boardLines = 
-      FileLoader::loadBoardFile(filePath, boardWidth, boardHeight);
+      FileLoader::loadBoardFile(filePath, rows, cols, maxSteps, numShells);
     
     if (boardLines.empty()) {
         return false;
     }
     
-    m_board = GameBoard(boardWidth, boardHeight);
+    m_board = GameBoard(cols, rows);
     std::vector<std::string> errors;
 
     std::vector<std::pair<int, Point>> tankPositions;

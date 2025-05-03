@@ -2,54 +2,72 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 
 std::vector<std::string> FileLoader::loadBoardFile(
     const std::string& filePath,
-    int& width,
-    int& height
+    int& rows,
+    int& cols,
+    int& maxSteps,
+    int& numShells
 ) {
     std::ifstream inputFile(filePath);
     if (!inputFile.is_open()) {
-        std::cerr << "Error: Could not open file '" << filePath
-          << "'" << std::endl;
-        return std::vector<std::string>();
+        std::cerr << "Error: Could not open file '" << filePath << "'" << std::endl;
+        return {};
     }
-    
+
     std::vector<std::string> lines;
     std::string line;
-    
     while (std::getline(inputFile, line)) {
         lines.push_back(line);
     }
     inputFile.close();
-    
-    if (lines.empty()) {
-        std::cerr << "Error: File is empty" << std::endl;
-        return std::vector<std::string>();
+
+    if (lines.size() < 5) {
+        std::cerr << "Error: File must have at least 5 header lines" << std::endl;
+        return {};
     }
-    
-    if (!parseDimensions(lines[0], width, height)) {
-        std::cerr << "Error: First line must contain valid board dimensions"
-          << std::endl;
-        return std::vector<std::string>();
+
+    // 1. Map name/description (can be ignored)
+    // 2. MaxSteps = <NUM>
+    if (!parseKeyValue(lines[1], "MaxSteps", maxSteps)) {
+        std::cerr << "Error: Invalid or missing MaxSteps line: '" << lines[1] << "'" << std::endl;
+        return {};
     }
-    
-    if (width <= 0 || height <= 0) {
-        std::cerr << "Error: Invalid board dimensions: " << width << "x" 
-          << height << std::endl;
-        return std::vector<std::string>();
+    // 3. NumShells = <NUM>
+    if (!parseKeyValue(lines[2], "NumShells", numShells)) {
+        std::cerr << "Error: Invalid or missing NumShells line: '" << lines[2] << "'" << std::endl;
+        return {};
     }
-    lines.erase(lines.begin());
-    
-    return lines;
+    // 4. Rows = <NUM>
+    if (!parseKeyValue(lines[3], "Rows", rows) || rows <= 0) {
+        std::cerr << "Error: Invalid or missing Rows line: '" << lines[3] << "'" << std::endl;
+        return {};
+    }
+    // 5. Cols = <NUM>
+    if (!parseKeyValue(lines[4], "Cols", cols) || cols <= 0) {
+        std::cerr << "Error: Invalid or missing Cols line: '" << lines[4] << "'" << std::endl;
+        return {};
+    }
+
+    // Remove the first 5 lines (headers) and return the rest as the board
+    return std::vector<std::string>(lines.begin() + 5, lines.end());
 }
 
-bool FileLoader::parseDimensions(
-    const std::string& line,
-    int& width,
-    int& height
-) {
-    std::istringstream iss(line);
-    iss >> width >> height;
+bool FileLoader::parseKeyValue(const std::string& line, const std::string& key, int& value) {
+    // Accepts lines like: Key = Value (spaces around '=' allowed)
+    std::string::size_type pos = line.find('=');
+    if (pos == std::string::npos) return false;
+    std::string left = line.substr(0, pos);
+    std::string right = line.substr(pos + 1);
+    // Trim spaces
+    left.erase(left.find_last_not_of(" \t") + 1);
+    left.erase(0, left.find_first_not_of(" \t"));
+    right.erase(right.find_last_not_of(" \t") + 1);
+    right.erase(0, right.find_first_not_of(" \t"));
+    if (left != key) return false;
+    std::istringstream iss(right);
+    iss >> value;
     return !iss.fail();
 }

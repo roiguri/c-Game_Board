@@ -8,35 +8,33 @@
  * 
  * This class handles file operations for the tank battle game, including
  * reading board files, parsing board dimensions, and validating input format.
+ * It supports the strict format required by the assignment.
  */
 class FileLoader {
 public:
     /**
-     * @brief Load a board file and parse its contents
+     * @brief Load a board file and parse its contents according to assignment format
      * 
-     * Reads the file at the given path, parses the first line for dimensions,
-     * and returns the remaining lines that contain the actual board data.
+     * Reads the file at the given path, parses the header lines for game parameters,
+     * and returns the board data as a vector of strings (each string is a row).
      * 
      * @param filePath Path to the board file to load
-     * @param width Reference to store the parsed board width
-     * @param height Reference to store the parsed board height
-     * @return Vector of strings containing the board content (without the
-     *  dimensions line) or an empty vector if loading failed due to file
-     *  errors or invalid dimensions
+     * @param rows Reference to store the parsed number of rows
+     * @param cols Reference to store the parsed number of columns
+     * @param maxSteps Reference to store the parsed max steps
+     * @param numShells Reference to store the parsed number of shells per tank
+     * @return Vector of strings containing the board content (each string is a row),
+     *         or an empty vector if loading failed due to file errors or invalid format
      */
     static std::vector<std::string> loadBoardFile(
         const std::string& filePath,
-        int& width,
-        int& height
+        int& rows,
+        int& cols,
+        int& maxSteps,
+        int& numShells
     );
 
 private:
-    // Parse board dimensions from the first line of the file
-    // The expected format is "width height", e.g., "10 20"
-    // where width and height are integers
-    static bool parseDimensions(
-        const std::string& line,
-        int& width,
-        int& height
-    );
+    // Parse a line of the form "Key = Value" (spaces around '=' allowed)
+    static bool parseKeyValue(const std::string& line, const std::string& key, int& value);
 };
