@@ -57,7 +57,7 @@ public:
      */
     bool initialize(const std::vector<std::string>& boardLines, 
       std::vector<std::string>& errors,
-      std::map<int, std::vector<Point>>& tankPositions);
+      std::vector<std::pair<int, Point>>& tankPositions);
     
     /**
      * @brief Checks if the cell at the specified position is a wall

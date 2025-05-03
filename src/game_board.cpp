@@ -13,7 +13,7 @@ GameBoard::GameBoard(size_t width, size_t height) : m_width(width), m_height(hei
 
 bool GameBoard::initialize(const std::vector<std::string>& boardLines, 
   std::vector<std::string>& errors,
-  std::map<int, std::vector<Point>>& tankPositions) {
+  std::vector<std::pair<int, Point>>& tankPositions) {
   if (boardLines.empty()) {
       std::cerr << "Error: Input board is empty. Cannot initialize game." 
         << std::endl;
@@ -57,11 +57,11 @@ bool GameBoard::initialize(const std::vector<std::string>& boardLines,
                   m_wallHealth[Point(x, y)] = WALL_STARTING_HEALTH;
                   break;
               case '1':
-                  tankPositions[1].push_back(Point(x, y));
+                  tankPositions.push_back({1, Point(x, y)});
                   cellType = CellType::Empty;
                   break;
               case '2':
-                  tankPositions[2].push_back(Point(x, y));
+                  tankPositions.push_back({2, Point(x, y)});
                   cellType = CellType::Empty;
                   break;
               case '@':

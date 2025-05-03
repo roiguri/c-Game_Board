@@ -120,7 +120,7 @@ private:
     );
 
     // Create tank objects based on tank positions
-    void createTanks(const std::map<int, std::vector<Point>>& tankPositions);
+    void createTanks(const std::vector<std::pair<int, Point>>& tankPositions);
 
     // Save recoverable errors to input_errors.txt file
     bool saveErrorsToFile(const std::vector<std::string>& errors) const;

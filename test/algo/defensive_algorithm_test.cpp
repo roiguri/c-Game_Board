@@ -18,7 +18,7 @@ protected:
     GameBoard createTestBoard(const std::vector<std::string>& boardLines) const {
         GameBoard board(boardLines[0].length(), boardLines.size());
         std::vector<std::string> errors;
-        std::map<int, std::vector<Point>> tankPositions;
+        std::vector<std::pair<int, Point>> tankPositions;
         board.initialize(boardLines, errors, tankPositions);
         return board;
     }

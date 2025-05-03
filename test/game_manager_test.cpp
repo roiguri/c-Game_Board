@@ -352,11 +352,11 @@ TEST_F(GameManagerTest, Initialize_MultipleTanksBothPlayers) {
   EXPECT_EQ(tanks[0].getPlayerId(), 1);
   EXPECT_EQ(tanks[0].getPosition(), Point(1, 0));
 
-  EXPECT_EQ(tanks[1].getPlayerId(), 1);
-  EXPECT_EQ(tanks[1].getPosition(), Point(2, 2));
+  EXPECT_EQ(tanks[1].getPlayerId(), 2);
+  EXPECT_EQ(tanks[1].getPosition(), Point(2, 0));
   
-  EXPECT_EQ(tanks[2].getPlayerId(), 2);
-  EXPECT_EQ(tanks[2].getPosition(), Point(2, 0));
+  EXPECT_EQ(tanks[2].getPlayerId(), 1);
+  EXPECT_EQ(tanks[2].getPosition(), Point(2, 2));
 
   EXPECT_EQ(tanks[3].getPlayerId(), 2);
   EXPECT_EQ(tanks[3].getPosition(), Point(3, 3));
@@ -519,8 +519,8 @@ TEST_F(GameManagerTest, MoveShellsOnce_ShellMovementAndCollision) {
   // Verify tank positions and directions
   auto initialTanks = getTanks(manager);
   ASSERT_EQ(initialTanks.size(), 2);
-  EXPECT_EQ(initialTanks[0].getPosition(), Point(5, 1)); // Tank 1
-  EXPECT_EQ(initialTanks[1].getPosition(), Point(1, 1)); // Tank 2
+  EXPECT_EQ(initialTanks[0].getPosition(), Point(1, 1)); // Tank 2
+  EXPECT_EQ(initialTanks[1].getPosition(), Point(5, 1)); // Tank 1
   
   // Player 2 shoots (facing right)
   testApplyAction(manager, 2, Action::Shoot);
@@ -566,17 +566,17 @@ TEST_F(GameManagerTest, ApplyAction_DoNothing) {
   
   EXPECT_EQ(getTanks(manager)[1].getPreviousPosition(), initialPos1);
   EXPECT_EQ(getTanks(manager)[0].getPreviousPosition(), initialPos2);
-  EXPECT_EQ(getTanks(manager)[0].getPosition(), newPosition1);
-  EXPECT_EQ(getTanks(manager)[1].getPosition(), newPosition2);
+  EXPECT_EQ(getTanks(manager)[1].getPosition(), newPosition1);
+  EXPECT_EQ(getTanks(manager)[0].getPosition(), newPosition2);
 
   // Apply "do nothing" action for both players
   testApplyAction(manager, 1, Action::None);
   testApplyAction(manager, 2, Action::None);
 
-  EXPECT_TRUE(getTanks(manager)[0].getPosition() == newPosition1);
-  EXPECT_TRUE(getTanks(manager)[1].getPosition() == newPosition2);
-  EXPECT_TRUE(getTanks(manager)[0].getPreviousPosition() == newPosition1);
-  EXPECT_TRUE(getTanks(manager)[1].getPreviousPosition() == newPosition2);
+  EXPECT_TRUE(getTanks(manager)[1].getPosition() == newPosition1);
+  EXPECT_TRUE(getTanks(manager)[0].getPosition() == newPosition2);
+  EXPECT_TRUE(getTanks(manager)[1].getPreviousPosition() == newPosition1);
+  EXPECT_TRUE(getTanks(manager)[0].getPreviousPosition() == newPosition2);
   
   // Check that the action was logged
   const auto& log = getGameLog(manager);
@@ -865,8 +865,8 @@ TEST_F(GameManagerTest, ProcessStep_shellsCollide) {
   testProcessStep(manager);
   EXPECT_EQ(getShells(manager).size(), 0);
   // Tanks hide from shells
-  EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(8, 2));
-  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(1, 2));
+  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(8, 2));
+  EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(1, 2));
 }
 
 TEST_F(GameManagerTest, ProcessStep_waitForCooldown) {
@@ -892,11 +892,11 @@ TEST_F(GameManagerTest, ProcessStep_waitForCooldown) {
     // tanks can't shoot due to cooldown
     testProcessStep(manager);
     EXPECT_EQ(getShells(manager).size(), 1);
-    EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(1, 1));
-    EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(25, 1));
+    EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(1, 1));
+    EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(25, 1));
   }
-  EXPECT_EQ(getTanks(manager)[1].getDirection(), Direction::Right);
-  EXPECT_EQ(getTanks(manager)[0].getDirection(), Direction::Left);
+  EXPECT_EQ(getTanks(manager)[1].getDirection(), Direction::Left);
+  EXPECT_EQ(getTanks(manager)[0].getDirection(), Direction::Right);
   testProcessStep(manager);
   // tanks can shoot again (only one of the tanks is in direction)
   EXPECT_EQ(getShells(manager).size(), 2);
@@ -1138,16 +1138,16 @@ TEST_F(GameManagerTest, RunGame_BackwardMovementSequence) {
   GameManager manager;
   ASSERT_TRUE(initializeManager(manager, boardLines));
 
-  EXPECT_EQ(getTanks(manager)[0].getPlayerId(), 1);
-  EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(5, 2));
+  EXPECT_EQ(getTanks(manager)[1].getPlayerId(), 1);
+  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(5, 2));
   testProcessStep(manager, 2);
-  EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(5, 2));
+  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(5, 2));
   testProcessStep(manager);
-  EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(6, 2));
+  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(6, 2));
   testProcessStep(manager);
-  EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(7, 2));
+  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(7, 2));
   testProcessStep(manager);
-  EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(8, 2));
+  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(8, 2));
   testProcessStep(manager, 4);
   ASSERT_TRUE(testCheckGameOver(manager));
   EXPECT_EQ(testGetGameResult(manager), "Player 1 wins - Enemy tank destroyed");  
@@ -1278,5 +1278,29 @@ TEST_F(GameManagerTest, OutputFileCreatedInSubDir) {
     std::remove(inputFile.c_str());
     std::remove(expected.c_str());
     std::filesystem::remove(dir);
+}
+
+TEST_F(GameManagerTest, Initialize_ManyTanksPerPlayer_IntertwinedOrder) {
+    // 5x2 board, alternating tanks left-to-right, top-to-bottom
+    // 1 2 1 2 1
+    // 2 1 2 1 2
+    auto boardLines = makeBoardFile("Test Board", 1000, 20, 2, 5, {
+        "12121",
+        "21212"
+    });
+    createTestBoardFile(boardLines);
+    GameManager manager;
+    ASSERT_TRUE(manager.readBoard(tempFilePath));
+    const auto& tanks = getTanks(manager);
+    ASSERT_EQ(tanks.size(), 10);
+    // Expected order: (x, y) left-to-right, top-to-bottom
+    std::vector<std::pair<int, Point>> expected = {
+        {1, Point(0,0)}, {2, Point(1,0)}, {1, Point(2,0)}, {2, Point(3,0)}, {1, Point(4,0)},
+        {2, Point(0,1)}, {1, Point(1,1)}, {2, Point(2,1)}, {1, Point(3,1)}, {2, Point(4,1)}
+    };
+    for (size_t i = 0; i < expected.size(); ++i) {
+        EXPECT_EQ(tanks[i].getPlayerId(), expected[i].first) << "Tank " << i << " wrong player";
+        EXPECT_EQ(tanks[i].getPosition(), expected[i].second) << "Tank " << i << " wrong position";
+    }
 }
 
