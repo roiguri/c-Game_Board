@@ -46,7 +46,7 @@ bool GameManager::initialize(const std::string& filePath,
     m_board = GameBoard(cols, rows);
     std::vector<std::string> errors;
 
-    std::vector<std::pair<int, Point>> tankPositions;
+    std::map<int, std::vector<Point>> tankPositions;
     if (!m_board.initialize(boardLines, errors, tankPositions)) {
         // Unrecoverable error in board initialization
         return false;
@@ -378,21 +378,15 @@ void GameManager::createAlgorithms(
                         player2Algorithm : new DefensiveAlgorithm();
 }
 
-void GameManager::createTanks(
-  std::vector<std::pair<int, Point>> tankPositions
-) {
-  m_tanks.clear();
-  for (const auto& tankPos : tankPositions) {
-      int playerId = tankPos.first;
-      Point position = tankPos.second;
-      Direction dir;
-      if (playerId == 1) {
-          dir = Direction::Left;
-      } else  {
-          dir = Direction::Right;
-      }
-      m_tanks.emplace_back(playerId, position, dir);
-  }
+// TODO: add sequence number to tank positions
+void GameManager::createTanks(const std::map<int, std::vector<Point>>& tankPositions) {
+    m_tanks.clear();
+    for (const auto& [playerId, positions] : tankPositions) {
+        Direction dir = (playerId == 1) ? Direction::Left : Direction::Right;
+        for (const auto& position : positions) {
+            m_tanks.emplace_back(playerId, position, dir);
+        }
+    }
 }
 
 bool GameManager::saveErrorsToFile(

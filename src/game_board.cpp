@@ -13,7 +13,7 @@ GameBoard::GameBoard(size_t width, size_t height) : m_width(width), m_height(hei
 
 bool GameBoard::initialize(const std::vector<std::string>& boardLines, 
   std::vector<std::string>& errors,
-  std::vector<std::pair<int, Point>>& tankPositions) {
+  std::map<int, std::vector<Point>>& tankPositions) {
   if (boardLines.empty()) {
       std::cerr << "Error: Input board is empty. Cannot initialize game." 
         << std::endl;
@@ -21,8 +21,6 @@ bool GameBoard::initialize(const std::vector<std::string>& boardLines,
   }
   m_wallHealth.clear();
   
-  int tank1Count = 0;
-  int tank2Count = 0;
   for (size_t y = 0; y < m_height; ++y) {
       for (size_t x = 0; x < m_width; ++x) {
           setCellType(x, y, CellType::Empty);
@@ -59,29 +57,11 @@ bool GameBoard::initialize(const std::vector<std::string>& boardLines,
                   m_wallHealth[Point(x, y)] = WALL_STARTING_HEALTH;
                   break;
               case '1':
-                  tank1Count++;
-                  if (tank1Count > 1) {
-                      errors.push_back(
-                        "Multiple tanks for player 1 found. Tank at position ("
-                          + std::to_string(x) + "," + std::to_string(y) 
-                          + ") ignored."
-                      );
-                  } else {
-                    tankPositions.push_back({1, Point(x, y)});
-                  }
+                  tankPositions[1].push_back(Point(x, y));
                   cellType = CellType::Empty;
                   break;
               case '2':
-                  tank2Count++;
-                  if (tank2Count > 1) {
-                      errors.push_back(
-                        "Multiple tanks for player 2 found. Tank at position (" 
-                          + std::to_string(x) + "," + std::to_string(y) 
-                          + ") ignored."
-                      );
-                  } else {
-                    tankPositions.push_back({2, Point(x, y)});
-                  }
+                  tankPositions[2].push_back(Point(x, y));
                   cellType = CellType::Empty;
                   break;
               case '@':
@@ -114,16 +94,6 @@ bool GameBoard::initialize(const std::vector<std::string>& boardLines,
       errors.push_back(
         "Input has more rows than expected height. Extra rows ignored."
       );
-  }
-  if (tank1Count == 0) {
-      std::cerr << "Error: No tank found for player 1. Cannot start game."
-        << std::endl;
-      return false;
-  }
-  if (tank2Count == 0) {
-      std::cerr << "Error: No tank found for player 2. Cannot start game."
-        << std::endl;
-      return false;
   }
   return true;
 }
