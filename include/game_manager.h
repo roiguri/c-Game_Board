@@ -57,14 +57,6 @@ public:
      * Processes turns, applies actions, and checks for game end conditions
      */
     void run();
-    
-    /**
-     * @brief Save the game results to an output file
-     * 
-     * @param outputFilePath Path to the output file
-     */
-    bool saveResults(const std::string& outputFilePath);
-
 private:
     // Algorithms
     Algorithm* m_player1Algorithm;
@@ -127,6 +119,9 @@ private:
 
     // Remove any destroyed shells from the game
     void removeDestroyedShells();
+
+    // Save the game results to an output file
+    bool saveResults(const std::string& outputFilePath);
 
     // For testing purposes
     friend class GameManagerTest;

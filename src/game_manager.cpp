@@ -98,6 +98,7 @@ void GameManager::run() {
   }
   #endif
   
+  // TODO: update log structure
   while (!m_gameOver) {
       processStep();
       m_currentStep++;
@@ -107,15 +108,15 @@ void GameManager::run() {
         "Step " + std::to_string(m_currentStep) + " completed"
       );
 
-      bool bothOutOfShells = true;
+      bool tanksOutOfShells = true;
       for (const auto& tank : m_tanks) {
           if (!tank.isDestroyed() && tank.getRemainingShells() > 0) {
-              bothOutOfShells = false;
+              tanksOutOfShells = false;
               break;
           }
       }
       
-      if (bothOutOfShells) {
+      if (tanksOutOfShells) {
           m_remaining_steps--;
       }
       m_gameOver = checkGameOver();
@@ -335,6 +336,7 @@ void GameManager::moveShellsOnce() {
   }
 }
 
+// TODO: fix log
 bool GameManager::checkGameOver() {
   int destroyedTankCount = 0;
   int playerWinner = 0;
