@@ -21,10 +21,11 @@ option(ENABLE_VISUALIZATION "Enable visualization features" OFF)
 # Collect source files (exclude test and visualization for now)
 file(GLOB_RECURSE PROJECT_SOURCES "src/*.cpp")
 file(GLOB_RECURSE PROJECT_HEADERS "include/*.h")
+file(GLOB COMMON_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/common/*.h")
 
 # Define core source files by removing visualization sources if needed
 set(CORE_SOURCES ${PROJECT_SOURCES})
-set(CORE_HEADERS ${PROJECT_HEADERS})
+set(CORE_HEADERS ${PROJECT_HEADERS} ${COMMON_HEADERS})
 
 # Handle visualization-specific code
 if(NOT ENABLE_VISUALIZATION)
@@ -46,7 +47,7 @@ endif()
 
 # Create the core library
 add_library(tanks_game_lib ${CORE_SOURCES} ${CORE_HEADERS})
-target_include_directories(tanks_game_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(tanks_game_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/common)
 
 # Set explicit output directories
 set_target_properties(tanks_game_lib
@@ -58,7 +59,7 @@ set_target_properties(tanks_game_lib
 # Add the main executable
 add_executable(tanks_game "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 target_link_libraries(tanks_game PRIVATE tanks_game_lib)
-target_include_directories(tanks_game PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(tanks_game PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/common)
 set_target_properties(tanks_game
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
