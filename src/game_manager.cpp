@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <filesystem>
 
 GameManager::GameManager()
     : m_player1Algorithm(nullptr),
@@ -29,6 +30,7 @@ GameManager::~GameManager() {
     #endif
 }
 
+// TODO: add handling when no tanks are found
 // TODO: move algorithms from readBoard to constructor
 bool GameManager::readBoard(const std::string& filePath,
                              Algorithm* player1Algorithm,
@@ -60,6 +62,18 @@ bool GameManager::readBoard(const std::string& filePath,
     
     createTanks(tankPositions);
     createAlgorithms(player1Algorithm, player2Algorithm);
+
+    // TODO: extract to private helper function
+    // Set output file path based on input file path
+    std::filesystem::path inputPath(filePath);
+    std::string directory = inputPath.parent_path().string();
+    std::string filename = inputPath.filename().string();
+    if (directory.empty()) {
+        m_outputFilePath = "output_" + filename;
+    } else {
+        m_outputFilePath = directory + "/output_" + filename;
+    }
+
     return true;
 }
 
@@ -111,6 +125,9 @@ void GameManager::run() {
     "Game ended after " + std::to_string(m_currentStep) + " steps"
   );
   m_gameLog.push_back("Result: " + m_gameResult);
+
+  // Call saveResults with the stored output file path
+  saveResults(m_outputFilePath);
 }
 
 bool GameManager::saveResults(const std::string& outputFilePath) {

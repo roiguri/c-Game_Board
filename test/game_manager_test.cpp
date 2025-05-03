@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstdio>
+#include <filesystem>
 
 class GameManagerTest : public ::testing::Test {
 protected:
@@ -55,13 +56,12 @@ protected:
       }
       
       // Initialize the manager with our algorithms
-      return manager.initialize(tempFilePath, algoForP1, algoForP2);
+      return manager.readBoard(tempFilePath, algoForP1, algoForP2);
     }
 
     // Standard test board for most scenarios
     std::vector<std::string> getStandardBoard() {
         return {
-            "8 5",
             "########",
             "#2    1#", // Tanks are in the same row with clear line of sight
             "#   @  #",
@@ -168,7 +168,7 @@ protected:
     }
 
     void testRunGame(GameManager& manager) {
-        manager.runGame();
+        manager.run();
     }
 
     int getGameSteps(GameManager& manager) {
@@ -177,6 +177,18 @@ protected:
     
     std::string tempFilePath;
     std::string outputFilePath;
+
+    // Helper for new board input format
+    std::vector<std::string> makeBoardFile(const std::string& name, int maxSteps, int numShells, int rows, int cols, const std::vector<std::string>& map) {
+        std::vector<std::string> result;
+        result.push_back(name);
+        result.push_back("MaxSteps=" + std::to_string(maxSteps));
+        result.push_back("NumShells=" + std::to_string(numShells));
+        result.push_back("Rows=" + std::to_string(rows));
+        result.push_back("Cols=" + std::to_string(cols));
+        result.insert(result.end(), map.begin(), map.end());
+        return result;
+    }
 };
 
 TEST_F(GameManagerTest, Constructor) {
@@ -184,105 +196,73 @@ TEST_F(GameManagerTest, Constructor) {
     
     // We can't directly access private members, so we'll test indirectly
     // by calling initialize with an invalid file and checking it fails
-    EXPECT_FALSE(manager.initialize("nonexistent_file.txt"));
+    EXPECT_FALSE(manager.readBoard("nonexistent_file.txt"));
 }
 
 TEST_F(GameManagerTest, Initialize_ValidBoard) {
     // Create a valid test board file
-    std::vector<std::string> boardLines = {
-        "5 5",    // 5x5 board
-        "#####",
-        "#1 2#",
-        "#   #",
-        "# @ #",
-        "#####"
-    };
+    auto boardLines = makeBoardFile("Test Board", 1000, 20, 8, 5, getStandardBoard());
     createTestBoardFile(boardLines);
     
     GameManager manager;
-    EXPECT_TRUE(manager.initialize(tempFilePath));
+    EXPECT_TRUE(manager.readBoard(tempFilePath));
 }
 
 // Test initialize with invalid board file
-TEST_F(GameManagerTest, Initialize_InvalidBoard) {
+TEST_F(GameManagerTest, Initialize_NoTanks) {
     // Create an invalid test board file (no tanks)
-    std::vector<std::string> boardLines = {
-        "5 5",    // 5x5 board
+    auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 5, {
         "#####",
         "#   #",
         "#   #",
         "# @ #",
         "#####"
-    };
+    });
     createTestBoardFile(boardLines);
     
     GameManager manager;
-    EXPECT_FALSE(manager.initialize(tempFilePath));
+    EXPECT_TRUE(manager.readBoard(tempFilePath));
 }
 
 // Test initialize with invalid board dimensions
 TEST_F(GameManagerTest, Initialize_InvalidDimensions) {
     // Create a test board file with invalid dimensions
-    std::vector<std::string> boardLines = {
-        "-5 -5",  // Negative dimensions
+    auto boardLines = makeBoardFile("Test Board", 1000, 20, -5, -5, {
         "#####",
         "#1 2#",
         "#   #",
         "# @ #",
         "#####"
-    };
+    });
     createTestBoardFile(boardLines);
     
     GameManager manager;
-    EXPECT_FALSE(manager.initialize(tempFilePath));
+    EXPECT_FALSE(manager.readBoard(tempFilePath));
 }
 
 // Test initialize with empty file
 TEST_F(GameManagerTest, Initialize_EmptyFile) {
     // Create an empty file
-    createTestBoardFile({});
-    
-    GameManager manager;
-    EXPECT_FALSE(manager.initialize(tempFilePath));
-}
-
-// Test initialize with missing tank
-TEST_F(GameManagerTest, Initialize_MissingTank) {
-    // Create a board with only one tank
-    std::vector<std::string> boardLines = {
-        "5 5",    // 5x5 board
-        "#####",
-        "#1  #",  // Missing tank 2
-        "#   #",
-        "# @ #",
-        "#####"
-    };
+    auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 5, {});
     createTestBoardFile(boardLines);
     
     GameManager manager;
-    EXPECT_FALSE(manager.initialize(tempFilePath));
+    EXPECT_FALSE(manager.readBoard(tempFilePath));
 }
 
 // Test cleanup method through reinitialization
 TEST_F(GameManagerTest, Cleanup_ThroughReinitialization) {
     // Create a valid test board file
-    std::vector<std::string> boardLines = {
-        "5 5",    // 5x5 board
-        "#####",
-        "#1 2#",
-        "#   #",
-        "# @ #",
-        "#####"
-    };
+    auto boardLines = makeBoardFile("Test Board", 1000, 20, 8, 5, getStandardBoard());
     createTestBoardFile(boardLines);
     
     GameManager manager;
     
     // Initialize once
-    EXPECT_TRUE(manager.initialize(tempFilePath));
+    EXPECT_TRUE(manager.readBoard(tempFilePath));
     
     // Initialize again - this should call cleanup internally
-    EXPECT_TRUE(manager.initialize(tempFilePath));
+    EXPECT_TRUE(manager.readBoard(tempFilePath));
     
     // No crash means cleanup worked properly
 }
@@ -297,18 +277,17 @@ TEST_F(GameManagerTest, GetTanks_EmptyBeforeInit) {
 
 // Test tank creation with normal board
 TEST_F(GameManagerTest, Initialize_NormalTankCreation) {
-  std::vector<std::string> boardLines = {
-      "5 5",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 5, {
       "#####",
       "#1 2#",  // Player 1 at (1,1), Player 2 at (3,1)
       "#   #",
       "#   #",
       "#####"
-  };
+  });
   createTestBoardFile(boardLines);
   
   GameManager manager;
-  EXPECT_TRUE(manager.initialize(tempFilePath));
+  EXPECT_TRUE(manager.readBoard(tempFilePath));
   
   const auto& tanks = getTanks(manager);
   ASSERT_EQ(tanks.size(), 2);
@@ -326,73 +305,79 @@ TEST_F(GameManagerTest, Initialize_NormalTankCreation) {
 
 // Test tank creation with multiple tanks for one player
 TEST_F(GameManagerTest, Initialize_MultipleTanksOnePlayer) {
-  std::vector<std::string> boardLines = {
-      "5 5",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 5, {
       "#1###",
       "#   #",
       "# 1 #",  // Second tank for player 1
       "#  2#",
       "#####"
-  };
+  });
   createTestBoardFile(boardLines);
   
   GameManager manager;
-  EXPECT_TRUE(manager.initialize(tempFilePath));
+  EXPECT_TRUE(manager.readBoard(tempFilePath));
   
   const auto& tanks = getTanks(manager);
-  ASSERT_EQ(tanks.size(), 2);
+  ASSERT_EQ(tanks.size(), 3);
   
   // Should keep the first tank found (top-to-bottom, left-to-right scan)
   EXPECT_EQ(tanks[0].getPlayerId(), 1);
   EXPECT_EQ(tanks[0].getPosition(), Point(1, 0));
+
+  EXPECT_EQ(tanks[1].getPlayerId(), 1);
+  EXPECT_EQ(tanks[1].getPosition(), Point(2, 2));
   
-  EXPECT_EQ(tanks[1].getPlayerId(), 2);
-  EXPECT_EQ(tanks[1].getPosition(), Point(3, 3));
+  EXPECT_EQ(tanks[2].getPlayerId(), 2);
+  EXPECT_EQ(tanks[2].getPosition(), Point(3, 3));
 }
 
 // Test tank creation with multiple tanks for both players
 TEST_F(GameManagerTest, Initialize_MultipleTanksBothPlayers) {
-  std::vector<std::string> boardLines = {
-      "5 5",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 5, {
       "#12##",  // First tanks
       "#   #",
       "# 1 #",  // Duplicate player 1
       "#  2#",  // Duplicate player 2
       "#####"
-  };
+  });
   createTestBoardFile(boardLines);
   
   GameManager manager;
-  EXPECT_TRUE(manager.initialize(tempFilePath));
+  EXPECT_TRUE(manager.readBoard(tempFilePath));
   
   const auto& tanks = getTanks(manager);
-  ASSERT_EQ(tanks.size(), 2);
+  ASSERT_EQ(tanks.size(), 4);
   
   // Should keep the first tanks found
   EXPECT_EQ(tanks[0].getPlayerId(), 1);
   EXPECT_EQ(tanks[0].getPosition(), Point(1, 0));
+
+  EXPECT_EQ(tanks[1].getPlayerId(), 1);
+  EXPECT_EQ(tanks[1].getPosition(), Point(2, 2));
   
-  EXPECT_EQ(tanks[1].getPlayerId(), 2);
-  EXPECT_EQ(tanks[1].getPosition(), Point(2, 0));
+  EXPECT_EQ(tanks[2].getPlayerId(), 2);
+  EXPECT_EQ(tanks[2].getPosition(), Point(2, 0));
+
+  EXPECT_EQ(tanks[3].getPlayerId(), 2);
+  EXPECT_EQ(tanks[3].getPosition(), Point(3, 3));
 }
 
 TEST_F(GameManagerTest, Initialize_CreatesErrorFile) {
   // Create a board with a recoverable error (extra row)
-  std::vector<std::string> boardLines = {
-      "5 4",    // 5x4 board, but we provide 5 rows
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 4, {
       "#####",
       "#1 2#",
       "#   #",
       "#   #",
       "#####"  // Extra row
-  };
+  });
   createTestBoardFile(boardLines);
   
   // Remove any existing error file first
   std::remove("input_errors.txt");
   
   GameManager manager;
-  EXPECT_TRUE(manager.initialize(tempFilePath));
+  EXPECT_TRUE(manager.readBoard(tempFilePath));
   
   // Check that error file was created
   std::ifstream errorFile("input_errors.txt");
@@ -412,21 +397,20 @@ TEST_F(GameManagerTest, Initialize_CreatesErrorFile) {
 // Test that initialization doesn't create an error file when there are no errors
 TEST_F(GameManagerTest, Initialize_NoErrorFile) {
   // Create a valid board with no errors
-  std::vector<std::string> boardLines = {
-      "5 5",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 5, {
       "#####",
       "#1 2#",
       "#   #",
       "#   #",
       "#####"
-  };
+  });
   createTestBoardFile(boardLines);
   
   // Remove any existing error file first
   std::remove("input_errors.txt");
   
   GameManager manager;
-  EXPECT_TRUE(manager.initialize(tempFilePath));
+  EXPECT_TRUE(manager.readBoard(tempFilePath));
   
   // Check that error file was not created
   std::ifstream errorFile("input_errors.txt");
@@ -435,18 +419,17 @@ TEST_F(GameManagerTest, Initialize_NoErrorFile) {
 
 TEST_F(GameManagerTest, GetPlayerAction_ClearShot) {
   // Create a board where tanks are in a direct line of sight
-  std::vector<std::string> boardLines = {
-      "5 5",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 5, {
       "#####",
       "#2 1#",  // Player 1 and 2 in same row with clear line of sight
       "#   #",
       "#   #",
       "#####"
-  };
+  });
   createTestBoardFile(boardLines);
   
   GameManager manager;
-  ASSERT_TRUE(manager.initialize(tempFilePath));
+  ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // For DefensiveAlgorithm, when there's a clear shot, it should return Shoot
   Action player2Action = testGetPlayerAction(manager, 2);
@@ -460,18 +443,17 @@ TEST_F(GameManagerTest, GetPlayerAction_ClearShot) {
 // Test getPlayerAction with invalid player IDs
 TEST_F(GameManagerTest, GetPlayerAction_InvalidPlayerIds) {
   // Create a valid test board file
-  std::vector<std::string> boardLines = {
-      "5 5",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 5, {
       "#####",
       "#1 2#",
       "#   #",
       "#   #",
       "#####"
-  };
+  });
   createTestBoardFile(boardLines);
   
   GameManager manager;
-  ASSERT_TRUE(manager.initialize(tempFilePath));
+  ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Test with invalid player IDs
   Action invalidAction1 = testGetPlayerAction(manager, 0);
@@ -524,22 +506,21 @@ TEST_F(GameManagerTest, GetGameLog_MultipleEntries) {
 
 TEST_F(GameManagerTest, MoveShellsOnce_ShellMovementAndCollision) {
   // Create a board with tank 1 to the right of tank 2, with 2 spaces between
-  std::vector<std::string> boardLines = {
-      "7 3",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 3, 7, {
       "#######",
       "#2   1#", // Tank 2 at (1,1), Tank 1 at (5,1)
       "#######"
-  };
+  });
   createTestBoardFile(boardLines);
   
   GameManager manager;
-  ASSERT_TRUE(manager.initialize(tempFilePath));
+  ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Verify tank positions and directions
   auto initialTanks = getTanks(manager);
   ASSERT_EQ(initialTanks.size(), 2);
-  EXPECT_EQ(initialTanks[0].getPosition(), Point(1, 1)); // Tank 2
-  EXPECT_EQ(initialTanks[1].getPosition(), Point(5, 1)); // Tank 1
+  EXPECT_EQ(initialTanks[0].getPosition(), Point(5, 1)); // Tank 1
+  EXPECT_EQ(initialTanks[1].getPosition(), Point(1, 1)); // Tank 2
   
   // Player 2 shoots (facing right)
   testApplyAction(manager, 2, Action::Shoot);
@@ -560,11 +541,11 @@ TEST_F(GameManagerTest, MoveShellsOnce_ShellMovementAndCollision) {
 
 TEST_F(GameManagerTest, ApplyAction_DoNothing) {
   // Create a basic test board 
-  std::vector<std::string> boardLines = getStandardBoard();
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 8, getStandardBoard());
   createTestBoardFile(boardLines);
   
   GameManager manager;
-  ASSERT_TRUE(manager.initialize(tempFilePath));
+  ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Capture initial state
   auto initialTanks = getTanks(manager);
@@ -585,17 +566,17 @@ TEST_F(GameManagerTest, ApplyAction_DoNothing) {
   
   EXPECT_EQ(getTanks(manager)[1].getPreviousPosition(), initialPos1);
   EXPECT_EQ(getTanks(manager)[0].getPreviousPosition(), initialPos2);
-  EXPECT_EQ(getTanks(manager)[1].getPosition(), newPosition1);
-  EXPECT_EQ(getTanks(manager)[0].getPosition(), newPosition2);
+  EXPECT_EQ(getTanks(manager)[0].getPosition(), newPosition1);
+  EXPECT_EQ(getTanks(manager)[1].getPosition(), newPosition2);
 
   // Apply "do nothing" action for both players
   testApplyAction(manager, 1, Action::None);
   testApplyAction(manager, 2, Action::None);
 
-  EXPECT_TRUE(getTanks(manager)[1].getPosition() == newPosition1);
-  EXPECT_TRUE(getTanks(manager)[0].getPosition() == newPosition2);
-  EXPECT_TRUE(getTanks(manager)[1].getPreviousPosition() == newPosition1);
-  EXPECT_TRUE(getTanks(manager)[0].getPreviousPosition() == newPosition2);
+  EXPECT_TRUE(getTanks(manager)[0].getPosition() == newPosition1);
+  EXPECT_TRUE(getTanks(manager)[1].getPosition() == newPosition2);
+  EXPECT_TRUE(getTanks(manager)[0].getPreviousPosition() == newPosition1);
+  EXPECT_TRUE(getTanks(manager)[1].getPreviousPosition() == newPosition2);
   
   // Check that the action was logged
   const auto& log = getGameLog(manager);
@@ -606,16 +587,15 @@ TEST_F(GameManagerTest, ApplyAction_DoNothing) {
 
 TEST_F(GameManagerTest, MoveShellsOnce_EdgeWrapping) {
   // Create a board with tank 1 at position (5,1) and open edges for wrapping
-  std::vector<std::string> boardLines = {
-      "7 3",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 3, 7, {
       "       ", // No walls at top
       "  1    ", // Tank 1 at position (2,1)
       "      2"  // No walls at bottom
-  };
+  });
   createTestBoardFile(boardLines);
   
   GameManager manager;
-  ASSERT_TRUE(manager.initialize(tempFilePath));
+  ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Verify tank 1 position
   auto initialTanks = getTanks(manager);
@@ -645,18 +625,17 @@ TEST_F(GameManagerTest, MoveShellsOnce_EdgeWrapping) {
 // Test checkGameOver with one tank destroyed
 TEST_F(GameManagerTest, CheckGameOver_OneTankDestroyed) {
   // Create a valid test board file
-  std::vector<std::string> boardLines = {
-      "5 5",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 5, {
       "#####",
       "#1 2#",
       "#   #",
       "#   #",
       "#####"
-  };
+  });
   createTestBoardFile(boardLines);
   
   GameManager manager;
-  ASSERT_TRUE(manager.initialize(tempFilePath));
+  ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Manually set one tank to destroyed state
   std::vector<Tank>& tanks = testGetTanksMutable(manager);
@@ -672,18 +651,17 @@ TEST_F(GameManagerTest, CheckGameOver_OneTankDestroyed) {
 // Test checkGameOver with both tanks destroyed
 TEST_F(GameManagerTest, CheckGameOver_BothTanksDestroyed) {
   // Create a valid test board file
-  std::vector<std::string> boardLines = {
-      "5 5",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 5, {
       "#####",
       "#1 2#",
       "#   #",
       "#   #",
       "#####"
-  };
+  });
   createTestBoardFile(boardLines);
   
   GameManager manager;
-  ASSERT_TRUE(manager.initialize(tempFilePath));
+  ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Destroy both tanks
   std::vector<Tank>& tanks = testGetTanksMutable(manager);
@@ -700,18 +678,17 @@ TEST_F(GameManagerTest, CheckGameOver_BothTanksDestroyed) {
 // Test checkGameOver with shells depleted and steps exhausted
 TEST_F(GameManagerTest, CheckGameOver_ShellsDepleted) {
   // Create a valid test board file
-  std::vector<std::string> boardLines = {
-      "5 5",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 5, {
       "#####",
       "#1 2#",
       "#   #",
       "#   #",
       "#####"
-  };
+  });
   createTestBoardFile(boardLines);
   
   GameManager manager;
-  ASSERT_TRUE(manager.initialize(tempFilePath));
+  ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Set the remaining steps counter to negative
   testSetRemainingSteps(manager, -1);
@@ -726,18 +703,17 @@ TEST_F(GameManagerTest, CheckGameOver_ShellsDepleted) {
 // Test checkGameOver with game still in progress
 TEST_F(GameManagerTest, CheckGameOver_GameInProgress) {
   // Create a valid test board file
-  std::vector<std::string> boardLines = {
-      "5 5",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 5, {
       "#####",
       "#1 2#",
       "#   #",
       "#   #",
       "#####"
-  };
+  });
   createTestBoardFile(boardLines);
   
   GameManager manager;
-  ASSERT_TRUE(manager.initialize(tempFilePath));
+  ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // No tanks destroyed, steps not exhausted
   std::vector<Tank>& tanks = testGetTanksMutable(manager);
@@ -837,17 +813,16 @@ TEST_F(GameManagerTest, SaveResults_InvalidFilePath) {
 
 TEST_F(GameManagerTest, ProcessStep_shellStartsNextToTank) {
   // Create a simple test board with two tanks in clear view of each other
-  std::vector<std::string> boardLines = {
-      "10 3",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 3, 10, {
       "##########",
       "#2      1#", // Tanks are in the same row with clear line of sight
       "# ###### #"
     // 0123456789 (cell indexes)
-  };
+  });
   createTestBoardFile(boardLines);
   
   GameManager manager;
-  ASSERT_TRUE(manager.initialize(tempFilePath));
+  ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Both tanks Shoot
   testProcessStep(manager);
@@ -867,17 +842,16 @@ TEST_F(GameManagerTest, ProcessStep_shellStartsNextToTank) {
 
 TEST_F(GameManagerTest, ProcessStep_shellsCollide) {
   // Create a simple test board with two tanks in clear view of each other
-  std::vector<std::string> boardLines = {
-      "10 3",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 3, 10, {
       "##########",
       "#2      1#", // Tanks are in the same row with clear line of sight
       "# ###### #"
     // 0123456789 (cell indexes)
-  };
+  });
   createTestBoardFile(boardLines);
   
   GameManager manager;
-  ASSERT_TRUE(manager.initialize(tempFilePath));
+  ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Both tanks Shoot
   testProcessStep(manager);
@@ -891,19 +865,18 @@ TEST_F(GameManagerTest, ProcessStep_shellsCollide) {
   testProcessStep(manager);
   EXPECT_EQ(getShells(manager).size(), 0);
   // Tanks hide from shells
-  EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(1, 2));
-  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(8, 2));
+  EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(8, 2));
+  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(1, 2));
 }
 
 TEST_F(GameManagerTest, ProcessStep_waitForCooldown) {
   // Create a simple test board with two tanks in clear view of each other
-  std::vector<std::string> boardLines = {
-      "27 3",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 3, 27, {
       "###########################",
       "#2                       1#", // Tanks are in the same row with clear line of sight
       "###########################"
     // 012345678901234567890123456 (cell indexes)
-  };
+  });
   createTestBoardFile(boardLines);
   
   GameManager manager;
@@ -919,11 +892,11 @@ TEST_F(GameManagerTest, ProcessStep_waitForCooldown) {
     // tanks can't shoot due to cooldown
     testProcessStep(manager);
     EXPECT_EQ(getShells(manager).size(), 1);
-    EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(1, 1));
-    EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(25, 1));
+    EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(1, 1));
+    EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(25, 1));
   }
-  EXPECT_EQ(getTanks(manager)[0].getDirection(), Direction::Right);
-  EXPECT_EQ(getTanks(manager)[1].getDirection(), Direction::Left);
+  EXPECT_EQ(getTanks(manager)[1].getDirection(), Direction::Right);
+  EXPECT_EQ(getTanks(manager)[0].getDirection(), Direction::Left);
   testProcessStep(manager);
   // tanks can shoot again (only one of the tanks is in direction)
   EXPECT_EQ(getShells(manager).size(), 2);
@@ -931,17 +904,16 @@ TEST_F(GameManagerTest, ProcessStep_waitForCooldown) {
 
 TEST_F(GameManagerTest, GameManagerTest_maximumSteps) {
   // Create a simple test board with two tanks in clear view of each other
-  std::vector<std::string> boardLines = {
-      "6 3",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 3, 6, {
       "######",
       "#2##1#", // Tanks are in the same row with clear line of sight
       "######"
     // 012345678901234567890123456 (cell indexes)
-  };
+  });
   createTestBoardFile(boardLines);
   
   GameManager manager;
-  ASSERT_TRUE(manager.initialize(tempFilePath));
+  ASSERT_TRUE(manager.readBoard(tempFilePath));
     
   testRunGame(manager);
   EXPECT_EQ(getGameSteps(manager), 1000);
@@ -953,10 +925,11 @@ TEST_F(GameManagerTest, RunGame_TanksShooting) {
   
   // Initialize manager
   GameManager manager;
-  ASSERT_TRUE(initializeManager(manager, getStandardBoard()));
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 8, getStandardBoard());
+  ASSERT_TRUE(initializeManager(manager, boardLines));
   
   // Run the game
-  manager.runGame();
+  manager.run();
   
   // Verify game results
   const auto& gameLog = getGameLog(manager);
@@ -987,14 +960,13 @@ TEST_F(GameManagerTest, RunGame_TanksShooting) {
 }
 
 TEST_F(GameManagerTest, RunGame_TankHitsMine) {
-  std::vector<std::string> boardLines = {
-      "8 5",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 8, {
       "########",
       "#2  @ 1#", // Tanks are in the same row with clear line of sight
       "#      #", // Mine in the middle
       "#      #",
       "########"
-  };
+  });
   
   // Setup mock algorithm for player 1 to move down toward the mine
   mockAlgo1->setActionSequence({
@@ -1012,7 +984,7 @@ TEST_F(GameManagerTest, RunGame_TankHitsMine) {
   ASSERT_TRUE(initializeManager(manager, boardLines));
   
   // Run the game
-  manager.runGame();
+  manager.run();
   
   // Verify game results
   const auto& gameLog = getGameLog(manager);
@@ -1041,7 +1013,8 @@ TEST_F(GameManagerTest, RunGame_TankHitsWall) {
   
   // Initialize manager
   GameManager manager;
-  ASSERT_TRUE(initializeManager(manager, getStandardBoard()));
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 8, getStandardBoard());
+  ASSERT_TRUE(initializeManager(manager, boardLines));
   
   testProcessStep(manager, 3);
 
@@ -1065,12 +1038,11 @@ TEST_F(GameManagerTest, RunGame_TankHitsWall) {
 
 TEST_F(GameManagerTest, RunGame_TanksTryToOccupySameSpace) {
   // Create a board with tanks next to each other
-  std::vector<std::string> tightBoard = {
-      "10 3",
+  auto tightBoard = makeBoardFile("Test Board", 1000, 20, 3, 10, {
       "##########",
       "#21      #", // Tanks are right next to each other
       "##########"
-  };
+  });
   
   // Setup algorithms to try to move into each other's space
   mockAlgo1->setConstantAction(Action::MoveForward); // Player 1 moves left
@@ -1081,7 +1053,7 @@ TEST_F(GameManagerTest, RunGame_TanksTryToOccupySameSpace) {
   ASSERT_TRUE(initializeManager(manager, tightBoard));
   
   // Run the game
-  manager.runGame();
+  manager.run();
   
   // Verify game results
   const auto& gameLog = getGameLog(manager);
@@ -1103,12 +1075,11 @@ TEST_F(GameManagerTest, RunGame_TanksTryToOccupySameSpace) {
 
 TEST_F(GameManagerTest, RunGame_ShellDestroyingWallsThenTank) {
   // Create a board with a wall between the tanks
-  std::vector<std::string> walledBoard = {
-      "7 3",
+  auto walledBoard = makeBoardFile("Test Board", 1000, 20, 3, 7, {
       "#######",
       "#2#  1#", // Wall between tanks
       "#######"
-  };
+  });
   
   // Setup algorithms to shoot constantly
   mockAlgo1->setConstantAction(Action::Shoot);
@@ -1119,7 +1090,7 @@ TEST_F(GameManagerTest, RunGame_ShellDestroyingWallsThenTank) {
   ASSERT_TRUE(initializeManager(manager, walledBoard));
   
   // Run the game
-  manager.runGame();
+  manager.run();
   
   // Verify game results
   const auto& gameLog = getGameLog(manager);
@@ -1142,13 +1113,12 @@ TEST_F(GameManagerTest, RunGame_ShellDestroyingWallsThenTank) {
 
 // Test complex sequences including backward movement
 TEST_F(GameManagerTest, RunGame_BackwardMovementSequence) {
-  std::vector<std::string> boardLines = {
-      "10 3",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 3, 10, {
       "##########",
       "#         #",
       "#2  @1    #", // Player 1 at (5,2)
       "##########"
-  };
+  });
   
   // Setup algorithm for player 1 with a sequence including backward moves
   mockAlgo1->setActionSequence({
@@ -1168,16 +1138,16 @@ TEST_F(GameManagerTest, RunGame_BackwardMovementSequence) {
   GameManager manager;
   ASSERT_TRUE(initializeManager(manager, boardLines));
 
-  EXPECT_EQ(getTanks(manager)[1].getPlayerId(), 1);
-  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(5, 2));
+  EXPECT_EQ(getTanks(manager)[0].getPlayerId(), 1);
+  EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(5, 2));
   testProcessStep(manager, 2);
-  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(5, 2));
+  EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(5, 2));
   testProcessStep(manager);
-  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(6, 2));
+  EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(6, 2));
   testProcessStep(manager);
-  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(7, 2));
+  EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(7, 2));
   testProcessStep(manager);
-  EXPECT_EQ(getTanks(manager)[1].getPosition(), Point(8, 2));
+  EXPECT_EQ(getTanks(manager)[0].getPosition(), Point(8, 2));
   testProcessStep(manager, 4);
   ASSERT_TRUE(testCheckGameOver(manager));
   EXPECT_EQ(testGetGameResult(manager), "Player 1 wins - Enemy tank destroyed");  
@@ -1200,7 +1170,8 @@ TEST_F(GameManagerTest, RunGame_ShellsCollide) {
   
   // Initialize manager
   GameManager manager;
-  ASSERT_TRUE(initializeManager(manager, getStandardBoard()));
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 8, getStandardBoard());
+  ASSERT_TRUE(initializeManager(manager, boardLines));
   
   testProcessStep(manager, 2);
   
@@ -1226,13 +1197,12 @@ TEST_F(GameManagerTest, RunGame_ShellsCollide) {
 
 // Test a full game until both tanks are out of shells
 TEST_F(GameManagerTest, RunGame_OutOfShells) {
-  std::vector<std::string> boardLines = {
-      "18 4",
+  auto boardLines = makeBoardFile("Test Board", 1000, 20, 4, 18, {
       "2#################",
       "#                #",
       "#   @            #",  
       "#################1"
-  };
+  });
   
   mockAlgo1->setConstantAction(Action::Shoot);
   mockAlgo2->setConstantAction(Action::Shoot);
@@ -1242,7 +1212,7 @@ TEST_F(GameManagerTest, RunGame_OutOfShells) {
   ASSERT_TRUE(initializeManager(manager, boardLines));
   
   // Run the full game
-  manager.runGame();
+  manager.run();
   
   // Verify game results
   const auto& gameLog = getGameLog(manager);
@@ -1263,5 +1233,50 @@ TEST_F(GameManagerTest, RunGame_OutOfShells) {
       EXPECT_EQ(tank.getRemainingShells(), 0);
   }
   EXPECT_EQ(getGameSteps(manager), 116);
+}
+
+TEST_F(GameManagerTest, OutputFileCreatedInCurrentDir) {
+    GameManager manager;
+    std::string inputFile = "test_board_output.txt";
+    auto boardLines = makeBoardFile("TestOutput", 100, 10, 3, 3, {
+        "###",
+        "#1#",
+        "###"
+    });
+    std::ofstream dummy(inputFile);
+    for (const auto& line : boardLines) dummy << line << '\n';
+    dummy.close();
+    manager.readBoard(inputFile);
+    std::string expected = "output_test_board_output.txt";
+    manager.run();
+    std::ifstream outputFile(expected);
+    EXPECT_TRUE(outputFile.is_open());
+    outputFile.close();
+    std::remove(inputFile.c_str());
+    std::remove(expected.c_str());
+}
+
+TEST_F(GameManagerTest, OutputFileCreatedInSubDir) {
+    GameManager manager;
+    std::string dir = "test_output_dir";
+    std::string inputFile = dir + "/test_board_output2.txt";
+    std::filesystem::create_directory(dir);
+    auto boardLines = makeBoardFile("TestOutput", 100, 10, 3, 3, {
+        "###",
+        "#2#",
+        "###"
+    });
+    std::ofstream dummy(inputFile);
+    for (const auto& line : boardLines) dummy << line << '\n';
+    dummy.close();
+    manager.readBoard(inputFile);
+    std::string expected = dir + "/output_test_board_output2.txt";
+    manager.run();
+    std::ifstream outputFile(expected);
+    EXPECT_TRUE(outputFile.is_open());
+    outputFile.close();
+    std::remove(inputFile.c_str());
+    std::remove(expected.c_str());
+    std::filesystem::remove(dir);
 }
 

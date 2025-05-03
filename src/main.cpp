@@ -14,23 +14,6 @@ int runGameWithFile(const std::string& filePath) {
     
     gameManager.run();
     
-    std::filesystem::path inputPath(filePath);
-    std::string directory = inputPath.parent_path().string();
-    std::string filename = inputPath.filename().string();
-    
-    // Create output path
-    std::string outputFilePath;
-    if (directory.empty()) {
-        outputFilePath = "output_" + filename;
-    } else {
-        outputFilePath = directory + "/" + "output_" + filename;
-    }
-    
-    if (!gameManager.saveResults(outputFilePath)) {
-        return 1;
-    }
-    
-    std::cout << "Game completed successfully. Results saved to " << outputFilePath << "." << std::endl;
     return 0;
 }
 
@@ -99,16 +82,6 @@ int generateAndRunGame(const std::string& configPath) {
     }
     
     gameManager.run();
-    
-    // Create output path
-    std::string outputFilePath = "output_generated_board.txt";
-    
-    if (!gameManager.saveResults(outputFilePath)) {
-        std::filesystem::remove(tempFilePath);
-        return 1;
-    }
-    
-    std::cout << "Game completed successfully. Results saved to " << outputFilePath << "." << std::endl;
     
     // Clean up the temporary file
     std::filesystem::remove(tempFilePath);

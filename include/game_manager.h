@@ -84,6 +84,9 @@ private:
     std::vector<Tank> m_tanks;
     std::vector<Shell> m_shells;
     
+    // Output file path
+    std::string m_outputFilePath;
+    
     // Get the tank object for a player
     Tank& getPlayerTank(int playerId);
 
