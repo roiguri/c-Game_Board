@@ -29,9 +29,11 @@ GameManager::~GameManager() {
     #endif
 }
 
-bool GameManager::initialize(const std::string& filePath,
+// TODO: move algorithms from readBoard to constructor
+bool GameManager::readBoard(const std::string& filePath,
                              Algorithm* player1Algorithm,
                              Algorithm* player2Algorithm) {
+    // TODO: consider creating a struct to store game configuration
     int rows = 0;
     int cols = 0;
     int maxSteps = 0;
@@ -61,7 +63,7 @@ bool GameManager::initialize(const std::string& filePath,
     return true;
 }
 
-void GameManager::runGame() {
+void GameManager::run() {
   m_currentStep = 0;
   m_gameOver = false;
   m_gameLog.clear();

@@ -47,16 +47,16 @@ public:
      * @param filePath Path to the board file
      * @return true if initialization was successful, false otherwise
      */
-    bool initialize(const std::string& filePath,
-                    Algorithm* player1Algorithm = nullptr,
-                    Algorithm* player2Algorithm = nullptr);
+    bool readBoard(const std::string& filePath,
+                   Algorithm* player1Algorithm = nullptr,
+                   Algorithm* player2Algorithm = nullptr);
     
     /**
      * @brief Run the game loop until completion
      * 
      * Processes turns, applies actions, and checks for game end conditions
      */
-    void runGame();
+    void run();
     
     /**
      * @brief Save the game results to an output file

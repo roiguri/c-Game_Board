@@ -8,11 +8,11 @@
 // Run the game with a specified board file
 int runGameWithFile(const std::string& filePath) {
     GameManager gameManager;
-    if (!gameManager.initialize(filePath)) {
+    if (!gameManager.readBoard(filePath)) {
         return 1;
     }
     
-    gameManager.runGame();
+    gameManager.run();
     
     std::filesystem::path inputPath(filePath);
     std::string directory = inputPath.parent_path().string();
@@ -93,12 +93,12 @@ int generateAndRunGame(const std::string& configPath) {
     
     // Run the game with the temporary file
     GameManager gameManager;
-    if (!gameManager.initialize(tempFilePath)) {
+    if (!gameManager.readBoard(tempFilePath)) {
         std::filesystem::remove(tempFilePath);
         return 1;
     }
     
-    gameManager.runGame();
+    gameManager.run();
     
     // Create output path
     std::string outputFilePath = "output_generated_board.txt";
