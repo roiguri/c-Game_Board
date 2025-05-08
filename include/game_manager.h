@@ -10,6 +10,7 @@
 #include "collision_handler.h"
 #include "TankAlgorithmFactory.h"
 #include "PlayerFactory.h"
+#include "ActionRequest.h"
 
 #ifdef ENABLE_VISUALIZATION
 #include "bonus/visualization/visualization.h"
@@ -80,9 +81,14 @@ private:
 
     // Core game state
     GameBoard m_board;
-    std::vector<Tank> m_tanks;
+    std::vector<Tank> m_tanks; // FIXME: remove once migration completes
     std::vector<Shell> m_shells;
-    std::vector<std::unique_ptr<TankAlgorithm>> m_tankAlgorithms;
+    struct TankWithAlgorithm {
+        Tank& tank;
+        std::unique_ptr<TankAlgorithm> algorithm;
+        ActionRequest nextAction = ActionRequest::DoNothing;
+    };
+    std::vector<TankWithAlgorithm> m_tankControllers;
     
     // Output file path
     std::string m_outputFilePath;
@@ -99,7 +105,7 @@ private:
     
     // Apply an action for a player
     // Validates and executes the action, updating the game state
-    void applyAction(int playerId, Action action);
+    void applyAction(TankWithAlgorithm& controller);
     
     // Move all active shells one cell in their direction
     void moveShellsOnce();
@@ -109,7 +115,7 @@ private:
     bool checkGameOver();
     
     // Log an action taken by a player
-    void logAction(int playerId, Action action, bool valid);
+    void logAction(int playerId, ActionRequest action, bool valid);
     
     // Helper methods
 

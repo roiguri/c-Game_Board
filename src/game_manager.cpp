@@ -113,7 +113,8 @@ void GameManager::run() {
       m_gameLog.push_back(
         "Step " + std::to_string(m_currentStep) + " completed"
       );
-
+      
+      // TODO: optimize to store out of shells state
       bool tanksOutOfShells = true;
       for (const auto& tank : m_tanks) {
           if (!tank.isDestroyed() && tank.getRemainingShells() > 0) {
@@ -137,6 +138,7 @@ void GameManager::run() {
   saveResults(m_outputFilePath);
 }
 
+// TODO: FIX
 bool GameManager::saveResults(const std::string& outputFilePath) {
   std::ofstream outputFile(outputFilePath);
   if (!outputFile.is_open()) {
@@ -172,8 +174,13 @@ bool GameManager::saveResults(const std::string& outputFilePath) {
 }
 
 void GameManager::processStep() {
-  Action player1Action = getPlayerAction(1);
-  Action player2Action = getPlayerAction(2);
+  for (auto& controller : m_tankControllers) {
+    if (!controller.tank.isDestroyed() && controller.algorithm) {
+      controller.nextAction = controller.algorithm->getAction();
+    } else {
+      controller.nextAction = ActionRequest::DoNothing;
+    }
+  }
 
   moveShellsOnce();
 
@@ -197,8 +204,12 @@ void GameManager::processStep() {
   }
   #endif
   
-  applyAction(1, player1Action);
-  applyAction(2, player2Action);
+  // TODO: fix log actions
+  for (auto& controller : m_tankControllers) {
+    if (!controller.tank.isDestroyed() && controller.algorithm) {
+      applyAction(controller);
+    }
+  }
 
   moveShellsOnce();
 
@@ -255,12 +266,13 @@ Tank& GameManager::getPlayerTank(int playerId) {
   return m_tanks[0];
 }
 
-void GameManager::applyAction(int playerId, Action action) {
-  if (playerId != 1 && playerId != 2) {
+void GameManager::applyAction(TankWithAlgorithm& controller) {
+  if (controller.tank.isDestroyed()) {
       return;
   }
-  
-  Tank& playerTank = getPlayerTank(playerId);
+
+  int playerId = controller.tank.getPlayerId();
+  Tank& playerTank = controller.tank;
   
   if (playerTank.isDestroyed()) {
       return;
@@ -268,8 +280,8 @@ void GameManager::applyAction(int playerId, Action action) {
   
   bool actionResult = false;
   
-  switch (action) {
-      case Action::MoveForward: {
+  switch (controller.nextAction) {
+      case ActionRequest::MoveForward: {
           Point newPosition = playerTank.getNextForwardPosition();
           newPosition = m_board.wrapPosition(newPosition);
           
@@ -279,7 +291,7 @@ void GameManager::applyAction(int playerId, Action action) {
           break;
       }
           
-      case Action::MoveBackward: {
+      case ActionRequest::MoveBackward: {
           Point newPosition = playerTank.getNextBackwardPosition();
           newPosition = m_board.wrapPosition(newPosition);
           
@@ -289,23 +301,23 @@ void GameManager::applyAction(int playerId, Action action) {
           break;
       }
               
-      case Action::RotateLeftEighth:
+      case ActionRequest::RotateLeft45:
           actionResult = playerTank.rotateLeft(false);
           break;
           
-      case Action::RotateRightEighth:
+      case ActionRequest::RotateRight45:
           actionResult = playerTank.rotateRight(false);
           break;
           
-      case Action::RotateLeftQuarter:
+      case ActionRequest::RotateLeft90:
           actionResult = playerTank.rotateLeft(true);
           break;
           
-      case Action::RotateRightQuarter:
+      case ActionRequest::RotateRight90:
           actionResult = playerTank.rotateRight(true);
           break;
           
-      case Action::Shoot:
+      case ActionRequest::Shoot:
           if (playerTank.canShoot()) {
               Point shellPosition = playerTank.getPosition();
               Direction shellDirection = playerTank.getDirection();
@@ -315,17 +327,20 @@ void GameManager::applyAction(int playerId, Action action) {
               actionResult = playerTank.shoot();
           }
           break;
-          
-      case Action::None:
+      case ActionRequest::GetBattleInfo:
+          // TODO: add getBattleInfo
+          // Create sattelite view of the board
+          // Player.updateTankWithBattleInfo(tank, satteliteView)
+          break;
+      case ActionRequest::DoNothing:
           playerTank.doNothing(); // update tank state
           actionResult = true;  // No action is always "successful"
           break;
-          
       default:
           actionResult = false;
           break;
   }  
-  logAction(playerId, action, actionResult);
+  logAction(playerId, controller.nextAction, actionResult);
 }
 
 void GameManager::moveShellsOnce() {
@@ -344,48 +359,47 @@ void GameManager::moveShellsOnce() {
 
 // TODO: fix log
 bool GameManager::checkGameOver() {
-  int destroyedTankCount = 0;
-  int playerWinner = 0;
-  
-  for (const auto& tank : m_tanks) {
-      if (tank.isDestroyed()) {
-          destroyedTankCount++;
-          // If only one tank is destroyed, the other player wins
-          if (destroyedTankCount == 1) {
-              playerWinner = (tank.getPlayerId() == 1) ? 2 : 1;
-          }
-      }
-  }
+    int player1Alive = 0;
+    int player2Alive = 0;
+    for (const auto& tank : m_tanks) {
+        if (player1Alive > 0 && player2Alive > 0) {
+            break;
+        }
+        if (!tank.isDestroyed()) {
+            if (tank.getPlayerId() == 1) player1Alive++;
+            else if (tank.getPlayerId() == 2) player2Alive++;
+        }
+    }
 
-  if (destroyedTankCount == 1) {
-    m_gameResult = 
-      "Player " + std::to_string(playerWinner) + " wins - Enemy tank destroyed";
-    return true;
-  }
-  
-  // If both tanks are destroyed, it's a tie
-  if (destroyedTankCount == 2) {
-      m_gameResult = "Tie - Both tanks destroyed";
-      return true;
-  }
+    if (player1Alive > 0 && player2Alive == 0) {
+        m_gameResult = "Player 1 wins - All player 2 tanks destroyed";
+        return true;
+    }
+    if (player2Alive > 0 && player1Alive == 0) {
+        m_gameResult = "Player 2 wins - All player 1 tanks destroyed";
+        return true;
+    }
+    if (player1Alive == 0 && player2Alive == 0) {
+        m_gameResult = "Tie - All tanks destroyed";
+        return true;
+    }
 
-  // If all shells are used and additional steps have passed, it's a tie
-  if (m_remaining_steps < 0) {
-      m_gameResult = "Tie - Maximum steps reached after shells depleted";
-      return true;
-  }
-  
-  if (m_currentStep >= m_maximum_steps) {
-      m_gameResult = "Tie - Maximum steps reached";
-      return true;
-  }
+    // If all shells are used and additional steps have passed, it's a tie
+    if (m_remaining_steps < 0) {
+        m_gameResult = "Tie - Maximum steps reached after shells depleted";
+        return true;
+    }
+    if (m_currentStep >= m_maximum_steps) {
+        m_gameResult = "Tie - Maximum steps reached";
+        return true;
+    }
 
-  // Game continues
-  return false;
+    // Game continues
+    return false;
 }
 
-void GameManager::logAction(int playerId, Action action, bool valid) {
-  std::string actionType = actionToString(action);
+void GameManager::logAction(int playerId, ActionRequest action, bool valid) {
+  std::string actionType = "Replace with actionToString(action)"; // FIXME: add actionToString
   std::string status = valid ? "Success" : "Bad Step";
   
   // Format: "Player X: [Action] - [Status]"
@@ -445,14 +459,12 @@ void GameManager::removeDestroyedShells() {
 }
 
 void GameManager::createTankAlgorithms() {
-    m_tankAlgorithms.clear();
     // Map from playerId to current tank index for that player
     std::unordered_map<int, int> playerTankCounts;
-    for (const auto& tank : m_tanks) {
+    for (auto& tank : m_tanks) {
         int playerId = tank.getPlayerId();
         int tankIndex = playerTankCounts[playerId]++;
-        m_tankAlgorithms.push_back(
-            m_tankAlgorithmFactory->create(playerId, tankIndex)
-        );
+        auto algo = m_tankAlgorithmFactory->create(playerId, tankIndex);
+        m_tankControllers.push_back(TankWithAlgorithm{tank, std::move(algo)});
     }
 }
