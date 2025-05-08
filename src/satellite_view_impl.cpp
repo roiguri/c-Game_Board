@@ -11,8 +11,8 @@ constexpr char CURRENT_TANK_CHAR = '%';
 constexpr char OUT_OF_BOARD_CHAR = '&';
 
 SatelliteViewImpl::SatelliteViewImpl(const GameBoard& board,
-    const std::vector<std::shared_ptr<const Tank>>& tanks,
-    const std::vector<std::shared_ptr<const Shell>>& shells,
+    const std::vector<Tank>& tanks,
+    const std::vector<Shell>& shells,
     const Point& currentTankPos)
     : m_board(board), m_tanks(tanks), m_shells(shells), m_currentTankPos(currentTankPos) {}
 
@@ -26,8 +26,9 @@ char SatelliteViewImpl::getObjectAt(size_t x, size_t y) const {
     }
     // Check for tank at (x, y)
     for (const auto& tank : m_tanks) {
-        if (tank && tank->getPosition().getX() == x && tank->getPosition().getY() == y) {
-            int playerId = tank->getPlayerId();
+        if (tank.isDestroyed()) continue;
+        if (tank.getPosition().getX() == x && tank.getPosition().getY() == y) {
+            int playerId = tank.getPlayerId();
             if (playerId >= 1 && playerId <= 9) {
                 return TANK_CHARS[playerId - 1];
             } else {
@@ -37,7 +38,8 @@ char SatelliteViewImpl::getObjectAt(size_t x, size_t y) const {
     }
     // Check for shell at (x, y)
     for (const auto& shell : m_shells) {
-        if (shell && shell->getPosition().getX() == x && shell->getPosition().getY() == y) {
+        if (shell.isDestroyed()) continue;
+        if (shell.getPosition().getX() == x && shell.getPosition().getY() == y) {
             return SHELL_CHAR;
         }
     }

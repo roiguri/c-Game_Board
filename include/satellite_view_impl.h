@@ -2,7 +2,6 @@
 
 #include "SatelliteView.h"
 #include <vector>
-#include <memory>
 #include "game_board.h"
 #include "objects/tank.h"
 #include "objects/shell.h"
@@ -20,13 +19,13 @@ public:
     /**
      * @brief Constructs a SatelliteViewImpl
      * @param board Reference to the game board
-     * @param tanks Vector of shared pointers to tanks (const)
-     * @param shells Vector of shared pointers to shells (const)
+     * @param tanks Reference to a vector of tanks (const)
+     * @param shells Reference to a vector of shells (const)
      * @param currentTankPos The position of the current tank (to be marked with '%')
      */
     SatelliteViewImpl(const GameBoard& board,
-                     const std::vector<std::shared_ptr<const Tank>>& tanks,
-                     const std::vector<std::shared_ptr<const Shell>>& shells,
+                     const std::vector<Tank>& tanks,
+                     const std::vector<Shell>& shells,
                      const Point& currentTankPos);
 
     /**
@@ -39,7 +38,7 @@ public:
 
 private:
     const GameBoard& m_board;
-    const std::vector<std::shared_ptr<const Tank>>& m_tanks;
-    const std::vector<std::shared_ptr<const Shell>>& m_shells;
+    const std::vector<Tank>& m_tanks;
+    const std::vector<Shell>& m_shells;
     Point m_currentTankPos;
 }; 
