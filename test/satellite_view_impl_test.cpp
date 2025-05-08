@@ -120,4 +120,25 @@ TEST(SatelliteViewImplTest, IgnoresDestroyedTanksAndShells) {
     EXPECT_EQ(view.getObjectAt(1, 1), '1'); // tank 1
     EXPECT_EQ(view.getObjectAt(2, 2), ' '); // destroyed tank 2 and shell 2 ignored
     EXPECT_EQ(view.getObjectAt(0, 0), '%'); // current tank position (shell 1 is at 0,0 but current tank takes precedence)
+}
+
+TEST(SatelliteViewImplTest, DestroyedShellOverMineReturnsMine) {
+    std::vector<std::string> boardLines = {
+        "@  ",
+        "   ",
+        "   "
+    };
+    GameBoard board(3, 3);
+    std::vector<std::string> errors;
+    std::vector<std::pair<int, Point>> tankPositions;
+    board.initialize(boardLines, errors, tankPositions);
+    std::vector<Tank> tanks;
+    std::vector<Shell> shells = {
+        Shell(1, Point(0, 0), Direction::Down)
+    };
+    shells[0].destroy();
+    Point currentTankPos(2, 2);
+    SatelliteViewImpl view(board, tanks, shells, currentTankPos);
+    // Should return mine character, not shell
+    EXPECT_EQ(view.getObjectAt(0, 0), '@');
 } 
