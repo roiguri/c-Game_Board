@@ -8,6 +8,8 @@
 #include "objects/shell.h"
 #include "algo/algorithm.h"
 #include "collision_handler.h"
+#include "TankAlgorithmFactory.h"
+#include "PlayerFactory.h"
 
 #ifdef ENABLE_VISUALIZATION
 #include "bonus/visualization/visualization.h"
@@ -28,7 +30,8 @@ public:
     /**
      * @brief Construct a new Game Manager object with default state
      */
-    GameManager();
+    GameManager(std::unique_ptr<PlayerFactory> playerFactory,
+                std::unique_ptr<TankAlgorithmFactory> tankAlgorithmFactory);
     
     /**
      * @brief Destroy the Game Manager object and free resources
@@ -62,6 +65,10 @@ private:
     Algorithm* m_player1Algorithm;
     Algorithm* m_player2Algorithm;
 
+    // Factories
+    std::unique_ptr<PlayerFactory> m_PlayerFactory;
+    std::unique_ptr<TankAlgorithmFactory> m_tankAlgorithmFactory;
+
     // Game state tracking
     int m_currentStep;
     bool m_gameOver;
@@ -75,6 +82,7 @@ private:
     GameBoard m_board;
     std::vector<Tank> m_tanks;
     std::vector<Shell> m_shells;
+    std::vector<std::unique_ptr<TankAlgorithm>> m_tankAlgorithms;
     
     // Output file path
     std::string m_outputFilePath;
@@ -105,11 +113,15 @@ private:
     
     // Helper methods
 
+    // TODO: remove once algorithms are correctly implemented
     // Create algorithm instances for both players
     void createAlgorithms(
       Algorithm* player1Algorithm, 
       Algorithm* player2Algorithm
     );
+
+    // Create algorithm instances for all tanks
+    void createTankAlgorithms();
 
     // Create tank objects based on tank positions
     void createTanks(const std::vector<std::pair<int, Point>>& tankPositions);

@@ -7,10 +7,14 @@
 #include <fstream>
 #include <algorithm>
 #include <filesystem>
+#include <unordered_map>
 
-GameManager::GameManager()
-    : m_player1Algorithm(nullptr),
-      m_player2Algorithm(nullptr),
+GameManager::GameManager(std::unique_ptr<PlayerFactory> playerFactory,
+                       std::unique_ptr<TankAlgorithmFactory> tankAlgorithmFactory)
+    : m_player1Algorithm(nullptr), // FIXME: remove
+      m_player2Algorithm(nullptr), // FIXME: remove
+      m_PlayerFactory(std::move(playerFactory)),
+      m_tankAlgorithmFactory(std::move(tankAlgorithmFactory)),
       m_currentStep(0),
       m_gameOver(false),
       m_remaining_steps(40),
@@ -61,7 +65,9 @@ bool GameManager::readBoard(const std::string& filePath,
     }
     
     createTanks(tankPositions);
-    createAlgorithms(player1Algorithm, player2Algorithm);
+    createAlgorithms(player1Algorithm, player2Algorithm); // FIXME: remove
+
+    createTankAlgorithms();
 
     // TODO: extract to private helper function
     // Set output file path based on input file path
@@ -436,4 +442,17 @@ void GameManager::removeDestroyedShells() {
           [](const Shell& shell) { return shell.isDestroyed(); }),
       m_shells.end()
   );
+}
+
+void GameManager::createTankAlgorithms() {
+    m_tankAlgorithms.clear();
+    // Map from playerId to current tank index for that player
+    std::unordered_map<int, int> playerTankCounts;
+    for (const auto& tank : m_tanks) {
+        int playerId = tank.getPlayerId();
+        int tankIndex = playerTankCounts[playerId]++;
+        m_tankAlgorithms.push_back(
+            m_tankAlgorithmFactory->create(playerId, tankIndex)
+        );
+    }
 }

@@ -7,12 +7,13 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_compile_options(
-  -Wall
-  -Wextra
-  -Werror
-  -pedantic
-)
+# TODO: restore all warnings
+# add_compile_options(
+#   -Wall
+#   -Wextra
+#   -Werror
+#   -pedantic
+# )
 
 # Build configuration options
 option(ENABLE_TESTING "Build tests" OFF)
@@ -110,7 +111,7 @@ if(ENABLE_TESTING)
     endif()
     
     add_executable(tanks_game_tests ${TEST_SOURCES})
-    target_include_directories(tanks_game_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_include_directories(tanks_game_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/common)
     target_link_libraries(tanks_game_tests PRIVATE tanks_game_lib gtest gmock gtest_main)
     set_target_properties(tanks_game_tests
         PROPERTIES

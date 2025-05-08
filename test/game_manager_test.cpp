@@ -7,6 +7,8 @@
 #include <sstream>
 #include <cstdio>
 #include <filesystem>
+#include "player_factory_impl.h"
+#include "algo/tank_algorithm_factory_impl.h"
 
 class GameManagerTest : public ::testing::Test {
 protected:
@@ -108,7 +110,7 @@ protected:
         manager.m_remaining_steps = steps;
     }
     
-    std::vector<Tank>& testGetTanksMutable(GameManager& manager) {
+    std::vector<Tank>& getTanksMutable(GameManager& manager) {
         return manager.m_tanks;
     }
 
@@ -189,10 +191,58 @@ protected:
         result.insert(result.end(), map.begin(), map.end());
         return result;
     }
+
+    TankAlgorithmFactory* getTankAlgorithmFactory(GameManager& manager) {
+        return manager.m_tankAlgorithmFactory.get();
+    }
+    void callCreateTankAlgorithms(GameManager& manager) {
+        manager.createTankAlgorithms();
+    }
 };
 
+// Mock TankAlgorithmFactory for testing createTankAlgorithms
+class RecordingTankAlgorithmFactory : public TankAlgorithmFactory {
+public:
+    struct Call {
+        int playerId;
+        int tankIndex;
+    };
+    std::vector<Call> calls;
+    std::unique_ptr<TankAlgorithm> create(int player_index, int tank_index) const override {
+        const_cast<RecordingTankAlgorithmFactory*>(this)->calls.push_back({player_index, tank_index});
+        // Return a dummy pointer (could be nullptr for this test)
+        return nullptr;
+    }
+};
+
+TEST_F(GameManagerTest, CreateTankAlgorithms_CreatesCorrectAlgorithms) {
+    // Board with 3 tanks for player 1 and 2 tanks for player 2
+    std::vector<std::pair<int, Point>> tankPositions = {
+        {1, Point(0,0)}, {2, Point(1,0)}, {1, Point(2,0)}, {2, Point(3,0)}, {1, Point(4,0)}
+    };
+    GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<RecordingTankAlgorithmFactory>());
+    // Directly set m_tanks for the test
+    auto& tanks = getTanksMutable(manager);
+    tanks.clear();
+    for (const auto& [playerId, pos] : tankPositions) {
+        tanks.emplace_back(playerId, pos, playerId == 1 ? Direction::Left : Direction::Right);
+    }
+    auto* factory = static_cast<RecordingTankAlgorithmFactory*>(getTankAlgorithmFactory(manager));
+    callCreateTankAlgorithms(manager);
+    // There should be 5 calls, one for each tank
+    ASSERT_EQ(factory->calls.size(), tankPositions.size());
+    // Check the playerId and tankIndex for each call
+    std::map<int, int> expectedTankIndices; // playerId -> next expected index
+    for (size_t i = 0; i < tankPositions.size(); ++i) {
+        int expectedPlayer = tankPositions[i].first;
+        int expectedIndex = expectedTankIndices[expectedPlayer]++;
+        EXPECT_EQ(factory->calls[i].playerId, expectedPlayer);
+        EXPECT_EQ(factory->calls[i].tankIndex, expectedIndex);
+    }
+}
+
 TEST_F(GameManagerTest, Constructor) {
-    GameManager manager;
+    GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
     
     // We can't directly access private members, so we'll test indirectly
     // by calling initialize with an invalid file and checking it fails
@@ -204,7 +254,7 @@ TEST_F(GameManagerTest, Initialize_ValidBoard) {
     auto boardLines = makeBoardFile("Test Board", 1000, 20, 8, 5, getStandardBoard());
     createTestBoardFile(boardLines);
     
-    GameManager manager;
+    GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
     EXPECT_TRUE(manager.readBoard(tempFilePath));
 }
 
@@ -220,7 +270,7 @@ TEST_F(GameManagerTest, Initialize_NoTanks) {
     });
     createTestBoardFile(boardLines);
     
-    GameManager manager;
+    GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
     EXPECT_TRUE(manager.readBoard(tempFilePath));
 }
 
@@ -236,7 +286,7 @@ TEST_F(GameManagerTest, Initialize_InvalidDimensions) {
     });
     createTestBoardFile(boardLines);
     
-    GameManager manager;
+    GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
     EXPECT_FALSE(manager.readBoard(tempFilePath));
 }
 
@@ -246,7 +296,7 @@ TEST_F(GameManagerTest, Initialize_EmptyFile) {
     auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 5, {});
     createTestBoardFile(boardLines);
     
-    GameManager manager;
+    GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
     EXPECT_FALSE(manager.readBoard(tempFilePath));
 }
 
@@ -256,7 +306,7 @@ TEST_F(GameManagerTest, Cleanup_ThroughReinitialization) {
     auto boardLines = makeBoardFile("Test Board", 1000, 20, 8, 5, getStandardBoard());
     createTestBoardFile(boardLines);
     
-    GameManager manager;
+    GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
     
     // Initialize once
     EXPECT_TRUE(manager.readBoard(tempFilePath));
@@ -269,7 +319,7 @@ TEST_F(GameManagerTest, Cleanup_ThroughReinitialization) {
 
 // Test getTanks returns empty vector before initialization
 TEST_F(GameManagerTest, GetTanks_EmptyBeforeInit) {
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   
   // Before initialization, tanks vector should be empty
   EXPECT_TRUE(getTanks(manager).empty());
@@ -286,7 +336,7 @@ TEST_F(GameManagerTest, Initialize_NormalTankCreation) {
   });
   createTestBoardFile(boardLines);
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   EXPECT_TRUE(manager.readBoard(tempFilePath));
   
   const auto& tanks = getTanks(manager);
@@ -314,7 +364,7 @@ TEST_F(GameManagerTest, Initialize_MultipleTanksOnePlayer) {
   });
   createTestBoardFile(boardLines);
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   EXPECT_TRUE(manager.readBoard(tempFilePath));
   
   const auto& tanks = getTanks(manager);
@@ -342,7 +392,7 @@ TEST_F(GameManagerTest, Initialize_MultipleTanksBothPlayers) {
   });
   createTestBoardFile(boardLines);
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   EXPECT_TRUE(manager.readBoard(tempFilePath));
   
   const auto& tanks = getTanks(manager);
@@ -376,7 +426,7 @@ TEST_F(GameManagerTest, Initialize_CreatesErrorFile) {
   // Remove any existing error file first
   std::remove("input_errors.txt");
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   EXPECT_TRUE(manager.readBoard(tempFilePath));
   
   // Check that error file was created
@@ -409,7 +459,7 @@ TEST_F(GameManagerTest, Initialize_NoErrorFile) {
   // Remove any existing error file first
   std::remove("input_errors.txt");
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   EXPECT_TRUE(manager.readBoard(tempFilePath));
   
   // Check that error file was not created
@@ -428,7 +478,7 @@ TEST_F(GameManagerTest, GetPlayerAction_ClearShot) {
   });
   createTestBoardFile(boardLines);
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // For DefensiveAlgorithm, when there's a clear shot, it should return Shoot
@@ -452,7 +502,7 @@ TEST_F(GameManagerTest, GetPlayerAction_InvalidPlayerIds) {
   });
   createTestBoardFile(boardLines);
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Test with invalid player IDs
@@ -467,7 +517,7 @@ TEST_F(GameManagerTest, GetPlayerAction_InvalidPlayerIds) {
 
 // Test logAction adds entries correctly
 TEST_F(GameManagerTest, LogAction_FormatsCorrectly) {
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   
   // Log a valid action using the test helper method
   testLogAction(manager, 1, Action::MoveForward, true);
@@ -487,7 +537,7 @@ TEST_F(GameManagerTest, LogAction_FormatsCorrectly) {
 
 // Test getGameLog accessor with multiple entries
 TEST_F(GameManagerTest, GetGameLog_MultipleEntries) {
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   
   // Log several actions
   testLogAction(manager, 1, Action::MoveForward, true);
@@ -513,7 +563,7 @@ TEST_F(GameManagerTest, MoveShellsOnce_ShellMovementAndCollision) {
   });
   createTestBoardFile(boardLines);
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Verify tank positions and directions
@@ -544,7 +594,7 @@ TEST_F(GameManagerTest, ApplyAction_DoNothing) {
   auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 8, getStandardBoard());
   createTestBoardFile(boardLines);
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Capture initial state
@@ -594,7 +644,7 @@ TEST_F(GameManagerTest, MoveShellsOnce_EdgeWrapping) {
   });
   createTestBoardFile(boardLines);
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Verify tank 1 position
@@ -634,11 +684,11 @@ TEST_F(GameManagerTest, CheckGameOver_OneTankDestroyed) {
   });
   createTestBoardFile(boardLines);
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Manually set one tank to destroyed state
-  std::vector<Tank>& tanks = testGetTanksMutable(manager);
+  std::vector<Tank>& tanks = getTanksMutable(manager);
   tanks[0].destroy();
   
   // Test checkGameOver
@@ -660,11 +710,11 @@ TEST_F(GameManagerTest, CheckGameOver_BothTanksDestroyed) {
   });
   createTestBoardFile(boardLines);
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Destroy both tanks
-  std::vector<Tank>& tanks = testGetTanksMutable(manager);
+  std::vector<Tank>& tanks = getTanksMutable(manager);
   tanks[0].destroy();
   tanks[1].destroy();
   
@@ -687,7 +737,7 @@ TEST_F(GameManagerTest, CheckGameOver_ShellsDepleted) {
   });
   createTestBoardFile(boardLines);
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Set the remaining steps counter to negative
@@ -712,11 +762,11 @@ TEST_F(GameManagerTest, CheckGameOver_GameInProgress) {
   });
   createTestBoardFile(boardLines);
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // No tanks destroyed, steps not exhausted
-  std::vector<Tank>& tanks = testGetTanksMutable(manager);
+  std::vector<Tank>& tanks = getTanksMutable(manager);
   ASSERT_FALSE(tanks[0].isDestroyed());
   ASSERT_FALSE(tanks[1].isDestroyed());
   testSetRemainingSteps(manager, 40); // default value
@@ -730,7 +780,7 @@ TEST_F(GameManagerTest, CheckGameOver_GameInProgress) {
 
 // Test saveResults writes game log to output file
 TEST_F(GameManagerTest, SaveResults_WritesGameLog) {
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   
   // Add some entries to the game log
   testLogAction(manager, 1, Action::MoveForward, true);
@@ -767,7 +817,7 @@ TEST_F(GameManagerTest, SaveResults_WritesGameLog) {
 
 // Test saveResults with empty game log
 TEST_F(GameManagerTest, SaveResults_EmptyGameLog) {
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   
   // No log entries added, should create an empty file
   std::string outputFilePath = "test_empty_output.txt";
@@ -790,7 +840,7 @@ TEST_F(GameManagerTest, SaveResults_EmptyGameLog) {
 
 // Test saveResults with invalid file path
 TEST_F(GameManagerTest, SaveResults_InvalidFilePath) {
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   
   // Add some entries to the game log
   testLogAction(manager, 1, Action::MoveForward, true);
@@ -821,7 +871,7 @@ TEST_F(GameManagerTest, ProcessStep_shellStartsNextToTank) {
   });
   createTestBoardFile(boardLines);
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Both tanks Shoot
@@ -850,7 +900,7 @@ TEST_F(GameManagerTest, ProcessStep_shellsCollide) {
   });
   createTestBoardFile(boardLines);
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(manager.readBoard(tempFilePath));
   
   // Both tanks Shoot
@@ -879,7 +929,7 @@ TEST_F(GameManagerTest, ProcessStep_waitForCooldown) {
   });
   createTestBoardFile(boardLines);
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   mockAlgo1->setConstantAction(Action::Shoot);
   mockAlgo2->setConstantAction(Action::None);
   ASSERT_TRUE(initializeManager(manager, boardLines));
@@ -912,7 +962,7 @@ TEST_F(GameManagerTest, GameManagerTest_maximumSteps) {
   });
   createTestBoardFile(boardLines);
   
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(manager.readBoard(tempFilePath));
     
   testRunGame(manager);
@@ -924,7 +974,7 @@ TEST_F(GameManagerTest, RunGame_TanksShooting) {
   mockAlgo2->setConstantAction(Action::Shoot);
   
   // Initialize manager
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 8, getStandardBoard());
   ASSERT_TRUE(initializeManager(manager, boardLines));
   
@@ -980,7 +1030,7 @@ TEST_F(GameManagerTest, RunGame_TankHitsMine) {
   mockAlgo2->setConstantAction(Action::None);
   
   // Initialize manager
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(initializeManager(manager, boardLines));
   
   // Run the game
@@ -1012,7 +1062,7 @@ TEST_F(GameManagerTest, RunGame_TankHitsWall) {
   mockAlgo2->setConstantAction(Action::None);
   
   // Initialize manager
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 8, getStandardBoard());
   ASSERT_TRUE(initializeManager(manager, boardLines));
   
@@ -1049,7 +1099,7 @@ TEST_F(GameManagerTest, RunGame_TanksTryToOccupySameSpace) {
   mockAlgo2->setConstantAction(Action::MoveForward);  // Player 2 moves right
   
   // Initialize manager
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(initializeManager(manager, tightBoard));
   
   // Run the game
@@ -1086,7 +1136,7 @@ TEST_F(GameManagerTest, RunGame_ShellDestroyingWallsThenTank) {
   mockAlgo2->setConstantAction(Action::None);
   
   // Initialize manager
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(initializeManager(manager, walledBoard));
   
   // Run the game
@@ -1135,7 +1185,7 @@ TEST_F(GameManagerTest, RunGame_BackwardMovementSequence) {
   mockAlgo2->setConstantAction(Action::None);
   
   // Initialize manager
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(initializeManager(manager, boardLines));
 
   EXPECT_EQ(getTanks(manager)[1].getPlayerId(), 1);
@@ -1169,7 +1219,7 @@ TEST_F(GameManagerTest, RunGame_ShellsCollide) {
   });
   
   // Initialize manager
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   auto boardLines = makeBoardFile("Test Board", 1000, 20, 5, 8, getStandardBoard());
   ASSERT_TRUE(initializeManager(manager, boardLines));
   
@@ -1208,7 +1258,7 @@ TEST_F(GameManagerTest, RunGame_OutOfShells) {
   mockAlgo2->setConstantAction(Action::Shoot);
   
   // Initialize manager
-  GameManager manager;
+  GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
   ASSERT_TRUE(initializeManager(manager, boardLines));
   
   // Run the full game
@@ -1236,7 +1286,7 @@ TEST_F(GameManagerTest, RunGame_OutOfShells) {
 }
 
 TEST_F(GameManagerTest, OutputFileCreatedInCurrentDir) {
-    GameManager manager;
+    GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
     std::string inputFile = "test_board_output.txt";
     auto boardLines = makeBoardFile("TestOutput", 100, 10, 3, 3, {
         "###",
@@ -1257,7 +1307,7 @@ TEST_F(GameManagerTest, OutputFileCreatedInCurrentDir) {
 }
 
 TEST_F(GameManagerTest, OutputFileCreatedInSubDir) {
-    GameManager manager;
+    GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
     std::string dir = "test_output_dir";
     std::string inputFile = dir + "/test_board_output2.txt";
     std::filesystem::create_directory(dir);
@@ -1289,7 +1339,7 @@ TEST_F(GameManagerTest, Initialize_ManyTanksPerPlayer_IntertwinedOrder) {
         "21212"
     });
     createTestBoardFile(boardLines);
-    GameManager manager;
+    GameManager manager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
     ASSERT_TRUE(manager.readBoard(tempFilePath));
     const auto& tanks = getTanks(manager);
     ASSERT_EQ(tanks.size(), 10);
