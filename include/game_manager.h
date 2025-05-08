@@ -147,4 +147,9 @@ private:
     #ifdef ENABLE_VISUALIZATION
     std::unique_ptr<VisualizationManager> m_visualizationManager;
     #endif
+
+    // TODO: Consider creating a GameState abstraction to encapsulate board, tanks, and shells
+    GameBoard m_currentBoard;
+    std::vector<Tank> m_currentTanks;
+    std::vector<Shell> m_currentShells;
 };

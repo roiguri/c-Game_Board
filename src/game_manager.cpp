@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <unordered_map>
+#include <satellite_view_impl.h>
 
 GameManager::GameManager(std::unique_ptr<PlayerFactory> playerFactory,
                        std::unique_ptr<TankAlgorithmFactory> tankAlgorithmFactory)
@@ -174,6 +175,11 @@ bool GameManager::saveResults(const std::string& outputFilePath) {
 }
 
 void GameManager::processStep() {
+  // TODO: Consider creating a GameState abstraction to encapsulate board, tanks, and shells
+  GameBoard m_currentBoard = m_board;
+  std::vector<Tank> m_currentTanks = m_tanks;
+  std::vector<Shell> m_currentShells = m_shells;
+
   for (auto& controller : m_tankControllers) {
     if (!controller.tank.isDestroyed() && controller.algorithm) {
       controller.nextAction = controller.algorithm->getAction();
@@ -327,10 +333,11 @@ void GameManager::applyAction(TankWithAlgorithm& controller) {
               actionResult = playerTank.shoot();
           }
           break;
-      case ActionRequest::GetBattleInfo:
+      case ActionRequest::GetBattleInfo: {
           // TODO: add getBattleInfo
-          // Create sattelite view of the board
+          SatelliteViewImpl satteliteView(m_currentBoard, m_currentTanks, m_currentShells, playerTank.getPosition());
           // Player.updateTankWithBattleInfo(tank, satteliteView)
+          }
           break;
       case ActionRequest::DoNothing:
           playerTank.doNothing(); // update tank state
