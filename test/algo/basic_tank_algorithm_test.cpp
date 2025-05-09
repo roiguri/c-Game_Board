@@ -63,6 +63,12 @@ protected:
     bool isInDangerFromShells(const Point& pos) { return algo->isInDangerFromShells(pos); }
     bool isPositionSafe(const Point& pos) { return algo->isPositionSafe(pos); }
     std::vector<Point> getSafePositions() { return algo->getSafePositions(); }
+    // New helpers for private/protected methods
+    BasicTankAlgorithm::SafeMoveOption getSafeMoveOption(const Point& p) { return algo->getSafeMoveOption(p); }
+    std::vector<BasicTankAlgorithm::SafeMoveOption> getSafeMoveOptions(const std::vector<Point>& positions) { return algo->getSafeMoveOptions(positions); }
+    ActionRequest getActionToSafePosition() { return algo->getActionToSafePosition(); }
+    // Helper for canShootEnemy
+    bool getCanShootEnemy() { return algo->canShootEnemy(); }
 };
 
 TEST_F(BasicTankAlgorithmTest, UpdateBattleInfo_UpdatesGameBoardAndObjects) {
@@ -372,5 +378,177 @@ TEST_F(BasicTankAlgorithmTest, GetSafePositions_ShellDanger) {
     auto safe = getSafePositions();
     std::vector<Point> expected = {Point(1,1), Point(1,2), Point(3,1), Point(3,2)};
     EXPECT_THAT(safe, UnorderedElementsAreArray(expected));
+}
+
+TEST_F(BasicTankAlgorithmTest, GetSafeMoveOption_AlreadySafe) {
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 2));
+    algo->setTank(*tank);
+    auto opt = getSafeMoveOption(Point(2, 2));
+    EXPECT_EQ(opt.action, ActionRequest::DoNothing);
+    EXPECT_EQ(opt.cost, 0);
+}
+
+TEST_F(BasicTankAlgorithmTest, GetSafeMoveOption_Forward) {
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 2));
+    tank->setDirection(Direction::Up);
+    algo->setTank(*tank);
+    auto opt = getSafeMoveOption(Point(2, 1));
+    EXPECT_EQ(opt.action, ActionRequest::MoveForward);
+    EXPECT_EQ(opt.cost, 1);
+}
+
+TEST_F(BasicTankAlgorithmTest, GetSafeMoveOption_RotateLeft) {
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 2));
+    tank->setDirection(Direction::Right);
+    algo->setTank(*tank);
+    auto opt = getSafeMoveOption(Point(2, 1));
+    EXPECT_EQ(opt.action, ActionRequest::RotateLeft90);
+    EXPECT_GT(opt.cost, 1);
+}
+
+TEST_F(BasicTankAlgorithmTest, GetSafeMoveOption_RotateRight) {
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 2));
+    tank->setDirection(Direction::Left);
+    algo->setTank(*tank);
+    auto opt = getSafeMoveOption(Point(2, 1));
+    EXPECT_EQ(opt.action, ActionRequest::RotateRight90);
+    EXPECT_GT(opt.cost, 1);
+}
+
+TEST_F(BasicTankAlgorithmTest, GetSafeMoveOptions_Multiple) {
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 2));
+    tank->setDirection(Direction::Up);
+    algo->setTank(*tank);
+    std::vector<Point> positions = {Point(2, 1), Point(3, 2)};
+    auto opts = getSafeMoveOptions(positions);
+    ASSERT_EQ(opts.size(), 2u);
+    EXPECT_EQ(opts[0].action, ActionRequest::MoveForward);
+    EXPECT_EQ(opts[1].action, ActionRequest::RotateRight90);
+}
+
+TEST_F(BasicTankAlgorithmTest, GetActionToSafePosition_Forward) {
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 2));
+    tank->setDirection(Direction::Up);
+    algo->setTank(*tank);
+    // Block all but forward
+    std::vector<Point> safe = {Point(2, 1)};
+    EXPECT_EQ(getSafeMoveOption(Point(2, 1)).action, ActionRequest::MoveForward);
+    EXPECT_EQ(getActionToSafePosition(), ActionRequest::MoveForward);
+}
+
+TEST_F(BasicTankAlgorithmTest, GetActionToSafePosition_MinimalRotation) {
+    GameBoard board = makeBoard({
+        "#####",
+        "#####",
+        "#  ##",
+        "### #",
+        "#####"
+    });
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 2));
+    tank->setDirection(Direction::Up);
+    algo->setTank(*tank);
+    EXPECT_EQ(getActionToSafePosition(), ActionRequest::RotateLeft90);
+}
+
+TEST_F(BasicTankAlgorithmTest, GetActionToSafePosition_NoSafe) {
+    GameBoard board = makeBoard({
+        "#####",
+        "#####",
+        "## ##",
+        "#####",
+        "#####"
+    });
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 2));
+    algo->setTank(*tank);
+    // No safe positions
+    EXPECT_EQ(getActionToSafePosition(), ActionRequest::DoNothing);
+}
+
+TEST_F(BasicTankAlgorithmTest, GetActionToSafePosition_ChooseSafeFromShell) {
+    GameBoard board = makeBoard({
+        "##**#",
+        "##  #",
+        "##  #",
+        "#  ##",
+        "#####"
+    });
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {Point(2,0), Point(2,1)});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 3));
+    tank->setDirection(Direction::Up);
+    algo->setTank(*tank);
+    EXPECT_EQ(getActionToSafePosition(), ActionRequest::RotateLeft90);
+}
+
+TEST_F(BasicTankAlgorithmTest, CanShootEnemy_EnemyInCurrentDirection) {
+    // Tank at (2,2) facing Up, enemy at (2,1)
+    BattleInfoImpl info = makeBattleInfo(board, {Point(2, 1)}, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 2));
+    tank->setDirection(Direction::Up);
+    algo->setTank(*tank);
+    EXPECT_TRUE(getCanShootEnemy());
+}
+
+TEST_F(BasicTankAlgorithmTest, CanShootEnemy_EnemyNotInCurrentDirection) {
+    // Tank at (2,2) facing Up, enemy at (3,2) (to the right)
+    BattleInfoImpl info = makeBattleInfo(board, {Point(3, 2)}, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 2));
+    tank->setDirection(Direction::Up);
+    algo->setTank(*tank);
+    EXPECT_FALSE(getCanShootEnemy());
+}
+
+TEST_F(BasicTankAlgorithmTest, CanShootEnemy_EnemyBlockedByWall) {
+    // Tank at (2,2) facing Up, enemy at (2,1), wall at (2,1)
+    GameBoard walledBoard = makeBoard({
+        "#####",
+        "# # #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    BattleInfoImpl info = makeBattleInfo(walledBoard, {Point(1, 3)}, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(1, 1));
+    tank->setDirection(Direction::Up);
+    algo->setTank(*tank);
+    EXPECT_FALSE(getCanShootEnemy());
+}
+
+TEST_F(BasicTankAlgorithmTest, CanShootEnemy_MultipleEnemies_OneInDirection) {
+    // Tank at (2,2) facing Up, enemies at (2,1) and (3,2)
+    BattleInfoImpl info = makeBattleInfo(board, {Point(2, 1), Point(3, 2)}, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 2));
+    tank->setDirection(Direction::Up);
+    algo->setTank(*tank);
+    EXPECT_TRUE(getCanShootEnemy());
+}
+
+TEST_F(BasicTankAlgorithmTest, CanShootEnemy_NoEnemies) {
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 2));
+    tank->setDirection(Direction::Up);
+    algo->setTank(*tank);
+    EXPECT_FALSE(getCanShootEnemy());
 }
 

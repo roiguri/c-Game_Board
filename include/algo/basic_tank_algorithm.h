@@ -59,9 +59,29 @@ private:
     std::vector<Point> m_friendlyTanks;
     std::vector<Point> m_shells;
 
+    struct SafeMoveOption {
+        Point position;
+        ActionRequest action;
+        int cost;
+        Direction direction;
+        bool operator<(const SafeMoveOption& other) const { return cost < other.cost; }
+    };
+
+    // Helper: get SafeMoveOption for a single point
+    SafeMoveOption getSafeMoveOption(const Point& pos) const;
+    // Helper: get SafeMoveOptions for a list of points
+    std::vector<SafeMoveOption> getSafeMoveOptions(const std::vector<Point>& positions) const;
+
     bool canShootEnemy() const;
 
     // === Helper Methods ===
+
+    /**
+     * @brief Gets the next action for this tank to reach a safe position
+     * @return ActionRequest for the next move
+     */
+    ActionRequest getActionToSafePosition() const;
+
     /**
      * @brief Checks if the given position is in immediate danger from shells (distance < 3)
      * @return true if in danger, false otherwise

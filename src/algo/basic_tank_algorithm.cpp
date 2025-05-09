@@ -16,13 +16,14 @@ ActionRequest BasicTankAlgorithm::getAction() {
     }
     // 2. Check if in danger
     if (isInDangerFromShells()) {
-        return ActionRequest::DoNothing;
+        return getActionToSafePosition();
     }
     // 3. Check if can shoot enemy
     if (canShootEnemy()) {
         return ActionRequest::Shoot;
     }
-    return ActionRequest::DoNothing;
+    // TODO: decide what to do if not in danger and not shooting
+    return getActionToSafePosition();
 }
 
 void BasicTankAlgorithm::setTank(Tank& tank) {
@@ -40,8 +41,15 @@ void BasicTankAlgorithm::updateBattleInfo(BattleInfo& info) {
 }
 
 bool BasicTankAlgorithm::canShootEnemy() const {
-    // Example: if any enemy tank is present
-    return !m_enemyTanks.empty();
+    const Tank& myTank = m_tank.value().get();
+    const Point& myPos = myTank.getPosition();
+    Direction myDir = myTank.getDirection();
+    for (const auto& enemyPos : m_enemyTanks) {
+        if (checkLineOfSightInDirection(myPos, enemyPos, myDir)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 std::optional<Direction> BasicTankAlgorithm::getLineOfSightDirection(const Point& from, const Point& to) const {
@@ -133,4 +141,66 @@ std::vector<Point> BasicTankAlgorithm::getSafePositions() const {
         }
     }
     return safePositions;
+}
+
+BasicTankAlgorithm::SafeMoveOption BasicTankAlgorithm::getSafeMoveOption(const Point& pos) const {
+    const Tank& tank = m_tank.value().get();
+    const Point& current = tank.getPosition();
+    Direction currentDir = tank.getDirection();
+    SafeMoveOption option{pos, ActionRequest::DoNothing, 1000, currentDir};
+    if (pos == current) {
+        option.action = ActionRequest::DoNothing;
+        option.cost = 0;
+        return option;
+    }
+    auto dirOpt = getLineOfSightDirection(current, pos);
+    if (!dirOpt) return option;
+    Direction targetDir = *dirOpt;
+    option.direction = targetDir;
+    if (current + getDirectionDelta(targetDir) == pos) {
+        // Adjacent in that direction
+        if (currentDir == targetDir) {
+            option.action = ActionRequest::MoveForward;
+            option.cost = 1;
+        } else {
+            int leftSteps = 0, rightSteps = 0;
+            Direction temp = currentDir;
+            while (temp != targetDir && leftSteps < 8) {
+                temp = rotateLeft(temp, false);
+                leftSteps++;
+            }
+            temp = currentDir;
+            while (temp != targetDir && rightSteps < 8) {
+                temp = rotateRight(temp, false);
+                rightSteps++;
+            }
+            if (leftSteps <= rightSteps) {
+                option.action = (leftSteps == 2) ? ActionRequest::RotateLeft90 : ActionRequest::RotateLeft45;
+                option.cost = leftSteps;
+            } else {
+                option.action = (rightSteps == 2) ? ActionRequest::RotateRight90 : ActionRequest::RotateRight45;
+                option.cost = rightSteps;
+            }
+            option.cost += 1; // Add 1 for the move after rotation
+        }
+    }
+    return option;
+}
+
+std::vector<BasicTankAlgorithm::SafeMoveOption> BasicTankAlgorithm::getSafeMoveOptions(const std::vector<Point>& positions) const {
+    std::vector<SafeMoveOption> options;
+    for (const auto& pos : positions) {
+        options.push_back(getSafeMoveOption(pos));
+    }
+    return options;
+}
+
+ActionRequest BasicTankAlgorithm::getActionToSafePosition() const {
+    auto safePositions = getSafePositions();
+    if (safePositions.empty()) {
+        return ActionRequest::DoNothing;
+    }
+    auto options = getSafeMoveOptions(safePositions);
+    auto best = std::min_element(options.begin(), options.end());
+    return best->action;
 } 
