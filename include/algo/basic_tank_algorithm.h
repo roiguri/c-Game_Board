@@ -59,8 +59,6 @@ private:
     std::vector<Point> m_friendlyTanks;
     std::vector<Point> m_shells;
 
-    // Internal decision logic
-    bool isInDanger() const;
     bool canShootEnemy() const;
 
     // === Helper Methods ===
@@ -69,14 +67,6 @@ private:
      * @return true if in danger, false otherwise
      */
     bool isInDangerFromShells() const;
-
-    /**
-     * @brief Checks if there is a clear line of sight between two points (handles board wrapping)
-     * @param from The starting point
-     * @param to The target point
-     * @return true if line of sight exists, false otherwise
-     */
-    bool hasLineOfSight(const Point& from, const Point& to) const;
 
     /**
      * @brief Checks if a position is safe (no walls, tanks, mines, or shell danger)
@@ -97,4 +87,16 @@ private:
      * @return ActionRequest to reach a safe position
      */
     ActionRequest getActionToSafePosition(const std::vector<Point>& safePositions) const;
+
+    /**
+     * @brief Returns the direction if there is a line of sight from 'from' to 'to', else std::nullopt
+     */
+    std::optional<Direction> getLineOfSightDirection(const Point& from, const Point& to) const;
+
+    /**
+     * @brief Checks if there is a line of sight from 'from' to 'to' in the given direction
+     */
+    bool checkLineOfSightInDirection(const Point& from, const Point& to, Direction direction) const;
+
+    friend class BasicTankAlgorithmTest;
 }; 
