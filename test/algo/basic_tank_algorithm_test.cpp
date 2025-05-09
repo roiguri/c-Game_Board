@@ -6,6 +6,8 @@
 #include "players/battle_info_impl.h"
 #include <vector>
 #include <string>
+#include <gmock/gmock.h>
+using ::testing::UnorderedElementsAreArray;
 
 class BasicTankAlgorithmTest : public ::testing::Test {
 protected:
@@ -60,6 +62,7 @@ protected:
     bool isInDangerFromShells() { return algo->isInDangerFromShells(); }
     bool isInDangerFromShells(const Point& pos) { return algo->isInDangerFromShells(pos); }
     bool isPositionSafe(const Point& pos) { return algo->isPositionSafe(pos); }
+    std::vector<Point> getSafePositions() { return algo->getSafePositions(); }
 };
 
 TEST_F(BasicTankAlgorithmTest, UpdateBattleInfo_UpdatesGameBoardAndObjects) {
@@ -298,3 +301,76 @@ TEST_F(BasicTankAlgorithmTest, IsPositionSafe_ShellDanger) {
     algo->updateBattleInfo(info);
     EXPECT_FALSE(isPositionSafe(Point(2, 2)));
 }
+
+TEST_F(BasicTankAlgorithmTest, GetSafePositions_AllSafe) {
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 2));
+    algo->setTank(*tank);
+    auto safe = getSafePositions();
+    std::vector<Point> expected = {
+        Point(1,1), Point(2,1), Point(3,1),
+        Point(1,2),             Point(3,2),
+        Point(1,3), Point(2,3), Point(3,3)
+    };
+    EXPECT_THAT(safe, UnorderedElementsAreArray(expected));
+}
+
+TEST_F(BasicTankAlgorithmTest, GetSafePositions_SomeWalls) {
+    GameBoard walledBoard = makeBoard({
+        "#####",
+        "# # #",
+        "## ##",
+        "# # #",
+        "#####"
+    });
+    BattleInfoImpl info = makeBattleInfo(walledBoard, {}, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 2));
+    algo->setTank(*tank);
+    auto safe = getSafePositions();
+    // Only non-wall adjacent positions should be returned
+    std::vector<Point> expected = {Point(1,1), Point(3,3), Point(1,3), Point(3,1)};
+    EXPECT_THAT(safe, UnorderedElementsAreArray(expected));
+}
+
+TEST_F(BasicTankAlgorithmTest, GetSafePositions_SomeMines) {
+    GameBoard mineBoard = makeBoard({
+        "#####",
+        "# @ #",
+        "# @ #",
+        "#   #",
+        "#####"
+    });
+    BattleInfoImpl info = makeBattleInfo(mineBoard, {}, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(1, 1));
+    algo->setTank(*tank);
+    auto safe = getSafePositions();
+    // Only (1,2) is safe
+    std::vector<Point> expected = {Point(1,2)};
+    EXPECT_THAT(safe, UnorderedElementsAreArray(expected));
+}
+
+TEST_F(BasicTankAlgorithmTest, GetSafePositions_SomeTanks) {
+    std::vector<Point> enemyTanks = {Point(1,1), Point(3,3)};
+    BattleInfoImpl info = makeBattleInfo(board, enemyTanks, {}, {});
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 2));
+    algo->setTank(*tank);
+    auto safe = getSafePositions();
+    std::vector<Point> expected = {Point(2,1), Point(3,1), Point(1,2), Point(3,2), Point(1,3), Point(2,3)};
+    EXPECT_THAT(safe, UnorderedElementsAreArray(expected));
+}
+
+TEST_F(BasicTankAlgorithmTest, GetSafePositions_ShellDanger) {
+    std::vector<Point> shells = {Point(2, 4)};
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, shells);
+    algo->updateBattleInfo(info);
+    tank->setPosition(Point(2, 2));
+    algo->setTank(*tank);
+    auto safe = getSafePositions();
+    std::vector<Point> expected = {Point(1,1), Point(1,2), Point(3,1), Point(3,2)};
+    EXPECT_THAT(safe, UnorderedElementsAreArray(expected));
+}
+

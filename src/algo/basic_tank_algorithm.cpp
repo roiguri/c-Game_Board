@@ -120,4 +120,17 @@ bool BasicTankAlgorithm::isPositionSafe(const Point& position) const {
         return false;
     }
     return true;
+}
+
+std::vector<Point> BasicTankAlgorithm::getSafePositions() const {
+    std::vector<Point> safePositions;
+    if (!m_tank.has_value()) return safePositions;
+    const Point& position = m_tank.value().get().getPosition();
+    for (const Direction& dir : ALL_DIRECTIONS) {
+        Point adj = m_gameBoard.wrapPosition(position + getDirectionDelta(dir));
+        if (isPositionSafe(adj)) {
+            safePositions.push_back(adj);
+        }
+    }
+    return safePositions;
 } 
