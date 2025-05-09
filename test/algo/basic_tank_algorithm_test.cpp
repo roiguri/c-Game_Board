@@ -58,6 +58,8 @@ protected:
     const std::vector<Point>& getFriendlyTanks() const { return algo->m_friendlyTanks; }
     const std::vector<Point>& getShells() const { return algo->m_shells; }
     bool isInDangerFromShells() { return algo->isInDangerFromShells(); }
+    bool isInDangerFromShells(const Point& pos) { return algo->isInDangerFromShells(pos); }
+    bool isPositionSafe(const Point& pos) { return algo->isPositionSafe(pos); }
 };
 
 TEST_F(BasicTankAlgorithmTest, UpdateBattleInfo_UpdatesGameBoardAndObjects) {
@@ -194,4 +196,105 @@ TEST_F(BasicTankAlgorithmTest, IsInDangerFromShells_MultipleShells) {
     BattleInfoImpl info = makeBattleInfo(board, {}, {}, shells);
     algo->updateBattleInfo(info);
     EXPECT_TRUE(isInDangerFromShells());
+}
+
+TEST_F(BasicTankAlgorithmTest, IsInDangerFromShells_Point_NoShells) {
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    EXPECT_FALSE(isInDangerFromShells(Point(1, 1)));
+}
+
+TEST_F(BasicTankAlgorithmTest, IsInDangerFromShells_Point_ShellWithLineOfSightAndClose) {
+    std::vector<Point> shells = {Point(1, 4)};
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, shells);
+    algo->updateBattleInfo(info);
+    EXPECT_TRUE(isInDangerFromShells(Point(1, 1)));
+}
+
+TEST_F(BasicTankAlgorithmTest, IsInDangerFromShells_Point_ShellWithLineOfSightButTooFar) {
+    GameBoard gameBoard = makeBoard({
+        "######",
+        "#1   #",
+        "#    #",
+        "#    #",
+        "######"
+    });
+    std::vector<Point> shells = {Point(5, 5)};
+    BattleInfoImpl info = makeBattleInfo(gameBoard, {}, {}, shells);
+    algo->updateBattleInfo(info);
+    EXPECT_FALSE(isInDangerFromShells(Point(1, 1)));
+}
+
+TEST_F(BasicTankAlgorithmTest, IsInDangerFromShells_Point_ShellBlockedByWall) {
+    GameBoard walledBoard = makeBoard({
+        "#####",
+        "#   #",
+        "# # #",
+        "#   #",
+        "#####"
+    });
+    std::vector<Point> shells = {Point(3, 3)};
+    BattleInfoImpl info = makeBattleInfo(walledBoard, {}, {}, shells);
+    algo->updateBattleInfo(info);
+    EXPECT_FALSE(isInDangerFromShells(Point(1, 1)));
+}
+
+TEST_F(BasicTankAlgorithmTest, IsInDangerFromShells_Point_MultipleShells) {
+    std::vector<Point> shells = {Point(1, 4), Point(3, 3)};
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, shells);
+    algo->updateBattleInfo(info);
+    EXPECT_TRUE(isInDangerFromShells(Point(1, 1)));
+}
+
+TEST_F(BasicTankAlgorithmTest, IsPositionSafe_SafePosition) {
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    EXPECT_TRUE(isPositionSafe(Point(2, 2)));
+}
+
+TEST_F(BasicTankAlgorithmTest, IsPositionSafe_Wall) {
+    GameBoard walledBoard = makeBoard({
+        "#####",
+        "#   #",
+        "# # #",
+        "#   #",
+        "#####"
+    });
+    BattleInfoImpl info = makeBattleInfo(walledBoard, {}, {}, {});
+    algo->updateBattleInfo(info);
+    EXPECT_FALSE(isPositionSafe(Point(2, 2)));
+}
+
+TEST_F(BasicTankAlgorithmTest, IsPositionSafe_Mine) {
+    GameBoard mineBoard = makeBoard({
+        "#####",
+        "#   #",
+        "# @ #",
+        "#   #",
+        "#####"
+    });
+    BattleInfoImpl info = makeBattleInfo(mineBoard, {}, {}, {});
+    algo->updateBattleInfo(info);
+    EXPECT_FALSE(isPositionSafe(Point(2, 2)));
+}
+
+TEST_F(BasicTankAlgorithmTest, IsPositionSafe_EnemyTank) {
+    std::vector<Point> enemyTanks = {Point(2, 2)};
+    BattleInfoImpl info = makeBattleInfo(board, enemyTanks, {}, {});
+    algo->updateBattleInfo(info);
+    EXPECT_FALSE(isPositionSafe(Point(2, 2)));
+}
+
+TEST_F(BasicTankAlgorithmTest, IsPositionSafe_FriendlyTank) {
+    std::vector<Point> friendlyTanks = {Point(2, 2)};
+    BattleInfoImpl info = makeBattleInfo(board, {}, friendlyTanks, {});
+    algo->updateBattleInfo(info);
+    EXPECT_FALSE(isPositionSafe(Point(2, 2)));
+}
+
+TEST_F(BasicTankAlgorithmTest, IsPositionSafe_ShellDanger) {
+    std::vector<Point> shells = {Point(2, 4)};
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, shells);
+    algo->updateBattleInfo(info);
+    EXPECT_FALSE(isPositionSafe(Point(2, 2)));
 }

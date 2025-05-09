@@ -63,6 +63,12 @@ private:
 
     // === Helper Methods ===
     /**
+     * @brief Checks if the given position is in immediate danger from shells (distance < 3)
+     * @return true if in danger, false otherwise
+     */
+    bool isInDangerFromShells(const Point& position) const;
+
+    /**
      * @brief Checks if the tank is in immediate danger from shells (distance < 3)
      * @return true if in danger, false otherwise
      */

@@ -75,11 +75,7 @@ bool BasicTankAlgorithm::checkLineOfSightInDirection(const Point& from, const Po
     return false;
 }
 
-// TODO: consider optimizing performance
-bool BasicTankAlgorithm::isInDangerFromShells() const {
-    if (!m_tank.has_value()) return false;
-    const Point& position = m_tank.value().get().getPosition();
-
+bool BasicTankAlgorithm::isInDangerFromShells(const Point& position) const {
     for (const Point& shellPos : m_shells) {
         auto dirOpt = getLineOfSightDirection(shellPos, position);
         if (!dirOpt) continue;
@@ -96,4 +92,32 @@ bool BasicTankAlgorithm::isInDangerFromShells() const {
         }
     }
     return false;
+}
+
+bool BasicTankAlgorithm::isInDangerFromShells() const {
+    if (!m_tank.has_value()) return false;
+    return isInDangerFromShells(m_tank.value().get().getPosition());
+}
+
+bool BasicTankAlgorithm::isPositionSafe(const Point& position) const {
+    // Check for wall
+    if (!m_gameBoard.canMoveTo(position)) {
+        return false;
+    }
+    // Check for mine
+    if (m_gameBoard.getCellType(position.getX(), position.getY()) == GameBoard::CellType::Mine) {
+        return false;
+    }
+    // Check for tanks (enemy or friendly)
+    for (const auto& tankPos : m_enemyTanks) {
+        if (tankPos == position) return false;
+    }
+    for (const auto& tankPos : m_friendlyTanks) {
+        if (tankPos == position) return false;
+    }
+    // Check for shell danger at this position
+    if (isInDangerFromShells(position)) {
+        return false;
+    }
+    return true;
 } 
