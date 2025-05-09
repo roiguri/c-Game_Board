@@ -1,3 +1,5 @@
+#pragma once
+
 #include "utils/point.h"
 #include "game_board.h"
 #include <vector>
@@ -9,7 +11,7 @@
  */
 class BattleInfoImpl : public BattleInfo {
 public:
-    // Constructor & destructor
+    // Constructor & destructor // TODO: consider changing int to size_t
     BattleInfoImpl(int boardWidth, int boardHeight);
     virtual ~BattleInfoImpl() = default;
     

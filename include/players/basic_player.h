@@ -2,6 +2,7 @@
 
 #include "Player.h"
 #include "BattleInfo.h"
+#include "players/battle_info_impl.h"
 #include <memory>
 
 /**
@@ -56,7 +57,7 @@ private:
    size_t m_num_shells;
    
    /** Reusable battle info object */
-   std::unique_ptr<BattleInfo> m_battle_info;
+   BattleInfoImpl m_battleInfo;
    
    /**
     * @brief Creates and populates the battle info from satellite view
@@ -77,4 +78,6 @@ private:
     * @param tank_id ID of the tank providing feedback
     */
    void processTankFeedback(int tank_id);
+   
+   friend class BasicPlayerTest;
 };

@@ -104,6 +104,7 @@ if(ENABLE_TESTING)
         test/algo/defensive_algorithm_test.cpp
         test/satellite_view_impl_test.cpp
         test/players/battle_info_impl_test.cpp
+        test/players/basic_player_test.cpp
         test/test_main.cpp
     )
 
