@@ -80,4 +80,22 @@ TEST_F(BattleInfoImplTest, Clear_ResetsState) {
     EXPECT_TRUE(info->getFriendlyTankPositions().empty());
     EXPECT_TRUE(info->getShellPositions().empty());
     EXPECT_TRUE(info->getFeedback().empty());
+}
+
+TEST_F(BattleInfoImplTest, SetAndGetOwnTankPosition) {
+    Point pos(2, 1);
+    info->setOwnTankPosition(pos);
+    EXPECT_EQ(info->getOwnTankPosition(), pos);
+    // Overwrite
+    Point pos2(3, 2);
+    info->setOwnTankPosition(pos2);
+    EXPECT_EQ(info->getOwnTankPosition(), pos2);
+}
+
+TEST_F(BattleInfoImplTest, OwnTankPositionPersistsAfterClear) {
+    Point pos(1, 2);
+    info->setOwnTankPosition(pos);
+    info->clear();
+    // Own tank position should remain unchanged after clear (unless design says otherwise)
+    EXPECT_EQ(info->getOwnTankPosition(), pos);
 } 

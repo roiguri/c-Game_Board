@@ -53,4 +53,12 @@ void BattleInfoImpl::setFeedback(const std::string& feedback) {
 
 const std::string& BattleInfoImpl::getFeedback() const {
     return m_feedback;
+}
+
+void BattleInfoImpl::setOwnTankPosition(const Point& pos) {
+    m_ownTankPosition = pos;
+}
+
+const Point& BattleInfoImpl::getOwnTankPosition() const {
+    return m_ownTankPosition;
 } 

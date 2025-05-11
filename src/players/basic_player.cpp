@@ -35,7 +35,7 @@ void BasicPlayer::populateBattleInfo(SatelliteView& satellite_view) {
                     break;
                 case '%':
                     cellType = GameBoard::CellType::Empty;
-                    m_battleInfo.addFriendlyTankPosition(Point(x, y));
+                    m_battleInfo.setOwnTankPosition(Point(x, y));
                     break;
                 case '*':
                     cellType = GameBoard::CellType::Empty;

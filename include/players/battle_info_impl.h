@@ -35,6 +35,9 @@ public:
     void setFeedback(const std::string& feedback);
     const std::string& getFeedback() const;
     
+    void setOwnTankPosition(const Point& pos);
+    const Point& getOwnTankPosition() const;
+    
 private:
     int m_boardWidth;
     int m_boardHeight;
@@ -42,5 +45,6 @@ private:
     std::vector<Point> m_enemyTankPositions;
     std::vector<Point> m_friendlyTankPositions;
     std::vector<Point> m_shellPositions;
+    Point m_ownTankPosition;
     std::string m_feedback;
 };

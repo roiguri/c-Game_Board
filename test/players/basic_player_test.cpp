@@ -77,9 +77,9 @@ TEST_F(BasicPlayerTest, PopulatesTankAndShellPositions) {
     callPopulateBattleInfo(view);
     auto& info = getBattleInfo();
     // Friendly tanks: '1' and '%'
-    EXPECT_EQ(info.getFriendlyTankPositions().size(), 2);
+    EXPECT_EQ(info.getFriendlyTankPositions().size(), 1);
     EXPECT_EQ(info.getFriendlyTankPositions()[0], Point(1, 0));
-    EXPECT_EQ(info.getFriendlyTankPositions()[1], Point(2, 1));
+    EXPECT_EQ(info.getOwnTankPosition(), Point(2, 1));
     // Enemy tanks: '2'
     EXPECT_EQ(info.getEnemyTankPositions().size(), 1);
     EXPECT_EQ(info.getEnemyTankPositions()[0], Point(2, 0));
@@ -100,4 +100,27 @@ TEST_F(BasicPlayerTest, UpdateTankWithBattleInfoCallsAlgorithm) {
 TEST_F(BasicPlayerTest, ProcessTankFeedbackIsNoOp) {
     // Should not throw or do anything
     EXPECT_NO_THROW(callProcessTankFeedback(0));
+}
+
+TEST_F(BasicPlayerTest, PopulatesOwnTankPosition) {
+    MockSatelliteView view(board);
+    callPopulateBattleInfo(view);
+    auto& info = getBattleInfo();
+    // The own tank ('%') is at (2,1) in the test board
+    EXPECT_EQ(info.getOwnTankPosition(), Point(2, 1));
+}
+
+TEST_F(BasicPlayerTest, NoOwnTankPositionIfNotPresent) {
+    // Remove '%' from the board
+    std::vector<std::vector<char>> noOwnTankBoard = board;
+    for (auto& row : noOwnTankBoard) {
+        for (auto& cell : row) {
+            if (cell == '%') cell = ' ';
+        }
+    }
+    MockSatelliteView view(noOwnTankBoard);
+    callPopulateBattleInfo(view);
+    auto& info = getBattleInfo();
+    // The default-constructed Point should be (0,0)
+    EXPECT_EQ(info.getOwnTankPosition(), Point(0, 0));
 } 
