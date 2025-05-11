@@ -335,14 +335,20 @@ void GameManager::moveShellsOnce() {
   }
 }
 
-// TODO: fix log
+/**
+ * @brief Checks if the game is over and sets m_gameResult accordingly.
+ *
+ * Last line in file will announce the winner in the following format:
+ *   Player <X> won with <Y> tanks still alive
+ * Or:
+ *   Tie, both players have zero tanks
+ * Or:
+ *   Tie, reached max steps = <max_steps>, player 1 has <X> tanks, player 2 has <Y> tanks
+ */
 bool GameManager::checkGameOver() {
     int player1Alive = 0;
     int player2Alive = 0;
     for (const auto& tank : m_tanks) {
-        if (player1Alive > 0 && player2Alive > 0) {
-            break;
-        }
         if (!tank.isDestroyed()) {
             if (tank.getPlayerId() == 1) player1Alive++;
             else if (tank.getPlayerId() == 2) player2Alive++;
@@ -350,28 +356,21 @@ bool GameManager::checkGameOver() {
     }
 
     if (player1Alive > 0 && player2Alive == 0) {
-        m_gameResult = "Player 1 wins - All player 2 tanks destroyed";
+        m_gameResult = "Player 1 won with " + std::to_string(player1Alive) + " tanks still alive";
         return true;
     }
     if (player2Alive > 0 && player1Alive == 0) {
-        m_gameResult = "Player 2 wins - All player 1 tanks destroyed";
+        m_gameResult = "Player 2 won with " + std::to_string(player2Alive) + " tanks still alive";
         return true;
     }
     if (player1Alive == 0 && player2Alive == 0) {
-        m_gameResult = "Tie - All tanks destroyed";
-        return true;
-    }
-
-    // If all shells are used and additional steps have passed, it's a tie
-    if (m_remaining_steps < 0) {
-        m_gameResult = "Tie - Maximum steps reached after shells depleted";
+        m_gameResult = "Tie, both players have zero tanks";
         return true;
     }
     if (m_currentStep >= m_maximum_steps) {
-        m_gameResult = "Tie - Maximum steps reached";
+        m_gameResult = "Tie, reached max steps = " + std::to_string(m_maximum_steps) + ", player 1 has " + std::to_string(player1Alive) + " tanks, player 2 has " + std::to_string(player2Alive) + " tanks";
         return true;
     }
-
     // Game continues
     return false;
 }

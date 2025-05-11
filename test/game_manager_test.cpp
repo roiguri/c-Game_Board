@@ -71,6 +71,23 @@ protected:
     std::string ActionToString(ActionRequest action) {
         return manager->actionToString(action);
     }
+
+    // ---- checkGameOver helpers ----
+    bool CallCheckGameOver() {
+        return manager->checkGameOver();
+    }
+    std::string& GetGameResult() {
+        return manager->m_gameResult;
+    }
+    std::vector<Tank>& Tanks() {
+        return GetTanks(*manager);
+    }
+    void SetCurrentStep(int step) {
+        manager->m_currentStep = step;
+    }
+    void SetMaxSteps(int maxSteps) {
+        manager->m_maximum_steps = maxSteps;
+    }
 };
 
 TEST_F(GameManagerTest, RemoveDestroyedShells_RemovesOnlyDestroyed) {
@@ -670,4 +687,55 @@ TEST_F(GameManagerTest, ProcessStep_Shoot_CannotShootMoreThanMaxShells) {
     }
     CallProcessStep();
     EXPECT_EQ(GetGameLog(*manager).back(), "Shoot (ignored)");
+}
+
+// ---- checkGameOver tests ----
+
+TEST_F(GameManagerTest, CheckGameOver_Player1Wins) {
+    std::vector<std::pair<int, Point>> positions = { {1, Point(0,0)}, {1, Point(1,0)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    bool over = CallCheckGameOver();
+    EXPECT_TRUE(over);
+    EXPECT_EQ(GetGameResult(), "Player 1 won with 2 tanks still alive");
+}
+
+TEST_F(GameManagerTest, CheckGameOver_Player2Wins) {
+    std::vector<std::pair<int, Point>> positions = { {2, Point(0,0)}, {2, Point(1,0)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    bool over = CallCheckGameOver();
+    EXPECT_TRUE(over);
+    EXPECT_EQ(GetGameResult(), "Player 2 won with 2 tanks still alive");
+}
+
+TEST_F(GameManagerTest, CheckGameOver_TieZeroTanks) {
+    std::vector<std::pair<int, Point>> positions = { {1, Point(0,0)}, {2, Point(1,0)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    for (auto& t : Tanks()) t.destroy();
+    bool over = CallCheckGameOver();
+    EXPECT_TRUE(over);
+    EXPECT_EQ(GetGameResult(), "Tie, both players have zero tanks");
+}
+
+TEST_F(GameManagerTest, CheckGameOver_TieMaxSteps) {
+    std::vector<std::pair<int, Point>> positions = { {1, Point(0,0)}, {2, Point(1,0)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    SetMaxSteps(5);
+    SetCurrentStep(5);
+    bool over = CallCheckGameOver();
+    EXPECT_TRUE(over);
+    EXPECT_EQ(GetGameResult(), "Tie, reached max steps = 5, player 1 has 1 tanks, player 2 has 1 tanks");
+}
+
+TEST_F(GameManagerTest, CheckGameOver_GameContinues) {
+    std::vector<std::pair<int, Point>> positions = { {1, Point(0,0)}, {2, Point(1,0)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    SetMaxSteps(10);
+    SetCurrentStep(3);
+    bool over = CallCheckGameOver();
+    EXPECT_FALSE(over);
 }
