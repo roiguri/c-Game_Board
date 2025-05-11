@@ -730,7 +730,7 @@ TEST_F(GameManagerTest, CheckGameOver_TieMaxSteps) {
     CreateTanks(*manager, positions);
     CreateTankAlgorithms(*manager);
     SetMaxSteps(5);
-    SetCurrentStep(6);
+    SetCurrentStep(5);
     bool over = CallCheckGameOver();
     EXPECT_TRUE(over);
     EXPECT_EQ(GetGameResult(), "Tie, reached max steps = 5, player 1 has 1 tanks, player 2 has 1 tanks");

@@ -359,7 +359,7 @@ bool GameManager::checkGameOver() {
         m_gameResult = "Tie, both players have zero tanks";
         return true;
     }
-    if (m_currentStep > m_maximum_steps) {
+    if (m_currentStep >= m_maximum_steps) {
         m_gameResult = "Tie, reached max steps = " + std::to_string(m_maximum_steps) + ", player 1 has " + std::to_string(player1Alive) + " tanks, player 2 has " + std::to_string(player2Alive) + " tanks";
         return true;
     }
