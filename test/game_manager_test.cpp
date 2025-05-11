@@ -63,6 +63,14 @@ protected:
         ASSERT_LT(controllerIndex, controllers.size());
         controllers[controllerIndex].wasKilledInPreviousStep = value;
     }
+
+    void CallProcessStep() {
+        manager->processStep();
+    }
+
+    std::string ActionToString(ActionRequest action) {
+        return manager->actionToString(action);
+    }
 };
 
 TEST_F(GameManagerTest, RemoveDestroyedShells_RemovesOnlyDestroyed) {
@@ -426,4 +434,240 @@ TEST_F(GameManagerTest, LogAction_OrderMatchesTanksOnBoard) {
     ASSERT_FALSE(GetGameLog(*manager).empty());
     // The log should match the order of tanks as found in m_tankControllers
     EXPECT_EQ(GetGameLog(*manager).back(), "MoveForward, Shoot, RotateLeft90");
+}
+
+// ---- processStep tests ----
+
+// 1. One tank moves forward
+TEST_F(GameManagerTest, ProcessStep_OneTankMoves_UpdatesPositionAndLogs) {
+    std::vector<std::pair<int, Point>> positions = { {1, Point(1, 1)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    auto& controller = GetTankControllers(*manager)[0];
+    controller.tank.setDirection(Direction::Right);
+    auto* mockAlgo = dynamic_cast<MockAlgorithm*>(controller.algorithm.get());
+    ASSERT_NE(mockAlgo, nullptr);
+    mockAlgo->setConstantAction(ActionRequest::MoveForward);
+    CallProcessStep();
+    EXPECT_EQ(controller.tank.getPosition(), Point(2, 1));
+    EXPECT_EQ(GetGameLog(*manager).back(), "MoveForward");
+}
+
+// 2. One tank shoots
+TEST_F(GameManagerTest, ProcessStep_OneTankShoots_AddsShellAndLogs) {
+    std::vector<std::pair<int, Point>> positions = { {1, Point(1, 1)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    auto& controller = GetTankControllers(*manager)[0];
+    controller.tank.setDirection(Direction::Down);
+    auto* mockAlgo = dynamic_cast<MockAlgorithm*>(controller.algorithm.get());
+    ASSERT_NE(mockAlgo, nullptr);
+    mockAlgo->setConstantAction(ActionRequest::Shoot);
+    int shellsBefore = GetShells(*manager).size();
+    CallProcessStep();
+    int shellsAfter = GetShells(*manager).size();
+    EXPECT_EQ(shellsAfter, shellsBefore + 1);
+    EXPECT_EQ(GetShells(*manager).back().getPosition(), Point(1, 2));
+    EXPECT_EQ(GetShells(*manager).back().getDirection(), Direction::Down);
+    EXPECT_EQ(GetGameLog(*manager).back(), "Shoot");
+}
+
+// 3. Shell hits tank, tank destroyed and log killed
+TEST_F(GameManagerTest, ProcessStep_ShellHitsTank_TankDestroyedAndLogKilled) {
+    std::vector<std::pair<int, Point>> positions = { {1, Point(1, 1)}, {2, Point(3, 1)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    auto& shooter = GetTankControllers(*manager)[0];
+    auto& target = GetTankControllers(*manager)[1];
+    shooter.tank.setDirection(Direction::Right);
+    auto* mockAlgoShooter = dynamic_cast<MockAlgorithm*>(shooter.algorithm.get());
+    auto* mockAlgoTarget = dynamic_cast<MockAlgorithm*>(target.algorithm.get());
+    ASSERT_NE(mockAlgoShooter, nullptr);
+    ASSERT_NE(mockAlgoTarget, nullptr);
+    mockAlgoShooter->setActionSequence({ActionRequest::Shoot, ActionRequest::DoNothing});
+    mockAlgoTarget->setConstantAction(ActionRequest::DoNothing);
+    // Step 1: shoot, shell moves 4 cells right (from (1,1) to (5,1) with wrap)
+    CallProcessStep();
+    // Target not yet destroyed
+    EXPECT_FALSE(target.tank.isDestroyed());
+    // Step 2: shell moves again, should hit the target at (5,1)
+    CallProcessStep();
+    EXPECT_TRUE(target.tank.isDestroyed());
+    // Log should show MoveForward (killed) for target
+    EXPECT_EQ(GetGameLog(*manager).back(), "DoNothing, DoNothing (killed)");
+}
+
+// 4. Tank on cooldown, shoot ignored
+TEST_F(GameManagerTest, ProcessStep_TankOnCooldown_ShootIgnoredAndLogs) {
+    std::vector<std::pair<int, Point>> positions = { {1, Point(1, 1)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    auto& controller = GetTankControllers(*manager)[0];
+    controller.tank.setDirection(Direction::Right);
+    auto* mockAlgo = dynamic_cast<MockAlgorithm*>(controller.algorithm.get());
+    ASSERT_NE(mockAlgo, nullptr);
+    mockAlgo->setConstantAction(ActionRequest::Shoot);
+    // Simulate tank just shot (cooldown active)
+    controller.tank.shoot();
+    CallProcessStep();
+    EXPECT_EQ(GetGameLog(*manager).back(), "Shoot (ignored)");
+}
+
+// 5. Tank killed this step, logs killed this step
+TEST_F(GameManagerTest, ProcessStep_TankKilledThisStep_LogsKilledThisStep) {
+    std::vector<std::pair<int, Point>> positions = { {1, Point(1, 1)}, {2, Point(2, 1)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    auto& shooter = GetTankControllers(*manager)[0];
+    auto& target = GetTankControllers(*manager)[1];
+    shooter.tank.setDirection(Direction::Right);
+    auto* mockAlgoShooter = dynamic_cast<MockAlgorithm*>(shooter.algorithm.get());
+    auto* mockAlgoTarget = dynamic_cast<MockAlgorithm*>(target.algorithm.get());
+    ASSERT_NE(mockAlgoShooter, nullptr);
+    ASSERT_NE(mockAlgoTarget, nullptr);
+    mockAlgoShooter->setConstantAction(ActionRequest::Shoot);
+    mockAlgoTarget->setConstantAction(ActionRequest::DoNothing);
+    // Step 1: shoot, shell moves 4 cells right (from (1,1) to (5,1)), hits target at (5,1)
+    CallProcessStep();
+    EXPECT_TRUE(target.tank.isDestroyed());
+    EXPECT_EQ(GetGameLog(*manager).back(), "Shoot, DoNothing (killed)");
+}
+
+// 6. Already dead tank, logs killed
+TEST_F(GameManagerTest, ProcessStep_AlreadyDeadTank_LogsKilled) {
+    std::vector<std::pair<int, Point>> positions = { {1, Point(1, 1)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    auto& controller = GetTankControllers(*manager)[0];
+    controller.tank.destroy();
+    controller.wasKilledInPreviousStep = true;
+    auto* mockAlgo = dynamic_cast<MockAlgorithm*>(controller.algorithm.get());
+    ASSERT_NE(mockAlgo, nullptr);
+    mockAlgo->setConstantAction(ActionRequest::MoveForward);
+    CallProcessStep();
+    EXPECT_EQ(GetGameLog(*manager).back(), "Killed");
+}
+
+// 7. Mixed actions, logs all scenarios
+TEST_F(GameManagerTest, ProcessStep_MixedActions_LogsAllScenarios) {
+    std::vector<std::pair<int, Point>> positions = {
+        {2, Point(0, 0)}, {2, Point(1, 0)}, {2, Point(2, 0)}
+    };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    auto& c0 = GetTankControllers(*manager)[0];
+    auto& c1 = GetTankControllers(*manager)[1];
+    auto& c2 = GetTankControllers(*manager)[2];
+    auto* mockAlgo0 = dynamic_cast<MockAlgorithm*>(c0.algorithm.get());
+    auto* mockAlgo1 = dynamic_cast<MockAlgorithm*>(c1.algorithm.get());
+    auto* mockAlgo2 = dynamic_cast<MockAlgorithm*>(c2.algorithm.get());
+    ASSERT_NE(mockAlgo0, nullptr);
+    ASSERT_NE(mockAlgo1, nullptr);
+    ASSERT_NE(mockAlgo2, nullptr);
+    mockAlgo0->setConstantAction(ActionRequest::MoveForward);
+    mockAlgo1->setConstantAction(ActionRequest::Shoot);
+    mockAlgo2->setConstantAction(ActionRequest::RotateLeft90);
+    c0.tank.destroy();
+    c0.wasKilledInPreviousStep = false;
+    CallProcessStep();
+    EXPECT_EQ(GetGameLog(*manager).back(), "DoNothing (killed), Shoot, RotateLeft90 (killed)");
+}
+
+// 8. All shells destroyed, removes shells
+TEST_F(GameManagerTest, ProcessStep_AllShellsDestroyed_RemovesShells) {
+    // Add two destroyed shells
+    GetShells(*manager).push_back(Shell(1, Point(1, 1), Direction::Right));
+    GetShells(*manager).push_back(Shell(2, Point(2, 2), Direction::Left));
+    GetShells(*manager)[0].destroy();
+    GetShells(*manager)[1].destroy();
+    // Add a tank so processStep can run
+    std::vector<std::pair<int, Point>> positions = { {1, Point(0, 0)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    auto& controller = GetTankControllers(*manager)[0];
+    auto* mockAlgo = dynamic_cast<MockAlgorithm*>(controller.algorithm.get());
+    ASSERT_NE(mockAlgo, nullptr);
+    mockAlgo->setConstantAction(ActionRequest::DoNothing);
+    CallProcessStep();
+    EXPECT_TRUE(GetShells(*manager).empty());
+}
+
+// 9. MoveBackward only moves on 3rd step
+TEST_F(GameManagerTest, ProcessStep_MoveBackward_OnlyMovesOnThirdStep) {
+    std::vector<std::pair<int, Point>> positions = { {1, Point(2, 2)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    auto& controller = GetTankControllers(*manager)[0];
+    controller.tank.setDirection(Direction::Up);
+    auto* mockAlgo = dynamic_cast<MockAlgorithm*>(controller.algorithm.get());
+    ASSERT_NE(mockAlgo, nullptr);
+    mockAlgo->setConstantAction(ActionRequest::MoveBackward);
+    // Step 1
+    CallProcessStep();
+    EXPECT_EQ(controller.tank.getPosition(), Point(2, 2));
+    EXPECT_EQ(GetGameLog(*manager).back(), "MoveBackward");
+    // Step 2
+    CallProcessStep();
+    EXPECT_EQ(controller.tank.getPosition(), Point(2, 2));
+    EXPECT_EQ(GetGameLog(*manager).back(), "MoveBackward (ignored)");
+    // Step 3
+    CallProcessStep();
+    EXPECT_EQ(controller.tank.getPosition(), Point(2, 3));
+    EXPECT_EQ(GetGameLog(*manager).back(), "MoveBackward (ignored)");
+    
+    // Step 4  - continous backward
+    CallProcessStep();
+    EXPECT_EQ(controller.tank.getPosition(), Point(2, 4));
+    EXPECT_EQ(GetGameLog(*manager).back(), "MoveBackward");
+}
+
+// 10. Shoot cooldown resets after 4 steps
+TEST_F(GameManagerTest, ProcessStep_Shoot_CooldownResetsAfter4Steps) {
+    std::vector<std::pair<int, Point>> positions = { {1, Point(0, 0)} };
+    GetBoard(*manager) = GameBoard(20, 20);
+
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    auto& controller = GetTankControllers(*manager)[0];
+    controller.tank.setDirection(Direction::Right);
+    auto* mockAlgo = dynamic_cast<MockAlgorithm*>(controller.algorithm.get());
+    ASSERT_NE(mockAlgo, nullptr);
+    mockAlgo->setConstantAction(ActionRequest::Shoot);
+    // Step 1: Shoot (should succeed)
+    CallProcessStep();
+    EXPECT_EQ(GetGameLog(*manager).back(), "Shoot");
+    // Steps 2-4: Shoot (should be ignored due to cooldown)
+    for (int i = 0; i < Tank::SHOOT_COOLDOWN; ++i) {
+        CallProcessStep();
+        EXPECT_EQ(GetGameLog(*manager).back(), "Shoot (ignored)");
+    }
+    // Step 5: Shoot (should succeed again)
+    CallProcessStep();
+    EXPECT_EQ(GetGameLog(*manager).back(), "Shoot");
+}
+
+// 11. Cannot shoot more than max shells in a row
+TEST_F(GameManagerTest, ProcessStep_Shoot_CannotShootMoreThanMaxShells) {
+    std::vector<std::pair<int, Point>> positions = { {1, Point(1, 1)} };
+    int maxShells = Tank::INITIAL_SHELLS;
+    int shootCooldown = Tank::SHOOT_COOLDOWN;
+    GetBoard(*manager) = GameBoard(2 * maxShells * (shootCooldown + 1), 1);
+
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    auto& controller = GetTankControllers(*manager)[0];
+    controller.tank.setDirection(Direction::Right);
+    auto* mockAlgo = dynamic_cast<MockAlgorithm*>(controller.algorithm.get());
+    ASSERT_NE(mockAlgo, nullptr);
+    mockAlgo->setConstantAction(ActionRequest::Shoot);
+    for (int i = 0; i < maxShells * (shootCooldown + 1); ++i) {
+        CallProcessStep();
+        if (i % (shootCooldown + 1) == 0) {
+            EXPECT_EQ(GetGameLog(*manager).back(), "Shoot");
+        } else {
+            EXPECT_EQ(GetGameLog(*manager).back(), "Shoot (ignored)");
+        }
+    }
+    CallProcessStep();
+    EXPECT_EQ(GetGameLog(*manager).back(), "Shoot (ignored)");
 }

@@ -260,6 +260,7 @@ void GameManager::applyAction(TankWithAlgorithm& controller) {
           
           if (m_board.canMoveTo(newPosition)) {
               actionResult = playerTank.moveForward(newPosition);
+              std::cout << "actionResult: " << actionResult << std::endl;
           }
           break;
       }
@@ -317,6 +318,7 @@ void GameManager::applyAction(TankWithAlgorithm& controller) {
           actionResult = false;
           break;
   }
+  controller.actionSuccess = actionResult;
 }
 
 void GameManager::moveShellsOnce() {

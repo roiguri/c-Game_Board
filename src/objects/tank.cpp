@@ -61,7 +61,7 @@ bool Tank::moveForward(const Point& newPosition) {
 
 bool Tank::requestMoveBackward(const Point& newPosition) {
   if (isInBackwardMovement()) {
-      return true;
+      return false;
   }
   m_backwardPosition = newPosition;
   if (m_continuousBackward) {
