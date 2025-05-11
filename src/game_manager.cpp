@@ -12,24 +12,18 @@
 
 GameManager::GameManager(std::unique_ptr<PlayerFactory> playerFactory,
                        std::unique_ptr<TankAlgorithmFactory> tankAlgorithmFactory)
-    : m_player1Algorithm(nullptr), // FIXME: remove
-      m_player2Algorithm(nullptr), // FIXME: remove
-      m_PlayerFactory(std::move(playerFactory)),
+    : m_PlayerFactory(std::move(playerFactory)),
       m_tankAlgorithmFactory(std::move(tankAlgorithmFactory)),
       m_currentStep(0),
       m_gameOver(false),
       m_remaining_steps(40),
-      m_maximum_steps(1000) {
-
+      m_maximum_steps(1000) { // TODO: update maximum steps    
     #ifdef ENABLE_VISUALIZATION
     m_visualizationManager = createVisualizationManager();
     #endif
 }
 
 GameManager::~GameManager() {
-    delete m_player1Algorithm;
-    delete m_player2Algorithm;
-
     #ifdef ENABLE_VISUALIZATION
     m_visualizationManager.reset();
     #endif
@@ -66,8 +60,6 @@ bool GameManager::readBoard(const std::string& filePath,
     }
     
     createTanks(tankPositions);
-    createAlgorithms(player1Algorithm, player2Algorithm); // FIXME: remove
-
     createTankAlgorithms();
 
     // TODO: extract to private helper function
@@ -232,8 +224,6 @@ void GameManager::processStep() {
   #ifdef ENABLE_VISUALIZATION
   if (m_visualizationManager) {
       std::string stepMessage = "Step " + std::to_string(m_currentStep) + ": ";
-      stepMessage += "P1: " + actionToString(player1Action);
-      stepMessage += ", P2: " + actionToString(player2Action);
       
       m_visualizationManager->captureGameState(
           m_currentStep,
@@ -245,31 +235,8 @@ void GameManager::processStep() {
       );
   }
   #endif
-}
 
-Action GameManager::getPlayerAction(int playerId) {
-  if (playerId != 1 && playerId != 2) {
-    return Action::None;
-  }
-
-  Tank& playerTank = getPlayerTank(playerId);
-  Tank& enemyTank = getPlayerTank(playerId == 1 ? 2 : 1);
-
-  Algorithm* algorithm = (playerId == 1) ? 
-                         m_player1Algorithm : m_player2Algorithm;
-  if (!algorithm) {
-      return Action::None;
-  }
-  return algorithm->getNextAction(m_board, playerTank, enemyTank, m_shells);
-}
-
-Tank& GameManager::getPlayerTank(int playerId) {
-  for (auto& tank : m_tanks) {
-    if (tank.getPlayerId() == playerId) {
-        return tank;
-    }
-  }
-  return m_tanks[0];
+  logAction();
 }
 
 void GameManager::applyAction(TankWithAlgorithm& controller) {
@@ -334,9 +301,12 @@ void GameManager::applyAction(TankWithAlgorithm& controller) {
           }
           break;
       case ActionRequest::GetBattleInfo: {
-          // TODO: add getBattleInfo
-          SatelliteViewImpl satteliteView(m_currentBoard, m_currentTanks, m_currentShells, playerTank.getPosition());
-          // Player.updateTankWithBattleInfo(tank, satteliteView)
+            SatelliteViewImpl satteliteView(m_currentBoard, m_currentTanks, m_currentShells, playerTank.getPosition());
+            if (controller.tank.getPlayerId() == 1) {
+                m_player1->updateTankWithBattleInfo(*controller.algorithm, satteliteView);
+            } else {
+                m_player2->updateTankWithBattleInfo(*controller.algorithm, satteliteView);
+            }
           }
           break;
       case ActionRequest::DoNothing:
@@ -346,8 +316,7 @@ void GameManager::applyAction(TankWithAlgorithm& controller) {
       default:
           actionResult = false;
           break;
-  }  
-  logAction(playerId, controller.nextAction, actionResult);
+  }
 }
 
 void GameManager::moveShellsOnce() {
@@ -405,25 +374,43 @@ bool GameManager::checkGameOver() {
     return false;
 }
 
-void GameManager::logAction(int playerId, ActionRequest action, bool valid) {
-  std::string actionType = "Replace with actionToString(action)"; // FIXME: add actionToString
-  std::string status = valid ? "Success" : "Bad Step";
-  
-  // Format: "Player X: [Action] - [Status]"
-  std::string logEntry = "Player " + std::to_string(playerId) + ": " + 
-                         actionType + " - " + status;
-  
-  m_gameLog.push_back(logEntry);
+void GameManager::logAction() {
+    std::vector<std::string> stepActions;
+    for (auto& controller : m_tankControllers) {
+        std::string actionStr;
+        if (controller.tank.isDestroyed() && !controller.wasKilledInPreviousStep) {
+            actionStr = actionToString(controller.nextAction) + " (killed)";
+            controller.wasKilledInPreviousStep = true;
+        } else if (controller.tank.isDestroyed()) {
+            actionStr = "Killed";
+        } else {
+            actionStr = actionToString(controller.nextAction);
+            if (!controller.actionSuccess) actionStr += " (ignored)";
+        }
+        stepActions.push_back(actionStr);
+    }
+    std::string turnLog;
+    for (size_t i = 0; i < stepActions.size(); ++i) {
+        if (i > 0) turnLog += ", ";
+        turnLog += stepActions[i];
+    }
+    m_gameLog.push_back(turnLog);
 }
 
-void GameManager::createAlgorithms(
-  Algorithm* player1Algorithm, 
-  Algorithm* player2Algorithm
-) {
-  m_player1Algorithm = player1Algorithm ? 
-                        player1Algorithm : new ChaseAlgorithm();
-  m_player2Algorithm = player2Algorithm ? 
-                        player2Algorithm : new DefensiveAlgorithm();
+// Helper to convert ActionRequest to string for logging
+std::string GameManager::actionToString(ActionRequest action) {
+    switch (action) {
+        case ActionRequest::MoveForward: return "MoveForward";
+        case ActionRequest::MoveBackward: return "MoveBackward";
+        case ActionRequest::RotateLeft45: return "RotateLeft45";
+        case ActionRequest::RotateRight45: return "RotateRight45";
+        case ActionRequest::RotateLeft90: return "RotateLeft90";
+        case ActionRequest::RotateRight90: return "RotateRight90";
+        case ActionRequest::Shoot: return "Shoot";
+        case ActionRequest::GetBattleInfo: return "GetBattleInfo";
+        case ActionRequest::DoNothing: return "DoNothing";
+        default: return "Unknown";
+    }
 }
 
 // TODO: consider adding sequence number to tank object members

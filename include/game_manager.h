@@ -61,10 +61,19 @@ public:
      * Processes turns, applies actions, and checks for game end conditions
      */
     void run();
+
+    struct TankWithAlgorithm {
+        Tank& tank;
+        std::unique_ptr<TankAlgorithm> algorithm;
+        ActionRequest nextAction = ActionRequest::DoNothing;
+        bool actionSuccess = false; // Track if last action was successful
+        bool wasKilledInPreviousStep = false; // Track if killed this step
+    };
+
 private:
-    // Algorithms
-    Algorithm* m_player1Algorithm;
-    Algorithm* m_player2Algorithm;
+    // Players
+    std::unique_ptr<Player> m_player1;
+    std::unique_ptr<Player> m_player2;
 
     // Factories
     std::unique_ptr<PlayerFactory> m_PlayerFactory;
@@ -83,25 +92,14 @@ private:
     GameBoard m_board;
     std::vector<Tank> m_tanks; // FIXME: remove once migration completes
     std::vector<Shell> m_shells;
-    struct TankWithAlgorithm {
-        Tank& tank;
-        std::unique_ptr<TankAlgorithm> algorithm;
-        ActionRequest nextAction = ActionRequest::DoNothing;
-    };
     std::vector<TankWithAlgorithm> m_tankControllers;
     
     // Output file path
     std::string m_outputFilePath;
-    
-    // Get the tank object for a player
-    Tank& getPlayerTank(int playerId);
 
     // Game step methods
     // Process a single step of the game
     void processStep();
-    
-    // Get the next action for a player from their algorithm
-    Action getPlayerAction(int playerId);
     
     // Apply an action for a player
     // Validates and executes the action, updating the game state
@@ -115,16 +113,9 @@ private:
     bool checkGameOver();
     
     // Log an action taken by a player
-    void logAction(int playerId, ActionRequest action, bool valid);
+    void logAction();
     
     // Helper methods
-
-    // TODO: remove once algorithms are correctly implemented
-    // Create algorithm instances for both players
-    void createAlgorithms(
-      Algorithm* player1Algorithm, 
-      Algorithm* player2Algorithm
-    );
 
     // Create algorithm instances for all tanks
     void createTankAlgorithms();
@@ -140,6 +131,9 @@ private:
 
     // Save the game results to an output file
     bool saveResults(const std::string& outputFilePath);
+
+    // Helper method to convert ActionRequest to string
+    std::string actionToString(ActionRequest action);
 
     // For testing purposes
     friend class GameManagerTest;
