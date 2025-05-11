@@ -576,3 +576,13 @@ TEST_F(GameBoardTest, ToString_PopulatedBoard) {
     EXPECT_EQ(board.toString(), expected);
 }
 
+TEST_F(GameBoardTest, ZeroDimensionBoard_DoesNotCrash) {
+    GameBoard zeroBoard(0, 0);
+    // Should not crash or throw
+    EXPECT_EQ(zeroBoard.getWidth(), 0);
+    EXPECT_EQ(zeroBoard.getHeight(), 0);
+    // wrapPosition should return the input
+    Point p(5, 7);
+    EXPECT_EQ(zeroBoard.wrapPosition(p), Point(-1, -1));
+}
+

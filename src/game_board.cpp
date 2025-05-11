@@ -169,10 +169,12 @@ int GameBoard::getWallHealth(const Point& position) const {
     return 0;
 }
 
-Point GameBoard::wrapPosition(const Point& position) const {   
+Point GameBoard::wrapPosition(const Point& position) const {
+    if (m_width == 0 || m_height == 0) {
+        return Point(-1, -1);
+    }
     int wrappedX = ((position.getX() + m_width) % m_width);
     int wrappedY = ((position.getY() + m_height) % m_height);
-    
     return Point(wrappedX, wrappedY);
 }
 
