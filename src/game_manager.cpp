@@ -10,10 +10,10 @@
 #include <unordered_map>
 #include <satellite_view_impl.h>
 
-GameManager::GameManager(std::unique_ptr<PlayerFactory> playerFactory,
-                       std::unique_ptr<TankAlgorithmFactory> tankAlgorithmFactory)
-    : m_PlayerFactory(std::move(playerFactory)),
-      m_tankAlgorithmFactory(std::move(tankAlgorithmFactory)),
+GameManager::GameManager(PlayerFactory& playerFactory,
+                       TankAlgorithmFactory& tankAlgorithmFactory)
+    : m_PlayerFactory(playerFactory),
+      m_tankAlgorithmFactory(tankAlgorithmFactory),
       m_currentStep(0),
       m_gameOver(false),
       m_remaining_steps(40),
@@ -43,6 +43,9 @@ bool GameManager::readBoard(const std::string& filePath) {
     if (boardLines.empty()) {
         return false;
     }
+
+    m_player1 = m_PlayerFactory.create(1, cols, rows, maxSteps, numShells);
+    m_player2 = m_PlayerFactory.create(2, cols, rows, maxSteps, numShells);
     
     m_board = GameBoard(cols, rows);
     std::vector<std::string> errors;
@@ -451,7 +454,7 @@ void GameManager::createTankAlgorithms() {
     for (auto& tank : m_tanks) {
         int playerId = tank.getPlayerId();
         int tankIndex = playerTankCounts[playerId]++;
-        auto algo = m_tankAlgorithmFactory->create(playerId, tankIndex);
+        auto algo = m_tankAlgorithmFactory.create(playerId, tankIndex);
         m_tankControllers.push_back(TankWithAlgorithm{tank, std::move(algo)});
     }
 }

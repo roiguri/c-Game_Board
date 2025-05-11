@@ -13,6 +13,8 @@
 class GameManagerTest : public ::testing::Test {
 protected:
     std::unique_ptr<GameManager> manager;
+    MockPlayerFactory playerFactory;
+    MockAlgorithmFactory algoFactory;
 
     static void RemoveDestroyedShells(GameManager& manager) {
         manager.removeDestroyedShells();
@@ -52,10 +54,7 @@ protected:
     }
 
     void SetUp() override {
-        auto playerFactory = std::make_unique<MockPlayerFactory>();
-        auto algoFactory = std::make_unique<MockAlgorithmFactory>();
-        manager = std::make_unique<GameManager>(std::move(playerFactory), std::move(algoFactory));
-
+        manager = std::make_unique<GameManager>(playerFactory, algoFactory);
         // Initialize the board to a 5x5 empty board
         GetBoard(*manager) = GameBoard(5, 5);
     }

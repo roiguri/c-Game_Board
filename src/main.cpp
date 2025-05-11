@@ -4,13 +4,14 @@
 #include <filesystem>
 #include <iostream>
 #include "game_manager.h"
-#include "algo/tank_algorithm_factory_impl.h"
-#include "player_factory_impl.h"
+#include "algo/basic_tank_algorithm_factory.h"
+#include "players/basic_player_factory.h"
 
 // Run the game with a specified board file
 int runGameWithFile(const std::string& filePath) {
-    // FIXME: Update with real factories
-    GameManager gameManager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
+    BasicPlayerFactory playerFactory;
+    BasicTankAlgorithmFactory algoFactory;
+    GameManager gameManager(playerFactory, algoFactory);
     if (!gameManager.readBoard(filePath)) {
         return 1;
     }
@@ -77,9 +78,9 @@ int generateAndRunGame(const std::string& configPath) {
         return 1;
     }
     
-    // Run the game with the temporary file
-    // FIXME: Update with real factories
-    GameManager gameManager(std::make_unique<PlayerFactoryImpl>(), std::make_unique<TankAlgorithmFactoryImpl>());
+    BasicPlayerFactory playerFactory;
+    BasicTankAlgorithmFactory algoFactory;
+    GameManager gameManager(playerFactory, algoFactory);
     if (!gameManager.readBoard(tempFilePath)) {
         std::filesystem::remove(tempFilePath);
         return 1;

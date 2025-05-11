@@ -31,8 +31,8 @@ public:
     /**
      * @brief Construct a new Game Manager object with default state
      */
-    GameManager(std::unique_ptr<PlayerFactory> playerFactory,
-                std::unique_ptr<TankAlgorithmFactory> tankAlgorithmFactory);
+    GameManager(PlayerFactory& playerFactory,
+                TankAlgorithmFactory& tankAlgorithmFactory);
     
     /**
      * @brief Destroy the Game Manager object and free resources
@@ -51,9 +51,7 @@ public:
      * @param filePath Path to the board file
      * @return true if initialization was successful, false otherwise
      */
-    bool readBoard(const std::string& filePath,
-                   Algorithm* player1Algorithm = nullptr,
-                   Algorithm* player2Algorithm = nullptr);
+    bool readBoard(const std::string& filePath);
     
     /**
      * @brief Run the game loop until completion
@@ -76,8 +74,8 @@ private:
     std::unique_ptr<Player> m_player2;
 
     // Factories
-    std::unique_ptr<PlayerFactory> m_PlayerFactory;
-    std::unique_ptr<TankAlgorithmFactory> m_tankAlgorithmFactory;
+    PlayerFactory& m_PlayerFactory;
+    TankAlgorithmFactory& m_tankAlgorithmFactory;
 
     // Game state tracking
     int m_currentStep;
@@ -90,7 +88,7 @@ private:
 
     // Core game state
     GameBoard m_board;
-    std::vector<Tank> m_tanks; // FIXME: remove once migration completes
+    std::vector<Tank> m_tanks;
     std::vector<Shell> m_shells;
     std::vector<TankWithAlgorithm> m_tankControllers;
     
