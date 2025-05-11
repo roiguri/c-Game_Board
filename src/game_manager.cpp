@@ -131,7 +131,6 @@ void GameManager::run() {
   saveResults(m_outputFilePath);
 }
 
-// TODO: FIX
 bool GameManager::saveResults(const std::string& outputFilePath) {
   std::ofstream outputFile(outputFilePath);
   if (!outputFile.is_open()) {

@@ -6,6 +6,8 @@
 #include "utils/point.h"
 #include "utils/direction.h"
 #include <memory>
+#include <fstream>
+#include <cstdio> // for std::remove
 
 // Test fixture for GameManager
 class GameManagerTest : public ::testing::Test {
@@ -87,6 +89,10 @@ protected:
     }
     void SetMaxSteps(int maxSteps) {
         manager->m_maximum_steps = maxSteps;
+    }
+
+    void CallSaveResults(const std::string& file) {
+        manager->saveResults(file);
     }
 };
 
@@ -738,4 +744,37 @@ TEST_F(GameManagerTest, CheckGameOver_GameContinues) {
     SetCurrentStep(3);
     bool over = CallCheckGameOver();
     EXPECT_FALSE(over);
+}
+
+TEST_F(GameManagerTest, SaveResults_WritesAllLogLines) {
+    std::string testFile = "test_output.txt";
+    // Fill log with known lines
+    GetGameLog(*manager).clear();
+    GetGameLog(*manager).push_back("Step 1 completed");
+    GetGameLog(*manager).push_back("Step 2 completed");
+    GetGameLog(*manager).push_back("Game ended after 2 steps");
+    GetGameLog(*manager).push_back("Result: Player 1 won with 1 tanks still alive");
+
+    // Call saveResults
+    CallSaveResults(testFile);
+
+    // Read file back
+    std::ifstream in(testFile);
+    ASSERT_TRUE(in.is_open());
+    std::vector<std::string> lines;
+    std::string line;
+    while (std::getline(in, line)) {
+        lines.push_back(line);
+    }
+    in.close();
+
+    // Check all lines
+    ASSERT_EQ(lines.size(), 4u);
+    EXPECT_EQ(lines[0], "Step 1 completed");
+    EXPECT_EQ(lines[1], "Step 2 completed");
+    EXPECT_EQ(lines[2], "Game ended after 2 steps");
+    EXPECT_EQ(lines[3], "Result: Player 1 won with 1 tanks still alive");
+
+    // Clean up
+    std::remove(testFile.c_str());
 }
