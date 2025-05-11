@@ -215,13 +215,13 @@ TEST_F(TankTest, MoveBackward_InitiatesBackwardMoveWithDelay) {
   EXPECT_EQ(tank->getBackwardCounter(), 1);
   
   // Second request should increment the counter but still not move
-  EXPECT_TRUE(tank->requestMoveBackward(backwardPosition));
+  EXPECT_FALSE(tank->requestMoveBackward(backwardPosition)); // other requests ignored
   EXPECT_EQ(tank->getPosition(), originalPosition);
   EXPECT_TRUE(tank->isMovingBackward()); 
   EXPECT_EQ(tank->getBackwardCounter(), 2);
   
   // Third request should actually move the tank
-  EXPECT_TRUE(tank->requestMoveBackward(backwardPosition));
+  EXPECT_FALSE(tank->requestMoveBackward(backwardPosition)); // other requests ignored
   EXPECT_EQ(tank->getPosition(), backwardPosition); 
   EXPECT_FALSE(tank->isMovingBackward()); 
   EXPECT_EQ(tank->getBackwardCounter(), 0); 
@@ -232,8 +232,8 @@ TEST_F(TankTest, MoveBackward_ContinuousMovesTakeOneStep) {
   Point backwardPosition1 = tank->getNextBackwardPosition();
   // Set up the continuous backward state
   EXPECT_TRUE(tank->requestMoveBackward(backwardPosition1));
-  EXPECT_TRUE(tank->requestMoveBackward(backwardPosition1));
-  EXPECT_TRUE(tank->requestMoveBackward(backwardPosition1));
+  EXPECT_FALSE(tank->requestMoveBackward(backwardPosition1));
+  EXPECT_FALSE(tank->requestMoveBackward(backwardPosition1));
   EXPECT_TRUE(tank->isContinuousBackward());
   
   Point tankPos = tank->getPosition();
@@ -294,24 +294,25 @@ TEST_F(TankTest, Shoot_IgnoredDuringBackwardDelay) {
 TEST_F(TankTest, ContinuousBackward_ResetByOtherActions) {
   Point backwardPosition = tank->getNextBackwardPosition();
   EXPECT_TRUE(tank->requestMoveBackward(backwardPosition));
-  EXPECT_TRUE(tank->requestMoveBackward(backwardPosition));
-  EXPECT_TRUE(tank->requestMoveBackward(backwardPosition));
+  EXPECT_FALSE(tank->requestMoveBackward(backwardPosition));
+  EXPECT_FALSE(tank->requestMoveBackward(backwardPosition));
   EXPECT_TRUE(tank->isContinuousBackward());
+  EXPECT_TRUE(tank->requestMoveBackward(backwardPosition));
   
   EXPECT_TRUE(tank->moveForward(tank->getPosition()));
   EXPECT_FALSE(tank->isContinuousBackward());
   
   EXPECT_TRUE(tank->requestMoveBackward(backwardPosition));
-  EXPECT_TRUE(tank->requestMoveBackward(backwardPosition));
-  EXPECT_TRUE(tank->requestMoveBackward(backwardPosition));
+  EXPECT_FALSE(tank->requestMoveBackward(backwardPosition));
+  EXPECT_FALSE(tank->requestMoveBackward(backwardPosition));
   EXPECT_TRUE(tank->isContinuousBackward());
   
   EXPECT_TRUE(tank->rotateLeft(false));
   EXPECT_FALSE(tank->isContinuousBackward());
   
   EXPECT_TRUE(tank->requestMoveBackward(backwardPosition));
-  EXPECT_TRUE(tank->requestMoveBackward(backwardPosition));
-  EXPECT_TRUE(tank->requestMoveBackward(backwardPosition));
+  EXPECT_FALSE(tank->requestMoveBackward(backwardPosition));
+  EXPECT_FALSE(tank->requestMoveBackward(backwardPosition));
   EXPECT_TRUE(tank->isContinuousBackward());
   
   EXPECT_TRUE(tank->shoot());
@@ -333,8 +334,8 @@ TEST_F(TankTest, ResetBackwardMovement_ResetsAllBackwardState) {
   
   // Set up continuous backward state
   EXPECT_TRUE(tank->requestMoveBackward(backwardPosition));
-  EXPECT_TRUE(tank->requestMoveBackward(backwardPosition));
-  EXPECT_TRUE(tank->requestMoveBackward(backwardPosition));
+  EXPECT_FALSE(tank->requestMoveBackward(backwardPosition));
+  EXPECT_FALSE(tank->requestMoveBackward(backwardPosition));
   EXPECT_TRUE(tank->isContinuousBackward());
   
   tank->resetBackwardMovement();
