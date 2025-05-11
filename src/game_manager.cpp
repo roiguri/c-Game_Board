@@ -183,8 +183,7 @@ void GameManager::processStep() {
 
   #ifdef ENABLE_VISUALIZATION
   if (m_visualizationManager) {
-      std::string midStepMessage = "Step " + std::to_string(m_currentStep)+": ";
-      midStepMessage += "Shells moved once";
+      std::string midStepMessage = "Step " + std::to_string(m_currentStep);
       
       m_visualizationManager->captureGameState(
           m_currentStep,
@@ -216,9 +215,10 @@ void GameManager::processStep() {
     tank.updateCooldowns();
   }
 
+  std::string turnLog = logAction();
   #ifdef ENABLE_VISUALIZATION
   if (m_visualizationManager) {
-      std::string stepMessage = "Step " + std::to_string(m_currentStep) + ": ";
+      std::string stepMessage = "Step " + std::to_string(m_currentStep) + ": " + turnLog;
       
       m_visualizationManager->captureGameState(
           m_currentStep,
@@ -230,8 +230,6 @@ void GameManager::processStep() {
       );
   }
   #endif
-
-  logAction();
 }
 
 void GameManager::applyAction(TankWithAlgorithm& controller) {
@@ -370,7 +368,7 @@ bool GameManager::checkGameOver() {
     return false;
 }
 
-void GameManager::logAction() {
+std::string GameManager::logAction() {
     std::vector<std::string> stepActions;
     for (auto& controller : m_tankControllers) {
         std::string actionStr;
@@ -391,6 +389,7 @@ void GameManager::logAction() {
         turnLog += stepActions[i];
     }
     m_gameLog.push_back(turnLog);
+    return turnLog;
 }
 
 // Helper to convert ActionRequest to string for logging

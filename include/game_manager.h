@@ -111,7 +111,7 @@ private:
     bool checkGameOver();
     
     // Log an action taken by a player
-    void logAction();
+    std::string logAction();
     
     // Helper methods
 
