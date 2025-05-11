@@ -31,6 +31,9 @@ class BasicTankAlgorithm : public TankAlgorithm {
 public:
     /**
      * @brief Constructor
+     * 
+     * Without further information the algorithm assumes a 5x5 board.
+     * 
      * @param playerId The player ID this tank belongs to
      * @param tankIndex The index of the tank controlled by this algorithm
      */
@@ -59,21 +62,18 @@ public:
      */
     void updateBattleInfo(BattleInfo& info) override;
 
-    /**
-     * @brief Sets the tank reference for this algorithm instance.
-     *        Should be called when the algorithm is created.
-     * @param tank The tank to associate with this algorithm
-     */
-    void setTank(Tank& tank);
-
 private:
     int m_playerId;
     int m_tankIndex;
     int m_turnsSinceLastUpdate = 0;
 
+    // State tracking for position, direction, shells, and cooldown
+    Point m_trackedPosition;
+    Direction m_trackedDirection;
+    int m_trackedShells = Tank::INITIAL_SHELLS;
+    int m_trackedCooldown = 0;
+
     // Known game state
-    // TODO: consider changing to a regular reference
-    std::optional<std::reference_wrapper<Tank>> m_tank;
     GameBoard m_gameBoard;
     std::vector<Point> m_enemyTanks;
     std::vector<Point> m_friendlyTanks;
@@ -162,6 +162,12 @@ private:
      * @return true if line of sight exists, false otherwise
      */
     bool checkLineOfSightInDirection(const Point& from, const Point& to, Direction direction) const;
+
+    /**
+     * @brief Update the tracked position, direction, shells, and cooldown based on the last action.
+     * @param lastAction The action that was just taken
+     */
+    void updateState(ActionRequest lastAction);
 
     friend class BasicTankAlgorithmTest;
 }; 

@@ -1,39 +1,48 @@
 #include "algo/basic_tank_algorithm.h"
 #include "objects/tank.h"
 #include "utils/point.h"
+#include "utils/direction.h"
 #include <cassert>
+#include <iostream>
 
 BasicTankAlgorithm::BasicTankAlgorithm(int playerId, int tankIndex)
-    : m_playerId(playerId), m_tankIndex(tankIndex), m_gameBoard(0, 0) {}
+    : m_playerId(playerId), m_tankIndex(tankIndex), m_gameBoard(5, 5) {
+    m_trackedPosition = Point(0, 0);
+    m_trackedDirection = (playerId == 1) ? Direction::Left : Direction::Right;
+    m_trackedShells = Tank::INITIAL_SHELLS;
+    m_trackedCooldown = 0;
+    m_turnsSinceLastUpdate = 4;
+}
 
 BasicTankAlgorithm::~BasicTankAlgorithm() = default;
 
 ActionRequest BasicTankAlgorithm::getAction() {
     m_turnsSinceLastUpdate++;
+    ActionRequest action;
     // 1. Check if BattleInfo is outdated
     if (m_turnsSinceLastUpdate > 3) {
-        return ActionRequest::GetBattleInfo;
+        action = ActionRequest::GetBattleInfo;
     }
     // 2. Check if in danger
-    if (isInDangerFromShells()) {
-        return getActionToSafePosition();
+    else if (isInDangerFromShells()) {
+        action = getActionToSafePosition();
     }
     // 3. Check if can shoot enemy
-    if (canShootEnemy()) {
-        return ActionRequest::Shoot;
+    else if (canShootEnemy()) {
+        action = ActionRequest::Shoot;
     }
     // TODO: decide what to do if not in danger and not shooting
-    return getActionToSafePosition();
-}
-
-void BasicTankAlgorithm::setTank(Tank& tank) {
-    m_tank = std::ref(tank);
+    else {
+        action = getActionToSafePosition();
+    }
+    updateState(action);
+    return action;
 }
 
 void BasicTankAlgorithm::updateBattleInfo(BattleInfo& info) {
     m_turnsSinceLastUpdate = 0;
     auto& impl = dynamic_cast<BattleInfoImpl&>(info); // TODO: make sure this is correct
-
+    m_trackedPosition = impl.getOwnTankPosition();
     m_gameBoard = impl.getGameBoard(); // TODO: verify all copies not references
     m_enemyTanks = impl.getEnemyTankPositions();
     m_friendlyTanks = impl.getFriendlyTankPositions();
@@ -41,9 +50,8 @@ void BasicTankAlgorithm::updateBattleInfo(BattleInfo& info) {
 }
 
 bool BasicTankAlgorithm::canShootEnemy() const {
-    const Tank& myTank = m_tank.value().get();
-    const Point& myPos = myTank.getPosition();
-    Direction myDir = myTank.getDirection();
+    const Point& myPos = m_trackedPosition;
+    const Direction myDir = m_trackedDirection;
     for (const auto& enemyPos : m_enemyTanks) {
         if (checkLineOfSightInDirection(myPos, enemyPos, myDir)) {
             return true;
@@ -103,8 +111,7 @@ bool BasicTankAlgorithm::isInDangerFromShells(const Point& position) const {
 }
 
 bool BasicTankAlgorithm::isInDangerFromShells() const {
-    if (!m_tank.has_value()) return false;
-    return isInDangerFromShells(m_tank.value().get().getPosition());
+    return isInDangerFromShells(m_trackedPosition);
 }
 
 bool BasicTankAlgorithm::isPositionSafe(const Point& position) const {
@@ -132,10 +139,8 @@ bool BasicTankAlgorithm::isPositionSafe(const Point& position) const {
 
 std::vector<Point> BasicTankAlgorithm::getSafePositions() const {
     std::vector<Point> safePositions;
-    if (!m_tank.has_value()) return safePositions;
-    const Point& position = m_tank.value().get().getPosition();
     for (const Direction& dir : ALL_DIRECTIONS) {
-        Point adj = m_gameBoard.wrapPosition(position + getDirectionDelta(dir));
+        Point adj = m_gameBoard.wrapPosition(m_trackedPosition + getDirectionDelta(dir));
         if (isPositionSafe(adj)) {
             safePositions.push_back(adj);
         }
@@ -144,9 +149,8 @@ std::vector<Point> BasicTankAlgorithm::getSafePositions() const {
 }
 
 BasicTankAlgorithm::SafeMoveOption BasicTankAlgorithm::getSafeMoveOption(const Point& pos) const {
-    const Tank& tank = m_tank.value().get();
-    const Point& current = tank.getPosition();
-    Direction currentDir = tank.getDirection();
+    const Point& current = m_trackedPosition;
+    const Direction currentDir = m_trackedDirection;
     SafeMoveOption option{pos, ActionRequest::DoNothing, 1000, currentDir};
     if (pos == current) {
         option.action = ActionRequest::DoNothing;
@@ -203,4 +207,34 @@ ActionRequest BasicTankAlgorithm::getActionToSafePosition() const {
     auto options = getSafeMoveOptions(safePositions);
     auto best = std::min_element(options.begin(), options.end());
     return best->action;
+}
+
+void BasicTankAlgorithm::updateState(ActionRequest lastAction) {
+    if (m_trackedCooldown > 0) m_trackedCooldown--;
+    switch (lastAction) {
+        case ActionRequest::MoveForward: {
+            Point delta = getDirectionDelta(m_trackedDirection);
+            m_trackedPosition = m_gameBoard.wrapPosition(m_trackedPosition + delta);
+            break;
+        }
+        case ActionRequest::RotateLeft90:
+            m_trackedDirection = rotateLeft(m_trackedDirection, true);
+            break;
+        case ActionRequest::RotateLeft45:
+            m_trackedDirection = rotateLeft(m_trackedDirection, false);
+            break;
+        case ActionRequest::RotateRight90:
+            m_trackedDirection = rotateRight(m_trackedDirection, true);
+            break;
+        case ActionRequest::RotateRight45:
+            m_trackedDirection = rotateRight(m_trackedDirection, false);
+            break;
+        case ActionRequest::Shoot:
+            if (m_trackedShells > 0) m_trackedShells--;
+            m_trackedCooldown = Tank::SHOOT_COOLDOWN;
+            break;
+        default:
+            break; // Ignore MoveBackward, GetBattleInfo, DoNothing for now
+    }
+    if (m_trackedCooldown < 0) m_trackedCooldown = 0;
 } 

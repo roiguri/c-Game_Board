@@ -12,19 +12,17 @@ using ::testing::UnorderedElementsAreArray;
 class BasicTankAlgorithmTest : public ::testing::Test {
 protected:
     void SetUp() override {
+        // Default: tank at (1,1), direction Right
         board = makeBoard({
             "#####",
-            "#   #",
+            "#%  #",
             "#   #",
             "#   #",
             "#####"
         });
-        tank = std::make_unique<Tank>(1, Point(1, 1), Direction::Up);
         algo = std::make_unique<BasicTankAlgorithm>(1, 0);
-        algo->setTank(*tank);
     }
     GameBoard board;
-    std::unique_ptr<Tank> tank;
     std::unique_ptr<BasicTankAlgorithm> algo;
 
     // Helper to call private getLineOfSightDirection
@@ -69,6 +67,21 @@ protected:
     ActionRequest getActionToSafePosition() { return algo->getActionToSafePosition(); }
     // Helper for canShootEnemy
     bool getCanShootEnemy() { return algo->canShootEnemy(); }
+    // Helper to set the direction of the algorithm directly
+    void setAlgoDirection(Direction dir) {
+        algo->m_trackedDirection = dir;
+    }
+    void setAlgoPosition(const Point& pos) {
+        algo->m_trackedPosition = pos;
+    }
+    // Helper to get private state for testing
+    Point getAlgoPosition() const { return algo->m_trackedPosition; }
+    Direction getAlgoDirection() const { return algo->m_trackedDirection; }
+    int getAlgoShells() const { return algo->m_trackedShells; }
+    int getAlgoCooldown() const { return algo->m_trackedCooldown; }
+    void setAlgoShells(int shells) { algo->m_trackedShells = shells; }
+    void setAlgoCooldown(int cooldown) { algo->m_trackedCooldown = cooldown; }
+    void callUpdateState(ActionRequest action) { algo->updateState(action); }
 };
 
 TEST_F(BasicTankAlgorithmTest, UpdateBattleInfo_UpdatesGameBoardAndObjects) {
@@ -173,12 +186,12 @@ TEST_F(BasicTankAlgorithmTest, IsInDangerFromShells_ShellWithLineOfSightAndClose
 TEST_F(BasicTankAlgorithmTest, IsInDangerFromShells_ShellWithLineOfSightButTooFar) {
     GameBoard gameBoard = makeBoard({
         "######",
-        "#1   #",
+        "#%   #",
         "#    #",
         "#    #",
         "######"
     });
-    std::vector<Point> shells = {Point(5, 5)};
+    std::vector<Point> shells = {Point(4, 4)};
     BattleInfoImpl info = makeBattleInfo(gameBoard, {}, {}, shells);
     algo->updateBattleInfo(info);
     EXPECT_FALSE(isInDangerFromShells());
@@ -311,8 +324,7 @@ TEST_F(BasicTankAlgorithmTest, IsPositionSafe_ShellDanger) {
 TEST_F(BasicTankAlgorithmTest, GetSafePositions_AllSafe) {
     BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 2));
-    algo->setTank(*tank);
+    setAlgoPosition(Point(2, 2));
     auto safe = getSafePositions();
     std::vector<Point> expected = {
         Point(1,1), Point(2,1), Point(3,1),
@@ -332,8 +344,7 @@ TEST_F(BasicTankAlgorithmTest, GetSafePositions_SomeWalls) {
     });
     BattleInfoImpl info = makeBattleInfo(walledBoard, {}, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 2));
-    algo->setTank(*tank);
+    setAlgoPosition(Point(2, 2));
     auto safe = getSafePositions();
     // Only non-wall adjacent positions should be returned
     std::vector<Point> expected = {Point(1,1), Point(3,3), Point(1,3), Point(3,1)};
@@ -350,8 +361,7 @@ TEST_F(BasicTankAlgorithmTest, GetSafePositions_SomeMines) {
     });
     BattleInfoImpl info = makeBattleInfo(mineBoard, {}, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(1, 1));
-    algo->setTank(*tank);
+    setAlgoPosition(Point(1, 1));
     auto safe = getSafePositions();
     // Only (1,2) is safe
     std::vector<Point> expected = {Point(1,2)};
@@ -362,8 +372,7 @@ TEST_F(BasicTankAlgorithmTest, GetSafePositions_SomeTanks) {
     std::vector<Point> enemyTanks = {Point(1,1), Point(3,3)};
     BattleInfoImpl info = makeBattleInfo(board, enemyTanks, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 2));
-    algo->setTank(*tank);
+    setAlgoPosition(Point(2, 2));
     auto safe = getSafePositions();
     std::vector<Point> expected = {Point(2,1), Point(3,1), Point(1,2), Point(3,2), Point(1,3), Point(2,3)};
     EXPECT_THAT(safe, UnorderedElementsAreArray(expected));
@@ -373,8 +382,7 @@ TEST_F(BasicTankAlgorithmTest, GetSafePositions_ShellDanger) {
     std::vector<Point> shells = {Point(2, 4)};
     BattleInfoImpl info = makeBattleInfo(board, {}, {}, shells);
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 2));
-    algo->setTank(*tank);
+    setAlgoPosition(Point(2, 2));
     auto safe = getSafePositions();
     std::vector<Point> expected = {Point(1,1), Point(1,2), Point(3,1), Point(3,2)};
     EXPECT_THAT(safe, UnorderedElementsAreArray(expected));
@@ -383,8 +391,7 @@ TEST_F(BasicTankAlgorithmTest, GetSafePositions_ShellDanger) {
 TEST_F(BasicTankAlgorithmTest, GetSafeMoveOption_AlreadySafe) {
     BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 2));
-    algo->setTank(*tank);
+    setAlgoPosition(Point(2, 2));
     auto opt = getSafeMoveOption(Point(2, 2));
     EXPECT_EQ(opt.action, ActionRequest::DoNothing);
     EXPECT_EQ(opt.cost, 0);
@@ -393,9 +400,8 @@ TEST_F(BasicTankAlgorithmTest, GetSafeMoveOption_AlreadySafe) {
 TEST_F(BasicTankAlgorithmTest, GetSafeMoveOption_Forward) {
     BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 2));
-    tank->setDirection(Direction::Up);
-    algo->setTank(*tank);
+    setAlgoDirection(Direction::Up);
+    setAlgoPosition(Point(2, 2));
     auto opt = getSafeMoveOption(Point(2, 1));
     EXPECT_EQ(opt.action, ActionRequest::MoveForward);
     EXPECT_EQ(opt.cost, 1);
@@ -404,9 +410,8 @@ TEST_F(BasicTankAlgorithmTest, GetSafeMoveOption_Forward) {
 TEST_F(BasicTankAlgorithmTest, GetSafeMoveOption_RotateLeft) {
     BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 2));
-    tank->setDirection(Direction::Right);
-    algo->setTank(*tank);
+    setAlgoDirection(Direction::Right);
+    setAlgoPosition(Point(2, 2));
     auto opt = getSafeMoveOption(Point(2, 1));
     EXPECT_EQ(opt.action, ActionRequest::RotateLeft90);
     EXPECT_GT(opt.cost, 1);
@@ -415,9 +420,8 @@ TEST_F(BasicTankAlgorithmTest, GetSafeMoveOption_RotateLeft) {
 TEST_F(BasicTankAlgorithmTest, GetSafeMoveOption_RotateRight) {
     BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 2));
-    tank->setDirection(Direction::Left);
-    algo->setTank(*tank);
+    setAlgoDirection(Direction::Left);
+    setAlgoPosition(Point(2, 2));
     auto opt = getSafeMoveOption(Point(2, 1));
     EXPECT_EQ(opt.action, ActionRequest::RotateRight90);
     EXPECT_GT(opt.cost, 1);
@@ -426,9 +430,8 @@ TEST_F(BasicTankAlgorithmTest, GetSafeMoveOption_RotateRight) {
 TEST_F(BasicTankAlgorithmTest, GetSafeMoveOptions_Multiple) {
     BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 2));
-    tank->setDirection(Direction::Up);
-    algo->setTank(*tank);
+    setAlgoDirection(Direction::Up);
+    setAlgoPosition(Point(2, 2));
     std::vector<Point> positions = {Point(2, 1), Point(3, 2)};
     auto opts = getSafeMoveOptions(positions);
     ASSERT_EQ(opts.size(), 2u);
@@ -439,11 +442,8 @@ TEST_F(BasicTankAlgorithmTest, GetSafeMoveOptions_Multiple) {
 TEST_F(BasicTankAlgorithmTest, GetActionToSafePosition_Forward) {
     BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 2));
-    tank->setDirection(Direction::Up);
-    algo->setTank(*tank);
-    // Block all but forward
-    std::vector<Point> safe = {Point(2, 1)};
+    setAlgoDirection(Direction::Up);
+    setAlgoPosition(Point(2, 2));
     EXPECT_EQ(getSafeMoveOption(Point(2, 1)).action, ActionRequest::MoveForward);
     EXPECT_EQ(getActionToSafePosition(), ActionRequest::MoveForward);
 }
@@ -458,9 +458,8 @@ TEST_F(BasicTankAlgorithmTest, GetActionToSafePosition_MinimalRotation) {
     });
     BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 2));
-    tank->setDirection(Direction::Up);
-    algo->setTank(*tank);
+    setAlgoDirection(Direction::Up);
+    setAlgoPosition(Point(2, 2));
     EXPECT_EQ(getActionToSafePosition(), ActionRequest::RotateLeft90);
 }
 
@@ -474,9 +473,8 @@ TEST_F(BasicTankAlgorithmTest, GetActionToSafePosition_NoSafe) {
     });
     BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 2));
-    algo->setTank(*tank);
-    // No safe positions
+    setAlgoDirection(Direction::Up);
+    setAlgoPosition(Point(2, 2));
     EXPECT_EQ(getActionToSafePosition(), ActionRequest::DoNothing);
 }
 
@@ -490,9 +488,8 @@ TEST_F(BasicTankAlgorithmTest, GetActionToSafePosition_ChooseSafeFromShell) {
     });
     BattleInfoImpl info = makeBattleInfo(board, {}, {}, {Point(2,0), Point(2,1)});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 3));
-    tank->setDirection(Direction::Up);
-    algo->setTank(*tank);
+    setAlgoDirection(Direction::Up);
+    setAlgoPosition(Point(2, 3));
     EXPECT_EQ(getActionToSafePosition(), ActionRequest::RotateLeft90);
 }
 
@@ -500,9 +497,8 @@ TEST_F(BasicTankAlgorithmTest, CanShootEnemy_EnemyInCurrentDirection) {
     // Tank at (2,2) facing Up, enemy at (2,1)
     BattleInfoImpl info = makeBattleInfo(board, {Point(2, 1)}, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 2));
-    tank->setDirection(Direction::Up);
-    algo->setTank(*tank);
+    setAlgoDirection(Direction::Up);
+    setAlgoPosition(Point(2, 2));
     EXPECT_TRUE(getCanShootEnemy());
 }
 
@@ -510,9 +506,8 @@ TEST_F(BasicTankAlgorithmTest, CanShootEnemy_EnemyNotInCurrentDirection) {
     // Tank at (2,2) facing Up, enemy at (3,2) (to the right)
     BattleInfoImpl info = makeBattleInfo(board, {Point(3, 2)}, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 2));
-    tank->setDirection(Direction::Up);
-    algo->setTank(*tank);
+    setAlgoDirection(Direction::Up);
+    setAlgoPosition(Point(2, 2));
     EXPECT_FALSE(getCanShootEnemy());
 }
 
@@ -527,9 +522,8 @@ TEST_F(BasicTankAlgorithmTest, CanShootEnemy_EnemyBlockedByWall) {
     });
     BattleInfoImpl info = makeBattleInfo(walledBoard, {Point(1, 3)}, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(1, 1));
-    tank->setDirection(Direction::Up);
-    algo->setTank(*tank);
+    setAlgoDirection(Direction::Up);
+    setAlgoPosition(Point(1, 1));
     EXPECT_FALSE(getCanShootEnemy());
 }
 
@@ -537,18 +531,65 @@ TEST_F(BasicTankAlgorithmTest, CanShootEnemy_MultipleEnemies_OneInDirection) {
     // Tank at (2,2) facing Up, enemies at (2,1) and (3,2)
     BattleInfoImpl info = makeBattleInfo(board, {Point(2, 1), Point(3, 2)}, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 2));
-    tank->setDirection(Direction::Up);
-    algo->setTank(*tank);
+    setAlgoDirection(Direction::Up);
+    setAlgoPosition(Point(2, 2));
     EXPECT_TRUE(getCanShootEnemy());
 }
 
 TEST_F(BasicTankAlgorithmTest, CanShootEnemy_NoEnemies) {
     BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
     algo->updateBattleInfo(info);
-    tank->setPosition(Point(2, 2));
-    tank->setDirection(Direction::Up);
-    algo->setTank(*tank);
+    setAlgoDirection(Direction::Up);
+    setAlgoPosition(Point(2, 2));
     EXPECT_FALSE(getCanShootEnemy());
+}
+
+TEST_F(BasicTankAlgorithmTest, UpdateState_MoveForward) {
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    setAlgoPosition(Point(1, 1));
+    setAlgoDirection(Direction::Right);
+    callUpdateState(ActionRequest::MoveForward);
+    EXPECT_EQ(getAlgoPosition(), Point(2, 1));
+}
+
+TEST_F(BasicTankAlgorithmTest, UpdateState_RotateLeft90) {
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    setAlgoDirection(Direction::Up);
+    callUpdateState(ActionRequest::RotateLeft90);
+    EXPECT_EQ(getAlgoDirection(), Direction::Left);
+}
+
+TEST_F(BasicTankAlgorithmTest, UpdateState_RotateRight90) {
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    setAlgoDirection(Direction::Up);
+    callUpdateState(ActionRequest::RotateRight90);
+    EXPECT_EQ(getAlgoDirection(), Direction::Right);
+}
+
+TEST_F(BasicTankAlgorithmTest, UpdateState_Shoot) {
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    setAlgoShells(3);
+    setAlgoCooldown(0);
+    callUpdateState(ActionRequest::Shoot);
+    EXPECT_EQ(getAlgoShells(), 2);
+    EXPECT_EQ(getAlgoCooldown(), Tank::SHOOT_COOLDOWN);
+}
+
+TEST_F(BasicTankAlgorithmTest, UpdateState_DoNothing) {
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    setAlgoPosition(Point(1, 1));
+    setAlgoDirection(Direction::Up);
+    setAlgoShells(2);
+    setAlgoCooldown(1);
+    callUpdateState(ActionRequest::DoNothing);
+    EXPECT_EQ(getAlgoPosition(), Point(1, 1));
+    EXPECT_EQ(getAlgoDirection(), Direction::Up);
+    EXPECT_EQ(getAlgoShells(), 2);
+    EXPECT_EQ(getAlgoCooldown(), 0);
 }
 
