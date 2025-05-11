@@ -31,9 +31,7 @@ GameManager::~GameManager() {
 
 // TODO: add handling when no tanks are found
 // TODO: move algorithms from readBoard to constructor
-bool GameManager::readBoard(const std::string& filePath,
-                             Algorithm* player1Algorithm,
-                             Algorithm* player2Algorithm) {
+bool GameManager::readBoard(const std::string& filePath) {
     // TODO: consider creating a struct to store game configuration
     int rows = 0;
     int cols = 0;
@@ -77,7 +75,7 @@ bool GameManager::readBoard(const std::string& filePath,
 }
 
 void GameManager::run() {
-  m_currentStep = 0;
+  m_currentStep = 1;
   m_gameOver = false;
   m_gameLog.clear();
 
@@ -100,12 +98,6 @@ void GameManager::run() {
   // TODO: update log structure
   while (!m_gameOver) {
       processStep();
-      m_currentStep++;
-      
-      // Add a step separator to log
-      m_gameLog.push_back(
-        "Step " + std::to_string(m_currentStep) + " completed"
-      );
       
       // TODO: optimize to store out of shells state
       bool tanksOutOfShells = true;
@@ -120,6 +112,7 @@ void GameManager::run() {
           m_remaining_steps--;
       }
       m_gameOver = checkGameOver();
+      m_currentStep++;
   }
   
   m_gameLog.push_back(
@@ -366,7 +359,7 @@ bool GameManager::checkGameOver() {
         m_gameResult = "Tie, both players have zero tanks";
         return true;
     }
-    if (m_currentStep >= m_maximum_steps) {
+    if (m_currentStep > m_maximum_steps) {
         m_gameResult = "Tie, reached max steps = " + std::to_string(m_maximum_steps) + ", player 1 has " + std::to_string(player1Alive) + " tanks, player 2 has " + std::to_string(player2Alive) + " tanks";
         return true;
     }
