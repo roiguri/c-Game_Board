@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <chrono>
 
-BoardGenerator::BoardGenerator() : m_tank1Pos(-1, -1), m_tank2Pos(-1, -1) {
+BoardGenerator::BoardGenerator() {
     // Initialize with default values from BoardConfig
     // If seed is -1, use current time
     if (m_config.seed == -1) {
@@ -18,7 +18,7 @@ BoardGenerator::BoardGenerator() : m_tank1Pos(-1, -1), m_tank2Pos(-1, -1) {
 }
 
 BoardGenerator::BoardGenerator(const BoardConfig& config) 
-    : m_config(config), m_tank1Pos(-1, -1), m_tank2Pos(-1, -1) {
+    : m_config(config) {
     // If seed is -1, use current time
     if (m_config.seed == -1) {
         m_config.seed = static_cast<int>(std::chrono::steady_clock::now().time_since_epoch().count());
@@ -127,6 +127,12 @@ bool BoardGenerator::parseConfigValue(const std::string& key, const std::string&
     else if (key == "map_name") {
         m_config.mapName = value;
     }
+    else if (key == "num_tanks_per_player") {
+        int nt;
+        if (!(std::istringstream(value) >> nt)) return false;
+        if (nt < 1) return false;
+        m_config.numTanksPerPlayer = nt;
+    }
     else {
         std::cerr << "Unknown configuration key: " << key << std::endl;
         return false;
@@ -163,62 +169,58 @@ void BoardGenerator::initializeEmptyBoard() {
 }
 
 bool BoardGenerator::placeTanks() {
-    // Minimum distance between tanks to ensure they're not too close
-    int minDistance = std::min(m_config.width, m_config.height) / 3;
-    
-    // Place the first tank in a non-corner position
-    std::uniform_int_distribution<int> xDist1(2, m_config.width - 3);
-    std::uniform_int_distribution<int> yDist1(2, m_config.height - 3);
-    
-    m_tank1Pos.first = xDist1(m_rng);
-    m_tank1Pos.second = yDist1(m_rng);
-    m_board[m_tank1Pos.second][m_tank1Pos.first] = '1';
-    
-    // If using symmetry, place the second tank according to symmetry rules
-    if (m_config.symmetry != "none") {
-        if (m_config.symmetry == "horizontal") {
-            m_tank2Pos.first = m_config.width - 1 - m_tank1Pos.first;
-            m_tank2Pos.second = m_tank1Pos.second;
-        } 
-        else if (m_config.symmetry == "vertical") {
-            m_tank2Pos.first = m_tank1Pos.first;
-            m_tank2Pos.second = m_config.height - 1 - m_tank1Pos.second;
-        } 
-        else if (m_config.symmetry == "diagonal") {
-            m_tank2Pos.first = m_config.width - 1 - m_tank1Pos.first;
-            m_tank2Pos.second = m_config.height - 1 - m_tank1Pos.second;
+    m_tankPositions.clear();
+    int tanksPlaced1 = 0, tanksPlaced2 = 0;
+    int maxAttempts = 10000;
+    std::uniform_int_distribution<int> xDist(0, m_config.width - 1);
+    std::uniform_int_distribution<int> yDist(0, m_config.height - 1);
+    std::uniform_int_distribution<int> playerDist(0, 1); // 0 for P1, 1 for P2
+    int attempts = 0;
+    while ((tanksPlaced1 < m_config.numTanksPerPlayer || tanksPlaced2 < m_config.numTanksPerPlayer) && attempts < maxAttempts) {
+        int x = xDist(m_rng);
+        int y = yDist(m_rng);
+        auto [mx, my] = getMirror(x, y);
+        // Check if either position is occupied
+        if (isOccupied(x, y) || isOccupied(mx, my)) {
+            ++attempts;
+            continue;
         }
-    } 
-    else {
-        // For non-symmetric boards, place the second tank randomly
-        // but with minimum distance
-        bool validPosition = false;
-        int attempts = 0;
-        const int maxAttempts = 50;
-        
-        while (!validPosition && attempts < maxAttempts) {
-            std::uniform_int_distribution<int> xDist2(2, m_config.width - 3);
-            std::uniform_int_distribution<int> yDist2(2, m_config.height - 3);
-            
-            m_tank2Pos.first = xDist2(m_rng);
-            m_tank2Pos.second = yDist2(m_rng);
-            
-            int dx = m_tank2Pos.first - m_tank1Pos.first;
-            int dy = m_tank2Pos.second - m_tank1Pos.second;
-            double distance = std::sqrt(dx*dx + dy*dy);
-            
-            validPosition = (distance >= minDistance);
-            attempts++;
+        // Self-mirrored position (center)
+        if (x == mx && y == my) {
+            int chosenPlayer = playerDist(m_rng) ? 2 : 1;
+            if (chosenPlayer == 1 && tanksPlaced1 < m_config.numTanksPerPlayer) {
+                placeTank(x, y, 1);
+                ++tanksPlaced1;
+            } else if (chosenPlayer == 2 && tanksPlaced2 < m_config.numTanksPerPlayer) {
+                placeTank(x, y, 2);
+                ++tanksPlaced2;
+            }
+            ++attempts;
+            continue;
         }
-        
-        if (!validPosition) {
-            std::cerr << "Failed to place tanks with sufficient distance" << std::endl;
-            return false;
+        // Assign players randomly to original/mirror
+        int p1x = x, p1y = y, p2x = mx, p2y = my;
+        if (playerDist(m_rng)) {
+            std::swap(p1x, p2x);
+            std::swap(p1y, p2y);
         }
+        // Check if both players have room
+        if (tanksPlaced1 < m_config.numTanksPerPlayer && tanksPlaced2 < m_config.numTanksPerPlayer) {
+            placeTank(p1x, p1y, 1);
+            placeTank(p2x, p2y, 2);
+            ++tanksPlaced1;
+            ++tanksPlaced2;
+        } else if (tanksPlaced1 < m_config.numTanksPerPlayer) {
+            placeTank(p1x, p1y, 1);
+            ++tanksPlaced1;
+        } else if (tanksPlaced2 < m_config.numTanksPerPlayer) {
+            placeTank(p2x, p2y, 2);
+            ++tanksPlaced2;
+        }
+        ++attempts;
     }
-    
-    m_board[m_tank2Pos.second][m_tank2Pos.first] = '2';
-    return true;
+    // If we failed to place all tanks, return false
+    return tanksPlaced1 == m_config.numTanksPerPlayer && tanksPlaced2 == m_config.numTanksPerPlayer;
 }
 
 void BoardGenerator::placeWalls() {
@@ -285,11 +287,19 @@ void BoardGenerator::placeWalls() {
         // Place wall and apply symmetry
         applySymmetry(x, y, '#');
         wallsPlaced++;
-        
         // Verify connectivity after placing each wall
-        if (!canReach(m_tank1Pos.first, m_tank1Pos.second, 
-                      m_tank2Pos.first, m_tank2Pos.second)) {
-            // Remove the wall if it breaks connectivity
+        bool allConnected = true;
+        for (size_t i = 0; i < m_tankPositions.size(); ++i) {
+            for (size_t j = i + 1; j < m_tankPositions.size(); ++j) {
+                if (!canReach(m_tankPositions[i].first, m_tankPositions[i].second,
+                              m_tankPositions[j].first, m_tankPositions[j].second)) {
+                    allConnected = false;
+                    break;
+                }
+            }
+            if (!allConnected) break;
+        }
+        if (!allConnected) {
             applySymmetry(x, y, ' ');
             wallsPlaced--;
         }
@@ -364,18 +374,27 @@ void BoardGenerator::placeMines() {
 
 bool BoardGenerator::validateBoard() {
     // Check if tanks are placed
-    if (m_tank1Pos.first < 0 || m_tank2Pos.first < 0) {
+    int p1 = 0, p2 = 0;
+    std::vector<std::pair<int, int>> tankPositions;
+    for (int y = 0; y < m_config.height; ++y) {
+        for (int x = 0; x < m_config.width; ++x) {
+            if (m_board[y][x] == '1') { ++p1; tankPositions.push_back({x, y}); }
+            if (m_board[y][x] == '2') { ++p2; tankPositions.push_back({x, y}); }
+        }
+    }
+    if (p1 < 1 || p2 < 1) {
         std::cerr << "Tanks are not properly placed on the board" << std::endl;
         return false;
     }
-    
-    // Check connectivity between tanks
-    if (!canReach(m_tank1Pos.first, m_tank1Pos.second, 
-                 m_tank2Pos.first, m_tank2Pos.second)) {
-        std::cerr << "There is no valid path between tanks" << std::endl;
-        return false;
+    // Check connectivity between all tanks
+    for (size_t i = 0; i < tankPositions.size(); ++i) {
+        for (size_t j = i + 1; j < tankPositions.size(); ++j) {
+            if (!canReach(tankPositions[i].first, tankPositions[i].second, tankPositions[j].first, tankPositions[j].second)) {
+                std::cerr << "There is no valid path between tanks at (" << tankPositions[i].first << "," << tankPositions[i].second << ") and (" << tankPositions[j].first << "," << tankPositions[j].second << ")" << std::endl;
+                return false;
+            }
+        }
     }
-    
     return true;
 }
 
@@ -482,9 +501,13 @@ std::vector<std::pair<int, int>> BoardGenerator::getSymmetryPositions(int x, int
 }
 
 bool BoardGenerator::isValidPosition(int x, int y) const {
-    return x >= 0 && x < m_config.width && y >= 0 && y < m_config.height && 
-           (x != m_tank1Pos.first || y != m_tank1Pos.second) && 
-           (x != m_tank2Pos.first || y != m_tank2Pos.second);
+    if (x < 0 || x >= m_config.width || y < 0 || y >= m_config.height)
+        return false;
+    for (const auto& pos : m_tankPositions) {
+        if (pos.first == x && pos.second == y)
+            return false;
+    }
+    return true;
 }
 
 bool BoardGenerator::saveToFile(const std::string& outputPath) const {
@@ -536,4 +559,29 @@ void BoardGenerator::setConfig(const BoardConfig& config) {
         m_config.seed = static_cast<int>(std::chrono::steady_clock::now().time_since_epoch().count());
     }
     m_rng.seed(m_config.seed);
+}
+
+std::pair<int, int> BoardGenerator::getMirror(int x, int y) const {
+    if (m_config.symmetry == "horizontal") {
+        return {m_config.width - 1 - x, y};
+    } else if (m_config.symmetry == "vertical") {
+        return {x, m_config.height - 1 - y};
+    } else if (m_config.symmetry == "diagonal") {
+        return {m_config.width - 1 - x, m_config.height - 1 - y};
+    } else {
+        return {x, y}; // No symmetry
+    }
+}
+
+bool BoardGenerator::isOccupied(int x, int y) const {
+    for (const auto& pos : m_tankPositions) {
+        if (pos.first == x && pos.second == y)
+            return true;
+    }
+    return false;
+}
+
+void BoardGenerator::placeTank(int x, int y, int player) {
+    m_tankPositions.push_back({x, y});
+    m_board[y][x] = (player == 1) ? '1' : '2';
 }

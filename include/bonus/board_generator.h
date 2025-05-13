@@ -19,6 +19,7 @@ struct BoardConfig {
     int maxSteps = 1000; // Number of max steps for the game
     int numShells = 10;  // Number of shells per tank
     std::string mapName = "Generated Map"; // Map name/description
+    int numTanksPerPlayer = 1; // Number of tanks per player
 };
 
 /**
@@ -92,13 +93,14 @@ private:
     BoardConfig m_config;
     std::mt19937 m_rng;
     std::vector<std::vector<char>> m_board;
-    
-    // Tank positions
-    std::pair<int, int> m_tank1Pos;
-    std::pair<int, int> m_tank2Pos;
+    std::vector<std::pair<int, int>> m_tankPositions; // Stores all tank positions
     
     // Helper methods
     void initializeEmptyBoard();
+    /**
+     * @brief Place tanks for both players on the board.
+     * Places numTanksPerPlayer tanks for each player, respecting symmetry and avoiding collisions.
+     */
     bool placeTanks();
     void placeWalls();
     void placeMines();
@@ -108,7 +110,7 @@ private:
     // Get symmetry partner positions for a given position
     std::vector<std::pair<int, int>> getSymmetryPositions(int x, int y);
     
-    // Validate if a position is valid for placing a cell
+    // Validate if a position is valid for placing a cell (not occupied by a tank)
     bool isValidPosition(int x, int y) const;
     
     // BFS helper for connectivity check
@@ -116,4 +118,9 @@ private:
     
     // Parse a key-value pair from config file
     bool parseConfigValue(const std::string& key, const std::string& value);
+    
+    // --- New helpers for symmetry-aware tank placement ---
+    std::pair<int, int> getMirror(int x, int y) const;
+    bool isOccupied(int x, int y) const;
+    void placeTank(int x, int y, int player);
 };
