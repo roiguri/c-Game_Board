@@ -16,6 +16,9 @@ struct BoardConfig {
     float mineDensity = 0.05f;
     std::string symmetry = "none"; // none, horizontal, vertical, diagonal
     int seed = -1; // -1 for random seed
+    int maxSteps = 1000; // Number of max steps for the game
+    int numShells = 10;  // Number of shells per tank
+    std::string mapName = "Generated Map"; // Map name/description
 };
 
 /**
@@ -52,7 +55,15 @@ public:
     
     /**
      * @brief Save generated board to a file
-     * 
+     *
+     * The output file will have the following format:
+     *   Line 1: Map name/description
+     *   Line 2: MaxSteps = <NUM>
+     *   Line 3: NumShells = <NUM>
+     *   Line 4: Rows = <NUM>
+     *   Line 5: Cols = <NUM>
+     *   Then:   <Rows> lines of board content (each line Cols characters)
+     *
      * @param outputPath Path to save the board file
      * @return true if save was successful
      */

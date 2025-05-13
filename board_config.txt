@@ -2,5 +2,8 @@ dimensions: 15 10
 wall_density: 0.25
 mine_density: 0.25
 symmetry: vertical
+map_name: A great map
+max_steps: 500
+max_shells: 5
 # remove field for random results
 seed: 0

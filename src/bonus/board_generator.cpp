@@ -114,6 +114,19 @@ bool BoardGenerator::parseConfigValue(const std::string& key, const std::string&
             return false;
         }
     }
+    else if (key == "max_steps") {
+        int ms;
+        if (!(std::istringstream(value) >> ms)) return false;
+        m_config.maxSteps = ms;
+    }
+    else if (key == "num_shells") {
+        int ns;
+        if (!(std::istringstream(value) >> ns)) return false;
+        m_config.numShells = ns;
+    }
+    else if (key == "map_name") {
+        m_config.mapName = value;
+    }
     else {
         std::cerr << "Unknown configuration key: " << key << std::endl;
         return false;
@@ -480,10 +493,12 @@ bool BoardGenerator::saveToFile(const std::string& outputPath) const {
         std::cerr << "Could not open output file: " << outputPath << std::endl;
         return false;
     }
-    
-    // Write dimensions as the first line
-    outputFile << m_config.width << " " << m_config.height << std::endl;
-    
+    // Write 5-line header
+    outputFile << m_config.mapName << std::endl;
+    outputFile << "MaxSteps = " << m_config.maxSteps << std::endl;
+    outputFile << "NumShells = " << m_config.numShells << std::endl;
+    outputFile << "Rows = " << m_config.height << std::endl;
+    outputFile << "Cols = " << m_config.width << std::endl;
     // Write the board
     for (const auto& row : m_board) {
         for (char cell : row) {
@@ -491,30 +506,23 @@ bool BoardGenerator::saveToFile(const std::string& outputPath) const {
         }
         outputFile << std::endl;
     }
-    
-    // Write config as comment - Optional
-    // outputFile << "# Configuration:" << std::endl;
-    // outputFile << "# Wall Density: " << m_config.wallDensity << std::endl;
-    // outputFile << "# Mine Density: " << m_config.mineDensity << std::endl;
-    // outputFile << "# Symmetry: " << m_config.symmetry << std::endl;
-    // outputFile << "# Seed: " << m_config.seed << std::endl;
-    
     outputFile.close();
     return true;
 }
 
 std::vector<std::string> BoardGenerator::getBoardLines() const {
     std::vector<std::string> lines;
-    
-    // First line: dimensions
-    lines.push_back(std::to_string(m_config.width) + " " + std::to_string(m_config.height));
-    
+    // 5-line header
+    lines.push_back(m_config.mapName);
+    lines.push_back("MaxSteps = " + std::to_string(m_config.maxSteps));
+    lines.push_back("NumShells = " + std::to_string(m_config.numShells));
+    lines.push_back("Rows = " + std::to_string(m_config.height));
+    lines.push_back("Cols = " + std::to_string(m_config.width));
     // Board content
     for (const auto& row : m_board) {
         std::string line(row.begin(), row.end());
         lines.push_back(line);
     }
-    
     return lines;
 }
 
