@@ -10,9 +10,14 @@ mechanics.
 
 Specifies board layout:
 
-* First line: `<width> <height>` (dimensions).
-* Subsequent lines: board content (`#`: Wall (2 hits), `1`: Player 1 start, `2`: Player 2 start, `@`: Mine, ` `: Empty).
-* In order to start the game the file must include dimensions and tanks.
+* First five lines (header):
+  1. Map name/description (string)
+  2. MaxSteps = <NUM>
+  3. NumShells = <NUM>
+  4. Rows = <NUM>
+  5. Cols = <NUM>
+* Subsequent lines: board content (`#`: Wall (2 hits), `1`: Player 1 tank, `2`: Player 2 tank, `@`: Mine, ` `: Empty).
+* In order to start the game the file must include all header lines.
 
 ## Output Format
 
@@ -80,10 +85,13 @@ used.
 
 #### Configuration File Format:
 
-| Parameter | Value | Default Value |
-|:---------:|:-----:|:-------------:|
-| dimensions | \<width\> \<height\> | 15 10 |
-| wall_density | 0.0-0.9 | 0.25 |
-| mine_density | 0.0-0.5 | 0.25 |
-| symmetry | none\|horizontal\|vertical\|diagonal | none |
-| seed | \<number\> | no seed |
+| Parameter   | Value                                 | Default Value   |
+|:-----------:|:-------------------------------------:|:--------------:|
+| dimensions  | <width> <height>                      | 15 10          |
+| wall_density| 0.0-0.9                               | 0.25           |
+| mine_density| 0.0-0.5                               | 0.25           |
+| symmetry    | none|horizontal|vertical|diagonal      | none           |
+| seed        | <number>                              | no seed        |
+| max_steps   | <number>                              | 1000           |
+| num_shells  | <number>                              | 10             |
+| map_name    | <string>                              | Generated Map  |

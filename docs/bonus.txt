@@ -81,6 +81,17 @@ wall_density: <0.0-0.9>
 mine_density: <0.0-0.5>
 symmetry: <none|horizontal|vertical|diagonal>
 seed: <number> (remove field for random boards)
+max_steps: <number> (optional, default 1000)
+num_shells: <number> (optional, default 10)
+map_name: <string> (optional, default "Generated Map")
+
+*Output board file format:*
+- Line 1: Map name/description
+- Line 2: MaxSteps = <NUM>
+- Line 3: NumShells = <NUM>
+- Line 4: Rows = <NUM>
+- Line 5: Cols = <NUM>
+- Then: <Rows> lines of board content (each line Cols characters)
 
 * Requires txt file extension
 * Example config file with default values in project files
