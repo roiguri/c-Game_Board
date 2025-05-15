@@ -107,6 +107,7 @@ if(ENABLE_TESTING)
         test/players/offensive_player_test.cpp
         test/algo/basic_tank_algorithm_test.cpp
         test/algo/basic_tank_algorithm_factory_test.cpp
+        test/algo/offensive_tank_algorithm_test.cpp
         test/test_main.cpp
     )
 
