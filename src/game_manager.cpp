@@ -17,7 +17,7 @@ GameManager::GameManager(PlayerFactory& playerFactory,
       m_currentStep(0),
       m_gameOver(false),
       m_remaining_steps(40),
-      m_maximum_steps(1000) { // TODO: update maximum steps    
+      m_maximum_steps(100) { // TODO: update maximum steps    
     #ifdef ENABLE_VISUALIZATION
     m_visualizationManager = createVisualizationManager();
     #endif
@@ -39,7 +39,6 @@ bool GameManager::readBoard(const std::string& filePath) {
     int numShells = 0;
     std::vector<std::string> boardLines = 
       FileLoader::loadBoardFile(filePath, rows, cols, maxSteps, numShells);
-    
     if (boardLines.empty()) {
         return false;
     }
@@ -163,9 +162,9 @@ bool GameManager::saveResults(const std::string& outputFilePath) {
 
 void GameManager::processStep() {
   // TODO: Consider creating a GameState abstraction to encapsulate board, tanks, and shells
-  GameBoard m_currentBoard = m_board;
-  std::vector<Tank> m_currentTanks = m_tanks;
-  std::vector<Shell> m_currentShells = m_shells;
+  m_currentBoard = m_board;
+  m_currentTanks = m_tanks;
+  m_currentShells = m_shells;
 
   for (auto& controller : m_tankControllers) {
     if (!controller.tank.isDestroyed() && controller.algorithm) {
@@ -253,7 +252,6 @@ void GameManager::applyAction(TankWithAlgorithm& controller) {
           
           if (m_board.canMoveTo(newPosition)) {
               actionResult = playerTank.moveForward(newPosition);
-              std::cout << "actionResult: " << actionResult << std::endl;
           }
           break;
       }
@@ -295,13 +293,14 @@ void GameManager::applyAction(TankWithAlgorithm& controller) {
           }
           break;
       case ActionRequest::GetBattleInfo: {
-            SatelliteViewImpl satteliteView(m_currentBoard, m_currentTanks, m_currentShells, playerTank.getPosition());
+           SatelliteViewImpl satteliteView(m_currentBoard, m_currentTanks, m_currentShells, playerTank.getPosition());
             if (controller.tank.getPlayerId() == 1) {
                 m_player1->updateTankWithBattleInfo(*controller.algorithm, satteliteView);
             } else {
                 m_player2->updateTankWithBattleInfo(*controller.algorithm, satteliteView);
             }
           }
+          actionResult = true;
           break;
       case ActionRequest::DoNothing:
           playerTank.doNothing(); // update tank state

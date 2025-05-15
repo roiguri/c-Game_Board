@@ -1,5 +1,6 @@
 #include "satellite_view_impl.h"
 #include <cstddef>
+#include <iostream>
 
 // Character mapping
 constexpr char WALL_CHAR = '#';

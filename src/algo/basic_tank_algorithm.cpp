@@ -22,6 +22,7 @@ ActionRequest BasicTankAlgorithm::getAction() {
     // 1. Check if BattleInfo is outdated
     if (m_turnsSinceLastUpdate > 3) {
         action = ActionRequest::GetBattleInfo;
+        return action;
     }
     // 2. Check if in danger
     else if (isInDangerFromShells()) {
@@ -91,8 +92,10 @@ bool BasicTankAlgorithm::checkLineOfSightInDirection(const Point& from, const Po
     return false;
 }
 
+// TODO: consider improvinf efficiency of this function
 bool BasicTankAlgorithm::isInDangerFromShells(const Point& position) const {
     for (const Point& shellPos : m_shells) {
+        // FIXME: remove redundant check
         auto dirOpt = getLineOfSightDirection(shellPos, position);
         if (!dirOpt) continue;
         for (const Direction& dir : ALL_DIRECTIONS) {
@@ -159,7 +162,7 @@ BasicTankAlgorithm::SafeMoveOption BasicTankAlgorithm::getSafeMoveOption(const P
     }
     auto dirOpt = getLineOfSightDirection(current, pos);
     if (!dirOpt) return option;
-    Direction targetDir = *dirOpt;
+    Direction targetDir = dirOpt.value();
     option.direction = targetDir;
     if (current + getDirectionDelta(targetDir) == pos) {
         // Adjacent in that direction

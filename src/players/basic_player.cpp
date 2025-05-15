@@ -1,6 +1,7 @@
 #include "players/basic_player.h"
 #include "players/battle_info_impl.h"
 #include <cassert>
+#include <iostream>
 
 BasicPlayer::BasicPlayer(int player_index, size_t x, size_t y, size_t max_steps, size_t num_shells)
     : Player(player_index, x, y, max_steps, num_shells),
