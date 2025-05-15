@@ -211,3 +211,15 @@ std::string GameBoard::toString() const {
     
     return ss.str();
 }
+
+int GameBoard::stepDistance(const Point& a, const Point& b) const {
+    int w = static_cast<int>(m_width);
+    int h = static_cast<int>(m_height);
+    int dx = std::abs(a.getX() - b.getX());
+    int dy = std::abs(a.getY() - b.getY());
+    // Consider wrapping
+    dx = std::min(dx, w - dx);
+    dy = std::min(dy, h - dy);
+    // Chebyshev distance (since diagonal and orthogonal moves cost the same)
+    return std::max(dx, dy);
+}

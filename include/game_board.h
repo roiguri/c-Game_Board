@@ -181,6 +181,16 @@ public:
      * @return The height in number of cells
      */
     size_t getHeight() const;
+
+    /**
+     * @brief Calculates the minimum number of steps between two points, considering wrapping.
+     *        Diagonal and orthogonal moves both cost 1 step (no rotations).
+     *
+     * @param a The starting point
+     * @param b The destination point
+     * @return The minimum number of steps required
+     */
+    int stepDistance(const Point& a, const Point& b) const;
 private:
     std::vector<std::vector<CellType>> m_board;
     std::map<Point, int> m_wallHealth;
