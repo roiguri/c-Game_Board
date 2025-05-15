@@ -44,7 +44,7 @@ public:
    void updateTankWithBattleInfo(TankAlgorithm& tank,
                                 SatelliteView& satellite_view) override;
    
-private:
+protected:
    /** Player's ID (1 or 2) */
    int m_player_index;
    
@@ -67,7 +67,7 @@ private:
     * 
     * @param satellite_view The satellite view to query
     */
-   void populateBattleInfo(SatelliteView& satellite_view);
+   virtual void populateBattleInfo(SatelliteView& satellite_view);
    
    /**
     * @brief Processes feedback from a tank
