@@ -25,22 +25,24 @@ void OffensiveTankAlgorithm::updateBattleInfo(BattleInfo& info) {
 
 ActionRequest OffensiveTankAlgorithm::getAction() {
     // 1. Update battle info if necessary
+    m_turnsSinceLastUpdate++;
     if (m_turnsSinceLastUpdate > 3) {
         return ActionRequest::GetBattleInfo;
     }
+    ActionRequest action = ActionRequest::DoNothing;
     // 2. Avoid if in danger (from shells)
     if (isInDangerFromShells()) {
-        return getActionToSafePosition();
+        action = getActionToSafePosition();
     }
     // 3. Shoot if possible
     if (canShootEnemy()) {
-        return ActionRequest::Shoot;
+        action = ActionRequest::Shoot;
     }
     // 4. Turn to shoot if in line of sight
     if (m_targetPosition) {
         auto turnAction = turnToShootAction();
         if (turnAction.has_value()) {
-            return turnAction.value();
+            action = turnAction.value();
         }
     }
     // 5. Chase using BFS
@@ -48,11 +50,11 @@ ActionRequest OffensiveTankAlgorithm::getAction() {
         updatePathToTarget();
         auto moveAction = followCurrentPath();
         if (moveAction.has_value()) {
-            return moveAction.value();
+            action = moveAction.value();
         }
     }
-    // Default: do nothing
-    return ActionRequest::DoNothing;
+    updateState(action);
+    return action;
 }
 
 std::optional<ActionRequest> OffensiveTankAlgorithm::turnToShootAction() const {
