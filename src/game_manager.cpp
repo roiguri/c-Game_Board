@@ -17,7 +17,7 @@ GameManager::GameManager(PlayerFactory& playerFactory,
       m_currentStep(0),
       m_gameOver(false),
       m_remaining_steps(40),
-      m_maximum_steps(100) { // TODO: update maximum steps    
+      m_maximum_steps(100) { // TODO: should we leave default value?  
     #ifdef ENABLE_VISUALIZATION
     m_visualizationManager = createVisualizationManager();
     #endif
@@ -42,6 +42,8 @@ bool GameManager::readBoard(const std::string& filePath) {
     if (boardLines.empty()) {
         return false;
     }
+
+    m_maximum_steps = maxSteps;
 
     m_player1 = m_PlayerFactory.create(1, cols, rows, maxSteps, numShells);
     m_player2 = m_PlayerFactory.create(2, cols, rows, maxSteps, numShells);

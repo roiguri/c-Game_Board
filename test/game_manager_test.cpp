@@ -86,6 +86,9 @@ protected:
     void SetCurrentStep(int step) {
         manager->m_currentStep = step;
     }
+    int GetCurrentStep() {
+        return manager->m_currentStep;
+    }
     void SetMaxSteps(int maxSteps) {
         manager->m_maximum_steps = maxSteps;
     }
@@ -776,4 +779,19 @@ TEST_F(GameManagerTest, SaveResults_WritesAllLogLines) {
 
     // Clean up
     std::remove(testFile.c_str());
+}
+
+TEST_F(GameManagerTest, Run_DoesNotExceedMaximumSteps_Integration) {
+    // Arrange: set up a board with two tanks and a small max steps
+    std::vector<std::pair<int, Point>> positions = { {1, Point(0,0)}, {2, Point(1,0)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    SetMaxSteps(5); // Set a small maximum for the test
+
+    // Act
+    manager->run();
+
+    // Assert
+    EXPECT_LE(GetCurrentStep(), 6);
+    EXPECT_TRUE(GetGameResult().find("Tie, reached max steps") != std::string::npos);
 }
