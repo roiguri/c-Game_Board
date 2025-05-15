@@ -1,5 +1,10 @@
 #include "objects/tank.h"
 
+int Tank::INITIAL_SHELLS = 16;
+void Tank::setInitialShells(int shells) {
+    INITIAL_SHELLS = shells;
+}
+
 Tank::Tank(int playerId, const Point& position, Direction direction)
     : GameObject(playerId, position, direction),
       m_remainingShells(INITIAL_SHELLS),

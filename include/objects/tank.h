@@ -12,7 +12,8 @@
 class Tank : public GameObject {
 public:
     /** Maximum number of shells available at the start of the game */
-    static constexpr int INITIAL_SHELLS = 16;
+    static int INITIAL_SHELLS;
+    static void setInitialShells(int shells);
 
     /** Number of game steps a tank must wait between consecutive shots */
     static constexpr int SHOOT_COOLDOWN = 4;

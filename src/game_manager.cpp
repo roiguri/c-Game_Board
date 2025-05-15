@@ -44,6 +44,7 @@ bool GameManager::readBoard(const std::string& filePath) {
     }
 
     m_maximum_steps = maxSteps;
+    Tank::setInitialShells(numShells);
 
     m_player1 = m_PlayerFactory.create(1, cols, rows, maxSteps, numShells);
     m_player2 = m_PlayerFactory.create(2, cols, rows, maxSteps, numShells);

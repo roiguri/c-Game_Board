@@ -451,3 +451,10 @@ TEST_F(TankTest, DoNothing_ProcessesBackwardMovement) {
   EXPECT_EQ(tank->getPosition(), backwardPosition);
   EXPECT_TRUE(tank->isContinuousBackward());
 }
+
+TEST(TankStaticInitialShellsTest, SetInitialShellsAffectsNewTanks) {
+    // Set a custom initial shell count
+    Tank::setInitialShells(42);
+    Tank tank(1, Point(0, 0), Direction::Right);
+    EXPECT_EQ(tank.getRemainingShells(), 42);
+}
