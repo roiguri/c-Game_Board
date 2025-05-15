@@ -5,6 +5,7 @@
 #include <queue>
 #include <set>
 #include <algorithm>
+#include <iostream>
 
 OffensiveTankAlgorithm::OffensiveTankAlgorithm(int playerId, int tankIndex)
     : BasicTankAlgorithm(playerId, tankIndex) {}
@@ -33,24 +34,18 @@ ActionRequest OffensiveTankAlgorithm::getAction() {
     // 2. Avoid if in danger (from shells)
     if (isInDangerFromShells()) {
         action = getActionToSafePosition();
-    }
-    // 3. Shoot if possible
-    if (canShootEnemy()) {
+    } else if (canShootEnemy()) {
         action = ActionRequest::Shoot;
-    }
-    // 4. Turn to shoot if in line of sight
-    if (m_targetPosition) {
+    } else if (m_targetPosition) {
         auto turnAction = turnToShootAction();
         if (turnAction.has_value()) {
             action = turnAction.value();
-        }
-    }
-    // 5. Chase using BFS
-    if (m_targetPosition) {
-        updatePathToTarget();
-        auto moveAction = followCurrentPath();
-        if (moveAction.has_value()) {
-            action = moveAction.value();
+        } else {
+            updatePathToTarget();
+            auto moveAction = followCurrentPath();
+            if (moveAction.has_value()) {
+                action = moveAction.value();
+            }
         }
     }
     updateState(action);
