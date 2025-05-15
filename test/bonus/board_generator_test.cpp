@@ -16,145 +16,103 @@ protected:
         return filename;
     }
     
+    // Helper to extract board dimensions from header
+    std::pair<int, int> extractDimensions(const std::vector<std::string>& boardLines) {
+        int width = -1, height = -1;
+        for (const auto& line : boardLines) {
+            if (line.rfind("Rows = ", 0) == 0) {
+                height = std::stoi(line.substr(7));
+            } else if (line.rfind("Cols = ", 0) == 0) {
+                width = std::stoi(line.substr(7));
+            }
+        }
+        return {width, height};
+    }
+    
+    // Helper to get only the board rows (skip 5-line header)
+    std::vector<std::string> getBoardRows(const std::vector<std::string>& boardLines) {
+        if (boardLines.size() <= 5) return {};
+        return std::vector<std::string>(boardLines.begin() + 5, boardLines.end());
+    }
+    
     // Helper to check if a board has valid structure
     bool isBoardValid(const std::vector<std::string>& boardLines) {
-        if (boardLines.empty()) return false;
-        
-        // Check dimensions line
-        std::istringstream iss(boardLines[0]);
-        int width, height;
-        if (!(iss >> width >> height)) return false;
-        
-        // Check actual dimensions
-        if (boardLines.size() != static_cast<size_t>(height + 1)) return false;
-        
-        // Check all rows have the same width
-        for (size_t i = 1; i < boardLines.size(); ++i) {
-            if (boardLines[i].size() != static_cast<size_t>(width)) return false;
+        auto [width, height] = extractDimensions(boardLines);
+        auto rows = getBoardRows(boardLines);
+        if (width < 0 || height < 0) return false;
+        if ((int)rows.size() != height) return false;
+        for (const auto& row : rows) {
+            if ((int)row.size() != width) return false;
         }
-        
         return true;
     }
     
     // Helper to count occurrences of a character in the board
     int countCharInBoard(const std::vector<std::string>& boardLines, char ch) {
+        auto rows = getBoardRows(boardLines);
         int count = 0;
-        
-        // Start from index 1 to skip the dimensions line
-        for (size_t i = 1; i < boardLines.size(); ++i) {
-            count += std::count(boardLines[i].begin(), boardLines[i].end(), ch);
+        for (const auto& row : rows) {
+            count += std::count(row.begin(), row.end(), ch);
         }
-        
         return count;
     }
     
     // Helper to check if tanks have a valid path between them
     bool hasTankPath(const std::vector<std::string>& boardLines) {
-        if (boardLines.size() <= 1) return false;
-        
-        // Parse dimensions
-        std::istringstream iss(boardLines[0]);
-        int width, height;
-        if (!(iss >> width >> height)) return false;
-        
-        // Find tank positions
+        auto [width, height] = extractDimensions(boardLines);
+        auto rows = getBoardRows(boardLines);
+        if (width < 0 || height < 0 || (int)rows.size() != height) return false;
         int tank1X = -1, tank1Y = -1;
         int tank2X = -1, tank2Y = -1;
-        
         for (int y = 0; y < height; ++y) {
-            if (y + 1 >= static_cast<int>(boardLines.size())) continue;
-            
             for (int x = 0; x < width; ++x) {
-                if (x >= static_cast<int>(boardLines[y + 1].size())) continue;
-                
-                if (boardLines[y + 1][x] == '1') {
-                    tank1X = x;
-                    tank1Y = y;
-                } else if (boardLines[y + 1][x] == '2') {
-                    tank2X = x;
-                    tank2Y = y;
-                }
+                if (rows[y][x] == '1') { tank1X = x; tank1Y = y; }
+                else if (rows[y][x] == '2') { tank2X = x; tank2Y = y; }
             }
         }
-        
         if (tank1X < 0 || tank2X < 0) return false;
-        
-        // BFS to check connectivity
         std::vector<std::vector<bool>> visited(height, std::vector<bool>(width, false));
         std::queue<std::pair<int, int>> queue;
-        
         queue.push({tank1X, tank1Y});
         visited[tank1Y][tank1X] = true;
-        
         const int dx[] = {0, 1, 0, -1};
         const int dy[] = {-1, 0, 1, 0};
-        
         while (!queue.empty()) {
-            auto [x, y] = queue.front();
-            queue.pop();
-            
+            auto [x, y] = queue.front(); queue.pop();
             if (x == tank2X && y == tank2Y) return true;
-            
             for (int i = 0; i < 4; ++i) {
-                int nx = x + dx[i];
-                int ny = y + dy[i];
-                
-                // Check bounds
+                int nx = x + dx[i]; int ny = y + dy[i];
                 if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-                
-                // Skip if visited or wall
-                if (visited[ny][nx] || boardLines[ny + 1][nx] == '#') continue;
-                
+                if (visited[ny][nx] || rows[ny][nx] == '#') continue;
                 visited[ny][nx] = true;
                 queue.push({nx, ny});
             }
         }
-        
         return false;
     }
     
     // Helper to check symmetry
     bool checkSymmetry(const std::vector<std::string>& boardLines, const std::string& symmetryType) {
-        if (boardLines.size() <= 1) return false;
-        
-        // Parse dimensions
-        std::istringstream iss(boardLines[0]);
-        int width, height;
-        if (!(iss >> width >> height)) return false;
-        
-        // Skip the first line which contains dimensions
+        auto [width, height] = extractDimensions(boardLines);
+        auto rows = getBoardRows(boardLines);
+        if (width < 0 || height < 0 || (int)rows.size() != height) return false;
         for (int y = 0; y < height; ++y) {
-            if (y + 1 >= static_cast<int>(boardLines.size())) return false;
-            
             for (int x = 0; x < width; ++x) {
-                if (x >= static_cast<int>(boardLines[y + 1].size())) return false;
-                
-                char currentCell = boardLines[y + 1][x];
-                
-                // Skip tanks for symmetry check
+                char currentCell = rows[y][x];
                 if (currentCell == '1' || currentCell == '2') continue;
-                
                 if (symmetryType == "horizontal") {
                     int mirrorX = width - 1 - x;
-                    // Check if mirrored cell matches
-                    if (boardLines[y + 1][mirrorX] != currentCell) return false;
-                }
-                else if (symmetryType == "vertical") {
+                    if (rows[y][mirrorX] != currentCell) return false;
+                } else if (symmetryType == "vertical") {
                     int mirrorY = height - 1 - y;
-                    if (mirrorY + 1 < static_cast<int>(boardLines.size())) {
-                        if (boardLines[mirrorY + 1][x] != currentCell) return false;
-                    }
-                }
-                else if (symmetryType == "diagonal") {
+                    if (rows[mirrorY][x] != currentCell) return false;
+                } else if (symmetryType == "diagonal") {
                     int mirrorX = width - 1 - x;
                     int mirrorY = height - 1 - y;
-                    if (mirrorY + 1 < static_cast<int>(boardLines.size())) {
-                        if (boardLines[mirrorY + 1][mirrorX] != currentCell) return false;
-                    }
+                    if (rows[mirrorY][mirrorX] != currentCell) return false;
                 }
             }
         }
-        
         return true;
     }
 };
@@ -170,6 +128,10 @@ TEST_F(BoardGeneratorTest, DefaultConstructor) {
     EXPECT_FLOAT_EQ(config.mineDensity, 0.05f);
     EXPECT_EQ(config.symmetry, "none");
     EXPECT_NE(config.seed, -1); // Should have been replaced with a valid seed
+    EXPECT_EQ(config.maxSteps, 1000);
+    EXPECT_EQ(config.numShells, 10);
+    EXPECT_EQ(config.mapName, "Generated Map");
+    EXPECT_EQ(config.numTanksPerPlayer, 1);
 }
 
 // Test constructor with custom config
@@ -181,6 +143,10 @@ TEST_F(BoardGeneratorTest, CustomConfigConstructor) {
     config.mineDensity = 0.1f;
     config.symmetry = "horizontal";
     config.seed = 12345;
+    config.maxSteps = 500;
+    config.numShells = 7;
+    config.mapName = "My Custom Map";
+    config.numTanksPerPlayer = 3;
     
     BoardGenerator generator(config);
     const BoardConfig& retrievedConfig = generator.getConfig();
@@ -191,6 +157,10 @@ TEST_F(BoardGeneratorTest, CustomConfigConstructor) {
     EXPECT_FLOAT_EQ(retrievedConfig.mineDensity, 0.1f);
     EXPECT_EQ(retrievedConfig.symmetry, "horizontal");
     EXPECT_EQ(retrievedConfig.seed, 12345);
+    EXPECT_EQ(retrievedConfig.maxSteps, 500);
+    EXPECT_EQ(retrievedConfig.numShells, 7);
+    EXPECT_EQ(retrievedConfig.mapName, "My Custom Map");
+    EXPECT_EQ(retrievedConfig.numTanksPerPlayer, 3);
 }
 
 // Test loading configuration from file
@@ -200,7 +170,11 @@ TEST_F(BoardGeneratorTest, LoadConfig) {
         "wall_density: 0.4\n"
         "mine_density: 0.08\n"
         "symmetry: vertical\n"
-        "seed: 54321\n";
+        "seed: 54321\n"
+        "max_steps: 777\n"
+        "num_shells: 5\n"
+        "map_name: Test Map\n"
+        "num_tanks_per_player: 2\n";
     
     std::string filename = writeTestConfig(configContent);
     
@@ -214,6 +188,10 @@ TEST_F(BoardGeneratorTest, LoadConfig) {
     EXPECT_FLOAT_EQ(config.mineDensity, 0.08f);
     EXPECT_EQ(config.symmetry, "vertical");
     EXPECT_EQ(config.seed, 54321);
+    EXPECT_EQ(config.maxSteps, 777);
+    EXPECT_EQ(config.numShells, 5);
+    EXPECT_EQ(config.mapName, "Test Map");
+    EXPECT_EQ(config.numTanksPerPlayer, 2);
     
     // Cleanup
     std::remove(filename.c_str());
@@ -226,7 +204,11 @@ TEST_F(BoardGeneratorTest, LoadInvalidConfig) {
         "wall_density: 1.5\n" // Out of range
         "mine_density: -0.1\n" // Out of range
         "symmetry: invalid\n" // Invalid value
-        "seed: abc\n"; // Not a number
+        "seed: abc\n" // Not a number
+        "max_steps: notanumber\n" // Invalid
+        "num_shells: -5\n" // Invalid (negative)
+        "map_name: \n" // Empty
+        "num_tanks_per_player: 0\n"; // Invalid (too low)
     
     std::string filename = writeTestConfig(configContent);
     
@@ -240,6 +222,11 @@ TEST_F(BoardGeneratorTest, LoadInvalidConfig) {
     EXPECT_FLOAT_EQ(config.wallDensity, 0.25f);
     EXPECT_FLOAT_EQ(config.mineDensity, 0.05f);
     EXPECT_EQ(config.symmetry, "none");
+    EXPECT_NE(config.seed, -1);
+    EXPECT_EQ(config.maxSteps, 1000);
+    EXPECT_EQ(config.numShells, 10);
+    EXPECT_EQ(config.mapName, "Generated Map");
+    EXPECT_EQ(config.numTanksPerPlayer, 1);
     
     // Cleanup
     std::remove(filename.c_str());
@@ -365,36 +352,6 @@ TEST_F(BoardGeneratorTest, TankConnectivity) {
     EXPECT_TRUE(hasTankPath(boardLines));
 }
 
-// Test saving to file
-TEST_F(BoardGeneratorTest, SaveToFile) {
-    BoardConfig config;
-    config.seed = 12345;
-    
-    BoardGenerator generator(config);
-    EXPECT_TRUE(generator.generateBoard());
-    
-    std::string outputPath = "test_board_output.txt";
-    EXPECT_TRUE(generator.saveToFile(outputPath));
-    
-    // Verify file exists and has correct content
-    std::ifstream file(outputPath);
-    EXPECT_TRUE(file.good());
-    
-    std::vector<std::string> lines;
-    std::string line;
-    while (std::getline(file, line)) {
-        lines.push_back(line);
-    }
-    std::string expected = "20 15\n";
-    EXPECT_TRUE(isBoardValid(lines));
-    EXPECT_EQ(countCharInBoard(lines, '1'), 1);
-    EXPECT_EQ(countCharInBoard(lines, '2'), 1);
-    
-    // Cleanup
-    file.close();
-    std::remove(outputPath.c_str());
-}
-
 // Test that tanks are not trapped
 TEST_F(BoardGeneratorTest, TanksNotTrapped) {
     for (int i = 0; i < 5; ++i) { // Try multiple times with different seeds
@@ -408,4 +365,50 @@ TEST_F(BoardGeneratorTest, TanksNotTrapped) {
         auto boardLines = generator.getBoardLines();
         EXPECT_TRUE(hasTankPath(boardLines));
     }
+}
+
+// Test saving to file
+TEST_F(BoardGeneratorTest, SaveToFile) {
+    BoardConfig config;
+    config.seed = 12345;
+    config.maxSteps = 222;
+    config.numShells = 8;
+    config.mapName = "File Output Map";
+    config.width = 20;
+    config.height = 15;
+    config.wallDensity = 0.3f;
+    config.mineDensity = 0.1f;
+    config.symmetry = "horizontal";
+    config.numTanksPerPlayer = 2;
+
+    BoardGenerator generator(config);
+    EXPECT_TRUE(generator.generateBoard());
+
+    std::string outputPath = "test_board_output.txt";
+    EXPECT_TRUE(generator.saveToFile(outputPath));
+
+    // Verify file exists and has correct content
+    std::ifstream file(outputPath);
+    EXPECT_TRUE(file.good());
+
+    std::vector<std::string> lines;
+    std::string line;
+    while (std::getline(file, line)) {
+        lines.push_back(line);
+    }
+    // Check header lines
+    ASSERT_GE(lines.size(), 5);
+    EXPECT_EQ(lines[0], "File Output Map");
+    EXPECT_EQ(lines[1], "MaxSteps = 222");
+    EXPECT_EQ(lines[2], "NumShells = 8");
+    EXPECT_EQ(lines[3], "Rows = 15");
+    EXPECT_EQ(lines[4], "Cols = 20");
+    // Check board validity and tanks
+    EXPECT_TRUE(isBoardValid(lines));
+    EXPECT_GE(countCharInBoard(lines, '1'), 1);
+    EXPECT_GE(countCharInBoard(lines, '2'), 1);
+
+    // Cleanup
+    file.close();
+    std::remove(outputPath.c_str());
 }

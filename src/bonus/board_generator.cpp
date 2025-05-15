@@ -122,9 +122,17 @@ bool BoardGenerator::parseConfigValue(const std::string& key, const std::string&
     else if (key == "num_shells") {
         int ns;
         if (!(std::istringstream(value) >> ns)) return false;
+        if (ns < 1) {
+            std::cerr << "num_shells must be >= 1" << std::endl;
+            return false;
+        }
         m_config.numShells = ns;
     }
     else if (key == "map_name") {
+        if (value.empty()) {
+            std::cerr << "map_name must be non-empty" << std::endl;
+            return false;
+        }
         m_config.mapName = value;
     }
     else if (key == "num_tanks_per_player") {
