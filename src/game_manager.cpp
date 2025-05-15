@@ -1,8 +1,6 @@
 #include "game_manager.h"
 #include "file_loader.h"
 #include "collision_handler.h"
-#include "algo/chase_algorithm.h"
-#include "algo/defensive_algorithm.h"
 #include <iostream>
 #include <fstream>
 #include <algorithm>

@@ -6,7 +6,6 @@
 #include "game_board.h"
 #include "objects/tank.h"
 #include "objects/shell.h"
-#include "algo/algorithm.h"
 #include "collision_handler.h"
 #include "TankAlgorithmFactory.h"
 #include "PlayerFactory.h"
