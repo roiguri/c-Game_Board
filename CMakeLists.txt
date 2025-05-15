@@ -103,6 +103,7 @@ if(ENABLE_TESTING)
         test/players/battle_info_impl_test.cpp
         test/players/basic_player_test.cpp
         test/players/basic_player_factory_test.cpp
+        test/players/offensive_battle_info_test.cpp
         test/algo/basic_tank_algorithm_test.cpp
         test/algo/basic_tank_algorithm_factory_test.cpp
         test/test_main.cpp
