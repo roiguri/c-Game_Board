@@ -62,7 +62,7 @@ public:
      */
     void updateBattleInfo(BattleInfo& info) override;
 
-private:
+protected:
     int m_playerId;
     int m_tankIndex;
     int m_turnsSinceLastUpdate = 0;
@@ -168,6 +168,14 @@ private:
      * @param lastAction The action that was just taken
      */
     void updateState(ActionRequest lastAction);
+
+    /**
+     * @brief Gets optimal rotation action to face target direction.
+     * @param current The current direction
+     * @param target The target direction
+     * @return The ActionRequest needed to rotate toward the target
+     */
+    static ActionRequest getRotationToDirection(Direction current, Direction target);
 
     friend class BasicTankAlgorithmTest;
 }; 

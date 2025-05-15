@@ -151,6 +151,27 @@ std::vector<Point> BasicTankAlgorithm::getSafePositions() const {
     return safePositions;
 }
 
+ActionRequest BasicTankAlgorithm::getRotationToDirection(Direction current, Direction target) {
+    if (current == target) return ActionRequest::DoNothing;
+    if (target == rotateRight(current, false)) return ActionRequest::RotateRight45;
+    if (target == rotateLeft(current, false)) return ActionRequest::RotateLeft45;
+    if (target == rotateRight(current, true)) return ActionRequest::RotateRight90;
+    if (target == rotateLeft(current, true)) return ActionRequest::RotateLeft90;
+    // Fallback: choose the shortest rotation
+    int stepsClockwise = 0, stepsCounterClockwise = 0;
+    Direction tempDir = current;
+    while (tempDir != target && stepsClockwise < 8) {
+        tempDir = rotateRight(tempDir, false);
+        stepsClockwise++;
+    }
+    tempDir = current;
+    while (tempDir != target && stepsCounterClockwise < 8) {
+        tempDir = rotateLeft(tempDir, false);
+        stepsCounterClockwise++;
+    }
+    return (stepsClockwise <= stepsCounterClockwise) ? ActionRequest::RotateRight90 : ActionRequest::RotateLeft90;
+}
+
 BasicTankAlgorithm::SafeMoveOption BasicTankAlgorithm::getSafeMoveOption(const Point& pos) const {
     const Point& current = m_trackedPosition;
     const Direction currentDir = m_trackedDirection;
@@ -170,6 +191,8 @@ BasicTankAlgorithm::SafeMoveOption BasicTankAlgorithm::getSafeMoveOption(const P
             option.action = ActionRequest::MoveForward;
             option.cost = 1;
         } else {
+            option.action = getRotationToDirection(currentDir, targetDir);
+            // Estimate cost: 1 for move + 1 for each 45-degree rotation
             int leftSteps = 0, rightSteps = 0;
             Direction temp = currentDir;
             while (temp != targetDir && leftSteps < 8) {
@@ -181,14 +204,7 @@ BasicTankAlgorithm::SafeMoveOption BasicTankAlgorithm::getSafeMoveOption(const P
                 temp = rotateRight(temp, false);
                 rightSteps++;
             }
-            if (leftSteps <= rightSteps) {
-                option.action = (leftSteps == 2) ? ActionRequest::RotateLeft90 : ActionRequest::RotateLeft45;
-                option.cost = leftSteps;
-            } else {
-                option.action = (rightSteps == 2) ? ActionRequest::RotateRight90 : ActionRequest::RotateRight45;
-                option.cost = rightSteps;
-            }
-            option.cost += 1; // Add 1 for the move after rotation
+            option.cost = std::min(leftSteps, rightSteps) + 1;
         }
     }
     return option;

@@ -82,6 +82,10 @@ protected:
     void setAlgoShells(int shells) { algo->m_trackedShells = shells; }
     void setAlgoCooldown(int cooldown) { algo->m_trackedCooldown = cooldown; }
     void callUpdateState(ActionRequest action) { algo->updateState(action); }
+    // Helper to access protected static getRotationToDirection
+    static ActionRequest callGetRotationToDirection(Direction current, Direction target) {
+        return BasicTankAlgorithm::getRotationToDirection(current, target);
+    }
 };
 
 TEST_F(BasicTankAlgorithmTest, UpdateBattleInfo_UpdatesGameBoardAndObjects) {
@@ -591,5 +595,31 @@ TEST_F(BasicTankAlgorithmTest, UpdateState_DoNothing) {
     EXPECT_EQ(getAlgoDirection(), Direction::Up);
     EXPECT_EQ(getAlgoShells(), 2);
     EXPECT_EQ(getAlgoCooldown(), 0);
+}
+
+TEST_F(BasicTankAlgorithmTest, GetRotationToDirection_NoRotation) {
+    EXPECT_EQ(callGetRotationToDirection(Direction::Up, Direction::Up), ActionRequest::DoNothing);
+}
+
+TEST_F(BasicTankAlgorithmTest, GetRotationToDirection_45DegreeRight) {
+    EXPECT_EQ(callGetRotationToDirection(Direction::Up, Direction::UpRight), ActionRequest::RotateRight45);
+}
+
+TEST_F(BasicTankAlgorithmTest, GetRotationToDirection_45DegreeLeft) {
+    EXPECT_EQ(callGetRotationToDirection(Direction::Up, Direction::UpLeft), ActionRequest::RotateLeft45);
+}
+
+TEST_F(BasicTankAlgorithmTest, GetRotationToDirection_90DegreeRight) {
+    EXPECT_EQ(callGetRotationToDirection(Direction::Up, Direction::Right), ActionRequest::RotateRight90);
+}
+
+TEST_F(BasicTankAlgorithmTest, GetRotationToDirection_90DegreeLeft) {
+    EXPECT_EQ(callGetRotationToDirection(Direction::Up, Direction::Left), ActionRequest::RotateLeft90);
+}
+
+TEST_F(BasicTankAlgorithmTest, GetRotationToDirection_FallbackShortest) {
+    // 180 degree turn: Up to Down (should pick right or left, both are 4 steps)
+    ActionRequest result = callGetRotationToDirection(Direction::Up, Direction::Down);
+    EXPECT_TRUE(result == ActionRequest::RotateRight90 || result == ActionRequest::RotateLeft90);
 }
 
