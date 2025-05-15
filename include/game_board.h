@@ -188,9 +188,11 @@ public:
      *
      * @param a The starting point
      * @param b The destination point
+     * @param width The width of the board
+     * @param height The height of the board
      * @return The minimum number of steps required
      */
-    int stepDistance(const Point& a, const Point& b) const;
+    static int stepDistance(const Point& a, const Point& b, size_t width, size_t height);
 private:
     std::vector<std::vector<CellType>> m_board;
     std::map<Point, int> m_wallHealth;

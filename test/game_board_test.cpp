@@ -590,46 +590,46 @@ TEST_F(GameBoardTest, ZeroDimensionBoard_DoesNotCrash) {
 TEST_F(GameBoardTest, StepDistance_NoWrapping_StraightAndDiagonal) {
     board = GameBoard(10, 10);
     // Horizontal
-    EXPECT_EQ(board.stepDistance(Point(0, 0), Point(3, 0)), 3);
+    EXPECT_EQ(GameBoard::stepDistance(Point(0, 0), Point(3, 0), board.getWidth(), board.getHeight()), 3);
     // Vertical
-    EXPECT_EQ(board.stepDistance(Point(0, 0), Point(0, 4)), 4);
+    EXPECT_EQ(GameBoard::stepDistance(Point(0, 0), Point(0, 4), board.getWidth(), board.getHeight()), 4);
     // Diagonal
-    EXPECT_EQ(board.stepDistance(Point(0, 0), Point(3, 3)), 3);
+    EXPECT_EQ(GameBoard::stepDistance(Point(0, 0), Point(3, 3), board.getWidth(), board.getHeight()), 3);
     // Same point
-    EXPECT_EQ(board.stepDistance(Point(2, 2), Point(2, 2)), 0);
+    EXPECT_EQ(GameBoard::stepDistance(Point(2, 2), Point(2, 2), board.getWidth(), board.getHeight()), 0);
 }
 
 TEST_F(GameBoardTest, StepDistance_Wrapping_XAxis) {
     board = GameBoard(5, 5);
     // Wrapping horizontally: (0,0) to (4,0) is 1 step (wrap)
-    EXPECT_EQ(board.stepDistance(Point(0, 0), Point(4, 0)), 1);
+    EXPECT_EQ(GameBoard::stepDistance(Point(0, 0), Point(4, 0), board.getWidth(), board.getHeight()), 1);
     // Wrapping horizontally: (1,1) to (4,1) is 2 steps (min(3,2))
-    EXPECT_EQ(board.stepDistance(Point(1, 1), Point(4, 1)), 2);
+    EXPECT_EQ(GameBoard::stepDistance(Point(1, 1), Point(4, 1), board.getWidth(), board.getHeight()), 2);
 }
 
 TEST_F(GameBoardTest, StepDistance_Wrapping_YAxis) {
     board = GameBoard(5, 5);
     // Wrapping vertically: (0,0) to (0,4) is 1 step (wrap)
-    EXPECT_EQ(board.stepDistance(Point(0, 0), Point(0, 4)), 1);
+    EXPECT_EQ(GameBoard::stepDistance(Point(0, 0), Point(0, 4), board.getWidth(), board.getHeight()), 1);
     // Wrapping vertically: (2,1) to (2,4) is 2 steps (min(3,2))
-    EXPECT_EQ(board.stepDistance(Point(2, 1), Point(2, 4)), 2);
+    EXPECT_EQ(GameBoard::stepDistance(Point(2, 1), Point(2, 4), board.getWidth(), board.getHeight()), 2);
 }
 
 TEST_F(GameBoardTest, StepDistance_Wrapping_BothAxes) {
     board = GameBoard(3, 3);
     // (0,0) to (2,2): dx=1 (wrap), dy=1 (wrap) => 1
-    EXPECT_EQ(board.stepDistance(Point(0, 0), Point(2, 2)), 1);
+    EXPECT_EQ(GameBoard::stepDistance(Point(0, 0), Point(2, 2), board.getWidth(), board.getHeight()), 1);
     // (1,1) to (2,2): dx=1, dy=1 => 1
-    EXPECT_EQ(board.stepDistance(Point(1, 1), Point(2, 2)), 1);
+    EXPECT_EQ(GameBoard::stepDistance(Point(1, 1), Point(2, 2), board.getWidth(), board.getHeight()), 1);
 }
 
 TEST_F(GameBoardTest, StepDistance_EdgeCases) {
     board = GameBoard(3, 3);
     // Same point
-    EXPECT_EQ(board.stepDistance(Point(1, 1), Point(1, 1)), 0);
+    EXPECT_EQ(GameBoard::stepDistance(Point(1, 1), Point(1, 1), board.getWidth(), board.getHeight()), 0);
     // Opposite corners with wrapping
-    EXPECT_EQ(board.stepDistance(Point(0, 0), Point(2, 2)), 1);
+    EXPECT_EQ(GameBoard::stepDistance(Point(0, 0), Point(2, 2), board.getWidth(), board.getHeight()), 1);
     // Center to edge
-    EXPECT_EQ(board.stepDistance(Point(1, 1), Point(0, 1)), 1);
+    EXPECT_EQ(GameBoard::stepDistance(Point(1, 1), Point(0, 1), board.getWidth(), board.getHeight()), 1);
 }
 
