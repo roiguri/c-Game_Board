@@ -1,6 +1,7 @@
 // test/bonus/logger/logger_test.cpp
 #include "gtest/gtest.h"
 #include "bonus/logger/logger.h"
+#include "bonus/logger/logger_config.h"
 #include <fstream>
 #include <string>
 #include <filesystem>
@@ -31,6 +32,12 @@ protected:
         if (std::filesystem::exists("logger_test.log")) {
             std::filesystem::remove("logger_test.log");
         }
+        
+        // Clean up invalid directory test file if it exists
+        std::string invalidPath = "/invalid_dir/test.log";
+        if (std::filesystem::exists(invalidPath)) {
+            std::filesystem::remove(invalidPath);
+        }
     }
     
     // Helper to check if a string exists in log file
@@ -59,9 +66,20 @@ TEST_F(LoggerTest, LoggerInitialization) {
     EXPECT_TRUE(std::filesystem::exists("logger_test.log"));
 }
 
+TEST_F(LoggerTest, InitializationFailure) {
+    Logger& logger = Logger::getInstance();
+    
+    // Try to initialize with an invalid file path
+    EXPECT_FALSE(logger.initialize(Logger::Level::INFO, false, true, "/invalid_dir/test.log"));
+    
+    // Should still be able to initialize with console output
+    EXPECT_TRUE(logger.initialize(Logger::Level::INFO, true, false));
+}
+
 TEST_F(LoggerTest, LogLevels) {
     Logger& logger = Logger::getInstance();
     logger.initialize(Logger::Level::DEBUG, false, true, "logger_test.log");
+    logger.setEnabled(true);
     
     // All levels should be logged
     logger.debug("Debug message");
@@ -81,6 +99,7 @@ TEST_F(LoggerTest, LogLevels) {
     // Clear log file
     std::filesystem::remove("logger_test.log");
     logger.initialize(Logger::Level::WARNING, false, true, "logger_test.log");
+    logger.setEnabled(true);
     
     // Log messages at all levels
     logger.debug("Debug message 2");
@@ -102,6 +121,7 @@ TEST_F(LoggerTest, LogEnabledDisabled) {
     // Enable logging and check
     logger.setEnabled(true);
     EXPECT_TRUE(logger.isEnabled());
+    EXPECT_TRUE(logger.isInitializedAndEnabled());
     
     // Log a message
     logger.info("Logging enabled");
@@ -110,6 +130,7 @@ TEST_F(LoggerTest, LogEnabledDisabled) {
     // Disable logging and check
     logger.setEnabled(false);
     EXPECT_FALSE(logger.isEnabled());
+    EXPECT_FALSE(logger.isInitializedAndEnabled());
     
     // Clear log file
     std::filesystem::remove("logger_test.log");
@@ -123,4 +144,100 @@ TEST_F(LoggerTest, LogEnabledDisabled) {
     logger.setEnabled(true);
     logger.info("Logging enabled again");
     EXPECT_TRUE(logFileContains("Logging enabled again"));
+}
+
+TEST_F(LoggerTest, MacroSafety) {
+    Logger& logger = Logger::getInstance();
+    
+    // Make sure logger is not initialized or enabled
+    logger.setEnabled(false);
+    
+    // These should do nothing and not crash
+    LOG_DEBUG("Debug through macro");
+    LOG_INFO("Info through macro");
+    LOG_WARNING("Warning through macro");
+    LOG_ERROR("Error through macro");
+    
+    // Initialize but don't enable
+    logger.initialize(Logger::Level::DEBUG, false, true, "logger_test.log");
+    
+    // These should still do nothing
+    LOG_DEBUG("Debug after init");
+    LOG_INFO("Info after init");
+    
+    // Verify no logs were written
+    EXPECT_FALSE(logFileContains("Debug through macro"));
+    EXPECT_FALSE(logFileContains("Info through macro"));
+    EXPECT_FALSE(logFileContains("Debug after init"));
+    EXPECT_FALSE(logFileContains("Info after init"));
+    
+    // Now enable logging
+    logger.setEnabled(true);
+    
+    // These should now log
+    LOG_INFO("Info when enabled");
+    
+    // Verify log was written
+    EXPECT_TRUE(logFileContains("Info when enabled"));
+}
+
+TEST_F(LoggerTest, ConfigFromCommandLine) {
+    // Clean up existing files
+    if (std::filesystem::exists("cmdline_test.log")) {
+        std::filesystem::remove("cmdline_test.log");
+    }
+    
+    // Test with valid arguments
+    const char* args1[] = {
+        "program",
+        "--enable-logging",
+        "--log-level=warning",
+        "--log-to-file",
+        "--log-file=cmdline_test.log"
+    };
+    
+    EXPECT_TRUE(LoggerConfig::configureFromCommandLine(5, const_cast<char**>(args1)));
+    EXPECT_TRUE(Logger::getInstance().isInitializedAndEnabled());
+    
+    // Log something to verify
+    LOG_WARNING("Command line test");
+    
+    // Check file was created and contains log
+    EXPECT_TRUE(std::filesystem::exists("cmdline_test.log"));
+    
+    std::ifstream logFile("cmdline_test.log");
+    EXPECT_TRUE(logFile.is_open());
+    
+    std::string content;
+    std::getline(logFile, content);
+    EXPECT_TRUE(content.find("Command line test") != std::string::npos);
+    logFile.close();
+
+    
+    // Test with invalid file path but fallback to console
+    const char* args2[] = {
+        "program",
+        "--enable-logging",
+        "--log-file=/invalid_path/test.log"
+    };
+    
+    // Should still return true (fallback to console logging)
+    EXPECT_TRUE(LoggerConfig::configureFromCommandLine(3, const_cast<char**>(args2)));
+    
+    // Clean up
+    Logger::getInstance().setEnabled(false);
+    if (std::filesystem::exists("cmdline_test.log")) {
+        std::filesystem::remove("cmdline_test.log");
+    }
+}
+
+TEST_F(LoggerTest, ConfigFromCommandLine_WrongConfig) {
+    // Test with no logging requested
+    const char* args3[] = {
+        "program",
+        "--some-other-flag"
+    };
+    
+    EXPECT_TRUE(LoggerConfig::configureFromCommandLine(2, const_cast<char**>(args3)));
+    EXPECT_FALSE(Logger::getInstance().isEnabled());
 }

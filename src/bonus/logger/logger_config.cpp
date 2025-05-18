@@ -3,21 +3,36 @@
 #include <string>
 #include <algorithm>
 #include <cctype>
+#include <iostream>
 
 bool LoggerConfig::configureFromCommandLine(int argc, char* argv[]) {
+    // Check if logging is even requested
+    bool enableLogging = false;
+    for (int i = 1; i < argc; i++) {
+        if (std::string(argv[i]) == "--enable-logging") {
+            enableLogging = true;
+            break;
+        }
+    }
+    
+    // If logging is not requested, don't even try to configure it
+    if (!enableLogging) {
+        Logger::getInstance().setEnabled(false); // Explicitly disable logger
+        return true; // Success - no logging is fine
+    }
+    
     // Default settings
     Logger::Level level = Logger::Level::INFO;
     bool useConsole = true;
     bool useFile = false;
     std::string logFile = "tankbattle.log";
-    bool enableLogging = false;
     
     // Parse command-line arguments
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         
         if (arg == "--enable-logging") {
-            enableLogging = true;
+            // Already processed
         }
         else if (arg.substr(0, 12) == "--log-level=") {
             std::string levelStr = arg.substr(12);
@@ -35,15 +50,31 @@ bool LoggerConfig::configureFromCommandLine(int argc, char* argv[]) {
         }
     }
     
-    // Initialize the logger with the configured settings
-    bool success = Logger::getInstance().initialize(level, useConsole, useFile, logFile);
-    
-    // Enable logging if requested
-    if (success && enableLogging) {
-        Logger::getInstance().setEnabled(true);
+    // Don't allow disabling both console and file logging
+    if (!useConsole && !useFile) {
+        std::cerr << "Warning: Cannot disable both console and file logging. "
+                  << "Enabling console logging." << std::endl;
+        useConsole = true;
     }
     
-    return success;
+    // Try to initialize the logger
+    bool initSuccess = Logger::getInstance().initialize(level, useConsole, useFile, logFile);
+    
+    // If file logging failed, try to fall back to console only
+    if (!initSuccess && useFile) {
+        std::cerr << "Failed to open log file: " << logFile 
+                  << ". Falling back to console logging." << std::endl;
+        initSuccess = Logger::getInstance().initialize(level, true, false);
+    }
+    
+    // Only enable logging if initialization was successful
+    if (initSuccess) {
+        Logger::getInstance().setEnabled(true);
+        return true;
+    } else {
+        std::cerr << "Warning: Failed to initialize logger. Continuing without logging." << std::endl;
+        return false; // Logger initialization failed, but game can still run
+    }
 }
 
 Logger::Level LoggerConfig::stringToLevel(const std::string& levelStr) {

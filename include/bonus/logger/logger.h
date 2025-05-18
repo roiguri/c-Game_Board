@@ -73,6 +73,8 @@ public:
     void warning(const std::string& message, const char* file = nullptr, int line = 0);
     void error(const std::string& message, const char* file = nullptr, int line = 0);
 
+    bool isInitializedAndEnabled() const;
+
 private:
     Logger(); // Private constructor for singleton
     ~Logger(); // Private destructor
@@ -94,7 +96,7 @@ private:
 };
 
 // Convenience macros for logging - these check if logging is enabled at runtime
-#define LOG_DEBUG(msg) if(Logger::getInstance().isEnabled()) Logger::getInstance().debug(msg, __FILE__, __LINE__)
-#define LOG_INFO(msg) if(Logger::getInstance().isEnabled()) Logger::getInstance().info(msg, __FILE__, __LINE__)
-#define LOG_WARNING(msg) if(Logger::getInstance().isEnabled()) Logger::getInstance().warning(msg, __FILE__, __LINE__)
-#define LOG_ERROR(msg) if(Logger::getInstance().isEnabled()) Logger::getInstance().error(msg, __FILE__, __LINE__)
+#define LOG_DEBUG(msg) if(Logger::getInstance().isInitializedAndEnabled()) Logger::getInstance().debug(msg, __FILE__, __LINE__)
+#define LOG_INFO(msg) if(Logger::getInstance().isInitializedAndEnabled()) Logger::getInstance().info(msg, __FILE__, __LINE__)
+#define LOG_WARNING(msg) if(Logger::getInstance().isInitializedAndEnabled()) Logger::getInstance().warning(msg, __FILE__, __LINE__)
+#define LOG_ERROR(msg) if(Logger::getInstance().isInitializedAndEnabled()) Logger::getInstance().error(msg, __FILE__, __LINE__)

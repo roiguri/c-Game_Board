@@ -171,3 +171,7 @@ std::string Logger::getTimestamp() const {
     
     return ss.str();
 }
+
+bool Logger::isInitializedAndEnabled() const {
+    return m_initialized && m_enabled;
+}
