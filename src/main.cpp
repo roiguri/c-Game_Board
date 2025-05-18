@@ -6,6 +6,7 @@
 #include "game_manager.h"
 #include "algo/basic_tank_algorithm_factory.h"
 #include "players/basic_player_factory.h"
+#include "bonus/logger/logger_config.h"
 
 // Run the game with a specified board file
 int runGameWithFile(const std::string& filePath) {
@@ -23,29 +24,31 @@ int runGameWithFile(const std::string& filePath) {
 
 // Generate a board with the given configuration
 int generateBoard(const std::string& configPath, bool saveToFile) {
+    LOG_INFO("Generating board with configuration file: " + configPath);
+
     BoardGenerator generator;
     if (!configPath.empty()) {
         if (!generator.loadConfig(configPath)) {
-            std::cerr << "Failed to load configuration file: " << configPath << std::endl;
+            LOG_ERROR("Failed to load configuration file: " + configPath);
             return 1;
         }
-        std::cout << "Using configuration from: " << configPath << std::endl;
+        LOG_INFO("Using configuration from: " + configPath);
     } else {
-        std::cout << "Using default board configuration" << std::endl;
+        LOG_INFO("Using default board configuration");
     }
     
     if (!generator.generateBoard()) {
-        std::cerr << "Failed to generate board" << std::endl;
+        LOG_ERROR("Failed to generate board");
         return 1;
     }
     
     if (saveToFile) {
         std::string outputPath = "generated_board.txt";
         if (generator.saveToFile(outputPath)) {
-            std::cout << "Board generated and saved to " << outputPath << std::endl;
+            LOG_INFO("Board generated and saved to " + outputPath);
             return 0;
         } else {
-            std::cerr << "Failed to save generated board" << std::endl;
+            LOG_ERROR("Failed to save generated board");
             return 1;
         }
     }
@@ -58,23 +61,23 @@ int generateAndRunGame(const std::string& configPath) {
     BoardGenerator generator;
     if (!configPath.empty()) {
         if (!generator.loadConfig(configPath)) {
-            std::cerr << "Failed to load configuration file: " << configPath << std::endl;
+            LOG_ERROR("Failed to load configuration file: " + configPath);
             return 1;
         }
-        std::cout << "Using configuration from: " << configPath << std::endl;
+        LOG_INFO("Using configuration from: " + configPath);
     } else {
-        std::cout << "Using default board configuration" << std::endl;
+        LOG_INFO("Using default board configuration");
     }
     
     if (!generator.generateBoard()) {
-        std::cerr << "Failed to generate board" << std::endl;
+        LOG_ERROR("Failed to generate board");
         return 1;
     }
     
     // Create a temporary file for the generated board
     std::string tempFilePath = "temp_board.txt";
     if (!generator.saveToFile(tempFilePath)) {
-        std::cerr << "Failed to create temporary board file" << std::endl;
+        LOG_ERROR("Failed to create temporary board file");
         return 1;
     }
     
@@ -93,6 +96,7 @@ int generateAndRunGame(const std::string& configPath) {
     return 0;
 }
 
+// TODO: update with new command line arguments
 // Print usage information
 void printUsage() {
     std::cout << "Usage:" << std::endl;
@@ -106,6 +110,9 @@ int main(int argc, char* argv[]) {
     bool runGenerated = false;
     std::string configPath = "";
     
+    LoggerConfig::configureFromCommandLine(argc, argv);
+    LOG_INFO("Tank Battle Game started");
+
     // Parse command line arguments
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];

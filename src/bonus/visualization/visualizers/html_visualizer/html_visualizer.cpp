@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include "bonus/logger/logger.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -18,8 +19,8 @@ HTMLVisualizer::HTMLVisualizer(const std::string& templatePath) {
         // Try to find templates directory
         m_templatePath = findTemplatesDirectory();
         if (m_templatePath.empty()) {
-            std::cerr << "HTMLVisualizer: Could not locate templates directory. "
-                      << "HTML visualization may not work correctly." << std::endl;
+            LOG_ERROR("HTMLVisualizer: Could not locate templates directory. "
+                      "HTML visualization may not work correctly.");
         }
     }
 }
@@ -38,7 +39,7 @@ void HTMLVisualizer::clear() {
 
 bool HTMLVisualizer::generateOutput(const std::string& outputPath) {
     if (m_snapshots.empty()) {
-        std::cerr << "HTMLVisualizer: No snapshots to visualize" << std::endl;
+        LOG_ERROR("HTMLVisualizer: No snapshots to visualize");
         return false;
     }
     
@@ -48,7 +49,7 @@ bool HTMLVisualizer::generateOutput(const std::string& outputPath) {
     std::string jsTemplate = loadTemplate("visualizer.js");
     
     if (htmlTemplate.empty() || cssTemplate.empty() || jsTemplate.empty()) {
-        std::cerr << "HTMLVisualizer: Failed to load one or more templates" << std::endl;
+        LOG_ERROR("HTMLVisualizer: Failed to load one or more templates");
         return false;
     }
     
@@ -84,20 +85,17 @@ bool HTMLVisualizer::generateOutput(const std::string& outputPath) {
     try {
         std::ofstream outputFile(outputFilePath);
         if (!outputFile.is_open()) {
-            std::cerr << "HTMLVisualizer: Failed to open file for writing: " 
-                      << outputFilePath << std::endl;
+            LOG_ERROR("HTMLVisualizer: Failed to open file for writing: " + outputFilePath);
             return false;
         }
         
         outputFile << htmlTemplate;
         outputFile.close();
         
-        std::cout << "HTMLVisualizer: Generated visualization at " 
-                  << outputFilePath << std::endl;
+        LOG_INFO("HTMLVisualizer: Generated visualization at " + outputFilePath);
         return true;
     } catch (const std::exception& e) {
-        std::cerr << "HTMLVisualizer: Error writing output file: " 
-                  << e.what() << std::endl;
+        LOG_ERROR("HTMLVisualizer: Error writing output file: " + std::string(e.what()));
         return false;
     }
 }
@@ -112,7 +110,7 @@ void HTMLVisualizer::displayCurrentState() {
 
 std::string HTMLVisualizer::loadTemplate(const std::string& templateName) const {
     if (m_templatePath.empty()) {
-        std::cerr << "HTMLVisualizer: Template path not set" << std::endl;
+        LOG_ERROR("HTMLVisualizer: Template path not set");
         return "";
     }
     
@@ -121,8 +119,7 @@ std::string HTMLVisualizer::loadTemplate(const std::string& templateName) const 
     try {
         std::ifstream file(filePath);
         if (!file.is_open()) {
-            std::cerr << "HTMLVisualizer: Could not open template file: " 
-                      << filePath << std::endl;
+            LOG_ERROR("HTMLVisualizer: Could not open template file: " + filePath.string());
             return "";
         }
         
@@ -130,8 +127,7 @@ std::string HTMLVisualizer::loadTemplate(const std::string& templateName) const 
         buffer << file.rdbuf();
         return buffer.str();
     } catch (const std::exception& e) {
-        std::cerr << "HTMLVisualizer: Error reading template file " 
-                  << filePath << ": " << e.what() << std::endl;
+        LOG_ERROR("HTMLVisualizer: Error reading template file " + filePath.string() + ": " + e.what());
         return "";
     }
 }

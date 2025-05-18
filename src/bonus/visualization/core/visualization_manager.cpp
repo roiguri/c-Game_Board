@@ -1,5 +1,6 @@
 #include "bonus/visualization/core/visualization_manager.h"
 #include <iostream>
+#include "bonus/logger/logger.h"
 
 VisualizationManager::VisualizationManager()
     : m_liveVisualizationEnabled(false) {
@@ -43,7 +44,7 @@ bool VisualizationManager::generateOutputs(const std::string& basePath) {
         
         // Generate output and track success
         if (!m_visualizers[i]->generateOutput(outputPath)) {
-            std::cerr << "Failed to generate output for visualizer " << i << std::endl;
+            LOG_ERROR("Failed to generate output for visualizer " + std::to_string(i));
             allSucceeded = false;
         }
     }
@@ -65,7 +66,7 @@ void VisualizationManager::setLiveVisualizationEnabled(bool enabled) {
         }
         
         if (!anySupportsLive) {
-            std::cerr << "Warning: Live visualization enabled, but no visualizers support live mode" << std::endl;
+            LOG_WARNING("Live visualization enabled, but no visualizers support live mode");
         }
     }
 }

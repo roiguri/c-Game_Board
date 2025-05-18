@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <unordered_map>
 #include <satellite_view_impl.h>
+#include "bonus/logger/logger.h"
 
 GameManager::GameManager(PlayerFactory& playerFactory,
                        TankAlgorithmFactory& tankAlgorithmFactory)
@@ -97,9 +98,12 @@ void GameManager::run() {
       );
   }
   #endif
+
+  LOG_INFO("Starting game loop");
   
   // TODO: update log structure
   while (!m_gameOver) {
+      LOG_DEBUG("Processing step " + std::to_string(m_currentStep));
       processStep();
       
       // TODO: optimize to store out of shells state
@@ -122,6 +126,8 @@ void GameManager::run() {
     "Game ended after " + std::to_string(m_currentStep) + " steps"
   );
   m_gameLog.push_back("Result: " + m_gameResult);
+  LOG_INFO("Game ended after " + std::to_string(m_currentStep) + " steps");
+  LOG_INFO("Result: " + m_gameResult);
 
   // Call saveResults with the stored output file path
   saveResults(m_outputFilePath);
@@ -150,10 +156,9 @@ bool GameManager::saveResults(const std::string& outputFilePath) {
       visualizationPath += "_visualization";
       
       if (m_visualizationManager->generateOutputs(visualizationPath)) {
-          std::cout << "Visualization generated at " << visualizationPath <<
-           ".html" << std::endl;
+          LOG_INFO("Visualization generated at " + visualizationPath + ".html");
       } else {
-          std::cerr << "Failed to generate visualization." << std::endl;
+          LOG_ERROR("Failed to generate visualization.");
           return false;
       }
   }
@@ -196,7 +201,6 @@ void GameManager::processStep() {
   }
   #endif
   
-  // TODO: fix log actions
   for (auto& controller : m_tankControllers) {
     if (!controller.tank.isDestroyed() && controller.algorithm) {
       applyAction(controller);
@@ -305,7 +309,7 @@ void GameManager::applyAction(TankWithAlgorithm& controller) {
           break;
       case ActionRequest::DoNothing:
           playerTank.doNothing(); // update tank state
-          actionResult = true;  // No action is always "successful"
+          actionResult = true;    // No action is always "successful"
           break;
       default:
           actionResult = false;
@@ -389,6 +393,21 @@ std::string GameManager::logAction() {
         turnLog += stepActions[i];
     }
     m_gameLog.push_back(turnLog);
+
+    // Debug log for all tanks actions with their ids
+    std::string debugInfo = "Step " + std::to_string(m_currentStep) + " actions: ";
+    for (size_t i = 0; i < m_tankControllers.size(); ++i) {
+        auto& controller = m_tankControllers[i];
+        int playerId = controller.tank.getPlayerId();
+        
+        if (i > 0) debugInfo += ", ";
+        debugInfo += "P" + std::to_string(playerId) + 
+                     "-T" + std::to_string(i) + ": " + 
+                     actionToString(controller.nextAction) +
+                     (controller.actionSuccess ? "" : " (ignored)") +
+                     (controller.tank.isDestroyed() ? " (destroyed)" : "");
+    }
+    LOG_DEBUG(debugInfo);
     return turnLog;
 }
 
@@ -408,13 +427,14 @@ std::string GameManager::actionToString(ActionRequest action) {
     }
 }
 
-// TODO: consider adding sequence number to tank object members
 void GameManager::createTanks(const std::vector<std::pair<int, Point>>& tankPositions) {
+    LOG_INFO("Creating tanks");
     m_tanks.clear();
     for (const auto& [playerId, position] : tankPositions) {
         Direction dir = (playerId == 1) ? Direction::Left : Direction::Right;
         m_tanks.emplace_back(playerId, position, dir);
     }
+    LOG_INFO("Tanks created");
 }
 
 bool GameManager::saveErrorsToFile(
@@ -448,6 +468,7 @@ void GameManager::removeDestroyedShells() {
 }
 
 void GameManager::createTankAlgorithms() {
+    LOG_INFO("Creating tank algorithms");
     // Map from playerId to current tank index for that player
     std::unordered_map<int, int> playerTankCounts;
     for (auto& tank : m_tanks) {
@@ -456,4 +477,5 @@ void GameManager::createTankAlgorithms() {
         auto algo = m_tankAlgorithmFactory.create(playerId, tankIndex);
         m_tankControllers.push_back(TankWithAlgorithm{tank, std::move(algo)});
     }
+    LOG_INFO("Tank algorithms created");
 }

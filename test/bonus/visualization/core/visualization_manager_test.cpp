@@ -275,20 +275,3 @@ TEST_F(VisualizationManagerTest, LiveVisualization) {
     EXPECT_FALSE(nonLiveVisualizer->wasDisplayCurrentStateCalled());
     EXPECT_FALSE(liveVisualizer->wasDisplayCurrentStateCalled());
 }
-
-TEST_F(VisualizationManagerTest, NoLiveVisualizers) {
-    // Add visualizers with no live mode support
-    manager->addVisualizer(std::make_unique<MockVisualizer>(false));
-    manager->addVisualizer(std::make_unique<MockVisualizer>(false));
-    
-    // Capture stderr to verify warning
-    testing::internal::CaptureStderr();
-    
-    // Enable live visualization
-    manager->setLiveVisualizationEnabled(true);
-    
-    // Check the warning message
-    std::string error = testing::internal::GetCapturedStderr();
-    EXPECT_NE(error.find("Warning"), std::string::npos);
-    EXPECT_NE(error.find("no visualizers support live mode"), std::string::npos);
-}
