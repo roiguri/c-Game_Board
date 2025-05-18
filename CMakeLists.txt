@@ -19,7 +19,7 @@ add_compile_options(
 option(ENABLE_TESTING "Build tests" OFF)
 option(ENABLE_VISUALIZATION "Enable visualization features" OFF)
 
-# Collect source files (exclude test and visualization for now)
+# Collect source files
 file(GLOB_RECURSE PROJECT_SOURCES "src/*.cpp")
 file(GLOB_RECURSE PROJECT_HEADERS "include/*.h")
 file(GLOB COMMON_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/common/*.h")
@@ -107,6 +107,7 @@ if(ENABLE_TESTING)
         test/algo/basic_tank_algorithm_test.cpp
         test/algo/basic_tank_algorithm_factory_test.cpp
         test/algo/offensive_tank_algorithm_test.cpp
+        test/bonus/logger/logger_test.cpp
         test/test_main.cpp
     )
 
