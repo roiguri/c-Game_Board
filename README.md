@@ -95,3 +95,17 @@ used.
 | max_steps   | <number>                              | 1000           |
 | num_shells  | <number>                              | 10             |
 | map_name    | <string>                              | Generated Map  |
+
+### Logger System
+A lightweight, configurable logging system that helps with debugging and monitoring game execution.
+
+#### Usage:
+```bash
+# Enable logging
+./bin/tanks_game ... --enable-logging
+
+# Configure log level, destination, and file path
+./bin/tanks_game ... --enable-logging --log-level=debug --log-to-file --log-file=game.log
+```
+
+The logger supports multiple log levels (debug, info, warning, error) and can output to console, file, or both. When disabled (default), it has no impact on the game.
