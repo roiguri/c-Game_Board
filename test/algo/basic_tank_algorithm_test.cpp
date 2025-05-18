@@ -42,8 +42,8 @@ protected:
     }
     static BattleInfoImpl makeBattleInfo(const GameBoard& board, const std::vector<Point>& enemyTanks, const std::vector<Point>& friendlyTanks, const std::vector<Point>& shells) {
         BattleInfoImpl info(board.getWidth(), board.getHeight());
-        for (int x = 0; x < board.getWidth(); ++x) {
-            for (int y = 0; y < board.getHeight(); ++y) {
+        for (size_t x = 0; x < board.getWidth(); ++x) {
+            for (size_t y = 0; y < board.getHeight(); ++y) {
                 info.setCellType(x, y, board.getCellType(x, y));
             }
         }

@@ -40,8 +40,8 @@ protected:
     void injectBattleInfoWithBoard(const std::vector<std::string>& boardLines, const std::optional<Point>& target, const std::vector<Point>& enemyTanks = {}, const std::vector<Point>& shells = {}) {
         GameBoard board = makeBoard(boardLines);
         OffensiveBattleInfo info(board.getWidth(), board.getHeight());
-        for (int x = 0; x < board.getWidth(); ++x) {
-            for (int y = 0; y < board.getHeight(); ++y) {
+        for (size_t x = 0; x < board.getWidth(); ++x) {
+            for (size_t y = 0; y < board.getHeight(); ++y) {
                 info.setCellType(x, y, board.getCellType(x, y));
             }
         }

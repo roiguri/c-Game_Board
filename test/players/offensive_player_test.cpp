@@ -106,7 +106,6 @@ TEST(OffensivePlayerTest, ChoosesClosestTankAfterTargetDestroyed) {
     auto* info1 = dynamic_cast<OffensiveBattleInfo*>(algo1.lastInfo);
     ASSERT_NE(info1, nullptr);
     ASSERT_TRUE(info1->getTargetTankPosition().has_value());
-    Point initialTarget = info1->getTargetTankPosition().value();
 
     // Remove the initial target (simulate destruction), only (2,0) remains
     std::vector<std::vector<char>> board2 = {
