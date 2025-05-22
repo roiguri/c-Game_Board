@@ -48,7 +48,7 @@ endif()
 
 # Explicitly remove main game and analysis tool sources from library sources
 list(REMOVE_ITEM CORE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
-list(REMOVE_ITEM CORE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/analysis_tool.cpp")
+list(REMOVE_ITEM CORE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/bonus/analysis/analysis_tool.cpp")
 
 # Create the core library
 add_library(tanks_game_lib ${CORE_SOURCES} ${CORE_HEADERS})
@@ -71,7 +71,7 @@ set_target_properties(tanks_game
 )
 
 # Add the analysis tool executable
-add_executable(analysis_tool "${CMAKE_CURRENT_SOURCE_DIR}/src/analysis_tool.cpp")
+add_executable(analysis_tool "${CMAKE_CURRENT_SOURCE_DIR}/src/bonus/analysis/analysis_tool.cpp")
 target_link_libraries(analysis_tool PRIVATE tanks_game_lib)
 target_include_directories(analysis_tool PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/common)
 set_target_properties(analysis_tool
@@ -121,8 +121,8 @@ if(ENABLE_TESTING)
         test/algo/basic_tank_algorithm_factory_test.cpp
         test/algo/offensive_tank_algorithm_test.cpp
         test/bonus/logger/logger_test.cpp
-        test/analysis_tool_test.cpp # Added new test file
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/analysis_tool.cpp" # Added source for analysis tool functions
+        test/bonus/analysis/analysis_tool_test.cpp # Added new test file
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/bonus/analysis/analysis_tool.cpp"
         test/test_main.cpp
     )
 
