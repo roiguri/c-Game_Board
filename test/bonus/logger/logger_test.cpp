@@ -5,6 +5,8 @@
 #include <fstream>
 #include <string>
 #include <filesystem>
+#include <sstream>
+#include <streambuf>
 
 class LoggerTest : public ::testing::Test {
 protected:
@@ -56,6 +58,17 @@ protected:
         
         return false;
     }
+};
+
+// Helper to capture stderr
+class StderrCapture {
+public:
+    StderrCapture() : old_buf(std::cerr.rdbuf(capture.rdbuf())) {}
+    ~StderrCapture() { std::cerr.rdbuf(old_buf); }
+    std::string str() const { return capture.str(); }
+private:
+    std::stringstream capture;
+    std::streambuf* old_buf;
 };
 
 TEST_F(LoggerTest, LoggerInitialization) {
@@ -181,7 +194,7 @@ TEST_F(LoggerTest, MacroSafety) {
     EXPECT_TRUE(logFileContains("Info when enabled"));
 }
 
-TEST_F(LoggerTest, ConfigFromCommandLine) {
+TEST_F(LoggerTest, Configure) {
     // Clean up existing files
     if (std::filesystem::exists("cmdline_test.log")) {
         std::filesystem::remove("cmdline_test.log");
@@ -190,13 +203,15 @@ TEST_F(LoggerTest, ConfigFromCommandLine) {
     // Test with valid arguments
     const char* args1[] = {
         "program",
-        "--enable-logging",
-        "--log-level=warning",
-        "--log-to-file",
-        "--log-file=cmdline_test.log"
+        "--enable_logging",
+        "--log_level", "warning",
+        "--log_to_file",
+        "--log_file", "cmdline_test.log"
     };
-    
-    EXPECT_TRUE(LoggerConfig::configureFromCommandLine(5, const_cast<char**>(args1)));
+    int argc1 = 7;
+    CliParser parser1(argc1, const_cast<char**>(args1));
+    ASSERT_TRUE(parser1.parse());
+    EXPECT_TRUE(LoggerConfig::configure(parser1));
     EXPECT_TRUE(Logger::getInstance().isInitializedAndEnabled());
     
     // Log something to verify
@@ -213,16 +228,17 @@ TEST_F(LoggerTest, ConfigFromCommandLine) {
     EXPECT_TRUE(content.find("Command line test") != std::string::npos);
     logFile.close();
 
-    
     // Test with invalid file path but fallback to console
     const char* args2[] = {
         "program",
-        "--enable-logging",
-        "--log-file=/invalid_path/test.log"
+        "--enable_logging",
+        "--log_file", "/invalid_path/test.log"
     };
-    
+    int argc2 = 4;
+    CliParser parser2(argc2, const_cast<char**>(args2));
+    ASSERT_TRUE(parser2.parse());
     // Should still return true (fallback to console logging)
-    EXPECT_TRUE(LoggerConfig::configureFromCommandLine(3, const_cast<char**>(args2)));
+    EXPECT_TRUE(LoggerConfig::configure(parser2));
     
     // Clean up
     Logger::getInstance().setEnabled(false);
@@ -231,13 +247,62 @@ TEST_F(LoggerTest, ConfigFromCommandLine) {
     }
 }
 
-TEST_F(LoggerTest, ConfigFromCommandLine_WrongConfig) {
+TEST_F(LoggerTest, Configure_WrongConfig) {
     // Test with no logging requested
     const char* args3[] = {
         "program",
         "--some-other-flag"
     };
-    
-    EXPECT_TRUE(LoggerConfig::configureFromCommandLine(2, const_cast<char**>(args3)));
+    int argc3 = 2;
+    CliParser parser3(argc3, const_cast<char**>(args3));
+    ASSERT_TRUE(parser3.parse());
+    EXPECT_TRUE(LoggerConfig::configure(parser3));
     EXPECT_FALSE(Logger::getInstance().isEnabled());
+}
+
+TEST_F(LoggerTest, WarnIfLoggingArgsWithoutEnableLogging) {
+    const char* args[] = {
+        "program",
+        "--log_to_file",
+        "--log_level", "debug",
+        "--log_file", "somefile.log"
+    };
+    int argc = 6;
+    CliParser parser(argc, const_cast<char**>(args));
+    ASSERT_TRUE(parser.parse());
+    StderrCapture capture;
+    LoggerConfig::configure(parser);
+    std::string err = capture.str();
+    EXPECT_NE(err.find("Warning: Logging-related arguments were provided"), std::string::npos);
+}
+
+TEST_F(LoggerTest, WarnIfLogFileGivenWithoutLogToFile) {
+    const char* args[] = {
+        "program",
+        "--enable_logging",
+        "--log_file", "somefile.log"
+    };
+    int argc = 4;
+    CliParser parser(argc, const_cast<char**>(args));
+    ASSERT_TRUE(parser.parse());
+    StderrCapture capture;
+    LoggerConfig::configure(parser);
+    std::string err = capture.str();
+    EXPECT_NE(err.find("Warning: --log_file was provided, but --log_to_file is not enabled"), std::string::npos);
+}
+
+TEST_F(LoggerTest, NoWarnIfLogFileAndLogToFileAndEnableLogging) {
+    const char* args[] = {
+        "program",
+        "--enable_logging",
+        "--log_to_file",
+        "--log_file", "somefile.log"
+    };
+    int argc = 5;
+    CliParser parser(argc, const_cast<char**>(args));
+    ASSERT_TRUE(parser.parse());
+    StderrCapture capture;
+    LoggerConfig::configure(parser);
+    std::string err = capture.str();
+    EXPECT_EQ(err.find("Warning"), std::string::npos);
 }

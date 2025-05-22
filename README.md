@@ -64,10 +64,10 @@ If tests are enabled, run the tests with:
 ./bin/tests/tanks_game_tests
 ```
 
-### Visualization
+### 2. Visualization
 If visualization is enabled in the build, an HTML visualization will be generated alongside the output file.
 
-### Board Generator
+### 3. Board Generator
 #### Usage:
 
 Generate a board without running the game:
@@ -96,16 +96,16 @@ used.
 | num_shells  | <number>                              | 10             |
 | map_name    | <string>                              | Generated Map  |
 
-### Logger System
+### 4. Logger System
 A lightweight, configurable logging system that helps with debugging and monitoring game execution.
 
 #### Usage:
 ```bash
 # Enable logging
-./bin/tanks_game ... --enable-logging
+./bin/tanks_game ... --enable_logging
 
 # Configure log level, destination, and file path
-./bin/tanks_game ... --enable-logging --log-level=debug --log-to-file --log-file=game.log
+./bin/tanks_game ... --enable_logging --log_level=debug --log_to_file --log_file=game.log
 ```
 
 The logger supports multiple log levels (debug, info, warning, error) and can output to console, file, or both. When disabled (default), it has no impact on the game.

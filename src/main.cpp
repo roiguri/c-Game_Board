@@ -3,6 +3,7 @@
 #include <fstream>
 #include <filesystem>
 #include <iostream>
+#include "bonus/cli/cli_parser.h" // Added include
 #include "game_manager.h"
 #include "algo/basic_tank_algorithm_factory.h"
 #include "players/basic_player_factory.h"
@@ -96,46 +97,42 @@ int generateAndRunGame(const std::string& configPath) {
     return 0;
 }
 
-// TODO: update with new command line arguments
-// Print usage information
-void printUsage() {
-    std::cout << "Usage:" << std::endl;
-    std::cout << "  tanks_game <game_board_input_file>" << std::endl;
-    std::cout << "  tanks_game --only_generate [--config-path=<path>]" << std::endl;
-    std::cout << "  tanks_game --run_generated [--config-path=<path>]" << std::endl;
-}
-
 int main(int argc, char* argv[]) {
-    bool onlyGenerate = false;
-    bool runGenerated = false;
-    std::string configPath = "";
+    CliParser parser(argc, argv);
+    if (!parser.parse()) {
+        // Error message already printed by parser
+        std::cerr << parser.getHelpMessage() << std::endl; // Print help on error
+        return 1;
+    }
+
+    if (parser.isHelp()) {
+        std::cout << parser.getHelpMessage() << std::endl;
+        return 0;
+    }
     
-    LoggerConfig::configureFromCommandLine(argc, argv);
+    // Configure logger using the parsed options - Game continues even if logger configuration fails
+    LoggerConfig::configure(parser);
+
     LOG_INFO("Tank Battle Game started");
 
-    // Parse command line arguments
-    for (int i = 1; i < argc; ++i) {
-        std::string arg = argv[i];
-        if (arg == "--only_generate") {
-            onlyGenerate = true;
-        } else if (arg == "--run_generated") {
-            runGenerated = true;
-        } else if (arg.find("--config-path=") == 0) {
-            configPath = arg.substr(14); // Extract path after "="
-        } else if (!onlyGenerate && !runGenerated) {
-            // Regular game mode with specified board file
-            return runGameWithFile(arg);
+    if (parser.isOnlyGenerate()) {
+        if (!parser.getGameBoardFile().empty()) {
+            std::cerr << "Warning: Game board file specified with --only_generate. Board file will be ignored." << std::endl;
         }
+        return generateBoard(parser.getConfigPath(), true);
+    } else if (parser.isRunGenerated()) {
+        if (!parser.getGameBoardFile().empty()) {
+             std::cerr << "Warning: Game board file specified with --run_generated. Board file will be ignored." << std::endl;
+        }
+        return generateAndRunGame(parser.getConfigPath());
+    } else if (!parser.getGameBoardFile().empty()) {
+        if (!parser.getConfigPath().empty()) {
+             std::cerr << "Warning: --config-path is specified with a direct game board file. Config path will be ignored for direct board run." << std::endl;
+        }
+        return runGameWithFile(parser.getGameBoardFile());
+    } else {
+        // No specific mode and no game board file.
+        std::cout << parser.getHelpMessage() << std::endl;
+        return 1; // Indicate incorrect usage
     }
-    
-    // Handle generation modes
-    if (onlyGenerate) {
-        return generateBoard(configPath, true);
-    } else if (runGenerated) {
-        return generateAndRunGame(configPath);
-    }
-    
-    // If we get here, invalid arguments were provided
-    printUsage();
-    return 1;
 }

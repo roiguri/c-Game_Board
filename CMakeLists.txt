@@ -108,6 +108,7 @@ if(ENABLE_TESTING)
         test/algo/basic_tank_algorithm_factory_test.cpp
         test/algo/offensive_tank_algorithm_test.cpp
         test/bonus/logger/logger_test.cpp
+        test/bonus/cli/cli_parser_test.cpp # Added new test file
         test/test_main.cpp
     )
 
