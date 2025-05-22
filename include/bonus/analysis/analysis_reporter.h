@@ -11,6 +11,7 @@
 class AnalysisReporter {
 public:
     static void writeOverallResultsCsv(const std::string& filename, const std::map<std::string, GameOutcomeCounts>& results);
+
     template<typename KeyType>
     static void writeDimensionAnalysisCsv(const std::string& filename, const std::string& dimensionName, const std::map<KeyType, GameOutcomeCounts>& analysisMap) {
         std::ofstream file(filename);
@@ -29,6 +30,7 @@ public:
         }
         file.close();
     }
+
     template<typename KeyType>
     static void printDimensionAnalysis(const std::string& dimensionName, const std::map<KeyType, GameOutcomeCounts>& analysisMap) {
         std::cout << "\n--- Analysis by " << dimensionName << " ---" << std::endl;

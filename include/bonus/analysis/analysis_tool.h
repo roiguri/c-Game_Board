@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include "bonus/board_generator.h"
 
 // Forward declaration for BoardConfig
 struct BoardConfig;
@@ -36,4 +37,7 @@ class AnalysisReporter;
 class AnalysisTool {
 public:
     int runAnalysis();
+private:
+    static std::vector<BoardConfig> generateAllConfigs(const AnalysisParams& params);
+    void runSingleSimulation(const BoardConfig& config, ResultAggregator& aggregator);
 };
