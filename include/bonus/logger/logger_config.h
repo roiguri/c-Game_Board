@@ -2,6 +2,7 @@
 #pragma once
 
 #include "bonus/logger/logger.h"
+#include "bonus/cli/cli_parser.h" // Add this
 #include <string>
 
 /**
@@ -14,11 +15,10 @@ public:
      * 
      * Checks for --enable-logging flag and configures logger if found
      * 
-     * @param argc Argument count
-     * @param argv Argument values
+     * @param parser The CliParser instance with parsed arguments
      * @return true if configuration was successful
      */
-    static bool configureFromCommandLine(int argc, char* argv[]);
+    static bool configure(const CliParser& parser); // New
     
 private:
     // Convert string to log level

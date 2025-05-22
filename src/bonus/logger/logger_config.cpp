@@ -5,49 +5,28 @@
 #include <cctype>
 #include <iostream>
 
-bool LoggerConfig::configureFromCommandLine(int argc, char* argv[]) {
-    // Check if logging is even requested
-    bool enableLogging = false;
-    for (int i = 1; i < argc; i++) {
-        if (std::string(argv[i]) == "--enable-logging") {
-            enableLogging = true;
-            break;
-        }
-    }
+// New method signature
+bool LoggerConfig::configure(const CliParser& parser) { 
+    bool enableLogging = parser.isEnableLogging();
     
-    // If logging is not requested, don't even try to configure it
     if (!enableLogging) {
         Logger::getInstance().setEnabled(false); // Explicitly disable logger
         return true; // Success - no logging is fine
     }
     
-    // Default settings
-    Logger::Level level = Logger::Level::INFO;
-    bool useConsole = true;
-    bool useFile = false;
-    std::string logFile = "tankbattle.log";
-    
-    // Parse command-line arguments
-    for (int i = 1; i < argc; i++) {
-        std::string arg = argv[i];
-        
-        if (arg == "--enable-logging") {
-            // Already processed
-        }
-        else if (arg.substr(0, 12) == "--log-level=") {
-            std::string levelStr = arg.substr(12);
-            level = stringToLevel(levelStr);
-        } 
-        else if (arg == "--log-to-file") {
-            useFile = true;
-        }
-        else if (arg == "--no-console-log") {
-            useConsole = false;
-        }
-        else if (arg.substr(0, 11) == "--log-file=") {
-            logFile = arg.substr(11);
-            useFile = true;
-        }
+    Logger::Level level = stringToLevel(parser.getLogLevel());
+    bool useFile = parser.isLogToFile();
+    bool useConsole = !parser.isNoConsoleLog(); // Correctly interpret this
+    std::string logFile = parser.getLogFile();
+
+    // If logFile is empty from parser (meaning default was used or not set by parser explicitly to empty)
+    // and logToFile is true, ensure we still use the default "tankbattle.log" if parser's default is empty.
+    // The CliParser already defaults logFile_ to "tankbattle.log", so this specific check might be redundant
+    // if the parser's default for getLogFile() is never truly empty when logToFile is true.
+    // However, if logFile is empty due to an explicit empty argument (which CliParser doesn't currently allow for log-file),
+    // this would catch it. Given CliParser's current design, logFile will always have a value (its default or parsed).
+    if (useFile && logFile.empty()) { // This case should ideally not be hit if parser has a default.
+        logFile = "tankbattle.log"; // Ensure a fallback, though parser default should handle.
     }
     
     // Don't allow disabling both console and file logging
