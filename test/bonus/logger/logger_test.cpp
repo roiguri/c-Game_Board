@@ -194,7 +194,7 @@ TEST_F(LoggerTest, MacroSafety) {
     EXPECT_TRUE(logFileContains("Info when enabled"));
 }
 
-TEST_F(LoggerTest, ConfigFromCommandLine) {
+TEST_F(LoggerTest, Configure) {
     // Clean up existing files
     if (std::filesystem::exists("cmdline_test.log")) {
         std::filesystem::remove("cmdline_test.log");
@@ -247,7 +247,7 @@ TEST_F(LoggerTest, ConfigFromCommandLine) {
     }
 }
 
-TEST_F(LoggerTest, ConfigFromCommandLine_WrongConfig) {
+TEST_F(LoggerTest, Configure_WrongConfig) {
     // Test with no logging requested
     const char* args3[] = {
         "program",
