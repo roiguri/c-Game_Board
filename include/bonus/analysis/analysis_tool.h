@@ -29,9 +29,6 @@ struct GameOutcomeCounts {
     int totalGames = 0;
 };
 
-Winner ParseGameResult(const std::string& resultLine);
-std::string GenerateKey(const BoardConfig& config);
-
 void writeOverallResultsCsv(const std::string& filename, const std::map<std::string, GameOutcomeCounts>& results);
 
 template<typename KeyType>
