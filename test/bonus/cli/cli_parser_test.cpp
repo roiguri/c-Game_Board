@@ -75,7 +75,7 @@ TEST(CustomCliParserTest, RunGeneratedFlag) {
 }
 
 TEST(CustomCliParserTest, EnableLoggingFlag) {
-    std::vector<std::string> arg_strs = {"./tanks_game", "--enable-logging"};
+    std::vector<std::string> arg_strs = {"./tanks_game", "--enable_logging"};
     int argc = 0;
     char** argv = nullptr;
     createArgs(arg_strs, argc, argv);
@@ -86,7 +86,7 @@ TEST(CustomCliParserTest, EnableLoggingFlag) {
 }
 
 TEST(CustomCliParserTest, LogToFileFlag) {
-    std::vector<std::string> arg_strs = {"./tanks_game", "--log-to-file"};
+    std::vector<std::string> arg_strs = {"./tanks_game", "--log_to_file"};
     int argc = 0;
     char** argv = nullptr;
     createArgs(arg_strs, argc, argv);
@@ -97,7 +97,7 @@ TEST(CustomCliParserTest, LogToFileFlag) {
 }
 
 TEST(CustomCliParserTest, NoConsoleLogFlag) {
-    std::vector<std::string> arg_strs = {"./tanks_game", "--no-console-log"};
+    std::vector<std::string> arg_strs = {"./tanks_game", "--no_console_log"};
     int argc = 0;
     char** argv = nullptr;
     createArgs(arg_strs, argc, argv);
@@ -132,7 +132,7 @@ TEST(CustomCliParserTest, HelpFlagShort) {
 
 // Test Cases for Options with Values
 TEST(CustomCliParserTest, ConfigPathWithValue) {
-    std::vector<std::string> arg_strs = {"./tanks_game", "--config-path", "path/to/config.txt"};
+    std::vector<std::string> arg_strs = {"./tanks_game", "--config_path", "path/to/config.txt"};
     int argc = 0;
     char** argv = nullptr;
     createArgs(arg_strs, argc, argv);
@@ -143,7 +143,7 @@ TEST(CustomCliParserTest, ConfigPathWithValue) {
 }
 
 TEST(CustomCliParserTest, LogLevelWithValue) {
-    std::vector<std::string> arg_strs = {"./tanks_game", "--log-level", "DEBUG"};
+    std::vector<std::string> arg_strs = {"./tanks_game", "--log_level", "DEBUG"};
     int argc = 0;
     char** argv = nullptr;
     createArgs(arg_strs, argc, argv);
@@ -154,7 +154,7 @@ TEST(CustomCliParserTest, LogLevelWithValue) {
 }
 
 TEST(CustomCliParserTest, LogFileWithValue) {
-    std::vector<std::string> arg_strs = {"./tanks_game", "--log-file", "my_app.log"};
+    std::vector<std::string> arg_strs = {"./tanks_game", "--log_file", "my_app.log"};
     int argc = 0;
     char** argv = nullptr;
     createArgs(arg_strs, argc, argv);
@@ -166,7 +166,7 @@ TEST(CustomCliParserTest, LogFileWithValue) {
 
 // Error Cases for Options with Values
 TEST(CustomCliParserTest, ConfigPathMissingValue) {
-    std::vector<std::string> arg_strs = {"./tanks_game", "--config-path"};
+    std::vector<std::string> arg_strs = {"./tanks_game", "--config_path"};
     int argc = 0;
     char** argv = nullptr;
     createArgs(arg_strs, argc, argv);
@@ -179,12 +179,12 @@ TEST(CustomCliParserTest, ConfigPathMissingValue) {
     EXPECT_FALSE(parser.parse()); // Expect parse to fail
 
     std::cerr.rdbuf(oldCerr); // Restore cerr
-    EXPECT_NE(newCerr.str().find("Error: --config-path requires a value."), std::string::npos);
+    EXPECT_NE(newCerr.str().find("Error: --config_path requires a value."), std::string::npos);
     freeArgs(argc, argv);
 }
 
 TEST(CustomCliParserTest, LogLevelMissingValue) {
-    std::vector<std::string> arg_strs = {"./tanks_game", "--log-level"};
+    std::vector<std::string> arg_strs = {"./tanks_game", "--log_level"};
     int argc = 0;
     char** argv = nullptr;
     createArgs(arg_strs, argc, argv);
@@ -194,12 +194,12 @@ TEST(CustomCliParserTest, LogLevelMissingValue) {
     std::cerr.rdbuf(newCerr.rdbuf());
     EXPECT_FALSE(parser.parse());
     std::cerr.rdbuf(oldCerr);
-    EXPECT_NE(newCerr.str().find("Error: --log-level requires a value."), std::string::npos);
+    EXPECT_NE(newCerr.str().find("Error: --log_level requires a value."), std::string::npos);
     freeArgs(argc, argv);
 }
 
 TEST(CustomCliParserTest, ConfigPathWithAnotherFlagAsValue) {
-    std::vector<std::string> arg_strs = {"./tanks_game", "--config-path", "--log-to-file"};
+    std::vector<std::string> arg_strs = {"./tanks_game", "--config_path", "--log_to_file"};
     int argc = 0;
     char** argv = nullptr;
     createArgs(arg_strs, argc, argv);
@@ -207,9 +207,9 @@ TEST(CustomCliParserTest, ConfigPathWithAnotherFlagAsValue) {
     std::streambuf* oldCerr = std::cerr.rdbuf();
     std::ostringstream newCerr;
     std::cerr.rdbuf(newCerr.rdbuf());
-    EXPECT_FALSE(parser.parse()); // Expect parse to fail because --log-to-file is not a valid path
+    EXPECT_FALSE(parser.parse()); // Expect parse to fail because --log_to_file is not a valid path
     std::cerr.rdbuf(oldCerr);
-    EXPECT_NE(newCerr.str().find("Error: --config-path requires a value."), std::string::npos);
+    EXPECT_NE(newCerr.str().find("Error: --config_path requires a value."), std::string::npos);
     freeArgs(argc, argv);
 }
 
@@ -226,7 +226,7 @@ TEST(CustomCliParserTest, PositionalArgumentOnly) {
 }
 
 TEST(CustomCliParserTest, PositionalArgumentWithFlags) {
-    std::vector<std::string> arg_strs = {"./tanks_game", "--enable-logging", "board.txt", "--log-level", "ERROR"};
+    std::vector<std::string> arg_strs = {"./tanks_game", "--enable_logging", "board.txt", "--log_level", "ERROR"};
     int argc = 0;
     char** argv = nullptr;
     createArgs(arg_strs, argc, argv);
@@ -262,12 +262,12 @@ TEST(CustomCliParserTest, MultiplePositionalArguments) {
 TEST(CustomCliParserTest, CombinedArguments) {
     std::vector<std::string> arg_strs = {
         "./tanks_game", 
-        "--enable-logging", 
-        "--log-level", "DEBUG", 
+        "--enable_logging", 
+        "--log_level", "DEBUG", 
         "myboard.txt", 
-        "--log-to-file",
-        "--config-path", "configs/my_config.json",
-        "--no-console-log"
+        "--log_to_file",
+        "--config_path", "configs/my_config.json",
+        "--no_console_log"
     };
     int argc = 0;
     char** argv = nullptr;
@@ -320,8 +320,8 @@ TEST(CustomCliParserTest, HelpMessageContent) {
     std::string help = parser.getHelpMessage();
     EXPECT_NE(help.find("--help"), std::string::npos);
     EXPECT_NE(help.find("--only_generate"), std::string::npos);
-    EXPECT_NE(help.find("--config-path <path>"), std::string::npos);
-    EXPECT_NE(help.find("--log-level <level>"), std::string::npos);
+    EXPECT_NE(help.find("--config_path <path>"), std::string::npos);
+    EXPECT_NE(help.find("--log_level <level>"), std::string::npos);
     // ... add more checks for key options ...
     
     freeArgs(argc, argv);

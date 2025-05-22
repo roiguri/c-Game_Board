@@ -203,10 +203,10 @@ TEST_F(LoggerTest, ConfigFromCommandLine) {
     // Test with valid arguments
     const char* args1[] = {
         "program",
-        "--enable-logging",
-        "--log-level", "warning",
-        "--log-to-file",
-        "--log-file", "cmdline_test.log"
+        "--enable_logging",
+        "--log_level", "warning",
+        "--log_to_file",
+        "--log_file", "cmdline_test.log"
     };
     int argc1 = 7;
     CliParser parser1(argc1, const_cast<char**>(args1));
@@ -231,8 +231,8 @@ TEST_F(LoggerTest, ConfigFromCommandLine) {
     // Test with invalid file path but fallback to console
     const char* args2[] = {
         "program",
-        "--enable-logging",
-        "--log-file", "/invalid_path/test.log"
+        "--enable_logging",
+        "--log_file", "/invalid_path/test.log"
     };
     int argc2 = 4;
     CliParser parser2(argc2, const_cast<char**>(args2));
@@ -263,9 +263,9 @@ TEST_F(LoggerTest, ConfigFromCommandLine_WrongConfig) {
 TEST_F(LoggerTest, WarnIfLoggingArgsWithoutEnableLogging) {
     const char* args[] = {
         "program",
-        "--log-to-file",
-        "--log-level", "debug",
-        "--log-file", "somefile.log"
+        "--log_to_file",
+        "--log_level", "debug",
+        "--log_file", "somefile.log"
     };
     int argc = 6;
     CliParser parser(argc, const_cast<char**>(args));
@@ -279,8 +279,8 @@ TEST_F(LoggerTest, WarnIfLoggingArgsWithoutEnableLogging) {
 TEST_F(LoggerTest, WarnIfLogFileGivenWithoutLogToFile) {
     const char* args[] = {
         "program",
-        "--enable-logging",
-        "--log-file", "somefile.log"
+        "--enable_logging",
+        "--log_file", "somefile.log"
     };
     int argc = 4;
     CliParser parser(argc, const_cast<char**>(args));
@@ -294,9 +294,9 @@ TEST_F(LoggerTest, WarnIfLogFileGivenWithoutLogToFile) {
 TEST_F(LoggerTest, NoWarnIfLogFileAndLogToFileAndEnableLogging) {
     const char* args[] = {
         "program",
-        "--enable-logging",
-        "--log-to-file",
-        "--log-file", "somefile.log"
+        "--enable_logging",
+        "--log_to_file",
+        "--log_file", "somefile.log"
     };
     int argc = 5;
     CliParser parser(argc, const_cast<char**>(args));

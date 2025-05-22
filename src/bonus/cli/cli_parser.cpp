@@ -26,32 +26,32 @@ bool CliParser::parse() {
             onlyGenerate_ = true;
         } else if (token == "--run_generated") {
             runGenerated_ = true;
-        } else if (token == "--enable-logging") {
+        } else if (token == "--enable_logging") {
             enableLogging_ = true;
-        } else if (token == "--log-to-file") {
+        } else if (token == "--log_to_file") {
             logToFile_ = true;
-        } else if (token == "--no-console-log") {
+        } else if (token == "--no_console_log") {
             noConsoleLog_ = true;
-        } else if (token == "--config-path") {
+        } else if (token == "--config_path") {
             if (nextTokenIsValue(i)) {
                 configPath_ = tokens_[++i];
             } else {
-                std::cerr << "Error: --config-path requires a value." << std::endl;
+                std::cerr << "Error: --config_path requires a value." << std::endl;
                 return false;
             }
-        } else if (token == "--log-level") {
+        } else if (token == "--log_level") {
             if (nextTokenIsValue(i)) {
                 logLevel_ = tokens_[++i];
             } else {
-                std::cerr << "Error: --log-level requires a value." << std::endl;
+                std::cerr << "Error: --log_level requires a value." << std::endl;
                 return false;
             }
-        } else if (token == "--log-file") {
+        } else if (token == "--log_file") {
             if (nextTokenIsValue(i)) {
                 logFile_ = tokens_[++i];
                 logFileSet_ = true;
             } else {
-                std::cerr << "Error: --log-file requires a value." << std::endl;
+                std::cerr << "Error: --log_file requires a value." << std::endl;
                 return false;
             }
         } else if (token.rfind("-", 0) != 0) { // Doesn't start with -- or -, potential positional argument
@@ -73,12 +73,12 @@ std::string CliParser::getHelpMessage() const {
            "  -h, --help                 Show this help message\n"
            "  --only_generate            Only generate a board\n"
            "  --run_generated            Generate a board and run the game with it\n"
-           "  --config-path <path>       Path to board configuration file\n"
-           "  --enable-logging           Enable application logging\n"
-           "  --log-level <level>        Set log level (DEBUG, INFO, WARNING, ERROR)\n"
-           "  --log-to-file              Enable logging to a file\n"
-           "  --no-console-log           Disable console logging\n"
-           "  --log-file <path>          Specify log file path (default: tankbattle.log)\n";
+           "  --config_path <path>       Path to board configuration file\n"
+           "  --enable_logging           Enable application logging\n"
+           "  --log_level <level>        Set log level (DEBUG, INFO, WARNING, ERROR)\n"
+           "  --log_to_file              Enable logging to a file\n"
+           "  --no_console_log           Disable console logging\n"
+           "  --log_file <path>          Specify log file path (default: tankbattle.log)\n";
 }
 
 bool CliParser::isHelp() const { return help_; }
