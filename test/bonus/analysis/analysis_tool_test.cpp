@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "bonus/analysis/analysis_tool.h"
 #include "bonus/board_generator.h" // For BoardConfig definition
+#include "bonus/analysis/analysis_utils.h"
 
 // Test fixture for AnalysisTool tests
 class AnalysisToolTest : public ::testing::Test {
