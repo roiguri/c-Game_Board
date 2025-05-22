@@ -13,7 +13,7 @@
 #include "algo/basic_tank_algorithm_factory.h"
 #include "players/basic_player_factory.h"
 #include "bonus/logger/logger_config.h"
-#include "analysis_tool.h"
+#include "bonus/analysis/analysis_tool.h"
 
 // --- Helper Functions for Result Processing ---
 Winner ParseGameResult(const std::string& resultLine) {

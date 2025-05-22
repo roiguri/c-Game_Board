@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "analysis_tool.h"
+#include "bonus/analysis/analysis_tool.h"
 #include "bonus/board_generator.h" // For BoardConfig definition
 
 // Test fixture for AnalysisTool tests
@@ -19,11 +19,6 @@ protected:
         config1.maxSteps = 500;
         config1.numShells = 10;
         config1.numTanksPerPlayer = 1;
-        // Ensure all relevant fields are initialized for BoardConfig if it has more.
-        // For example, if BoardConfig has minMines, maxMines, ensurePathExists, etc.
-        // config1.minMines = 0;
-        // config1.maxMines = 0;
-        // config1.ensurePathExists = false;
 
 
         config2 = config1; // Start with a copy
