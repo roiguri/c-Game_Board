@@ -16,60 +16,12 @@
 #include "bonus/analysis/analysis_tool.h"
 #include "bonus/analysis/analysis_utils.h"
 #include "bonus/analysis/board_manager.h"
+#include "bonus/analysis/result_aggregator.h"
 
 // --- Helper Functions for Result Processing ---
 
 // --- Templated Helper Function for Printing Per-Dimension Analysis ---
-template<typename KeyType>
-void printDimensionAnalysis(const std::string& dimensionName, const std::map<KeyType, GameOutcomeCounts>& analysisMap) {
-    std::cout << "\n--- Analysis by " << dimensionName << " ---" << std::endl;
-    if (analysisMap.empty()) {
-        std::cout << "No data available for this dimension." << std::endl;
-        return;
-    }
-
-    // Determine if KeyType is float to apply std::fixed and std::setprecision for the key itself
-    bool isKeyFloat = std::is_same<KeyType, float>::value;
-
-    for (const auto& pair : analysisMap) {
-        const KeyType& paramValue = pair.first;
-        const GameOutcomeCounts& counts = pair.second;
-
-        std::cout << dimensionName << ": ";
-        if (isKeyFloat) {
-            std::cout << std::fixed << std::setprecision(3) << paramValue << std::defaultfloat << std::setprecision(6);
-        } else {
-            std::cout << paramValue;
-        }
-        std::cout << std::endl;
-
-        if (counts.totalGames == 0) {
-            std::cout << "  Total Games: 0" << std::endl;
-            std::cout << "  P1 Win %: N/A" << std::endl;
-            std::cout << "  P2 Win %: N/A" << std::endl;
-            std::cout << "  Tie %: N/A" << std::endl;
-            if (counts.unknownOutcomes > 0) {
-                 std::cout << "  Unknown Outcomes: " << counts.unknownOutcomes << std::endl;
-            }
-        } else {
-            double p1WinRate = (static_cast<double>(counts.player1Wins) / counts.totalGames) * 100.0;
-            double p2WinRate = (static_cast<double>(counts.player2Wins) / counts.totalGames) * 100.0;
-            double tieRate = (static_cast<double>(counts.ties) / counts.totalGames) * 100.0;
-            
-            std::cout << "  Total Games: " << counts.totalGames << std::endl;
-            std::cout << std::fixed << std::setprecision(1); // For printing percentages
-            std::cout << "  P1 Win %: " << p1WinRate << "%" << std::endl;
-            std::cout << "  P2 Win %: " << p2WinRate << "%" << std::endl;
-            std::cout << "  Tie %: " << tieRate << "%" << std::endl;
-            if (counts.unknownOutcomes > 0) {
-                 double unknownRate = (static_cast<double>(counts.unknownOutcomes) / counts.totalGames) * 100.0;
-                 std::cout << "  Unknown Outcomes: " << counts.unknownOutcomes << " (" << unknownRate << "%)" << std::endl;
-            }
-            std::cout << std::defaultfloat << std::setprecision(6); // Reset to default for subsequent prints
-        }
-        std::cout << "  ---------------------------" << std::endl;
-    }
-}
+// (Moved printDimensionAnalysis to header)
 
 void writeOverallResultsCsv(const std::string& filename, const std::map<std::string, GameOutcomeCounts>& results) {
     std::ofstream file(filename);
@@ -141,18 +93,7 @@ int main(int argc, char* argv[]) {
     params.numShells = {10};
     params.numTanksPerPlayer = {1, 2};
 
-    std::map<std::string, GameOutcomeCounts> aggregatedResults; // Overall results per unique config string
-
-    // --- New Maps for Per-Dimension Analysis ---
-    std::map<int, GameOutcomeCounts> widthAnalysis;
-    std::map<int, GameOutcomeCounts> heightAnalysis;
-    std::map<float, GameOutcomeCounts> wallDensityAnalysis;
-    std::map<float, GameOutcomeCounts> mineDensityAnalysis;
-    std::map<std::string, GameOutcomeCounts> symmetryAnalysis;
-    // std::map<int, GameOutcomeCounts> seedAnalysis; // Decided against per-seed analysis for now
-    std::map<int, GameOutcomeCounts> maxStepsAnalysis;
-    std::map<int, GameOutcomeCounts> numShellsAnalysis;
-    std::map<int, GameOutcomeCounts> numTanksPerPlayerAnalysis;
+    ResultAggregator aggregator;
 
     Winner outcome;
 
@@ -241,88 +182,11 @@ int main(int argc, char* argv[]) {
                                             
                                             // Parse the result and update aggregatedResults
                                             outcome = ParseGameResult(lastLine);
-                                            aggregatedResults[configKey].totalGames++; // Update total games for the main aggregated map
-                                            
-                                            switch (outcome) {
-                                                case Winner::PLAYER1:
-                                                    aggregatedResults[configKey].player1Wins++;
-                                                    break;
-                                                case Winner::PLAYER2:
-                                                    aggregatedResults[configKey].player2Wins++;
-                                                    break;
-                                                case Winner::TIE:
-                                                    aggregatedResults[configKey].ties++;
-                                                    break;
-                                                case Winner::UNKNOWN:
-                                                    aggregatedResults[configKey].unknownOutcomes++;
-                                                    break;
-                                            }
-                                            // Removed: std::cout << "Game Result: " << lastLine << std::endl; 
+                                            aggregator.updateResults(currentConfig, configKey, outcome);
                                         } else {
                                             std::cerr << "Error: Could not open result file: '" << outputFilePath << "' for " << configKey << "." << std::endl;
-                                            aggregatedResults[configKey].totalGames++; // Still count this attempt in totalGames for the main map
-                                            aggregatedResults[configKey].unknownOutcomes++; 
+                                            aggregator.updateResults(currentConfig, configKey, Winner::UNKNOWN);
                                         }
-
-                                        // --- Update Per-Dimension Analysis Maps ---
-                                        // Note: 'outcome' is the Winner enum value from ParseGameResult
-                                        // 'currentConfig' is the BoardConfig for the current iteration
-
-                                        // Width Analysis
-                                        widthAnalysis[currentConfig.width].totalGames++;
-                                        if (outcome == Winner::PLAYER1) widthAnalysis[currentConfig.width].player1Wins++;
-                                        else if (outcome == Winner::PLAYER2) widthAnalysis[currentConfig.width].player2Wins++;
-                                        else if (outcome == Winner::TIE) widthAnalysis[currentConfig.width].ties++;
-                                        else widthAnalysis[currentConfig.width].unknownOutcomes++;
-
-                                        // Height Analysis
-                                        heightAnalysis[currentConfig.height].totalGames++;
-                                        if (outcome == Winner::PLAYER1) heightAnalysis[currentConfig.height].player1Wins++;
-                                        else if (outcome == Winner::PLAYER2) heightAnalysis[currentConfig.height].player2Wins++;
-                                        else if (outcome == Winner::TIE) heightAnalysis[currentConfig.height].ties++;
-                                        else heightAnalysis[currentConfig.height].unknownOutcomes++;
-
-                                        // Wall Density Analysis
-                                        wallDensityAnalysis[currentConfig.wallDensity].totalGames++;
-                                        if (outcome == Winner::PLAYER1) wallDensityAnalysis[currentConfig.wallDensity].player1Wins++;
-                                        else if (outcome == Winner::PLAYER2) wallDensityAnalysis[currentConfig.wallDensity].player2Wins++;
-                                        else if (outcome == Winner::TIE) wallDensityAnalysis[currentConfig.wallDensity].ties++;
-                                        else wallDensityAnalysis[currentConfig.wallDensity].unknownOutcomes++;
-                                        
-                                        // Mine Density Analysis
-                                        mineDensityAnalysis[currentConfig.mineDensity].totalGames++;
-                                        if (outcome == Winner::PLAYER1) mineDensityAnalysis[currentConfig.mineDensity].player1Wins++;
-                                        else if (outcome == Winner::PLAYER2) mineDensityAnalysis[currentConfig.mineDensity].player2Wins++;
-                                        else if (outcome == Winner::TIE) mineDensityAnalysis[currentConfig.mineDensity].ties++;
-                                        else mineDensityAnalysis[currentConfig.mineDensity].unknownOutcomes++;
-
-                                        // Symmetry Analysis
-                                        symmetryAnalysis[currentConfig.symmetry].totalGames++; // Assuming symmetryType is the key
-                                        if (outcome == Winner::PLAYER1) symmetryAnalysis[currentConfig.symmetry].player1Wins++;
-                                        else if (outcome == Winner::PLAYER2) symmetryAnalysis[currentConfig.symmetry].player2Wins++;
-                                        else if (outcome == Winner::TIE) symmetryAnalysis[currentConfig.symmetry].ties++;
-                                        else symmetryAnalysis[currentConfig.symmetry].unknownOutcomes++;
-                                        
-                                        // Max Steps Analysis
-                                        maxStepsAnalysis[currentConfig.maxSteps].totalGames++;
-                                        if (outcome == Winner::PLAYER1) maxStepsAnalysis[currentConfig.maxSteps].player1Wins++;
-                                        else if (outcome == Winner::PLAYER2) maxStepsAnalysis[currentConfig.maxSteps].player2Wins++;
-                                        else if (outcome == Winner::TIE) maxStepsAnalysis[currentConfig.maxSteps].ties++;
-                                        else maxStepsAnalysis[currentConfig.maxSteps].unknownOutcomes++;
-
-                                        // Num Shells Analysis
-                                        numShellsAnalysis[currentConfig.numShells].totalGames++;
-                                        if (outcome == Winner::PLAYER1) numShellsAnalysis[currentConfig.numShells].player1Wins++;
-                                        else if (outcome == Winner::PLAYER2) numShellsAnalysis[currentConfig.numShells].player2Wins++;
-                                        else if (outcome == Winner::TIE) numShellsAnalysis[currentConfig.numShells].ties++;
-                                        else numShellsAnalysis[currentConfig.numShells].unknownOutcomes++;
-
-                                        // Num Tanks Per Player Analysis
-                                        numTanksPerPlayerAnalysis[currentConfig.numTanksPerPlayer].totalGames++;
-                                        if (outcome == Winner::PLAYER1) numTanksPerPlayerAnalysis[currentConfig.numTanksPerPlayer].player1Wins++;
-                                        else if (outcome == Winner::PLAYER2) numTanksPerPlayerAnalysis[currentConfig.numTanksPerPlayer].player2Wins++;
-                                        else if (outcome == Winner::TIE) numTanksPerPlayerAnalysis[currentConfig.numTanksPerPlayer].ties++;
-                                        else numTanksPerPlayerAnalysis[currentConfig.numTanksPerPlayer].unknownOutcomes++;
 
                                         // Cleanup
                                         boardManager.cleanupTempFiles(configKey);
@@ -338,24 +202,9 @@ int main(int argc, char* argv[]) {
 
     std::cout << "\nAnalysis tool finished." << std::endl;
 
-    // --- Overall Aggregated Results Summary (kept from previous step) ---
-    // (Removed console output, only CSV output remains)
-
-    // --- Per-Dimension Analysis Summaries ---
-    // (Removed console output, only CSV output remains)
-
     // --- Write CSV Reports ---
-    std::filesystem::create_directories("output"); // Ensure output directory exists
-    writeOverallResultsCsv("output/overall_results.csv", aggregatedResults);
-    writeDimensionAnalysisCsv("output/width_analysis.csv", "width", widthAnalysis);
-    writeDimensionAnalysisCsv("output/height_analysis.csv", "height", heightAnalysis);
-    writeDimensionAnalysisCsv("output/wall_density_analysis.csv", "wallDensity", wallDensityAnalysis);
-    writeDimensionAnalysisCsv("output/mine_density_analysis.csv", "mineDensity", mineDensityAnalysis);
-    writeDimensionAnalysisCsv("output/symmetry_analysis.csv", "symmetry", symmetryAnalysis);
-    writeDimensionAnalysisCsv("output/max_steps_analysis.csv", "maxSteps", maxStepsAnalysis);
-    writeDimensionAnalysisCsv("output/num_shells_analysis.csv", "numShells", numShellsAnalysis);
-    writeDimensionAnalysisCsv("output/num_tanks_per_player_analysis.csv", "numTanksPerPlayer", numTanksPerPlayerAnalysis);
-    
+    aggregator.writeCSVs();
+    // Optionally: aggregator.printSummaries();
     return 0;
 }
 #endif // TEST_BUILD
