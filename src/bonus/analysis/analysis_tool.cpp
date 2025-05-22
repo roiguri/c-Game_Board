@@ -14,47 +14,9 @@
 #include "players/basic_player_factory.h"
 #include "bonus/logger/logger_config.h"
 #include "bonus/analysis/analysis_tool.h"
+#include "bonus/analysis/analysis_utils.h"
 
 // --- Helper Functions for Result Processing ---
-Winner ParseGameResult(const std::string& resultLine) {
-    if (resultLine.find("Player 1 won") != std::string::npos) {
-        return Winner::PLAYER1;
-    } else if (resultLine.find("Player 2 won") != std::string::npos) {
-        return Winner::PLAYER2;
-    } else if (resultLine.find("Tie,") != std::string::npos) { // Assuming "Tie," is part of the tie message
-        return Winner::TIE;
-    }
-    // Log unknown results for debugging, but don't let it stop the analysis.
-    std::cerr << "Warning: Unknown game result string encountered: \"" << resultLine << "\"" << std::endl;
-    return Winner::UNKNOWN;
-}
-
-std::string GenerateKey(const BoardConfig& config) {
-    std::ostringstream oss;
-    // Use fixed precision for floating point numbers to ensure consistent keys.
-    // Using 3 decimal places for densities as an example.
-    oss << std::fixed << std::setprecision(3); 
-
-    oss << "w" << config.width
-        << "_h" << config.height
-        << "_wd" << config.wallDensity  // wallDensity will be formatted to 3 decimal places
-        << "_md" << config.mineDensity; // mineDensity will be formatted to 3 decimal places
-    
-    // Reset precision to default for non-float types if needed, though here it's not strictly necessary
-    // as subsequent items are integers or strings that don't use stream precision.
-    oss << std::defaultfloat << std::setprecision(6); // Reset to default
-
-    // Assuming symmetryType is a string. If it's an enum, it should be converted to string/int first.
-    oss << "_sym" << config.symmetry
-        // Note: if seed is -1 (time-based), this part of the key will vary for each run with that setting.
-        // This is generally desired if you want to treat time-based seeds as distinct runs.
-        // If seeds are explicit, they will group correctly.
-        << "_seed" << config.seed 
-        << "_steps" << config.maxSteps
-        << "_shells" << config.numShells
-        << "_tanks" << config.numTanksPerPlayer;
-    return oss.str();
-}
 
 // --- Templated Helper Function for Printing Per-Dimension Analysis ---
 template<typename KeyType>
