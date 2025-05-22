@@ -288,7 +288,7 @@ TEST_F(LoggerTest, WarnIfLogFileGivenWithoutLogToFile) {
     StderrCapture capture;
     LoggerConfig::configure(parser);
     std::string err = capture.str();
-    EXPECT_NE(err.find("Warning: --log-file was provided, but --log-to-file is not enabled"), std::string::npos);
+    EXPECT_NE(err.find("Warning: --log_file was provided, but --log_to_file is not enabled"), std::string::npos);
 }
 
 TEST_F(LoggerTest, NoWarnIfLogFileAndLogToFileAndEnableLogging) {
