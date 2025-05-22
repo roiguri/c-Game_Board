@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <iostream>
 #include "bonus/analysis/analysis_tool.h"
+#include "bonus/analysis/analysis_reporter.h"
 
 void ResultAggregator::updateResults(const BoardConfig& config, const std::string& configKey, Winner outcome) {
     // Overall results
@@ -64,24 +65,24 @@ void ResultAggregator::updateResults(const BoardConfig& config, const std::strin
 
 void ResultAggregator::writeCSVs() {
     std::filesystem::create_directories("output");
-    writeOverallResultsCsv("output/overall_results.csv", aggregatedResults);
-    writeDimensionAnalysisCsv("output/width_analysis.csv", "width", widthAnalysis);
-    writeDimensionAnalysisCsv("output/height_analysis.csv", "height", heightAnalysis);
-    writeDimensionAnalysisCsv("output/wall_density_analysis.csv", "wallDensity", wallDensityAnalysis);
-    writeDimensionAnalysisCsv("output/mine_density_analysis.csv", "mineDensity", mineDensityAnalysis);
-    writeDimensionAnalysisCsv("output/symmetry_analysis.csv", "symmetry", symmetryAnalysis);
-    writeDimensionAnalysisCsv("output/max_steps_analysis.csv", "maxSteps", maxStepsAnalysis);
-    writeDimensionAnalysisCsv("output/num_shells_analysis.csv", "numShells", numShellsAnalysis);
-    writeDimensionAnalysisCsv("output/num_tanks_per_player_analysis.csv", "numTanksPerPlayer", numTanksPerPlayerAnalysis);
+    AnalysisReporter::writeOverallResultsCsv("output/overall_results.csv", aggregatedResults);
+    AnalysisReporter::writeDimensionAnalysisCsv("output/width_analysis.csv", "width", widthAnalysis);
+    AnalysisReporter::writeDimensionAnalysisCsv("output/height_analysis.csv", "height", heightAnalysis);
+    AnalysisReporter::writeDimensionAnalysisCsv("output/wall_density_analysis.csv", "wallDensity", wallDensityAnalysis);
+    AnalysisReporter::writeDimensionAnalysisCsv("output/mine_density_analysis.csv", "mineDensity", mineDensityAnalysis);
+    AnalysisReporter::writeDimensionAnalysisCsv("output/symmetry_analysis.csv", "symmetry", symmetryAnalysis);
+    AnalysisReporter::writeDimensionAnalysisCsv("output/max_steps_analysis.csv", "maxSteps", maxStepsAnalysis);
+    AnalysisReporter::writeDimensionAnalysisCsv("output/num_shells_analysis.csv", "numShells", numShellsAnalysis);
+    AnalysisReporter::writeDimensionAnalysisCsv("output/num_tanks_per_player_analysis.csv", "numTanksPerPlayer", numTanksPerPlayerAnalysis);
 }
 
 void ResultAggregator::printSummaries() {
-    printDimensionAnalysis("width", widthAnalysis);
-    printDimensionAnalysis("height", heightAnalysis);
-    printDimensionAnalysis("wallDensity", wallDensityAnalysis);
-    printDimensionAnalysis("mineDensity", mineDensityAnalysis);
-    printDimensionAnalysis("symmetry", symmetryAnalysis);
-    printDimensionAnalysis("maxSteps", maxStepsAnalysis);
-    printDimensionAnalysis("numShells", numShellsAnalysis);
-    printDimensionAnalysis("numTanksPerPlayer", numTanksPerPlayerAnalysis);
+    AnalysisReporter::printDimensionAnalysis("width", widthAnalysis);
+    AnalysisReporter::printDimensionAnalysis("height", heightAnalysis);
+    AnalysisReporter::printDimensionAnalysis("wallDensity", wallDensityAnalysis);
+    AnalysisReporter::printDimensionAnalysis("mineDensity", mineDensityAnalysis);
+    AnalysisReporter::printDimensionAnalysis("symmetry", symmetryAnalysis);
+    AnalysisReporter::printDimensionAnalysis("maxSteps", maxStepsAnalysis);
+    AnalysisReporter::printDimensionAnalysis("numShells", numShellsAnalysis);
+    AnalysisReporter::printDimensionAnalysis("numTanksPerPlayer", numTanksPerPlayerAnalysis);
 } 
