@@ -31,6 +31,9 @@ private:
     char** argv_;
     std::vector<std::string> tokens_; // Store argv as vector of strings
 
+    // Helper for value check
+    bool nextTokenIsValue(size_t i) const;
+
     // Parsed values storage
     bool help_ = false;
     std::string gameBoardFile_ = "";

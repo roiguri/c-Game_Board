@@ -8,6 +8,12 @@ CliParser::CliParser(int argc, char** argv) : argc_(argc), argv_(argv) {
     }
 }
 
+bool CliParser::nextTokenIsValue(size_t i) const {
+    return (i + 1 < tokens_.size() &&
+            tokens_[i+1].rfind("--", 0) != 0 &&
+            tokens_[i+1].rfind("-", 0) != 0);
+}
+
 bool CliParser::parse() {
     // tokens_[0] is program name, skip it.
     for (size_t i = 1; i < tokens_.size(); ++i) {
@@ -27,22 +33,21 @@ bool CliParser::parse() {
         } else if (token == "--no-console-log") {
             noConsoleLog_ = true;
         } else if (token == "--config-path") {
-            // Check if there is a next token and it's not another option/flag
-            if (i + 1 < tokens_.size() && tokens_[i+1].rfind("--", 0) != 0 && tokens_[i+1].rfind("-", 0) != 0) {
+            if (nextTokenIsValue(i)) {
                 configPath_ = tokens_[++i];
             } else {
                 std::cerr << "Error: --config-path requires a value." << std::endl;
                 return false;
             }
         } else if (token == "--log-level") {
-            if (i + 1 < tokens_.size() && tokens_[i+1].rfind("--", 0) != 0 && tokens_[i+1].rfind("-", 0) != 0) {
+            if (nextTokenIsValue(i)) {
                 logLevel_ = tokens_[++i];
             } else {
                 std::cerr << "Error: --log-level requires a value." << std::endl;
                 return false;
             }
         } else if (token == "--log-file") {
-            if (i + 1 < tokens_.size() && tokens_[i+1].rfind("--", 0) != 0 && tokens_[i+1].rfind("-", 0) != 0) {
+            if (nextTokenIsValue(i)) {
                 logFile_ = tokens_[++i];
                 logFileSet_ = true;
             } else {
