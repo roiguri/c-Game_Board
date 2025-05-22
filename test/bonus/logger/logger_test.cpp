@@ -191,12 +191,14 @@ TEST_F(LoggerTest, ConfigFromCommandLine) {
     const char* args1[] = {
         "program",
         "--enable-logging",
-        "--log-level=warning",
+        "--log-level", "warning",
         "--log-to-file",
-        "--log-file=cmdline_test.log"
+        "--log-file", "cmdline_test.log"
     };
-    
-    EXPECT_TRUE(LoggerConfig::configureFromCommandLine(5, const_cast<char**>(args1)));
+    int argc1 = 7;
+    CliParser parser1(argc1, const_cast<char**>(args1));
+    ASSERT_TRUE(parser1.parse());
+    EXPECT_TRUE(LoggerConfig::configure(parser1));
     EXPECT_TRUE(Logger::getInstance().isInitializedAndEnabled());
     
     // Log something to verify
@@ -213,16 +215,17 @@ TEST_F(LoggerTest, ConfigFromCommandLine) {
     EXPECT_TRUE(content.find("Command line test") != std::string::npos);
     logFile.close();
 
-    
     // Test with invalid file path but fallback to console
     const char* args2[] = {
         "program",
         "--enable-logging",
-        "--log-file=/invalid_path/test.log"
+        "--log-file", "/invalid_path/test.log"
     };
-    
+    int argc2 = 4;
+    CliParser parser2(argc2, const_cast<char**>(args2));
+    ASSERT_TRUE(parser2.parse());
     // Should still return true (fallback to console logging)
-    EXPECT_TRUE(LoggerConfig::configureFromCommandLine(3, const_cast<char**>(args2)));
+    EXPECT_TRUE(LoggerConfig::configure(parser2));
     
     // Clean up
     Logger::getInstance().setEnabled(false);
@@ -237,7 +240,9 @@ TEST_F(LoggerTest, ConfigFromCommandLine_WrongConfig) {
         "program",
         "--some-other-flag"
     };
-    
-    EXPECT_TRUE(LoggerConfig::configureFromCommandLine(2, const_cast<char**>(args3)));
+    int argc3 = 2;
+    CliParser parser3(argc3, const_cast<char**>(args3));
+    ASSERT_TRUE(parser3.parse());
+    EXPECT_TRUE(LoggerConfig::configure(parser3));
     EXPECT_FALSE(Logger::getInstance().isEnabled());
 }
