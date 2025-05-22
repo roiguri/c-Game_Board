@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "src/analysis_tool.cpp" // Include cpp directly for simplicity, guarded by TEST_BUILD in analysis_tool.cpp's main
+#include "analysis_tool.h"
 #include "bonus/board_generator.h" // For BoardConfig definition
 
 // Test fixture for AnalysisTool tests
@@ -14,7 +14,7 @@ protected:
         config1.height = 10;
         config1.wallDensity = 0.1f;
         config1.mineDensity = 0.05f;
-        config1.symmetryType = "none";
+        config1.symmetry = "none";
         config1.seed = 12345;
         config1.maxSteps = 500;
         config1.numShells = 10;
@@ -89,7 +89,7 @@ TEST_F(AnalysisToolTest, GenerateKeyDifferentMineDensity) {
 }
 
 TEST_F(AnalysisToolTest, GenerateKeyDifferentSymmetryType) {
-    config2.symmetryType = "horizontal";
+    config2.symmetry = "horizontal";
     std::string key1 = GenerateKey(config1);
     std::string key2 = GenerateKey(config2);
     EXPECT_NE(key1, key2);

@@ -13,31 +13,7 @@
 #include "algo/basic_tank_algorithm_factory.h"
 #include "players/basic_player_factory.h"
 #include "bonus/logger/logger_config.h"
-
-// Placeholder BoardConfig struct is removed; bonus/board_generator.h should provide it.
-
-struct AnalysisParams {
-    std::vector<int> widths;
-    std::vector<int> heights;
-    std::vector<float> wallDensities;
-    std::vector<float> mineDensities;
-    std::vector<std::string> symmetryTypes;
-    std::vector<int> seeds;
-    std::vector<int> maxSteps;
-    std::vector<int> numShells;
-    std::vector<int> numTanksPerPlayer;
-};
-
-// --- Structs and Enums for Result Aggregation ---
-enum class Winner { PLAYER1, PLAYER2, TIE, UNKNOWN };
-
-struct GameOutcomeCounts {
-    int player1Wins = 0;
-    int player2Wins = 0;
-    int ties = 0;
-    int unknownOutcomes = 0; // To count games where the result string was not recognized
-    int totalGames = 0;      // New member for total games for this configuration
-};
+#include "analysis_tool.h"
 
 // --- Helper Functions for Result Processing ---
 Winner ParseGameResult(const std::string& resultLine) {
@@ -69,7 +45,7 @@ std::string GenerateKey(const BoardConfig& config) {
     oss << std::defaultfloat << std::setprecision(6); // Reset to default
 
     // Assuming symmetryType is a string. If it's an enum, it should be converted to string/int first.
-    oss << "_sym" << config.symmetryType 
+    oss << "_sym" << config.symmetry
         // Note: if seed is -1 (time-based), this part of the key will vary for each run with that setting.
         // This is generally desired if you want to treat time-based seeds as distinct runs.
         // If seeds are explicit, they will group correctly.
@@ -135,10 +111,10 @@ void printDimensionAnalysis(const std::string& dimensionName, const std::map<Key
 
 #ifndef TEST_BUILD
 int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
     // Deactivate logging for performance and cleaner output
-    LoggerConfig::getInstance().setLogLevel(LogLevel::NONE);
-    LoggerConfig::getInstance().setLogToConsole(false);
-    LoggerConfig::getInstance().setLogToFile(false);
+    Logger::getInstance().initialize(Logger::Level::INFO, false, false);
 
     std::cout << "Analysis tool started." << std::endl;
 
@@ -166,6 +142,8 @@ int main(int argc, char* argv[]) {
     std::map<int, GameOutcomeCounts> numShellsAnalysis;
     std::map<int, GameOutcomeCounts> numTanksPerPlayerAnalysis;
 
+    Winner outcome;
+
     for (int width : params.widths) {
         for (int height : params.heights) {
             for (float wallDensity : params.wallDensities) {
@@ -180,7 +158,7 @@ int main(int argc, char* argv[]) {
                                         currentConfig.height = height;
                                         currentConfig.wallDensity = wallDensity;
                                         currentConfig.mineDensity = mineDensity;
-                                        currentConfig.symmetryType = symmetryTypeLoop; 
+                                        currentConfig.symmetry = symmetryTypeLoop; 
                                         currentConfig.seed = (seedValue == -1 && currentConfig.seed != 0) ? static_cast<int>(std::time(nullptr)) : seedValue; // ensure time based seed is different if loop is fast
                                         if (seedValue == -1) { // Add small delay to ensure different seeds if loop is too fast
                                             // This is a simple way to potentially get different seeds for time(-1) option on fast loops.
@@ -258,7 +236,7 @@ int main(int argc, char* argv[]) {
                                             resultFile.close();
                                             
                                             // Parse the result and update aggregatedResults
-                                            Winner outcome = ParseGameResult(lastLine);
+                                            outcome = ParseGameResult(lastLine);
                                             aggregatedResults[configKey].totalGames++; // Update total games for the main aggregated map
                                             
                                             switch (outcome) {
@@ -315,11 +293,11 @@ int main(int argc, char* argv[]) {
                                         else mineDensityAnalysis[currentConfig.mineDensity].unknownOutcomes++;
 
                                         // Symmetry Analysis
-                                        symmetryAnalysis[currentConfig.symmetryType].totalGames++; // Assuming symmetryType is the key
-                                        if (outcome == Winner::PLAYER1) symmetryAnalysis[currentConfig.symmetryType].player1Wins++;
-                                        else if (outcome == Winner::PLAYER2) symmetryAnalysis[currentConfig.symmetryType].player2Wins++;
-                                        else if (outcome == Winner::TIE) symmetryAnalysis[currentConfig.symmetryType].ties++;
-                                        else symmetryAnalysis[currentConfig.symmetryType].unknownOutcomes++;
+                                        symmetryAnalysis[currentConfig.symmetry].totalGames++; // Assuming symmetryType is the key
+                                        if (outcome == Winner::PLAYER1) symmetryAnalysis[currentConfig.symmetry].player1Wins++;
+                                        else if (outcome == Winner::PLAYER2) symmetryAnalysis[currentConfig.symmetry].player2Wins++;
+                                        else if (outcome == Winner::TIE) symmetryAnalysis[currentConfig.symmetry].ties++;
+                                        else symmetryAnalysis[currentConfig.symmetry].unknownOutcomes++;
                                         
                                         // Max Steps Analysis
                                         maxStepsAnalysis[currentConfig.maxSteps].totalGames++;
