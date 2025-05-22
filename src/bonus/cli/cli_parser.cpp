@@ -13,7 +13,7 @@ bool CliParser::parse() {
     for (size_t i = 1; i < tokens_.size(); ++i) {
         const std::string& token = tokens_[i];
 
-        if (token == "--help" || token == "-h") { // Added -h alias
+        if (token == "--help" || token == "-h") {
             help_ = true;
             // As per instructions, continue parsing, main logic will check isHelp() first.
         } else if (token == "--only_generate") {
@@ -29,7 +29,7 @@ bool CliParser::parse() {
         } else if (token == "--config-path") {
             // Check if there is a next token and it's not another option/flag
             if (i + 1 < tokens_.size() && tokens_[i+1].rfind("--", 0) != 0 && tokens_[i+1].rfind("-", 0) != 0) {
-                configPath_ = tokens_[++i]; // Consume value and increment i
+                configPath_ = tokens_[++i];
             } else {
                 std::cerr << "Error: --config-path requires a value." << std::endl;
                 return false;
@@ -52,22 +52,16 @@ bool CliParser::parse() {
             if (gameBoardFile_.empty()) { // Take the first positional as the game board file
                 gameBoardFile_ = token;
             } else {
-                // According to instructions, warn or error for multiple positional arguments.
-                // For now, just warning. Strict parsing might return false.
                 std::cerr << "Warning: Multiple positional arguments. Ignoring '" << token << "'." << std::endl;
             }
         } else {
-            // Unknown option (starts with -- or - but not recognized)
             std::cerr << "Warning: Unknown option '" << token << "'." << std::endl;
-            // Depending on strictness, could return false here.
-            // For now, unknown options are simply ignored if they are not consuming values.
         }
     }
     return true; // Parsing deemed successful if no explicit error caused a false return
 }
 
 std::string CliParser::getHelpMessage() const {
-    // Placeholder for help message generation
     return "Usage: tanks_game [options] [game_board_file]\n"
            "Options:\n"
            "  -h, --help                 Show this help message\n"
@@ -81,7 +75,6 @@ std::string CliParser::getHelpMessage() const {
            "  --log-file <path>          Specify log file path (default: tankbattle.log)\n";
 }
 
-// Implement stub getter methods
 bool CliParser::isHelp() const { return help_; }
 std::string CliParser::getGameBoardFile() const { return gameBoardFile_; }
 bool CliParser::isOnlyGenerate() const { return onlyGenerate_; }

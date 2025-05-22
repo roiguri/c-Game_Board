@@ -42,8 +42,4 @@ private:
     bool logToFile_ = false;
     bool noConsoleLog_ = false;
     std::string logFile_ = "tankbattle.log"; // Default
-
-    // Helper methods for parsing (can be private)
-    // void tokenizeArguments(); // Done in constructor for now
-    // bool processArgument(const std::string& arg, const std::string& nextArg); // Example
 };

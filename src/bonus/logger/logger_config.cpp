@@ -1,11 +1,9 @@
-// src/bonus/logger/logger_config.cpp
 #include "bonus/logger/logger_config.h"
 #include <string>
 #include <algorithm>
 #include <cctype>
 #include <iostream>
 
-// New method signature
 bool LoggerConfig::configure(const CliParser& parser) { 
     bool enableLogging = parser.isEnableLogging();
     
@@ -19,14 +17,8 @@ bool LoggerConfig::configure(const CliParser& parser) {
     bool useConsole = !parser.isNoConsoleLog(); // Correctly interpret this
     std::string logFile = parser.getLogFile();
 
-    // If logFile is empty from parser (meaning default was used or not set by parser explicitly to empty)
-    // and logToFile is true, ensure we still use the default "tankbattle.log" if parser's default is empty.
-    // The CliParser already defaults logFile_ to "tankbattle.log", so this specific check might be redundant
-    // if the parser's default for getLogFile() is never truly empty when logToFile is true.
-    // However, if logFile is empty due to an explicit empty argument (which CliParser doesn't currently allow for log-file),
-    // this would catch it. Given CliParser's current design, logFile will always have a value (its default or parsed).
-    if (useFile && logFile.empty()) { // This case should ideally not be hit if parser has a default.
-        logFile = "tankbattle.log"; // Ensure a fallback, though parser default should handle.
+    if (useFile && logFile.empty()) {
+        logFile = "tankbattle.log";
     }
     
     // Don't allow disabling both console and file logging
