@@ -32,5 +32,10 @@ struct GameOutcomeCounts {
 Winner ParseGameResult(const std::string& resultLine);
 std::string GenerateKey(const BoardConfig& config);
 
+void writeOverallResultsCsv(const std::string& filename, const std::map<std::string, GameOutcomeCounts>& results);
+
+template<typename KeyType>
+void writeDimensionAnalysisCsv(const std::string& filename, const std::string& dimensionName, const std::map<KeyType, GameOutcomeCounts>& analysisMap);
+
 template<typename KeyType>
 void printDimensionAnalysis(const std::string& dimensionName, const std::map<KeyType, GameOutcomeCounts>& analysisMap);
