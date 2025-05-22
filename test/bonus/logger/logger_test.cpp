@@ -5,6 +5,8 @@
 #include <fstream>
 #include <string>
 #include <filesystem>
+#include <sstream>
+#include <streambuf>
 
 class LoggerTest : public ::testing::Test {
 protected:
@@ -56,6 +58,17 @@ protected:
         
         return false;
     }
+};
+
+// Helper to capture stderr
+class StderrCapture {
+public:
+    StderrCapture() : old_buf(std::cerr.rdbuf(capture.rdbuf())) {}
+    ~StderrCapture() { std::cerr.rdbuf(old_buf); }
+    std::string str() const { return capture.str(); }
+private:
+    std::stringstream capture;
+    std::streambuf* old_buf;
 };
 
 TEST_F(LoggerTest, LoggerInitialization) {
@@ -245,4 +258,51 @@ TEST_F(LoggerTest, ConfigFromCommandLine_WrongConfig) {
     ASSERT_TRUE(parser3.parse());
     EXPECT_TRUE(LoggerConfig::configure(parser3));
     EXPECT_FALSE(Logger::getInstance().isEnabled());
+}
+
+TEST_F(LoggerTest, WarnIfLoggingArgsWithoutEnableLogging) {
+    const char* args[] = {
+        "program",
+        "--log-to-file",
+        "--log-level", "debug",
+        "--log-file", "somefile.log"
+    };
+    int argc = 6;
+    CliParser parser(argc, const_cast<char**>(args));
+    ASSERT_TRUE(parser.parse());
+    StderrCapture capture;
+    LoggerConfig::configure(parser);
+    std::string err = capture.str();
+    EXPECT_NE(err.find("Warning: Logging-related arguments were provided"), std::string::npos);
+}
+
+TEST_F(LoggerTest, WarnIfLogFileGivenWithoutLogToFile) {
+    const char* args[] = {
+        "program",
+        "--enable-logging",
+        "--log-file", "somefile.log"
+    };
+    int argc = 4;
+    CliParser parser(argc, const_cast<char**>(args));
+    ASSERT_TRUE(parser.parse());
+    StderrCapture capture;
+    LoggerConfig::configure(parser);
+    std::string err = capture.str();
+    EXPECT_NE(err.find("Warning: --log-file was provided, but --log-to-file is not enabled"), std::string::npos);
+}
+
+TEST_F(LoggerTest, NoWarnIfLogFileAndLogToFileAndEnableLogging) {
+    const char* args[] = {
+        "program",
+        "--enable-logging",
+        "--log-to-file",
+        "--log-file", "somefile.log"
+    };
+    int argc = 5;
+    CliParser parser(argc, const_cast<char**>(args));
+    ASSERT_TRUE(parser.parse());
+    StderrCapture capture;
+    LoggerConfig::configure(parser);
+    std::string err = capture.str();
+    EXPECT_EQ(err.find("Warning"), std::string::npos);
 }

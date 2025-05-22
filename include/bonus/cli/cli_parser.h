@@ -23,6 +23,7 @@ public:
     bool isLogToFile() const;
     bool isNoConsoleLog() const;
     std::string getLogFile() const;
+    bool isLogFileSet() const;
 
 private:
     // Input arguments
@@ -42,4 +43,5 @@ private:
     bool logToFile_ = false;
     bool noConsoleLog_ = false;
     std::string logFile_ = "tankbattle.log"; // Default
+    bool logFileSet_ = false;
 };

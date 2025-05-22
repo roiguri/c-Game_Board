@@ -8,8 +8,16 @@ bool LoggerConfig::configure(const CliParser& parser) {
     bool enableLogging = parser.isEnableLogging();
     
     if (!enableLogging) {
-        Logger::getInstance().setEnabled(false); // Explicitly disable logger
-        return true; // Success - no logging is fine
+        if (parser.isLogToFile() || parser.isNoConsoleLog() ||
+            !parser.getLogLevel().empty() || parser.isLogFileSet()) {
+            std::cerr << "Warning: Logging-related arguments were provided, but logging is not enabled (missing --enable-logging)." << std::endl;
+        }
+        Logger::getInstance().setEnabled(false);
+        return true;
+    }
+    
+    if (enableLogging && parser.isLogFileSet() && !parser.isLogToFile()) {
+        std::cerr << "Warning: --log-file was provided, but --log-to-file is not enabled. The log file will be ignored." << std::endl;
     }
     
     Logger::Level level = stringToLevel(parser.getLogLevel());

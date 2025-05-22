@@ -44,6 +44,7 @@ bool CliParser::parse() {
         } else if (token == "--log-file") {
             if (i + 1 < tokens_.size() && tokens_[i+1].rfind("--", 0) != 0 && tokens_[i+1].rfind("-", 0) != 0) {
                 logFile_ = tokens_[++i];
+                logFileSet_ = true;
             } else {
                 std::cerr << "Error: --log-file requires a value." << std::endl;
                 return false;
@@ -85,3 +86,4 @@ std::string CliParser::getLogLevel() const { return logLevel_; }
 bool CliParser::isLogToFile() const { return logToFile_; }
 bool CliParser::isNoConsoleLog() const { return noConsoleLog_; }
 std::string CliParser::getLogFile() const { return logFile_; }
+bool CliParser::isLogFileSet() const { return logFileSet_; }
