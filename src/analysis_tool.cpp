@@ -108,6 +108,55 @@ void printDimensionAnalysis(const std::string& dimensionName, const std::map<Key
     }
 }
 
+void writeOverallResultsCsv(const std::string& filename, const std::map<std::string, GameOutcomeCounts>& results) {
+    std::ofstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open file for writing: " << filename << std::endl;
+        return;
+    }
+    // Write header
+    file << "configKey,totalGames,player1Wins,player2Wins,ties,unknownOutcomes\n";
+    for (const auto& pair : results) {
+        const std::string& configKey = pair.first;
+        const GameOutcomeCounts& counts = pair.second;
+        file << '"' << configKey << '"' << ','
+             << counts.totalGames << ','
+             << counts.player1Wins << ','
+             << counts.player2Wins << ','
+             << counts.ties << ','
+             << counts.unknownOutcomes << '\n';
+    }
+    file.close();
+}
+
+// Template implementation for per-dimension analysis CSV
+// This must be in the header or in the same translation unit as its use
+// But for now, we provide a definition here for int, float, and std::string
+
+template<typename KeyType>
+void writeDimensionAnalysisCsv(const std::string& filename, const std::string& dimensionName, const std::map<KeyType, GameOutcomeCounts>& analysisMap) {
+    std::ofstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open file for writing: " << filename << std::endl;
+        return;
+    }
+    // Write header
+    file << dimensionName << ",totalGames,player1Wins,player2Wins,ties,unknownOutcomes\n";
+    for (const auto& pair : analysisMap) {
+        file << pair.first << ','
+             << pair.second.totalGames << ','
+             << pair.second.player1Wins << ','
+             << pair.second.player2Wins << ','
+             << pair.second.ties << ','
+             << pair.second.unknownOutcomes << '\n';
+    }
+    file.close();
+}
+// Explicit instantiations for common types
+// (If you get linker errors, move this template to the header)
+template void writeDimensionAnalysisCsv<int>(const std::string&, const std::string&, const std::map<int, GameOutcomeCounts>&);
+template void writeDimensionAnalysisCsv<float>(const std::string&, const std::string&, const std::map<float, GameOutcomeCounts>&);
+template void writeDimensionAnalysisCsv<std::string>(const std::string&, const std::string&, const std::map<std::string, GameOutcomeCounts>&);
 
 #ifndef TEST_BUILD
 int main(int argc, char* argv[]) {
@@ -174,14 +223,6 @@ int main(int argc, char* argv[]) {
                                         currentConfig.numTanksPerPlayer = numTanks;
                                         
                                         std::string configKey = GenerateKey(currentConfig);
-
-                                        std::cout << "\nProcessing Config Key: " << configKey << std::endl;
-                                        // std::cout << "BoardConfig: " // Old detailed print, can be enabled for debugging
-                                        //           << "width=" << currentConfig.width << ", "
-                                        //           << "height=" << currentConfig.height << ", "
-                                        //           // ... (rest of params)
-                                        //           << std::endl;
-
 
                                         // Game Simulation
                                         BoardGenerator generator(currentConfig);
@@ -332,6 +373,13 @@ int main(int argc, char* argv[]) {
                                                      std::cerr << "Warning: Failed to remove temporary output file: " << outputFilePath << std::endl;
                                                  }
                                             }
+                                            // Remove visualization output file if it exists
+                                            std::string visualizationFilePath = "output_temp_analysis_board_" + configKey + "_visualization.html";
+                                            if (std::filesystem::exists(visualizationFilePath)) {
+                                                if (!std::filesystem::remove(visualizationFilePath)) {
+                                                    std::cerr << "Warning: Failed to remove temporary visualization file: " << visualizationFilePath << std::endl;
+                                                }
+                                            }
                                         } catch (const std::filesystem::filesystem_error& e) {
                                             std::cerr << "Filesystem error during cleanup for " << configKey << ": " << e.what() << std::endl;
                                         }
@@ -348,46 +396,22 @@ int main(int argc, char* argv[]) {
     std::cout << "\nAnalysis tool finished." << std::endl;
 
     // --- Overall Aggregated Results Summary (kept from previous step) ---
-    std::cout << "\n--- Overall Aggregated Results ---" << std::endl;
-    if (aggregatedResults.empty()) {
-        std::cout << "No results were aggregated during the analysis." << std::endl;
-    } else {
-        for (const auto& pair : aggregatedResults) {
-            const std::string& configKey = pair.first;
-            const GameOutcomeCounts& counts = pair.second;
-
-            std::cout << "Parameters: " << configKey << std::endl;
-            std::cout << "  Total Games: " << counts.totalGames << std::endl; // Added total games here too
-            std::cout << std::fixed << std::setprecision(1);
-            if (counts.totalGames > 0) {
-                 std::cout << "  P1 Win %: " << (static_cast<double>(counts.player1Wins) / counts.totalGames) * 100.0 << "%" << std::endl;
-                 std::cout << "  P2 Win %: " << (static_cast<double>(counts.player2Wins) / counts.totalGames) * 100.0 << "%" << std::endl;
-                 std::cout << "  Tie %: " << (static_cast<double>(counts.ties) / counts.totalGames) * 100.0 << "%" << std::endl;
-                 if (counts.unknownOutcomes > 0) {
-                     std::cout << "  Unknown %: " << (static_cast<double>(counts.unknownOutcomes) / counts.totalGames) * 100.0 << "% (" << counts.unknownOutcomes << " games)" << std::endl;
-                 }
-            } else {
-                 std::cout << "  P1 Win %: N/A" << std::endl;
-                 std::cout << "  P2 Win %: N/A" << std::endl;
-                 std::cout << "  Tie %: N/A" << std::endl;
-                 if (counts.unknownOutcomes > 0) {
-                     std::cout << "  Unknown Outcomes: " << counts.unknownOutcomes << std::endl;
-                 }
-            }
-            std::cout << std::defaultfloat << std::setprecision(6); // Reset to default
-            std::cout << "--------------------------------------------------" << std::endl;
-        }
-    }
+    // (Removed console output, only CSV output remains)
 
     // --- Per-Dimension Analysis Summaries ---
-    printDimensionAnalysis("Width", widthAnalysis);
-    printDimensionAnalysis("Height", heightAnalysis);
-    printDimensionAnalysis("Wall Density", wallDensityAnalysis);
-    printDimensionAnalysis("Mine Density", mineDensityAnalysis);
-    printDimensionAnalysis("Symmetry", symmetryAnalysis);
-    printDimensionAnalysis("Max Steps", maxStepsAnalysis);
-    printDimensionAnalysis("Number of Shells", numShellsAnalysis);
-    printDimensionAnalysis("Tanks Per Player", numTanksPerPlayerAnalysis);
+    // (Removed console output, only CSV output remains)
+
+    // --- Write CSV Reports ---
+    std::filesystem::create_directories("output"); // Ensure output directory exists
+    writeOverallResultsCsv("output/overall_results.csv", aggregatedResults);
+    writeDimensionAnalysisCsv("output/width_analysis.csv", "width", widthAnalysis);
+    writeDimensionAnalysisCsv("output/height_analysis.csv", "height", heightAnalysis);
+    writeDimensionAnalysisCsv("output/wall_density_analysis.csv", "wallDensity", wallDensityAnalysis);
+    writeDimensionAnalysisCsv("output/mine_density_analysis.csv", "mineDensity", mineDensityAnalysis);
+    writeDimensionAnalysisCsv("output/symmetry_analysis.csv", "symmetry", symmetryAnalysis);
+    writeDimensionAnalysisCsv("output/max_steps_analysis.csv", "maxSteps", maxStepsAnalysis);
+    writeDimensionAnalysisCsv("output/num_shells_analysis.csv", "numShells", numShellsAnalysis);
+    writeDimensionAnalysisCsv("output/num_tanks_per_player_analysis.csv", "numTanksPerPlayer", numTanksPerPlayerAnalysis);
     
     return 0;
 }
