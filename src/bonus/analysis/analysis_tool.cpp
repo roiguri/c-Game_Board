@@ -15,6 +15,7 @@
 #include "bonus/logger/logger_config.h"
 #include "bonus/analysis/analysis_tool.h"
 #include "bonus/analysis/analysis_utils.h"
+#include "bonus/analysis/board_manager.h"
 
 // --- Helper Functions for Result Processing ---
 
@@ -187,14 +188,14 @@ int main(int argc, char* argv[]) {
                                         std::string configKey = GenerateKey(currentConfig);
 
                                         // Game Simulation
-                                        BoardGenerator generator(currentConfig);
-                                        if (!generator.generateBoard()) {
+                                        BoardManager boardManager;
+                                        if (!boardManager.generateBoard(currentConfig)) {
                                             std::cerr << "Error: Board generation failed for " << configKey << ". Skipping." << std::endl;
                                             continue; 
                                         }
 
                                         const std::string tempBoardFilePath = "temp_analysis_board_" + configKey + ".txt"; // Unique temp file
-                                        if (!generator.saveToFile(tempBoardFilePath)) {
+                                        if (!boardManager.saveToFile(currentConfig, tempBoardFilePath)) {
                                             std::cerr << "Error: Saving board to file '" << tempBoardFilePath << "' failed for " << configKey << ". Skipping." << std::endl;
                                             continue;
                                         }
@@ -212,7 +213,7 @@ int main(int argc, char* argv[]) {
 
                                         if (!boardReadOk) {
                                             std::cerr << "Error: GameManager failed to read board from '" << tempBoardFilePath << "' for " << configKey << ". Skipping." << std::endl;
-                                            try { if(std::filesystem::exists(tempBoardFilePath)) std::filesystem::remove(tempBoardFilePath); } catch (const std::exception& e) { /* ignore */ }
+                                            boardManager.cleanupTempFiles(configKey);
                                             continue;
                                         }
                                         
@@ -324,27 +325,7 @@ int main(int argc, char* argv[]) {
                                         else numTanksPerPlayerAnalysis[currentConfig.numTanksPerPlayer].unknownOutcomes++;
 
                                         // Cleanup
-                                        try {
-                                            if (std::filesystem::exists(tempBoardFilePath)) {
-                                                if (!std::filesystem::remove(tempBoardFilePath)) {
-                                                     std::cerr << "Warning: Failed to remove temporary board file: " << tempBoardFilePath << std::endl;
-                                                }
-                                            }
-                                            if (std::filesystem::exists(outputFilePath)) {
-                                                 if (!std::filesystem::remove(outputFilePath)) {
-                                                     std::cerr << "Warning: Failed to remove temporary output file: " << outputFilePath << std::endl;
-                                                 }
-                                            }
-                                            // Remove visualization output file if it exists
-                                            std::string visualizationFilePath = "output_temp_analysis_board_" + configKey + "_visualization.html";
-                                            if (std::filesystem::exists(visualizationFilePath)) {
-                                                if (!std::filesystem::remove(visualizationFilePath)) {
-                                                    std::cerr << "Warning: Failed to remove temporary visualization file: " << visualizationFilePath << std::endl;
-                                                }
-                                            }
-                                        } catch (const std::filesystem::filesystem_error& e) {
-                                            std::cerr << "Filesystem error during cleanup for " << configKey << ": " << e.what() << std::endl;
-                                        }
+                                        boardManager.cleanupTempFiles(configKey);
                                     }
                                 }
                             }
