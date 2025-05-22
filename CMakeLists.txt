@@ -46,6 +46,10 @@ else()
     add_definitions(-DENABLE_VISUALIZATION)
 endif()
 
+# Explicitly remove main game and analysis tool sources from library sources
+list(REMOVE_ITEM CORE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+list(REMOVE_ITEM CORE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/analysis_tool.cpp")
+
 # Create the core library
 add_library(tanks_game_lib ${CORE_SOURCES} ${CORE_HEADERS})
 target_include_directories(tanks_game_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/common)
@@ -62,6 +66,15 @@ add_executable(tanks_game "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 target_link_libraries(tanks_game PRIVATE tanks_game_lib)
 target_include_directories(tanks_game PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/common)
 set_target_properties(tanks_game
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
+
+# Add the analysis tool executable
+add_executable(analysis_tool "${CMAKE_CURRENT_SOURCE_DIR}/src/analysis_tool.cpp")
+target_link_libraries(analysis_tool PRIVATE tanks_game_lib)
+target_include_directories(analysis_tool PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/common)
+set_target_properties(analysis_tool
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
@@ -108,6 +121,8 @@ if(ENABLE_TESTING)
         test/algo/basic_tank_algorithm_factory_test.cpp
         test/algo/offensive_tank_algorithm_test.cpp
         test/bonus/logger/logger_test.cpp
+        test/analysis_tool_test.cpp # Added new test file
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/analysis_tool.cpp" # Added source for analysis tool functions
         test/test_main.cpp
     )
 
@@ -117,7 +132,9 @@ if(ENABLE_TESTING)
     endif()
     
     add_executable(tanks_game_tests ${TEST_SOURCES})
-    target_include_directories(tanks_game_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/common)
+    # Add compile definition to guard main() in analysis_tool.cpp
+    target_compile_definitions(tanks_game_tests PRIVATE TEST_BUILD) 
+    target_include_directories(tanks_game_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/common ${CMAKE_CURRENT_SOURCE_DIR}/src)
     target_link_libraries(tanks_game_tests PRIVATE tanks_game_lib gtest gmock gtest_main)
     set_target_properties(tanks_game_tests
         PROPERTIES
