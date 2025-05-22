@@ -110,11 +110,9 @@ int main(int argc, char* argv[]) {
         return 0;
     }
     
-    // Configure logger using the parsed options
-    if (!LoggerConfig::configure(parser)) {
-        // Optional: Handle logger configuration failure, though configure itself might print errors.
-        // For now, we'll let the game continue as per current LoggerConfig behavior.
-    }
+    // Configure logger using the parsed options - Game continues even if logger configuration fails
+    LoggerConfig::configure(parser);
+
     LOG_INFO("Tank Battle Game started");
 
     if (parser.isOnlyGenerate()) {
