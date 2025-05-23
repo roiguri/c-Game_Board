@@ -61,22 +61,131 @@ void ResultAggregator::updateResults(const BoardConfig& config, const std::strin
     else if (outcome == Winner::PLAYER2) numTanksPerPlayerAnalysis[config.numTanksPerPlayer].player2Wins++;
     else if (outcome == Winner::TIE) numTanksPerPlayerAnalysis[config.numTanksPerPlayer].ties++;
     else numTanksPerPlayerAnalysis[config.numTanksPerPlayer].unknownOutcomes++;
+
+    // Update grand total counts
+    grandTotalCounts.totalGames++;
+    switch (outcome) {
+        case Winner::PLAYER1: grandTotalCounts.player1Wins++; break;
+        case Winner::PLAYER2: grandTotalCounts.player2Wins++; break;
+        case Winner::TIE:     grandTotalCounts.ties++; break;
+        case Winner::UNKNOWN: grandTotalCounts.unknownOutcomes++; break;
+    }
+}
+
+void ResultAggregator::calculateAllOdds() {
+    // Calculate for aggregatedResults
+    for (auto& pair : aggregatedResults) {
+        GameOutcomeCounts& counts = pair.second;
+        counts.p1WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player1Wins) / counts.totalGames : 0.0;
+        counts.p2WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player2Wins) / counts.totalGames : 0.0;
+    }
+    // Calculate for widthAnalysis
+    for (auto& pair : widthAnalysis) {
+        GameOutcomeCounts& counts = pair.second;
+        counts.p1WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player1Wins) / counts.totalGames : 0.0;
+        counts.p2WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player2Wins) / counts.totalGames : 0.0;
+    }
+    // Calculate for heightAnalysis
+    for (auto& pair : heightAnalysis) {
+        GameOutcomeCounts& counts = pair.second;
+        counts.p1WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player1Wins) / counts.totalGames : 0.0;
+        counts.p2WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player2Wins) / counts.totalGames : 0.0;
+    }
+    // Calculate for wallDensityAnalysis
+    for (auto& pair : wallDensityAnalysis) {
+        GameOutcomeCounts& counts = pair.second;
+        counts.p1WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player1Wins) / counts.totalGames : 0.0;
+        counts.p2WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player2Wins) / counts.totalGames : 0.0;
+    }
+    // Calculate for mineDensityAnalysis
+    for (auto& pair : mineDensityAnalysis) {
+        GameOutcomeCounts& counts = pair.second;
+        counts.p1WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player1Wins) / counts.totalGames : 0.0;
+        counts.p2WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player2Wins) / counts.totalGames : 0.0;
+    }
+    // Calculate for symmetryAnalysis
+    for (auto& pair : symmetryAnalysis) {
+        GameOutcomeCounts& counts = pair.second;
+        counts.p1WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player1Wins) / counts.totalGames : 0.0;
+        counts.p2WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player2Wins) / counts.totalGames : 0.0;
+    }
+    // Calculate for maxStepsAnalysis
+    for (auto& pair : maxStepsAnalysis) {
+        GameOutcomeCounts& counts = pair.second;
+        counts.p1WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player1Wins) / counts.totalGames : 0.0;
+        counts.p2WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player2Wins) / counts.totalGames : 0.0;
+    }
+    // Calculate for numShellsAnalysis
+    for (auto& pair : numShellsAnalysis) {
+        GameOutcomeCounts& counts = pair.second;
+        counts.p1WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player1Wins) / counts.totalGames : 0.0;
+        counts.p2WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player2Wins) / counts.totalGames : 0.0;
+    }
+    // Calculate for numTanksPerPlayerAnalysis
+    for (auto& pair : numTanksPerPlayerAnalysis) {
+        GameOutcomeCounts& counts = pair.second;
+        counts.p1WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player1Wins) / counts.totalGames : 0.0;
+        counts.p2WinOdds = (counts.totalGames > 0) ? static_cast<double>(counts.player2Wins) / counts.totalGames : 0.0;
+    }
+
+    // Calculate for grandTotalCounts
+    grandTotalCounts.p1WinOdds = (grandTotalCounts.totalGames > 0) ? static_cast<double>(grandTotalCounts.player1Wins) / grandTotalCounts.totalGames : 0.0;
+    grandTotalCounts.p2WinOdds = (grandTotalCounts.totalGames > 0) ? static_cast<double>(grandTotalCounts.player2Wins) / grandTotalCounts.totalGames : 0.0;
 }
 
 void ResultAggregator::writeCSVs() {
+    calculateAllOdds(); // Calculate odds before writing
     std::filesystem::create_directories("output");
+    // Write overall results to its own file as before
     AnalysisReporter::writeOverallResultsCsv("output/overall_results.csv", aggregatedResults);
-    AnalysisReporter::writeDimensionAnalysisCsv("output/width_analysis.csv", "width", widthAnalysis);
-    AnalysisReporter::writeDimensionAnalysisCsv("output/height_analysis.csv", "height", heightAnalysis);
-    AnalysisReporter::writeDimensionAnalysisCsv("output/wall_density_analysis.csv", "wallDensity", wallDensityAnalysis);
-    AnalysisReporter::writeDimensionAnalysisCsv("output/mine_density_analysis.csv", "mineDensity", mineDensityAnalysis);
-    AnalysisReporter::writeDimensionAnalysisCsv("output/symmetry_analysis.csv", "symmetry", symmetryAnalysis);
-    AnalysisReporter::writeDimensionAnalysisCsv("output/max_steps_analysis.csv", "maxSteps", maxStepsAnalysis);
-    AnalysisReporter::writeDimensionAnalysisCsv("output/num_shells_analysis.csv", "numShells", numShellsAnalysis);
-    AnalysisReporter::writeDimensionAnalysisCsv("output/num_tanks_per_player_analysis.csv", "numTanksPerPlayer", numTanksPerPlayerAnalysis);
+
+    // Create and open the single file for all dimension analyses
+    std::ofstream dimensionSummaryFile("output/dimension_summary.csv");
+    if (!dimensionSummaryFile.is_open()) {
+        std::cerr << "Error: Could not open file for writing: output/dimension_summary.csv" << std::endl;
+        return;
+    }
+
+    // Write each dimension's analysis to the single file
+    AnalysisReporter::writeDimensionAnalysisCsv(dimensionSummaryFile, "width", widthAnalysis);
+    AnalysisReporter::writeDimensionAnalysisCsv(dimensionSummaryFile, "height", heightAnalysis);
+    AnalysisReporter::writeDimensionAnalysisCsv(dimensionSummaryFile, "wallDensity", wallDensityAnalysis);
+    AnalysisReporter::writeDimensionAnalysisCsv(dimensionSummaryFile, "mineDensity", mineDensityAnalysis);
+    AnalysisReporter::writeDimensionAnalysisCsv(dimensionSummaryFile, "symmetry", symmetryAnalysis);
+    AnalysisReporter::writeDimensionAnalysisCsv(dimensionSummaryFile, "maxSteps", maxStepsAnalysis);
+    AnalysisReporter::writeDimensionAnalysisCsv(dimensionSummaryFile, "numShells", numShellsAnalysis);
+    AnalysisReporter::writeDimensionAnalysisCsv(dimensionSummaryFile, "numTanksPerPlayer", numTanksPerPlayerAnalysis);
+
+    dimensionSummaryFile.close();
+
+    // Write the grand total summary
+    AnalysisReporter::writeGrandTotalCsv("output/grand_total_summary.csv", grandTotalCounts);
+
+    // Open a new file for odds statistics
+    std::ofstream oddsStatsFile("output/odds_statistics_summary.csv");
+    if (!oddsStatsFile.is_open()) {
+        std::cerr << "Error: Could not open file for writing: output/odds_statistics_summary.csv" << std::endl;
+        return; // Or skip, but returning since other critical files might also fail
+    }
+
+    // Write odds statistics for each dimension
+    AnalysisReporter::writeOddsStatisticsCsv(oddsStatsFile, "Width", widthAnalysis);
+    AnalysisReporter::writeOddsStatisticsCsv(oddsStatsFile, "Height", heightAnalysis);
+    AnalysisReporter::writeOddsStatisticsCsv(oddsStatsFile, "WallDensity", wallDensityAnalysis);
+    AnalysisReporter::writeOddsStatisticsCsv(oddsStatsFile, "MineDensity", mineDensityAnalysis);
+    AnalysisReporter::writeOddsStatisticsCsv(oddsStatsFile, "Symmetry", symmetryAnalysis);
+    AnalysisReporter::writeOddsStatisticsCsv(oddsStatsFile, "MaxSteps", maxStepsAnalysis);
+    AnalysisReporter::writeOddsStatisticsCsv(oddsStatsFile, "NumShells", numShellsAnalysis);
+    AnalysisReporter::writeOddsStatisticsCsv(oddsStatsFile, "NumTanksPerPlayer", numTanksPerPlayerAnalysis);
+    
+    // Write grand total odds
+    AnalysisReporter::writeGrandTotalOdds(oddsStatsFile, grandTotalCounts);
+
+    oddsStatsFile.close();
 }
 
 void ResultAggregator::printSummaries() {
+    calculateAllOdds(); // Calculate odds before printing
     AnalysisReporter::printDimensionAnalysis("width", widthAnalysis);
     AnalysisReporter::printDimensionAnalysis("height", heightAnalysis);
     AnalysisReporter::printDimensionAnalysis("wallDensity", wallDensityAnalysis);

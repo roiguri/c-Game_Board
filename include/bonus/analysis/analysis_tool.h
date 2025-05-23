@@ -28,6 +28,8 @@ struct GameOutcomeCounts {
     int ties = 0;
     int unknownOutcomes = 0;
     int totalGames = 0;
+    double p1WinOdds = 0.0; // New field
+    double p2WinOdds = 0.0; // New field
 };
 
 class BoardManager;

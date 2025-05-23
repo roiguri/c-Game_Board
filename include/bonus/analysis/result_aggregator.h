@@ -13,7 +13,10 @@ public:
 
     // Expose maps for testing or further use if needed
     const std::map<std::string, GameOutcomeCounts>& getAggregatedResults() const { return aggregatedResults; }
+    const GameOutcomeCounts& getGrandTotalCounts() const { return grandTotalCounts; }
 private:
+    void calculateAllOdds(); // New private method
+    GameOutcomeCounts grandTotalCounts{};
     std::map<std::string, GameOutcomeCounts> aggregatedResults;
     std::map<int, GameOutcomeCounts> widthAnalysis;
     std::map<int, GameOutcomeCounts> heightAnalysis;

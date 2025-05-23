@@ -27,15 +27,16 @@ int AnalysisTool::runAnalysis() {
     std::cout << "Analysis tool started." << std::endl;
 
     AnalysisParams params;
-    params.widths = {10, 20};
-    params.heights = {10, 15};
-    params.wallDensities = {0.1f, 0.25f};
+    // Reduced parameters for faster testing
+    params.widths = {10};
+    params.heights = {8};
+    params.wallDensities = {0.1f};
     params.mineDensities = {0.05f};
-    params.symmetryTypes = {"none", "horizontal"};
-    params.seeds = {-1, 12345};
-    params.maxSteps = {500, 1000};
-    params.numShells = {10};
-    params.numTanksPerPlayer = {1, 2};
+    params.symmetryTypes = {"none"};
+    params.seeds = {12345}; // Use a specific seed for predictability
+    params.maxSteps = {500};
+    params.numShells = {5};
+    params.numTanksPerPlayer = {1};
 
     ResultAggregator aggregator;
     auto configs = generateAllConfigs(params);
