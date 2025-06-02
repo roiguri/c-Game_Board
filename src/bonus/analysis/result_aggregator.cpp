@@ -74,6 +74,8 @@ void ResultAggregator::writeCSVs() {
     AnalysisReporter::writeDimensionAnalysisCsv("output/max_steps_analysis.csv", "maxSteps", maxStepsAnalysis);
     AnalysisReporter::writeDimensionAnalysisCsv("output/num_shells_analysis.csv", "numShells", numShellsAnalysis);
     AnalysisReporter::writeDimensionAnalysisCsv("output/num_tanks_per_player_analysis.csv", "numTanksPerPlayer", numTanksPerPlayerAnalysis);
+
+    generateSummaryReport();
 }
 
 void ResultAggregator::printSummaries() {
@@ -86,3 +88,25 @@ void ResultAggregator::printSummaries() {
     AnalysisReporter::printDimensionAnalysis("numShells", numShellsAnalysis);
     AnalysisReporter::printDimensionAnalysis("numTanksPerPlayer", numTanksPerPlayerAnalysis);
 } 
+
+void ResultAggregator::generateSummaryReport() {
+    std::cout << "Generating summary report..." << std::endl;
+    
+    std::string report = m_summarizer.generateSummaryReport(
+        aggregatedResults,
+        widthAnalysis,
+        heightAnalysis,
+        wallDensityAnalysis,
+        mineDensityAnalysis,
+        symmetryAnalysis,
+        maxStepsAnalysis,
+        numShellsAnalysis,
+        numTanksPerPlayerAnalysis
+    );
+    
+    // Ensure output directory exists
+    std::filesystem::create_directories("output");
+    
+    // Save the report
+    m_summarizer.saveReportToFile(report, "output/analysis_summary.txt");
+}
