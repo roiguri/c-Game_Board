@@ -113,16 +113,16 @@ bool BasicTankAlgorithm::isTankAtPosition(const Point& position) const {
     return false;
 }
 
-// TODO: consider improving efficiency of this function
 bool BasicTankAlgorithm::isInDangerFromShells(const Point& position) const {
     for (const Point& shellPos : m_shells) {
-        // FIXME: remove redundant check
-        auto dirOpt = getLineOfSightDirection(shellPos, position);
-        if (!dirOpt) continue;
+        // Filter out shells that are too far away
+        if (GameBoard::stepDistance(shellPos, position, m_gameBoard.getWidth(), m_gameBoard.getHeight()) > 4) {
+            continue;
+        }
+
         for (const Direction& dir : ALL_DIRECTIONS) {
             if (!checkLineOfSightInDirection(shellPos, position, dir)) continue;
             Point current = shellPos;
-            // TODO: consider replacing with a simple distance check
             for (int step = 1; step < 4; ++step) {
                 current = m_gameBoard.wrapPosition(current + getDirectionDelta(dir));
                 if (current == position) {
