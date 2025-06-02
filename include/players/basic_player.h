@@ -56,7 +56,6 @@ protected:
    size_t m_num_shells;
    
    /** Reusable battle info object */
-   // TODO: can we keep battle info object?
    BattleInfoImpl m_battleInfo;
    
    /**
