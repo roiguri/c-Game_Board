@@ -57,18 +57,11 @@ TEST_F(BattleInfoImplTest, AddAndGetShellPositions) {
     EXPECT_EQ(shells[0], p1);
 }
 
-TEST_F(BattleInfoImplTest, SetAndGetFeedback) {
-    std::string feedback = "Test feedback message.";
-    info->setFeedback(feedback);
-    EXPECT_EQ(info->getFeedback(), feedback);
-}
-
 TEST_F(BattleInfoImplTest, Clear_ResetsState) {
     info->setCellType(1, 1, GameBoard::CellType::Wall);
     info->addEnemyTankPosition(Point(1, 1));
     info->addFriendlyTankPosition(Point(2, 2));
     info->addShellPosition(Point(0, 0));
-    info->setFeedback("msg");
     info->clear();
     // Board should be empty
     for (int y = 0; y < boardHeight; ++y) {
@@ -79,7 +72,6 @@ TEST_F(BattleInfoImplTest, Clear_ResetsState) {
     EXPECT_TRUE(info->getEnemyTankPositions().empty());
     EXPECT_TRUE(info->getFriendlyTankPositions().empty());
     EXPECT_TRUE(info->getShellPositions().empty());
-    EXPECT_TRUE(info->getFeedback().empty());
 }
 
 TEST_F(BattleInfoImplTest, SetAndGetOwnTankPosition) {

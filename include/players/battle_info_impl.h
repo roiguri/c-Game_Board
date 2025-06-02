@@ -4,7 +4,6 @@
 #include "game_board.h"
 #include <vector>
 #include "BattleInfo.h"
-// TODO: consider removing some of the methods that are not needed by the player
 /**
  * @class BattleInfo
  * @brief Contains battlefield information shared between Player and Tank
@@ -31,10 +30,6 @@ public:
     void addShellPosition(const Point& position);
     const std::vector<Point>& getShellPositions() const;
     
-    // Feedback mechanism
-    void setFeedback(const std::string& feedback);
-    const std::string& getFeedback() const;
-    
     void setOwnTankPosition(const Point& pos);
     const Point& getOwnTankPosition() const;
     
@@ -46,5 +41,4 @@ private:
     std::vector<Point> m_friendlyTankPositions;
     std::vector<Point> m_shellPositions;
     Point m_ownTankPosition;
-    std::string m_feedback;
 };

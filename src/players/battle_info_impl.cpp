@@ -8,7 +8,6 @@ void BattleInfoImpl::clear() {
     m_enemyTankPositions.clear();
     m_friendlyTankPositions.clear();
     m_shellPositions.clear();
-    m_feedback.clear();
 }
 
 void BattleInfoImpl::setCellType(int x, int y, GameBoard::CellType cellType) {
@@ -45,14 +44,6 @@ void BattleInfoImpl::addShellPosition(const Point& position) {
 
 const std::vector<Point>& BattleInfoImpl::getShellPositions() const {
     return m_shellPositions;
-}
-
-void BattleInfoImpl::setFeedback(const std::string& feedback) {
-    m_feedback = feedback;
-}
-
-const std::string& BattleInfoImpl::getFeedback() const {
-    return m_feedback;
 }
 
 void BattleInfoImpl::setOwnTankPosition(const Point& pos) {

@@ -56,9 +56,6 @@ protected:
     BattleInfoImpl& getBattleInfo() {
         return player->m_battleInfo;
     }
-    void callProcessTankFeedback(int tankId) {
-        player->processTankFeedback(tankId);
-    }
 };
 
 TEST_F(BasicPlayerTest, PopulatesBoardCellTypes) {
@@ -95,11 +92,6 @@ TEST_F(BasicPlayerTest, UpdateTankWithBattleInfoCallsAlgorithm) {
     EXPECT_TRUE(algo.updateCalled);
     // Should pass the correct info object
     EXPECT_EQ(algo.lastInfo, &getBattleInfo());
-}
-
-TEST_F(BasicPlayerTest, ProcessTankFeedbackIsNoOp) {
-    // Should not throw or do anything
-    EXPECT_NO_THROW(callProcessTankFeedback(0));
 }
 
 TEST_F(BasicPlayerTest, PopulatesOwnTankPosition) {

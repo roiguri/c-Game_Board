@@ -9,8 +9,7 @@
 * @class BasicPlayer
 * @brief Basic implementation of player with minimal coordination strategy
 * 
-* Provides tanks with battle information and implements simple
-* coordination through feedback messages.
+* Provides tanks with battle information.
 */
 class BasicPlayer : public Player {
 public:
@@ -57,6 +56,7 @@ protected:
    size_t m_num_shells;
    
    /** Reusable battle info object */
+   // TODO: can we keep battle info object?
    BattleInfoImpl m_battleInfo;
    
    /**
@@ -68,16 +68,6 @@ protected:
     * @param satellite_view The satellite view to query
     */
    virtual void populateBattleInfo(SatelliteView& satellite_view);
-   
-   /**
-    * @brief Processes feedback from a tank
-    * 
-    * Handles any feedback messages provided by tank algorithms
-    * after processing battle info.
-    * 
-    * @param tank_id ID of the tank providing feedback
-    */
-   void processTankFeedback(int tank_id);
    
    friend class BasicPlayerTest;
 };
