@@ -31,10 +31,10 @@ ActionRequest OffensiveTankAlgorithm::getAction() {
     if (m_turnsSinceLastUpdate > 3) {
         return ActionRequest::GetBattleInfo;
     }
-    ActionRequest action = ActionRequest::DoNothing;
+    ActionRequest action = getActionToSafePosition();
     // 2. Avoid if in danger (from shells)
     if (isInDangerFromShells()) {
-        action = getActionToSafePosition();
+        // No need to update action, already called getActionToSafePosition()
     } else if (canShootEnemy()) {
         action = ActionRequest::Shoot;
     } else if (m_targetPosition) {
@@ -72,34 +72,71 @@ std::optional<ActionRequest> OffensiveTankAlgorithm::turnToShootAction() const {
 }
 
 void OffensiveTankAlgorithm::updatePathToTarget() {
-    if (!m_targetPosition) {
+    // Check if we've reached the target
+    if (m_trackedPosition == m_targetPosition.value()) {
         m_currentPath.clear();
+        m_previousTargetPosition = std::nullopt;
         return;
     }
-    if (m_currentPath.empty() || m_currentPath.back() != m_targetPosition.value() ||
-        (m_trackedPosition != m_currentPath.front() && !m_currentPath.empty())) {
+
+    // Check if target moved more than 1 cell
+    bool targetMovedSignificantly = false;
+    if (m_previousTargetPosition.has_value() && m_targetPosition.has_value()) {
+        int distance = GameBoard::stepDistance(
+            m_previousTargetPosition.value(),
+            m_targetPosition.value(),
+            m_gameBoard.getWidth(),
+            m_gameBoard.getHeight()
+        );
+        targetMovedSignificantly = (distance > 1);
+    }
+
+    bool needRecalculation = 
+        m_currentPath.empty() ||
+        isTankOffPath() ||
+        targetMovedSignificantly ||
+        !isFirstStepValid();
+
+    if (needRecalculation) {
         m_currentPath = findPathBFS(m_trackedPosition, m_targetPosition.value());
+        m_previousTargetPosition = m_targetPosition;
     }
 }
 
-std::optional<ActionRequest> OffensiveTankAlgorithm::followCurrentPath() {
-    if (m_currentPath.empty()) return std::nullopt;
+bool OffensiveTankAlgorithm::isTankOffPath() const {
+    if (m_currentPath.empty()) return false;
+    
+    // Tank is on path if current position is at the first point of path,
+    // or one step away from the first point of path
+    Point nextStep = m_currentPath.front();
+    auto dirOpt = getDirectionToPoint(m_trackedPosition, nextStep);
+    return !dirOpt.has_value(); // If not adjacent, tank is off path
+}
+
+bool OffensiveTankAlgorithm::isFirstStepValid() const {
+    if (m_currentPath.empty()) return false;
+    
     Point nextPoint = m_currentPath.front();
-    if (m_trackedPosition == nextPoint) {
-        if (m_currentPath.size() > 1) {
-            m_currentPath.erase(m_currentPath.begin());
-            nextPoint = m_currentPath.front();
-        } else {
-            m_currentPath.clear();
-            return std::nullopt;
-        }
+    return isPositionSafe(nextPoint);
+}
+
+std::optional<ActionRequest> OffensiveTankAlgorithm::followCurrentPath() {
+    if (!m_currentPath.empty() && m_trackedPosition == m_currentPath.front()) {
+        m_currentPath.erase(m_currentPath.begin());
     }
+    
+    if (m_currentPath.empty()) return std::nullopt;
+    
+    Point nextPoint = m_currentPath.front();
+
     // Determine direction to next point
-    auto dirOpt = getLineOfSightDirection(m_trackedPosition, nextPoint);
+    auto dirOpt = getDirectionToPoint(m_trackedPosition, nextPoint);
     if (!dirOpt.has_value()) return std::nullopt;
     if (dirOpt.value() != m_trackedDirection) {
         return getRotationToDirection(m_trackedDirection, dirOpt.value());
     }
+
+    m_currentPath.erase(m_currentPath.begin());
     return ActionRequest::MoveForward;
 }
 

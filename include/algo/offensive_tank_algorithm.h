@@ -29,6 +29,8 @@ private:
     std::optional<Point> m_targetPosition;
     // Current BFS path to target
     std::vector<Point> m_currentPath;
+    // Previous target tank position
+    std::optional<Point> m_previousTargetPosition;
 
     // --- Helpers ---
     /**
@@ -50,6 +52,16 @@ private:
      * @brief Finds the shortest path to the target using BFS, considering board wrapping and obstacles.
      */
     std::vector<Point> findPathBFS(const Point& start, const Point& target) const;
+
+    /**
+     * @brief Checks if the first step of the current path is valid.
+     */
+    bool isFirstStepValid() const;
+
+    /**
+     * @brief Checks if the tank is off the current path.
+     */
+    bool isTankOffPath() const;
 
     friend class OffensiveTankAlgorithmTest;
 };
