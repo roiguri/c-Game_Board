@@ -11,7 +11,7 @@
 
 GameManager::GameManager(PlayerFactory& playerFactory,
                        TankAlgorithmFactory& tankAlgorithmFactory)
-    : m_PlayerFactory(playerFactory),
+    : m_playerFactory(playerFactory),
       m_tankAlgorithmFactory(tankAlgorithmFactory),
       m_currentStep(0),
       m_gameOver(false),
@@ -42,8 +42,8 @@ bool GameManager::readBoard(const std::string& filePath) {
     m_maximum_steps = maxSteps;
     Tank::setInitialShells(numShells);
 
-    m_player1 = m_PlayerFactory.create(1, cols, rows, maxSteps, numShells);
-    m_player2 = m_PlayerFactory.create(2, cols, rows, maxSteps, numShells);
+    m_player1 = m_playerFactory.create(1, cols, rows, maxSteps, numShells);
+    m_player2 = m_playerFactory.create(2, cols, rows, maxSteps, numShells);
     
     m_board = GameBoard(cols, rows);
     std::vector<std::string> errors;
@@ -115,7 +115,6 @@ void GameManager::run() {
   LOG_INFO("Game ended after " + std::to_string(m_currentStep) + " steps");
   LOG_INFO("Result: " + m_gameResult);
 
-  // Call saveResults with the stored output file path
   saveResults(m_outputFilePath);
 }
 
@@ -153,6 +152,7 @@ bool GameManager::saveResults(const std::string& outputFilePath) {
 }
 
 void GameManager::processStep() {
+  // TODO: should these be local variables?
   m_currentBoard = m_board;
   m_currentTanks = m_tanks;
   m_currentShells = m_shells;
@@ -317,16 +317,6 @@ void GameManager::moveShellsOnce() {
   }
 }
 
-/**
- * @brief Checks if the game is over and sets m_gameResult accordingly.
- *
- * Last line in file will announce the winner in the following format:
- *   Player <X> won with <Y> tanks still alive
- * Or:
- *   Tie, both players have zero tanks
- * Or:
- *   Tie, reached max steps = <max_steps>, player 1 has <X> tanks, player 2 has <Y> tanks
- */
 bool GameManager::checkGameOver() {
     int player1Alive = 0;
     int player2Alive = 0;
@@ -396,7 +386,6 @@ std::string GameManager::logAction() {
     return turnLog;
 }
 
-// Helper to convert ActionRequest to string for logging
 std::string GameManager::actionToString(ActionRequest action) {
     switch (action) {
         case ActionRequest::MoveForward: return "MoveForward";

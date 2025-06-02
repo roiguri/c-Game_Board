@@ -73,7 +73,7 @@ private:
     std::unique_ptr<Player> m_player2;
 
     // Factories
-    PlayerFactory& m_PlayerFactory;
+    PlayerFactory& m_playerFactory;
     TankAlgorithmFactory& m_tankAlgorithmFactory;
 
     // Game state tracking
@@ -94,6 +94,11 @@ private:
     // Output file path
     std::string m_outputFilePath;
 
+    // Current game state
+    GameBoard m_currentBoard;
+    std::vector<Tank> m_currentTanks;
+    std::vector<Shell> m_currentShells;
+
     // Game step methods
     // Process a single step of the game
     void processStep();
@@ -112,8 +117,6 @@ private:
     // Log an action taken by a player
     std::string logAction();
     
-    // Helper methods
-
     // Create algorithm instances for all tanks
     void createTankAlgorithms();
 
@@ -129,15 +132,11 @@ private:
     // Save the game results to an output file
     bool saveResults(const std::string& outputFilePath);
 
-    // Helper method to convert ActionRequest to string
+    // Convert ActionRequest to string
     std::string actionToString(ActionRequest action);
 
-    // Helper method to set output file path from input file path
+    // Set output file path from input file path
     void setOutputFilePath(const std::string& inputFilePath);
-
-    GameBoard m_currentBoard;
-    std::vector<Tank> m_currentTanks;
-    std::vector<Shell> m_currentShells;
 
     // For testing purposes
     friend class GameManagerTest;
