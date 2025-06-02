@@ -11,21 +11,19 @@
  */
 struct AnalysisParams {
     // Board dimensions
-    std::vector<int> widths = {10, 20};
-    std::vector<int> heights = {10, 15};
+    std::vector<int> boardSizes;
     
     // Board content densities (0.0 to 1.0)
-    std::vector<float> wallDensities = {0.1f, 0.25f};
-    std::vector<float> mineDensities = {0.05f};
-    
-    // Board generation options
-    std::vector<std::string> symmetryTypes = {"none", "horizontal"};
-    
+    std::vector<float> wallDensities;
+    std::vector<float> mineDensities;
+        
     // Statistical sampling
-    int numSamples = 5;  // Number of different random seeds per configuration
+    int numSamples;  // Number of different random seeds per configuration
     
     // Game rules
-    std::vector<int> maxSteps = {500, 1000};
-    std::vector<int> numShells = {10};
-    std::vector<int> numTanksPerPlayer = {1, 2};
+    std::vector<int> numShells;
+    std::vector<int> numTanksPerPlayer;
+    
+    int maxSteps;
+    std::string symmetryType;
 };

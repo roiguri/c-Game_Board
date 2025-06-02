@@ -76,29 +76,23 @@ int AnalysisTool::runAnalysisWithConfig(const std::string& configFile) {
 
 std::vector<BoardConfig> AnalysisTool::generateAllConfigs(const AnalysisParams& params) {
     std::vector<BoardConfig> configs;
-    for (int width : params.widths) {
-        for (int height : params.heights) {
-            for (float wallDensity : params.wallDensities) {
-                for (float mineDensity : params.mineDensities) {
-                    for (const std::string& symmetryType : params.symmetryTypes) {
-                        for (int maxStep : params.maxSteps) {
-                            for (int numShell : params.numShells) {
-                                for (int numTanks : params.numTanksPerPlayer) {
-                                    for (int sample = 0; sample < params.numSamples; sample++) {
-                                        BoardConfig config;
-                                        config.width = width;
-                                        config.height = height;
-                                        config.wallDensity = wallDensity;
-                                        config.mineDensity = mineDensity;
-                                        config.symmetry = symmetryType;
-                                        config.seed = -1;
-                                        config.maxSteps = maxStep;
-                                        config.numShells = numShell;
-                                        config.numTanksPerPlayer = numTanks;
-                                        configs.push_back(config);
-                                    }
-                                }
-                            }
+    for (int boardSize : params.boardSizes) {
+        for (float wallDensity : params.wallDensities) {
+            for (float mineDensity : params.mineDensities) {
+                for (int numShell : params.numShells) {
+                    for (int numTanks : params.numTanksPerPlayer) {
+                        for (int sample = 0; sample < params.numSamples; sample++) {
+                            BoardConfig config;
+                            config.width = boardSize;
+                            config.height = boardSize;
+                            config.wallDensity = wallDensity;
+                            config.mineDensity = mineDensity;
+                            config.symmetry = params.symmetryType;
+                            config.seed = -1;
+                            config.maxSteps = params.maxSteps;
+                            config.numShells = numShell;
+                            config.numTanksPerPlayer = numTanks;
+                            configs.push_back(config);
                         }
                     }
                 }

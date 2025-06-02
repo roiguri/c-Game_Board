@@ -8,14 +8,13 @@ AnalysisConfig::AnalysisConfig() {
 
 void AnalysisConfig::setDefaults() {
     // These match the default values from AnalysisParams struct
-    m_params.widths = {10, 20};
-    m_params.heights = {10, 15};
-    m_params.wallDensities = {0.1f, 0.25f};
-    m_params.mineDensities = {0.05f};
-    m_params.symmetryTypes = {"none", "horizontal"};
+    m_params.boardSizes = {10, 20, 30};
+    m_params.wallDensities = {0.1f, 0.25f, 0.35f};
+    m_params.mineDensities = {0.05f, 0.1f, 0.15f};
+    m_params.symmetryType = "horizontal";
     m_params.numSamples = 5;
-    m_params.maxSteps = {500, 1000};
-    m_params.numShells = {10};
+    m_params.maxSteps = 500;
+    m_params.numShells = {20};
     m_params.numTanksPerPlayer = {1, 2, 3};
 }
 
@@ -37,12 +36,8 @@ bool AnalysisConfig::loadFromFile(const std::string& filename) {
         file.close();
         
         // Parse each field, keeping defaults if field is missing
-        if (j.contains("widths") && j["widths"].is_array()) {
-            m_params.widths = j["widths"].get<std::vector<int>>();
-        }
-        
-        if (j.contains("heights") && j["heights"].is_array()) {
-            m_params.heights = j["heights"].get<std::vector<int>>();
+        if (j.contains("boardSizes") && j["boardSizes"].is_array()) {
+            m_params.boardSizes = j["boardSizes"].get<std::vector<int>>();
         }
         
         if (j.contains("wallDensities") && j["wallDensities"].is_array()) {
@@ -53,16 +48,16 @@ bool AnalysisConfig::loadFromFile(const std::string& filename) {
             m_params.mineDensities = j["mineDensities"].get<std::vector<float>>();
         }
         
-        if (j.contains("symmetryTypes") && j["symmetryTypes"].is_array()) {
-            m_params.symmetryTypes = j["symmetryTypes"].get<std::vector<std::string>>();
+        if (j.contains("symmetryType") && j["symmetryType"].is_string()) {
+            m_params.symmetryType = j["symmetryType"].get<std::string>();
         }
         
         if (j.contains("numSamples") && j["numSamples"].is_number_integer()) {
             m_params.numSamples = j["numSamples"].get<int>();
         }
         
-        if (j.contains("maxSteps") && j["maxSteps"].is_array()) {
-            m_params.maxSteps = j["maxSteps"].get<std::vector<int>>();
+        if (j.contains("maxSteps") && j["maxSteps"].is_number_integer()) {
+            m_params.maxSteps = j["maxSteps"].get<int>();
         }
         
         if (j.contains("numShells") && j["numShells"].is_array()) {
@@ -99,9 +94,9 @@ bool AnalysisConfig::validateParams() {
     bool valid = true;
     
     // Validate arrays are not empty
-    if (m_params.widths.empty() || m_params.heights.empty() || 
+    if (m_params.boardSizes.empty() || 
         m_params.wallDensities.empty() || m_params.mineDensities.empty() ||
-        m_params.symmetryTypes.empty() || m_params.maxSteps.empty() ||
+        m_params.symmetryType.empty() || m_params.maxSteps <= 0 ||
         m_params.numShells.empty() || m_params.numTanksPerPlayer.empty()) {
         std::cerr << "Warning: Empty parameter arrays found." << std::endl;
         valid = false;
