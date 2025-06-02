@@ -21,42 +21,25 @@
 #include "bonus/analysis/analysis_params.h"
 #include "bonus/analysis/analysis_config.h"
 #include <random>
+#include "indicators/indicators.hpp"
 
 #ifndef TEST_BUILD
-int AnalysisTool::runAnalysis() {
+int AnalysisTool::runAnalysis(const std::string& configFile) {
     // Deactivate logging for performance and cleaner output
     Logger::getInstance().initialize(Logger::Level::INFO, false, false);
 
     std::cout << "Analysis tool started." << std::endl;
 
+    // Load configuration (from file if provided, defaults otherwise)
     AnalysisConfig config;
-    AnalysisParams params = config.getParams();
-
-    ResultAggregator aggregator;
-    auto configs = generateAllConfigs(params);
-
-    std::cout << "Generated " << configs.size() << " configurations to test." << std::endl;
-    for (const auto& config : configs) {
-        runSingleSimulation(config, aggregator);
-    }
-    std::cout << "\nAnalysis tool finished." << std::endl;
-    aggregator.writeCSVs();
-    // Optionally: aggregator.printSummaries();
-    return 0;
-}
-
-int AnalysisTool::runAnalysisWithConfig(const std::string& configFile) {
-    // Deactivate logging for performance and cleaner output
-    Logger::getInstance().initialize(Logger::Level::INFO, false, false);
-
-    std::cout << "Analysis tool started." << std::endl;
-
-    // Load configuration from file
-    AnalysisConfig config;
-    if (config.loadFromFile(configFile)) {
-        std::cout << "Using configuration from: " << configFile << std::endl;
+    if (!configFile.empty()) {
+        if (config.loadFromFile(configFile)) {
+            std::cout << "Using configuration from: " << configFile << std::endl;
+        } else {
+            std::cout << "Failed to load config file, using defaults." << std::endl;
+        }
     } else {
-        std::cout << "Failed to load config file, using defaults." << std::endl;
+        std::cout << "Using default configuration." << std::endl;
     }
     
     AnalysisParams params = config.getParams();
@@ -66,9 +49,30 @@ int AnalysisTool::runAnalysisWithConfig(const std::string& configFile) {
     
     std::cout << "Generated " << configs.size() << " configurations to test." << std::endl;
     
-    for (const auto& boardConfig : configs) {
-        runSingleSimulation(boardConfig, aggregator);
+    // Create progress bar with indicators
+    using namespace indicators;
+    ProgressBar bar{
+        option::BarWidth{50},
+        option::Start{" ["},
+        option::Fill{"█"},
+        option::Lead{"█"},
+        option::Remainder{" "},
+        option::End{"]"},
+        option::PrefixText{"Running analysis "},
+        option::ForegroundColor{Color::green},
+        option::ShowElapsedTime{true},
+        option::ShowRemainingTime{true},
+        option::FontStyles{std::vector<FontStyle>{FontStyle::bold}}
+    };
+    
+    for (size_t i = 0; i < configs.size(); ++i) {
+        runSingleSimulation(configs[i], aggregator);
+        
+        // Update progress bar
+        float progress = (float)(i + 1) / configs.size() * 100.0f;
+        bar.set_progress(progress);
     }
+    
     std::cout << "\nAnalysis tool finished." << std::endl;
     aggregator.writeCSVs();
     return 0;
@@ -164,12 +168,8 @@ void AnalysisTool::runSingleSimulation(const BoardConfig& config, ResultAggregat
 int main(int argc, char* argv[]) {
     AnalysisTool tool;
     
-    // Check for config file argument
-    if (argc > 1) {
-        std::string configFile = argv[1];
-        return tool.runAnalysisWithConfig(configFile);
-    } else {
-        return tool.runAnalysis();  // Use defaults
-    }
+    // Pass config file if provided, empty string otherwise
+    std::string configFile = (argc > 1) ? argv[1] : "";
+    return tool.runAnalysis(configFile);
 }
 #endif // TEST_BUILD
