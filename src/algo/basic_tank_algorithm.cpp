@@ -31,8 +31,7 @@ ActionRequest BasicTankAlgorithm::getAction() {
     // 3. Check if can shoot enemy
     else if (canShootEnemy()) {
         action = ActionRequest::Shoot;
-    }
-    // TODO: decide what to do if not in danger and not shooting
+    } 
     else {
         action = getActionToSafePosition();
     }
@@ -44,7 +43,7 @@ void BasicTankAlgorithm::updateBattleInfo(BattleInfo& info) {
     m_turnsSinceLastUpdate = 0;
     auto& impl = dynamic_cast<BattleInfoImpl&>(info); // TODO: make sure this is correct
     m_trackedPosition = impl.getOwnTankPosition();
-    m_gameBoard = impl.getGameBoard(); // TODO: verify all copies not references
+    m_gameBoard = impl.getGameBoard();
     m_enemyTanks = impl.getEnemyTankPositions();
     m_friendlyTanks = impl.getFriendlyTankPositions();
     m_shells = impl.getShellPositions();
@@ -92,7 +91,7 @@ bool BasicTankAlgorithm::checkLineOfSightInDirection(const Point& from, const Po
     return false;
 }
 
-// TODO: consider improvinf efficiency of this function
+// TODO: consider improving efficiency of this function
 bool BasicTankAlgorithm::isInDangerFromShells(const Point& position) const {
     for (const Point& shellPos : m_shells) {
         // FIXME: remove redundant check

@@ -65,5 +65,4 @@ void BasicPlayer::populateBattleInfo(SatelliteView& satellite_view) {
 void BasicPlayer::processTankFeedback(int /*tank_id*/) {
     // 1. Extract feedback from battle info (if any)
     // 2. Process feedback (simple version: do nothing for now)
-    // TODO: Implement feedback processing if needed
 } 

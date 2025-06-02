@@ -72,7 +72,6 @@ public:
      */
     void destroy();
     
-    // TODO: consider removing or changing
     /**
      * @brief Set the previous position to the current position
      * 

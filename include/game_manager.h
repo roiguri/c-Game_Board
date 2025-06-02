@@ -132,15 +132,14 @@ private:
     // Helper method to convert ActionRequest to string
     std::string actionToString(ActionRequest action);
 
+    GameBoard m_currentBoard;
+    std::vector<Tank> m_currentTanks;
+    std::vector<Shell> m_currentShells;
+
     // For testing purposes
     friend class GameManagerTest;
 
     #ifdef ENABLE_VISUALIZATION
     std::unique_ptr<VisualizationManager> m_visualizationManager;
     #endif
-
-    // TODO: Consider creating a GameState abstraction to encapsulate board, tanks, and shells
-    GameBoard m_currentBoard;
-    std::vector<Tank> m_currentTanks;
-    std::vector<Shell> m_currentShells;
 };

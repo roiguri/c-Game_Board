@@ -16,7 +16,7 @@ GameManager::GameManager(PlayerFactory& playerFactory,
       m_currentStep(0),
       m_gameOver(false),
       m_remaining_steps(40),
-      m_maximum_steps(100) { // TODO: should we leave default value?  
+      m_maximum_steps(100) { 
     #ifdef ENABLE_VISUALIZATION
     m_visualizationManager = createVisualizationManager();
     #endif
@@ -29,9 +29,7 @@ GameManager::~GameManager() {
 }
 
 // TODO: add handling when no tanks are found
-// TODO: move algorithms from readBoard to constructor
 bool GameManager::readBoard(const std::string& filePath) {
-    // TODO: consider creating a struct to store game configuration
     int rows = 0;
     int cols = 0;
     int maxSteps = 0;
@@ -101,7 +99,6 @@ void GameManager::run() {
 
   LOG_INFO("Starting game loop");
   
-  // TODO: update log structure
   while (!m_gameOver) {
       LOG_DEBUG("Processing step " + std::to_string(m_currentStep));
       processStep();
@@ -167,7 +164,6 @@ bool GameManager::saveResults(const std::string& outputFilePath) {
 }
 
 void GameManager::processStep() {
-  // TODO: Consider creating a GameState abstraction to encapsulate board, tanks, and shells
   m_currentBoard = m_board;
   m_currentTanks = m_tanks;
   m_currentShells = m_shells;

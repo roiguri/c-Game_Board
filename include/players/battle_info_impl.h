@@ -11,7 +11,7 @@
  */
 class BattleInfoImpl : public BattleInfo {
 public:
-    // Constructor & destructor // TODO: consider changing int to size_t
+    // Constructor & destructor
     BattleInfoImpl(int boardWidth, int boardHeight);
     virtual ~BattleInfoImpl() = default;
     
