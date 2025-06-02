@@ -330,6 +330,40 @@ TEST_F(GameBoardTest, Initialize_UnrecognizedCharacters) {
   EXPECT_EQ(board.getCellType(2, 1), GameBoard::CellType::Empty);
 }
 
+TEST_F(GameBoardTest, Initialize_NoTanksReturnsFalse) {
+  std::vector<std::string> boardLines = {
+      "#####",
+      "#   #",  // No tanks, only walls, empty spaces, and mines
+      "# @ #",
+      "#   #",
+      "#####"
+  };
+  std::vector<std::string> errors;
+  std::vector<std::pair<int, Point>> tankPositions;
+  
+  // Redirect cerr to capture the error output
+  std::stringstream cerr_buffer;
+  std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
+  
+  // Should return false because no tanks are present
+  EXPECT_FALSE(board.initialize(boardLines, errors, tankPositions));
+  
+  // Restore cerr
+  std::cerr.rdbuf(old_cerr);
+  
+  // Verify the error message was printed
+  std::string output = cerr_buffer.str();
+  EXPECT_TRUE(output.find("Error: No tanks found on the board.") != std::string::npos);
+  
+  // Verify tankPositions is empty
+  EXPECT_TRUE(tankPositions.empty());
+  
+  // The board should still be initialized with the other elements
+  EXPECT_EQ(board.getCellType(0, 0), GameBoard::CellType::Wall);
+  EXPECT_EQ(board.getCellType(2, 2), GameBoard::CellType::Mine);
+  EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Empty);
+}
+
 // GetCellType Tests
 TEST_F(GameBoardTest, GetCellType_ValidPosition) {
     std::vector<std::string> boardLines = {

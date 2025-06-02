@@ -95,6 +95,10 @@ bool GameBoard::initialize(const std::vector<std::string>& boardLines,
         "Input has more rows than expected height. Extra rows ignored."
       );
   }
+  if (tankPositions.empty()) {
+      std::cerr << "Error: No tanks found on the board." << std::endl;
+      return false;
+  }
   return true;
 }
 

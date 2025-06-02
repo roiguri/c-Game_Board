@@ -28,7 +28,6 @@ GameManager::~GameManager() {
     #endif
 }
 
-// TODO: add handling when no tanks are found
 bool GameManager::readBoard(const std::string& filePath) {
     int rows = 0;
     int cols = 0;
