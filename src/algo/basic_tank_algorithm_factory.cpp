@@ -3,11 +3,11 @@
 #include "algo/offensive_tank_algorithm.h"
 
 std::unique_ptr<TankAlgorithm> BasicTankAlgorithmFactory::create(
-    int player_index, 
-    int tank_index) const {
-    if (player_index == 1) {
-        return std::make_unique<BasicTankAlgorithm>(player_index, tank_index);
+    int playerIndex, 
+    int tankIndex) const {
+    if (playerIndex == 1) {
+        return std::make_unique<BasicTankAlgorithm>(playerIndex, tankIndex);
     } else {
-        return std::make_unique<OffensiveTankAlgorithm>(player_index, tank_index);
+        return std::make_unique<OffensiveTankAlgorithm>(playerIndex, tankIndex);
     }
 }

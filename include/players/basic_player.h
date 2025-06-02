@@ -16,14 +16,14 @@ public:
    /**
     * @brief Constructs a new BasicPlayer object
     * 
-    * @param player_index The ID of the player (1 or 2)
+    * @param playerIndex The ID of the player (1 or 2)
     * @param x Width of the game board
     * @param y Height of the game board
-    * @param max_steps Maximum number of steps for the game
-    * @param num_shells Number of shells per tank at game start
+    * @param maxSteps Maximum number of steps for the game
+    * @param numShells Number of shells per tank at game start
     */
-   BasicPlayer(int player_index, size_t x, size_t y, 
-               size_t max_steps, size_t num_shells);
+   BasicPlayer(int playerIndex, size_t x, size_t y, 
+               size_t maxSteps, size_t numShells);
    
    /**
     * @brief Destructor
@@ -38,22 +38,22 @@ public:
     * then downcast it to the specific type.
     * 
     * @param tank The tank algorithm requesting information
-    * @param satellite_view Current view of the game board
+    * @param satelliteView Current view of the game board
     */
    void updateTankWithBattleInfo(TankAlgorithm& tank,
-                                SatelliteView& satellite_view) override;
+                                SatelliteView& satelliteView) override;
    
 protected:
    /** Player's ID (1 or 2) */
-   int m_player_index;
+   int m_playerIndex;
    
    /** Board dimensions */
-   size_t m_board_width;
-   size_t m_board_height;
+   size_t m_boardWidth;
+   size_t m_boardHeight;
    
    /** Game constraints */
-   size_t m_max_steps;
-   size_t m_num_shells;
+   size_t m_maxSteps;
+   size_t m_numShells;
    
    /** Reusable battle info object */
    BattleInfoImpl m_battleInfo;
@@ -64,9 +64,9 @@ protected:
     * Queries the satellite view to populate a specialized BattleInfo
     * object with current game state.
     * 
-    * @param satellite_view The satellite view to query
+    * @param satelliteView The satellite view to query
     */
-   virtual void populateBattleInfo(SatelliteView& satellite_view);
+   virtual void populateBattleInfo(SatelliteView& satelliteView);
    
    friend class BasicPlayerTest;
 };

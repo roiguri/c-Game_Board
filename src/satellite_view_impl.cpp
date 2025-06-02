@@ -18,6 +18,7 @@ SatelliteViewImpl::SatelliteViewImpl(const GameBoard& board,
     : m_board(board), m_tanks(tanks), m_shells(shells), m_currentTankPos(currentTankPos) {}
 
 char SatelliteViewImpl::getObjectAt(size_t x, size_t y) const {
+    // Cast as board uses int for coordinates (for wrapping calculations)
     int x_int = static_cast<int>(x);
     int y_int = static_cast<int>(y);
     if (x >= m_board.getWidth() || y >= m_board.getHeight()) {

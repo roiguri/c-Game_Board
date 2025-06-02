@@ -2,23 +2,23 @@
 #include <limits>
 #include <cmath>
 
-OffensivePlayer::OffensivePlayer(int player_index, size_t x, size_t y, size_t max_steps, size_t num_shells)
-    : BasicPlayer(player_index, x, y, max_steps, num_shells),
+OffensivePlayer::OffensivePlayer(int playerIndex, size_t x, size_t y, size_t maxSteps, size_t numShells)
+    : BasicPlayer(playerIndex, x, y, maxSteps, numShells),
       m_offensiveBattleInfo(static_cast<int>(x), static_cast<int>(y)) {}
 
 OffensivePlayer::~OffensivePlayer() = default;
 
-void OffensivePlayer::updateTankWithBattleInfo(TankAlgorithm& tank, SatelliteView& satellite_view) {
-    populateBattleInfo(satellite_view);
+void OffensivePlayer::updateTankWithBattleInfo(TankAlgorithm& tank, SatelliteView& satelliteView) {
+    populateBattleInfo(satelliteView);
     tank.updateBattleInfo(m_offensiveBattleInfo);
 }
 
-void OffensivePlayer::populateBattleInfo(SatelliteView& satellite_view) {
+void OffensivePlayer::populateBattleInfo(SatelliteView& satelliteView) {
     m_offensiveBattleInfo.clear();
-    // Use BasicPlayer's logic to populate the board, tanks, shells, etc.
-    for (size_t y = 0; y < m_board_height; ++y) {
-        for (size_t x = 0; x < m_board_width; ++x) {
-            char obj = satellite_view.getObjectAt(x, y);
+    // TODO: Use BasicPlayer's logic to populate the board, tanks, shells, etc.
+    for (size_t y = 0; y < m_boardHeight; ++y) {
+        for (size_t x = 0; x < m_boardWidth; ++x) {
+            char obj = satelliteView.getObjectAt(x, y);
             GameBoard::CellType cellType = GameBoard::CellType::Empty;
             switch (obj) {
                 case '#':
@@ -38,7 +38,7 @@ void OffensivePlayer::populateBattleInfo(SatelliteView& satellite_view) {
                 case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': {
                     cellType = GameBoard::CellType::Empty;
                     int tankPlayerId = obj - '0';
-                    if (tankPlayerId == m_player_index) {
+                    if (tankPlayerId == m_playerIndex) {
                         m_offensiveBattleInfo.addFriendlyTankPosition(Point(x, y));
                     } else {
                         m_offensiveBattleInfo.addEnemyTankPosition(Point(x, y));
@@ -91,7 +91,7 @@ std::optional<Point> OffensivePlayer::selectNewTarget(const std::vector<Point>& 
     double minDist = std::numeric_limits<double>::max();
     std::optional<Point> closest;
     for (const auto& pos : enemyTanks) {
-        int dist = GameBoard::stepDistance(pos, reference, m_board_width, m_board_height);
+        int dist = GameBoard::stepDistance(pos, reference, m_boardWidth, m_boardHeight);
         if (dist < minDist) {
             minDist = dist;
             closest = pos;

@@ -16,19 +16,23 @@ std::string directionToString(Direction direction) {
 
 Direction rotateLeft(Direction direction, bool quarterTurn) {
     int step = quarterTurn ? 2 : 1;
+    // Cast to int to perform modular arithmetic on ordered enum values
     int directionIndex = static_cast<int>(direction);
     
     directionIndex = (directionIndex - step + 8) % 8;
     
+    // Cast back to Direction enum after ensuring valid range with modulo
     return static_cast<Direction>(directionIndex);
 }
 
 Direction rotateRight(Direction direction, bool quarterTurn) {
     int step = quarterTurn ? 2 : 1;
+    // Cast to int to perform modular arithmetic on ordered enum values
     int directionIndex = static_cast<int>(direction);
     
     directionIndex = (directionIndex + step) % 8;
     
+    // Cast back to Direction enum after ensuring valid range with modulo
     return static_cast<Direction>(directionIndex);
 }
 

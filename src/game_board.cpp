@@ -217,6 +217,7 @@ std::string GameBoard::toString() const {
 }
 
 int GameBoard::stepDistance(const Point& a, const Point& b, size_t width, size_t height) {
+    // Cast to int for signed arithmetic needed in wrapping distance calculation
     int w = static_cast<int>(width);
     int h = static_cast<int>(height);
     int dx = std::abs(a.getX() - b.getX());

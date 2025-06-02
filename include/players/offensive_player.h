@@ -14,18 +14,18 @@ the closest enemy tank to the last known target position.
  */
 class OffensivePlayer : public BasicPlayer {
 public:
-    OffensivePlayer(int player_index, size_t x, size_t y, size_t max_steps, size_t num_shells);
+    OffensivePlayer(int playerIndex, size_t x, size_t y, size_t maxSteps, size_t numShells);
     ~OffensivePlayer() override;
 
-    void updateTankWithBattleInfo(TankAlgorithm& tank, SatelliteView& satellite_view) override;
+    void updateTankWithBattleInfo(TankAlgorithm& tank, SatelliteView& satelliteView) override;
 
 protected:
     /**
      * @brief Populates the offensive battle info from satellite view and manages target selection.
      *
-     * @param satellite_view The satellite view to query
+     * @param satelliteView The satellite view to query
      */
-    void populateBattleInfo(SatelliteView& satellite_view) override;
+    void populateBattleInfo(SatelliteView& satelliteView) override;
 
     /**
      * @brief Updates the current target tank and sets it in the battle info.

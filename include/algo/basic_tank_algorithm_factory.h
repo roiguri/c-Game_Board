@@ -24,11 +24,11 @@ public:
     /**
      * @brief Creates a new TankAlgorithm instance
      * 
-     * @param player_index The ID of the player (1 or 2) this algorithm is for
-     * @param tank_index The index of the tank this algorithm will control
+     * @param playerIndex The ID of the player (1 or 2) this algorithm is for
+     * @param tankIndex The index of the tank this algorithm will control
      * @return A unique pointer to the created TankAlgorithm
      */
     std::unique_ptr<TankAlgorithm> create(
-        int player_index, 
-        int tank_index) const override;
+        int playerIndex, 
+        int tankIndex) const override;
 };
