@@ -4,21 +4,7 @@
 #include <string>
 #include <map>
 #include "bonus/board_generator.h"
-
-// Forward declaration for BoardConfig
-struct BoardConfig;
-
-struct AnalysisParams {
-    std::vector<int> widths;
-    std::vector<int> heights;
-    std::vector<float> wallDensities;
-    std::vector<float> mineDensities;
-    std::vector<std::string> symmetryTypes;
-    std::vector<int> seeds;
-    std::vector<int> maxSteps;
-    std::vector<int> numShells;
-    std::vector<int> numTanksPerPlayer;
-};
+#include "bonus/analysis/analysis_params.h"
 
 enum class Winner { PLAYER1, PLAYER2, TIE, UNKNOWN };
 

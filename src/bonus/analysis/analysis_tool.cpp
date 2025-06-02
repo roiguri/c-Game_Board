@@ -18,6 +18,7 @@
 #include "bonus/analysis/analysis_utils.h"
 #include "bonus/analysis/board_manager.h"
 #include "bonus/analysis/result_aggregator.h"
+#include "bonus/analysis/analysis_params.h"
 
 #ifndef TEST_BUILD
 int AnalysisTool::runAnalysis() {
@@ -27,18 +28,11 @@ int AnalysisTool::runAnalysis() {
     std::cout << "Analysis tool started." << std::endl;
 
     AnalysisParams params;
-    params.widths = {10, 20};
-    params.heights = {10, 15};
-    params.wallDensities = {0.1f, 0.25f};
-    params.mineDensities = {0.05f};
-    params.symmetryTypes = {"none", "horizontal"};
-    params.seeds = {-1, 12345};
-    params.maxSteps = {500, 1000};
-    params.numShells = {10};
-    params.numTanksPerPlayer = {1, 2};
 
     ResultAggregator aggregator;
     auto configs = generateAllConfigs(params);
+
+    std::cout << "Generated " << configs.size() << " configurations to test." << std::endl;
     for (const auto& config : configs) {
         runSingleSimulation(config, aggregator);
     }
@@ -55,17 +49,17 @@ std::vector<BoardConfig> AnalysisTool::generateAllConfigs(const AnalysisParams& 
             for (float wallDensity : params.wallDensities) {
                 for (float mineDensity : params.mineDensities) {
                     for (const std::string& symmetryType : params.symmetryTypes) {
-                        for (int seed : params.seeds) {
-                            for (int maxStep : params.maxSteps) {
-                                for (int numShell : params.numShells) {
-                                    for (int numTanks : params.numTanksPerPlayer) {
+                        for (int maxStep : params.maxSteps) {
+                            for (int numShell : params.numShells) {
+                                for (int numTanks : params.numTanksPerPlayer) {
+                                    for (int sample = 0; sample < params.numSamples; sample++) {
                                         BoardConfig config;
                                         config.width = width;
                                         config.height = height;
                                         config.wallDensity = wallDensity;
                                         config.mineDensity = mineDensity;
                                         config.symmetry = symmetryType;
-                                        config.seed = seed;
+                                        config.seed = -1;
                                         config.maxSteps = maxStep;
                                         config.numShells = numShell;
                                         config.numTanksPerPlayer = numTanks;
