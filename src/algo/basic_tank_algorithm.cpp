@@ -41,7 +41,7 @@ ActionRequest BasicTankAlgorithm::getAction() {
 
 void BasicTankAlgorithm::updateBattleInfo(BattleInfo& info) {
     m_turnsSinceLastUpdate = 0;
-    auto& impl = dynamic_cast<BattleInfoImpl&>(info); // TODO: make sure this is correct
+    auto& impl = dynamic_cast<BattleInfoImpl&>(info);
     m_trackedPosition = impl.getOwnTankPosition();
     m_gameBoard = impl.getGameBoard();
     m_enemyTanks = impl.getEnemyTankPositions();

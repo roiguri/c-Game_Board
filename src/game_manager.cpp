@@ -102,7 +102,6 @@ void GameManager::run() {
       LOG_DEBUG("Processing step " + std::to_string(m_currentStep));
       processStep();
       
-      // TODO: optimize to store out of shells state
       bool tanksOutOfShells = true;
       for (const auto& tank : m_tanks) {
           if (!tank.isDestroyed() && tank.getRemainingShells() > 0) {
