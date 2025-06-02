@@ -24,16 +24,16 @@ public:
     /**
      * @brief Creates a new BasicPlayer instance
      * 
-     * @param player_index The ID of the player (1 or 2)
+     * @param playerIndex The ID of the player (1 or 2)
      * @param x Width of the game board
      * @param y Height of the game board
-     * @param max_steps Maximum number of steps for the game
-     * @param num_shells Number of shells per tank at game start
+     * @param maxSteps Maximum number of steps for the game
+     * @param numShells Number of shells per tank at game start
      * @return A unique pointer to the created BasicPlayer
      */
     std::unique_ptr<Player> create(
-        int player_index, 
+        int playerIndex, 
         size_t x, size_t y,  
-        size_t max_steps, 
-        size_t num_shells) const override;
+        size_t maxSteps, 
+        size_t numShells) const override;
 };
