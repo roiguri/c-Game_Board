@@ -19,6 +19,31 @@ Specifies board layout:
 * Subsequent lines: board content (`#`: Wall (2 hits), `1`: Player 1 tank, `2`: Player 2 tank, `@`: Mine, ` `: Empty).
 * In order to start the game the file must include all header lines.
 
+### Example Board File
+
+```
+Complex Battle Arena
+MaxSteps = 1000
+NumShells = 15
+Rows = 15
+Cols = 15
+  #    #@       
+  #  2             
+          #  #   
+   ## #           
+ 1 @ @#@    #    
+   @     @   2     
+            # @ 
+       1@ @      
+ @@@ @#   @   #
+  @    @#@      
+   @ #        #
+    @      #  #  
+ 1     @@#  @#  
+       #          
+      # 2      
+```
+
 ## Output Format
 
 Two output files are generated:
@@ -72,12 +97,12 @@ If visualization is enabled in the build, an HTML visualization will be generate
 
 Generate a board without running the game:
 ```bash
-./bin/tanks_game --only_generate [--config-path=<path>]
+./bin/tanks_game --only_generate [--config_path <path>]
 ```
 
 Generate a board and immediately run the game:
 ```bash
-./bin/tanks_game --run_generated [--config-path=<path>]
+./bin/tanks_game --run_generated [--config_path <path>]
 ```
 
 When running the generator without the --config-path flag, default values are
