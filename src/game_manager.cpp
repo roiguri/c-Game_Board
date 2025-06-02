@@ -283,6 +283,13 @@ void GameManager::applyAction(TankWithAlgorithm& controller) {
           }
           break;
       case ActionRequest::GetBattleInfo: {
+           // Ignore GetBattleInfo if tank is in backward movement, but still update state
+           if (playerTank.isMovingBackward()) {
+              playerTank.doNothing(); // Update counters and state
+              actionResult = false;   // Action ignored, but still update state
+              break;
+           }
+
            SatelliteViewImpl satteliteView(m_currentBoard, m_currentTanks, m_currentShells, playerTank.getPosition());
             if (controller.tank.getPlayerId() == 1) {
                 m_player1->updateTankWithBattleInfo(*controller.algorithm, satteliteView);

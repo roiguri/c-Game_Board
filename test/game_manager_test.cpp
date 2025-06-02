@@ -717,7 +717,61 @@ TEST_F(GameManagerTest, ProcessStep_Shoot_CannotShootMoreThanMaxShells) {
     EXPECT_EQ(GetGameLog(*manager).back(), "Shoot (ignored)");
 }
 
-// ---- checkGameOver tests ----
+TEST_F(GameManagerTest, GetBattleInfoIgnoredDuringBackwardMovement) {
+    // Setup: Create tanks
+    std::vector<std::pair<int, Point>> positions = { {1, Point(2, 2)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    
+    auto& controller = GetTankControllers(*manager)[0];
+    controller.tank.setDirection(Direction::Up);
+    
+    // Setup mock algorithm to request backward movement then GetBattleInfo
+    auto* mockAlgo = dynamic_cast<MockAlgorithm*>(controller.algorithm.get());
+    ASSERT_NE(mockAlgo, nullptr);
+    
+    std::vector<ActionRequest> actions = {
+        ActionRequest::MoveBackward,    // Step 1: Request backward movement
+        ActionRequest::GetBattleInfo,   // Step 2: Try to get battle info (should be ignored)
+        ActionRequest::GetBattleInfo,   // Step 3: Try again (should be ignored, backward executes)
+        ActionRequest::DoNothing        // Step 4: Do nothing
+    };
+    mockAlgo->setActionSequence(actions);
+    
+    // Track initial state
+    Point initialPos = controller.tank.getPosition();
+    
+    // Step 1: Request backward movement
+    CallProcessStep();
+    EXPECT_TRUE(controller.tank.isMovingBackward());
+    EXPECT_EQ(controller.tank.getBackwardCounter(), 1);
+    EXPECT_EQ(controller.tank.getPosition(), initialPos); // No movement yet
+    EXPECT_TRUE(controller.actionSuccess); // Backward request accepted
+    
+    // Step 2: Try GetBattleInfo during backward movement (should be ignored)
+    CallProcessStep();
+    EXPECT_TRUE(controller.tank.isMovingBackward());
+    EXPECT_EQ(controller.tank.getBackwardCounter(), 2);
+    EXPECT_EQ(controller.tank.getPosition(), initialPos); // Still no movement
+    EXPECT_FALSE(controller.actionSuccess); // GetBattleInfo was ignored
+    
+    // Step 3: Try GetBattleInfo again (should be ignored, backward should execute)
+    CallProcessStep();
+    EXPECT_FALSE(controller.tank.isMovingBackward()); // Backward movement completed
+    EXPECT_EQ(controller.tank.getBackwardCounter(), 0);
+    
+    // Tank should have moved backward (down one position since facing Up)
+    Point expectedPos = Point(initialPos.getX(), initialPos.getY() + 1);
+    EXPECT_EQ(controller.tank.getPosition(), expectedPos);
+    EXPECT_FALSE(controller.actionSuccess); // GetBattleInfo was ignored
+    
+    // Verify the logs show the ignored actions
+    auto& gameLog = GetGameLog(*manager);
+    EXPECT_GE(gameLog.size(), 3u);
+    EXPECT_EQ(gameLog[gameLog.size()-3], "MoveBackward"); // Step 1
+    EXPECT_EQ(gameLog[gameLog.size()-2], "GetBattleInfo (ignored)"); // Step 2
+    EXPECT_EQ(gameLog[gameLog.size()-1], "GetBattleInfo (ignored)"); // Step 3
+}
 
 TEST_F(GameManagerTest, CheckGameOver_Player1Wins) {
     std::vector<std::pair<int, Point>> positions = { {1, Point(0,0)}, {1, Point(1,0)} };
