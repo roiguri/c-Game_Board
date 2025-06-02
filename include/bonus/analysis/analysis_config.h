@@ -12,6 +12,10 @@
  */
 class AnalysisConfig {
 public:
+    // Configuration limits
+    static constexpr int MAX_VALUES_PER_DIMENSION = 3;
+    static constexpr int MAX_TOTAL_CONFIGURATIONS = 1000;
+
     /**
      * @brief Constructor that sets default values
      */
@@ -48,4 +52,7 @@ private:
      * @return true if all parameters are valid, false otherwise
      */
     bool validateParams();
+
+    bool validateLimitsAndPromptUser();
+    int calculateTotalConfigurations() const;
 };

@@ -4,6 +4,7 @@
 
 AnalysisConfig::AnalysisConfig() {
     setDefaults();
+    validateLimitsAndPromptUser();
 }
 
 void AnalysisConfig::setDefaults() {
@@ -73,6 +74,10 @@ bool AnalysisConfig::loadFromFile(const std::string& filename) {
             std::cerr << "Warning: Invalid values in config file. Using defaults for invalid fields." << std::endl;
             return false;
         }
+
+        if (!validateLimitsAndPromptUser()) {
+            return false;  // User chose not to continue
+        }
         
         std::cout << "Configuration loaded successfully from: " << filename << std::endl;
         return true;
@@ -124,4 +129,96 @@ bool AnalysisConfig::validateParams() {
     }
     
     return valid;
+}
+
+bool AnalysisConfig::validateLimitsAndPromptUser() {
+    int totalConfigs = calculateTotalConfigurations();
+    
+    // Check if any limits are exceeded
+    bool hasIssues = false;
+    std::vector<std::string> issues;
+    
+    if (m_params.boardSizes.size() > MAX_VALUES_PER_DIMENSION) {
+        issues.push_back("Board sizes: " + std::to_string(m_params.boardSizes.size()) + " values");
+        hasIssues = true;
+    }
+    
+    if (m_params.wallDensities.size() > MAX_VALUES_PER_DIMENSION) {
+        issues.push_back("Wall densities: " + std::to_string(m_params.wallDensities.size()) + " values");
+        hasIssues = true;
+    }
+    
+    if (m_params.mineDensities.size() > MAX_VALUES_PER_DIMENSION) {
+        issues.push_back("Mine densities: " + std::to_string(m_params.mineDensities.size()) + " values");
+        hasIssues = true;
+    }
+    
+    if (m_params.numShells.size() > MAX_VALUES_PER_DIMENSION) {
+        issues.push_back("Shell counts: " + std::to_string(m_params.numShells.size()) + " values");
+        hasIssues = true;
+    }
+    
+    if (m_params.numTanksPerPlayer.size() > MAX_VALUES_PER_DIMENSION) {
+        issues.push_back("Tank counts: " + std::to_string(m_params.numTanksPerPlayer.size()) + " values");
+        hasIssues = true;
+    }
+    
+    if (totalConfigs > MAX_TOTAL_CONFIGURATIONS) {
+        hasIssues = true;
+    }
+    
+    // If no issues, proceed
+    if (!hasIssues) {
+        return true;
+    }
+    
+    // Show warning
+    std::cout << "\n⚠️  WARNING: Large configuration detected" << std::endl;
+    std::cout << "Total configurations: " << totalConfigs << " (recommended max: " << MAX_TOTAL_CONFIGURATIONS << ")" << std::endl;
+    
+    if (!issues.empty()) {
+        std::cout << "Dimensions exceeding " << MAX_VALUES_PER_DIMENSION << " values: ";
+        for (size_t i = 0; i < issues.size(); ++i) {
+            if (i > 0) std::cout << ", ";
+            std::cout << issues[i];
+        }
+        std::cout << std::endl;
+    }
+    
+    // Estimate runtime
+    double estimatedMinutes = totalConfigs * 0.5 / 60.0;
+    std::cout << "Estimated runtime: ";
+    if (estimatedMinutes < 60) {
+        std::cout << (int)estimatedMinutes << " minutes" << std::endl;
+    } else {
+        std::cout << (int)(estimatedMinutes / 60) << " hours " << (int)estimatedMinutes % 60 << " minutes" << std::endl;
+    }
+    
+    // Simple recommendations
+    std::cout << "\nRecommendations:" << std::endl;
+    std::cout << "• Limit each dimension to 3 values max (e.g., [low, medium, high])" << std::endl;
+    std::cout << "• Reduce numSamples to 3-5 for faster results" << std::endl;
+    
+    // Simple Y/N prompt
+    std::cout << "\nDo you want to continue anyway? (y/N): ";
+    
+    char response;
+    std::cin >> response;
+    
+    if (response == 'y' || response == 'Y') {
+        std::cout << "Proceeding with large configuration..." << std::endl;
+        return true;
+    } else {
+        std::cout << "Cancelled. Please modify your configuration and try again." << std::endl;
+        return false;
+    }
+}
+
+int AnalysisConfig::calculateTotalConfigurations() const {
+    return m_params.boardSizes.size() * 
+           m_params.wallDensities.size() * 
+           m_params.mineDensities.size() * 
+           m_params.numShells.size() * 
+           m_params.numTanksPerPlayer.size() * 
+           m_params.numSamples;
 }

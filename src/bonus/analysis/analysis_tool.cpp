@@ -33,11 +33,12 @@ int AnalysisTool::runAnalysis(const std::string& configFile) {
     // Load configuration (from file if provided, defaults otherwise)
     AnalysisConfig config;
     if (!configFile.empty()) {
-        if (config.loadFromFile(configFile)) {
-            std::cout << "Using configuration from: " << configFile << std::endl;
-        } else {
-            std::cout << "Failed to load config file, using defaults." << std::endl;
+        if (!config.loadFromFile(configFile)) {
+            // Exit completely if config loading failed (user said no or error)
+            std::cout << "Analysis cancelled." << std::endl;
+            return 1;  // Exit with error code
         }
+        std::cout << "Using configuration from: " << configFile << std::endl;
     } else {
         std::cout << "Using default configuration." << std::endl;
     }
