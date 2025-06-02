@@ -164,6 +164,13 @@ protected:
     bool checkLineOfSightInDirection(const Point& from, const Point& to, Direction direction) const;
 
     /**
+     * @brief Checks if there is a tank (enemy or friendly) at the specified position.
+     * @param position The position to check
+     * @return true if a tank is at the position, false otherwise
+     */
+    bool isTankAtPosition(const Point& position) const;
+
+    /**
      * @brief Update the tracked position, direction, shells, and cooldown based on the last action.
      * @param lastAction The action that was just taken
      */

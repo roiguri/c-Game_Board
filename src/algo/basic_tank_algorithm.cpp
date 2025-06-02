@@ -69,7 +69,6 @@ std::optional<Direction> BasicTankAlgorithm::getLineOfSightDirection(const Point
     return std::nullopt;
 }
 
-// FIXME: consider changing to check if tanks blocks line of sight
 bool BasicTankAlgorithm::checkLineOfSightInDirection(const Point& from, const Point& to, Direction direction) const {
     if (from == to) {
         return true;
@@ -84,10 +83,33 @@ bool BasicTankAlgorithm::checkLineOfSightInDirection(const Point& from, const Po
         if (current == to) {
             return true;
         }
+        // Check for walls blocking line of sight
         if (m_gameBoard.isWall(current)) {
             return false;
         }
+        // Check for tanks blocking line of sight
+        if (isTankAtPosition(current)) {
+            return false;
+        }
     }
+    return false;
+}
+
+bool BasicTankAlgorithm::isTankAtPosition(const Point& position) const {
+    // Check enemy tanks
+    for (const auto& tankPos : m_enemyTanks) {
+        if (tankPos == position) {
+            return true;
+        }
+    }
+    
+    // Check friendly tanks
+    for (const auto& tankPos : m_friendlyTanks) {
+        if (tankPos == position) {
+            return true;
+        }
+    }
+    
     return false;
 }
 

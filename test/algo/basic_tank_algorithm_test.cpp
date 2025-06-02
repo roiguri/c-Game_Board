@@ -33,6 +33,10 @@ protected:
     bool checkLineOfSightInDirection(const Point& from, const Point& to, Direction dir) {
         return algo->checkLineOfSightInDirection(from, to, dir);
     }
+    // Helper to call private isTankAtPosition
+    bool isTankAtPosition(const Point& position) {
+        return algo->isTankAtPosition(position);
+    }
     static GameBoard makeBoard(const std::vector<std::string>& lines) {
         GameBoard board(lines[0].size(), lines.size());
         std::vector<std::string> errors;
@@ -171,6 +175,97 @@ TEST_F(BasicTankAlgorithmTest, CheckLineOfSightInDirection_CorrectDirections) {
     EXPECT_TRUE(checkLineOfSightInDirection(Point(1,1), Point(3,3), Direction::DownRight));
     // Wrong direction
     EXPECT_FALSE(checkLineOfSightInDirection(Point(1,1), Point(3,3), Direction::Up));
+}
+
+TEST_F(BasicTankAlgorithmTest, CheckLineOfSightInDirection_TankBlocking) {
+    GameBoard board = makeBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    // Place enemy tank blocking horizontal path at (2,2)
+    std::vector<Point> enemyTanks = {Point(2, 2)};
+    BattleInfoImpl info = makeBattleInfo(board, enemyTanks, {}, {});
+    algo->updateBattleInfo(info);
+    
+    // Should not find line of sight through tank
+    EXPECT_EQ(getLineOfSightDirection(Point(1,2), Point(3,2)), std::nullopt);
+    
+    // Tank at (2,2) also blocks diagonal path from (1,1) to (3,3)
+    EXPECT_EQ(getLineOfSightDirection(Point(1,1), Point(3,3)), std::nullopt);
+    
+    // But should find paths that don't go through the tank
+    EXPECT_EQ(getLineOfSightDirection(Point(1,1), Point(1,3)), Direction::Down);
+}
+
+TEST_F(BasicTankAlgorithmTest, CheckLineOfSightInDirection_FriendlyTankBlocking) {
+    GameBoard board = makeBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    // Place friendly tank at (2,2) - blocking path from (1,2) to (3,2)
+    std::vector<Point> friendlyTanks = {Point(2, 2)};
+    BattleInfoImpl info = makeBattleInfo(board, {}, friendlyTanks, {});
+    algo->updateBattleInfo(info);
+    
+    // Line of sight should be blocked by friendly tank
+    EXPECT_FALSE(checkLineOfSightInDirection(Point(1,2), Point(3,2), Direction::Right));
+}
+
+TEST_F(BasicTankAlgorithmTest, CheckLineOfSightInDirection_TankNotInPath) {
+    GameBoard board = makeBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    // Place enemy tank at (1,1) - not blocking path from (1,2) to (3,2)
+    std::vector<Point> enemyTanks = {Point(1, 1)};
+    BattleInfoImpl info = makeBattleInfo(board, enemyTanks, {}, {});
+    algo->updateBattleInfo(info);
+    
+    // Line of sight should not be blocked
+    EXPECT_TRUE(checkLineOfSightInDirection(Point(1,2), Point(3,2), Direction::Right));
+}
+
+TEST_F(BasicTankAlgorithmTest, CheckLineOfSightInDirection_TankAtDestination) {
+    GameBoard board = makeBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    // Place enemy tank at destination (3,2)
+    std::vector<Point> enemyTanks = {Point(3, 2)};
+    BattleInfoImpl info = makeBattleInfo(board, enemyTanks, {}, {});
+    algo->updateBattleInfo(info);
+    
+    // Line of sight should reach the tank at destination
+    EXPECT_TRUE(checkLineOfSightInDirection(Point(1,2), Point(3,2), Direction::Right));
+}
+
+TEST_F(BasicTankAlgorithmTest, CheckLineOfSightInDirection_TankBehindDestination) {
+    GameBoard board = makeBoard({
+        "######",
+        "#    #",
+        "#    #",
+        "#    #",
+        "######"
+    });
+    // Place enemy tank at (4,2) - behind destination (3,2)
+    std::vector<Point> enemyTanks = {Point(4, 2)};
+    BattleInfoImpl info = makeBattleInfo(board, enemyTanks, {}, {});
+    algo->updateBattleInfo(info);
+    
+    // Line of sight should reach destination before being blocked
+    EXPECT_TRUE(checkLineOfSightInDirection(Point(1,2), Point(3,2), Direction::Right));
 }
 
 TEST_F(BasicTankAlgorithmTest, IsInDangerFromShells_NoShells) {
@@ -621,5 +716,92 @@ TEST_F(BasicTankAlgorithmTest, GetRotationToDirection_FallbackShortest) {
     // 180 degree turn: Up to Down (should pick right or left, both are 4 steps)
     ActionRequest result = callGetRotationToDirection(Direction::Up, Direction::Down);
     EXPECT_TRUE(result == ActionRequest::RotateRight90 || result == ActionRequest::RotateLeft90);
+}
+
+TEST_F(BasicTankAlgorithmTest, IsTankAtPosition_EnemyTank) {
+    GameBoard board = makeBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    std::vector<Point> enemyTanks = {Point(2, 2), Point(1, 3)};
+    BattleInfoImpl info = makeBattleInfo(board, enemyTanks, {}, {});
+    algo->updateBattleInfo(info);
+    
+    EXPECT_TRUE(isTankAtPosition(Point(2, 2)));
+    EXPECT_TRUE(isTankAtPosition(Point(1, 3)));
+    EXPECT_FALSE(isTankAtPosition(Point(3, 3)));
+}
+
+TEST_F(BasicTankAlgorithmTest, IsTankAtPosition_FriendlyTank) {
+    GameBoard board = makeBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    std::vector<Point> friendlyTanks = {Point(2, 2), Point(3, 1)};
+    BattleInfoImpl info = makeBattleInfo(board, {}, friendlyTanks, {});
+    algo->updateBattleInfo(info);
+    
+    EXPECT_TRUE(isTankAtPosition(Point(2, 2)));
+    EXPECT_TRUE(isTankAtPosition(Point(3, 1)));
+    EXPECT_FALSE(isTankAtPosition(Point(1, 1)));
+}
+
+TEST_F(BasicTankAlgorithmTest, IsTankAtPosition_NoTanks) {
+    GameBoard board = makeBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    BattleInfoImpl info = makeBattleInfo(board, {}, {}, {});
+    algo->updateBattleInfo(info);
+    
+    EXPECT_FALSE(isTankAtPosition(Point(2, 2)));
+    EXPECT_FALSE(isTankAtPosition(Point(1, 1)));
+}
+
+TEST_F(BasicTankAlgorithmTest, GetLineOfSightDirection_TankBlocking) {
+    GameBoard board = makeBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    // Place enemy tank blocking horizontal path at (2,2)
+    std::vector<Point> enemyTanks = {Point(2, 2)};
+    BattleInfoImpl info = makeBattleInfo(board, enemyTanks, {}, {});
+    algo->updateBattleInfo(info);
+    
+    // Should not find line of sight through tank
+    EXPECT_EQ(getLineOfSightDirection(Point(1,2), Point(3,2)), std::nullopt);
+    
+    // Tank at (2,2) also blocks diagonal path from (1,1) to (3,3)
+    EXPECT_EQ(getLineOfSightDirection(Point(1,1), Point(3,3)), std::nullopt);
+    
+    // But should find paths that don't go through the tank
+    EXPECT_EQ(getLineOfSightDirection(Point(1,1), Point(1,3)), Direction::Down);
+}
+
+TEST_F(BasicTankAlgorithmTest, IsInDangerFromShells_Point_ShellBlockedByTank) {
+    GameBoard gameBoard = makeBoard({
+        "#####",
+        "#   #",
+        "#   #",
+        "#   #",
+        "#####"
+    });
+    std::vector<Point> shells = {Point(3, 3)};
+    std::vector<Point> enemyTanks = {Point(2, 2)}; // Tank blocks shell's path to (1,1)
+    BattleInfoImpl info = makeBattleInfo(gameBoard, enemyTanks, {}, shells);
+    algo->updateBattleInfo(info);
+    EXPECT_FALSE(isInDangerFromShells(Point(1, 1)));
 }
 
