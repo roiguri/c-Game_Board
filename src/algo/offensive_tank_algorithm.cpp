@@ -2,6 +2,7 @@
 #include "players/offensive_battle_info.h"
 #include "game_board.h"
 #include "utils/direction.h"
+#include "bonus/logger/logger.h"
 #include <queue>
 #include <set>
 #include <algorithm>
@@ -48,6 +49,14 @@ ActionRequest OffensiveTankAlgorithm::getAction() {
             }
         }
     }
+    
+    // Debug log with position and direction
+    std::string debugInfo = "P" + std::to_string(m_playerId) + 
+                           "-T" + std::to_string(m_tankIndex) + 
+                           " @Tracked Before Update: (" + std::to_string(m_trackedPosition.getX()) + "," + std::to_string(m_trackedPosition.getY()) + ")" +
+                           "-" + directionToString(m_trackedDirection);
+    LOG_DEBUG(debugInfo);
+    
     updateState(action);
     return action;
 }

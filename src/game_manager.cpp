@@ -388,10 +388,12 @@ std::string GameManager::logAction() {
         
         if (i > 0) debugInfo += ", ";
         debugInfo += "P" + std::to_string(playerId) + 
-                     "-T" + std::to_string(i) + ": " + 
-                     actionToString(controller.nextAction) +
+                     "-T" + std::to_string(i) + 
+                     " @(" + std::to_string(controller.tank.getPosition().getX()) + "," + std::to_string(controller.tank.getPosition().getY()) + ")" +
+                     "-" + directionToString(controller.tank.getDirection()) + 
+                     ": " + actionToString(controller.nextAction) +
                      (controller.actionSuccess ? "" : " (ignored)") +
-                     (controller.tank.isDestroyed() ? " (destroyed)" : "");
+                     (controller.tank.isDestroyed() ? " (killed)" : "");
     }
     LOG_DEBUG(debugInfo);
     return turnLog;

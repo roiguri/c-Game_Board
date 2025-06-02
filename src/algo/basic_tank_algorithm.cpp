@@ -2,6 +2,7 @@
 #include "objects/tank.h"
 #include "utils/point.h"
 #include "utils/direction.h"
+#include "bonus/logger/logger.h"
 #include <cassert>
 #include <iostream>
 
@@ -35,6 +36,14 @@ ActionRequest BasicTankAlgorithm::getAction() {
     else {
         action = getActionToSafePosition();
     }
+    
+    // Debug log with position, direction, and requested action
+    std::string debugInfo = "P" + std::to_string(m_playerId) + 
+                           "-T" + std::to_string(m_tankIndex) + 
+                           " @Tracked Before Update: (" + std::to_string(m_trackedPosition.getX()) + "," + std::to_string(m_trackedPosition.getY()) + ")" +
+                           "-" + directionToString(m_trackedDirection);
+    LOG_DEBUG(debugInfo);
+    
     updateState(action);
     return action;
 }
