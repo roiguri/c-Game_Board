@@ -19,6 +19,8 @@
 #include "bonus/analysis/board_manager.h"
 #include "bonus/analysis/result_aggregator.h"
 #include "bonus/analysis/analysis_params.h"
+#include "bonus/analysis/analysis_config.h"
+#include <random>
 
 #ifndef TEST_BUILD
 int AnalysisTool::runAnalysis() {
@@ -27,7 +29,8 @@ int AnalysisTool::runAnalysis() {
 
     std::cout << "Analysis tool started." << std::endl;
 
-    AnalysisParams params;
+    AnalysisConfig config;
+    AnalysisParams params = config.getParams();
 
     ResultAggregator aggregator;
     auto configs = generateAllConfigs(params);
@@ -39,6 +42,35 @@ int AnalysisTool::runAnalysis() {
     std::cout << "\nAnalysis tool finished." << std::endl;
     aggregator.writeCSVs();
     // Optionally: aggregator.printSummaries();
+    return 0;
+}
+
+int AnalysisTool::runAnalysisWithConfig(const std::string& configFile) {
+    // Deactivate logging for performance and cleaner output
+    Logger::getInstance().initialize(Logger::Level::INFO, false, false);
+
+    std::cout << "Analysis tool started." << std::endl;
+
+    // Load configuration from file
+    AnalysisConfig config;
+    if (config.loadFromFile(configFile)) {
+        std::cout << "Using configuration from: " << configFile << std::endl;
+    } else {
+        std::cout << "Failed to load config file, using defaults." << std::endl;
+    }
+    
+    AnalysisParams params = config.getParams();
+
+    ResultAggregator aggregator;
+    auto configs = generateAllConfigs(params);
+    
+    std::cout << "Generated " << configs.size() << " configurations to test." << std::endl;
+    
+    for (const auto& boardConfig : configs) {
+        runSingleSimulation(boardConfig, aggregator);
+    }
+    std::cout << "\nAnalysis tool finished." << std::endl;
+    aggregator.writeCSVs();
     return 0;
 }
 
@@ -80,14 +112,13 @@ void AnalysisTool::runSingleSimulation(const BoardConfig& config, ResultAggregat
     std::string configKey = GenerateKey(config);
     BoardManager boardManager;
     BoardConfig actualConfig = config;
-    if (config.seed == -1 && config.seed != 0) {
-        actualConfig.seed = static_cast<int>(std::time(nullptr));
-        #ifdef _WIN32
-            // Sleep(10);
-        #else
-            // usleep(10000);
-        #endif
+    if (config.seed == -1) {
+        // Use a combination of current time and a random component to ensure uniqueness
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        actualConfig.seed = static_cast<int>(gen());
     }
+
     if (!boardManager.generateBoard(actualConfig)) {
         std::cerr << "Error: Board generation failed for " << configKey << ". Skipping." << std::endl;
         return;
@@ -137,9 +168,14 @@ void AnalysisTool::runSingleSimulation(const BoardConfig& config, ResultAggregat
 }
 
 int main(int argc, char* argv[]) {
-    (void)argc;
-    (void)argv;
     AnalysisTool tool;
-    return tool.runAnalysis();
+    
+    // Check for config file argument
+    if (argc > 1) {
+        std::string configFile = argv[1];
+        return tool.runAnalysisWithConfig(configFile);
+    } else {
+        return tool.runAnalysis();  // Use defaults
+    }
 }
 #endif // TEST_BUILD

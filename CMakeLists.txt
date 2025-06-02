@@ -43,15 +43,15 @@ list(REMOVE_ITEM CORE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/bonus/analysis/an
 
 # Create the core library
 add_library(tanks_game_lib ${ALL_SOURCES} ${ALL_HEADERS} ${COMMON_HEADERS})
-target_include_directories(tanks_game_lib PUBLIC ${COMMON_INCLUDES})
+target_include_directories(tanks_game_lib PUBLIC 
+    ${COMMON_INCLUDES}
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+)
 
 # Main executable
 add_executable(tanks_game src/main.cpp)
 target_link_libraries(tanks_game PRIVATE tanks_game_lib)
-target_include_directories(tanks_game PRIVATE 
-    ${COMMON_INCLUDES}
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/nlohmann
-)
+target_include_directories(tanks_game PRIVATE ${COMMON_INCLUDES})
 
 # Add the analysis tool executable
 add_executable(analysis_tool "${CMAKE_CURRENT_SOURCE_DIR}/src/bonus/analysis/analysis_tool.cpp")

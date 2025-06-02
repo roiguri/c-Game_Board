@@ -23,6 +23,7 @@ class AnalysisReporter;
 class AnalysisTool {
 public:
     int runAnalysis();
+    int runAnalysisWithConfig(const std::string& configFile);
 private:
     static std::vector<BoardConfig> generateAllConfigs(const AnalysisParams& params);
     void runSingleSimulation(const BoardConfig& config, ResultAggregator& aggregator);
