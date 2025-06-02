@@ -27,6 +27,9 @@
  */
 class GameManager {
 public:
+    /** Default number of steps allowed when tanks run out of shells */
+    static constexpr int DEFAULT_NO_SHELLS_STEPS = 40;
+
     /**
      * @brief Construct a new Game Manager object with default state
      */

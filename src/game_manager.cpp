@@ -15,7 +15,7 @@ GameManager::GameManager(PlayerFactory& playerFactory,
       m_tankAlgorithmFactory(tankAlgorithmFactory),
       m_currentStep(0),
       m_gameOver(false),
-      m_remaining_steps(40),
+      m_remaining_steps(DEFAULT_NO_SHELLS_STEPS),
       m_maximum_steps(100) { 
     #ifdef ENABLE_VISUALIZATION
     m_visualizationManager = createVisualizationManager();
@@ -337,6 +337,10 @@ bool GameManager::checkGameOver() {
     }
     if (player1Alive == 0 && player2Alive == 0) {
         m_gameResult = "Tie, both players have zero tanks";
+        return true;
+    }
+    if (m_remaining_steps <= 0) {
+        m_gameResult = "Tie, both players have zero shells for " + std::to_string(DEFAULT_NO_SHELLS_STEPS) + " steps";
         return true;
     }
     if (m_currentStep >= m_maximum_steps) {

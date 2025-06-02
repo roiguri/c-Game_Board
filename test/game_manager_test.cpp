@@ -8,6 +8,7 @@
 #include <memory>
 #include <fstream>
 #include <cstdio> // for std::remove
+#include <iostream>
 
 // Test fixture for GameManager
 class GameManagerTest : public ::testing::Test {
@@ -105,6 +106,15 @@ protected:
 
     void CallSaveResults(const std::string& file) {
         manager->saveResults(file);
+    }
+
+    // Helper to access and set remaining steps
+    int GetRemainingSteps() {
+        return manager->m_remaining_steps;
+    }
+    
+    void SetRemainingSteps(int steps) {
+        manager->m_remaining_steps = steps;
     }
 };
 
@@ -758,6 +768,59 @@ TEST_F(GameManagerTest, CheckGameOver_GameContinues) {
     EXPECT_FALSE(over);
 }
 
+TEST_F(GameManagerTest, CheckGameOver_TieZeroShellsForExactly40Steps) {
+    // Arrange: Create tanks for both players with zero shells
+    std::vector<std::pair<int, Point>> positions = { {1, Point(0,0)}, {2, Point(1,0)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    
+    // Drain all shells from tanks
+    for (auto& tank : Tanks()) {
+        for (int i = 0; i < Tank::INITIAL_SHELLS; i++) {
+            tank.decrementShells();
+        }
+        EXPECT_EQ(tank.getRemainingShells(), 0);
+    }
+    
+    // Set remaining steps to exactly 0 (the condition for tie)
+    SetRemainingSteps(0);
+    SetMaxSteps(1000); // High enough to not trigger max steps condition
+    SetCurrentStep(100); // Far from max steps
+    
+    // Act: Check if game ends when remaining steps reaches 0
+    bool over = CallCheckGameOver();
+    
+    // Assert: Game should end with tie message mentioning exactly 40 steps
+    EXPECT_TRUE(over);
+    EXPECT_EQ(GetGameResult(), "Tie, both players have zero shells for " + std::to_string(GameManager::DEFAULT_NO_SHELLS_STEPS) + " steps");
+}
+
+TEST_F(GameManagerTest, CheckGameOver_ZeroShellsButStillRemaining39Steps) {
+    // Arrange: Create tanks for both players with zero shells
+    std::vector<std::pair<int, Point>> positions = { {1, Point(0,0)}, {2, Point(1,0)} };
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    
+    // Drain all shells from tanks
+    for (auto& tank : Tanks()) {
+        for (int i = 0; i < Tank::INITIAL_SHELLS; i++) {
+            tank.decrementShells();
+        }
+        EXPECT_EQ(tank.getRemainingShells(), 0);
+    }
+    
+    // Set remaining steps to 1 (still has steps left before 40 step limit)
+    SetRemainingSteps(1);
+    SetMaxSteps(1000); // High enough to not trigger max steps condition
+    SetCurrentStep(100); // Far from max steps
+    
+    // Act: Check if game continues when still has remaining steps
+    bool over = CallCheckGameOver();
+    
+    // Assert: Game should continue
+    EXPECT_FALSE(over);
+}
+
 TEST_F(GameManagerTest, SaveResults_WritesAllLogLines) {
     std::string testFile = "test_output.txt";
     // Fill log with known lines
@@ -845,4 +908,75 @@ TEST_F(GameManagerTest, SetOutputFilePath_EmptyString) {
 TEST_F(GameManagerTest, SetOutputFilePath_CurrentDirectory) {
     CallSetOutputFilePath(*manager, "./board.txt");
     EXPECT_EQ(GetOutputFilePath(*manager), "./output_board.txt");
+}
+
+TEST_F(GameManagerTest, Run_TieAfter40StepsWithZeroShells_Integration) {
+    // Arrange: Create tanks that will shoot at walls
+    std::vector<std::pair<int, Point>> positions = { {1, Point(19,19)}, {2, Point(0,0)} };
+    
+    // Set up a large board with walls in front of each tank
+    GetBoard(*manager) = GameBoard(20, 20);
+    
+    // Place walls in front of tank 1 (facing right by default for player 1)
+    // Tank 1 is at (5,5) facing Left, so place walls to the left
+    for (int i = 0; i < 16; ++i) {
+        GetBoard(*manager).setCellType(18-i, 19, GameBoard::CellType::Wall);
+    }
+    
+    // Place walls in front of tank 2 (facing right by default for player 2) 
+    // Tank 2 is at (10,10) facing Right, so place walls to the right
+    for (int i = 0; i < 16; ++i) {
+        GetBoard(*manager).setCellType(1+i, 0, GameBoard::CellType::Wall);
+    }
+    
+    CreateTanks(*manager, positions);
+    CreateTankAlgorithms(*manager);
+    
+    // Verify tanks have full shells initially
+    for (const auto& tank : Tanks()) {
+        EXPECT_EQ(tank.getRemainingShells(), Tank::INITIAL_SHELLS);
+    }
+    
+    // Set up mock algorithms to always shoot
+    auto& controllers = GetTankControllers(*manager);
+    auto* mockAlgo1 = dynamic_cast<MockAlgorithm*>(controllers[0].algorithm.get());
+    auto* mockAlgo2 = dynamic_cast<MockAlgorithm*>(controllers[1].algorithm.get());
+    ASSERT_NE(mockAlgo1, nullptr);
+    ASSERT_NE(mockAlgo2, nullptr);
+    
+    // Both tanks always shoot
+    mockAlgo1->setConstantAction(ActionRequest::Shoot);
+    mockAlgo2->setConstantAction(ActionRequest::Shoot);
+    
+    // Calculate expected steps: 1 (initial shoot) + (cooldown+1) * (num_shells - 1) + 40
+    int expectedShootingSteps = 1 + (Tank::SHOOT_COOLDOWN + 1) * (Tank::INITIAL_SHELLS - 1);
+    int expectedTotalSteps = expectedShootingSteps + GameManager::DEFAULT_NO_SHELLS_STEPS;
+    
+    SetMaxSteps(expectedTotalSteps + 10); // Give some buffer to avoid max steps limit
+    
+    // Act: Run the game
+    manager->run();
+    
+    // Assert: Game should end with zero shells tie condition
+    EXPECT_TRUE(GetGameResult().find("Tie, both players have zero shells for " + std::to_string(GameManager::DEFAULT_NO_SHELLS_STEPS) + " steps") != std::string::npos);
+    
+    // Verify the timing is exactly correct
+    EXPECT_EQ(GetCurrentStep(), expectedTotalSteps);
+    
+    // Verify tanks are still alive (not destroyed)
+    int player1Alive = 0;
+    int player2Alive = 0;
+    for (const auto& tank : Tanks()) {
+        if (!tank.isDestroyed()) {
+            if (tank.getPlayerId() == 1) player1Alive++;
+            else if (tank.getPlayerId() == 2) player2Alive++;
+        }
+    }
+    EXPECT_EQ(player1Alive, 1);
+    EXPECT_EQ(player2Alive, 1);
+    
+    // Verify both tanks have 0 shells
+    for (const auto& tank : Tanks()) {
+        EXPECT_EQ(tank.getRemainingShells(), 0);
+    }
 }
