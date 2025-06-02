@@ -53,6 +53,16 @@ protected:
         return manager.m_gameLog;
     }
 
+    // Helper to access m_outputFilePath for testing
+    static std::string& GetOutputFilePath(GameManager& manager) {
+        return manager.m_outputFilePath;
+    }
+
+    // Helper to call setOutputFilePath for testing
+    static void CallSetOutputFilePath(GameManager& manager, const std::string& inputPath) {
+        manager.setOutputFilePath(inputPath);
+    }
+
     void SetUp() override {
         manager = std::make_unique<GameManager>(playerFactory, algoFactory);
         // Initialize the board to a 5x5 empty board
@@ -794,4 +804,45 @@ TEST_F(GameManagerTest, Run_DoesNotExceedMaximumSteps_Integration) {
     // Assert
     EXPECT_LE(GetCurrentStep(), 6);
     EXPECT_TRUE(GetGameResult().find("Tie, reached max steps") != std::string::npos);
+}
+
+TEST_F(GameManagerTest, SetOutputFilePath_FilenameOnly) {
+    CallSetOutputFilePath(*manager, "board.txt");
+    EXPECT_EQ(GetOutputFilePath(*manager), "output_board.txt");
+}
+
+TEST_F(GameManagerTest, SetOutputFilePath_WithRelativeDirectory) {
+    CallSetOutputFilePath(*manager, "examples/board.txt");
+    EXPECT_EQ(GetOutputFilePath(*manager), "examples/output_board.txt");
+}
+
+TEST_F(GameManagerTest, SetOutputFilePath_WithAbsoluteDirectory) {
+    CallSetOutputFilePath(*manager, "/home/user/boards/board.txt");
+    EXPECT_EQ(GetOutputFilePath(*manager), "/home/user/boards/output_board.txt");
+}
+
+TEST_F(GameManagerTest, SetOutputFilePath_WithNestedDirectories) {
+    CallSetOutputFilePath(*manager, "test/data/boards/complex_board.txt");
+    EXPECT_EQ(GetOutputFilePath(*manager), "test/data/boards/output_complex_board.txt");
+}
+
+TEST_F(GameManagerTest, SetOutputFilePath_WithDifferentExtension) {
+    CallSetOutputFilePath(*manager, "my_board.board");
+    EXPECT_EQ(GetOutputFilePath(*manager), "output_my_board.board");
+}
+
+TEST_F(GameManagerTest, SetOutputFilePath_WithNoExtension) {
+    CallSetOutputFilePath(*manager, "examples/boardfile");
+    EXPECT_EQ(GetOutputFilePath(*manager), "examples/output_boardfile");
+}
+
+TEST_F(GameManagerTest, SetOutputFilePath_EmptyString) {
+    // Test edge case with empty string
+    CallSetOutputFilePath(*manager, "");
+    EXPECT_EQ(GetOutputFilePath(*manager), "output_");
+}
+
+TEST_F(GameManagerTest, SetOutputFilePath_CurrentDirectory) {
+    CallSetOutputFilePath(*manager, "./board.txt");
+    EXPECT_EQ(GetOutputFilePath(*manager), "./output_board.txt");
 }

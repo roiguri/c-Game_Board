@@ -61,16 +61,7 @@ bool GameManager::readBoard(const std::string& filePath) {
     createTanks(tankPositions);
     createTankAlgorithms();
 
-    // TODO: extract to private helper function
-    // Set output file path based on input file path
-    std::filesystem::path inputPath(filePath);
-    std::string directory = inputPath.parent_path().string();
-    std::string filename = inputPath.filename().string();
-    if (directory.empty()) {
-        m_outputFilePath = "output_" + filename;
-    } else {
-        m_outputFilePath = directory + "/output_" + filename;
-    }
+    setOutputFilePath(filePath);
 
     return true;
 }
@@ -472,4 +463,16 @@ void GameManager::createTankAlgorithms() {
         m_tankControllers.push_back(TankWithAlgorithm{tank, std::move(algo)});
     }
     LOG_INFO("Tank algorithms created");
+}
+
+void GameManager::setOutputFilePath(const std::string& inputFilePath) {
+    std::filesystem::path inputPath(inputFilePath);
+    std::string directory = inputPath.parent_path().string();
+    std::string filename = inputPath.filename().string();
+    
+    if (directory.empty()) {
+        m_outputFilePath = "output_" + filename;
+    } else {
+        m_outputFilePath = directory + "/output_" + filename;
+    }
 }

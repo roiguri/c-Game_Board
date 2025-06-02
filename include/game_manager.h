@@ -132,6 +132,9 @@ private:
     // Helper method to convert ActionRequest to string
     std::string actionToString(ActionRequest action);
 
+    // Helper method to set output file path from input file path
+    void setOutputFilePath(const std::string& inputFilePath);
+
     GameBoard m_currentBoard;
     std::vector<Tank> m_currentTanks;
     std::vector<Shell> m_currentShells;
