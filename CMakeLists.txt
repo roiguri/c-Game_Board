@@ -48,7 +48,10 @@ target_include_directories(tanks_game_lib PUBLIC ${COMMON_INCLUDES})
 # Main executable
 add_executable(tanks_game src/main.cpp)
 target_link_libraries(tanks_game PRIVATE tanks_game_lib)
-target_include_directories(tanks_game PRIVATE ${COMMON_INCLUDES})
+target_include_directories(tanks_game PRIVATE 
+    ${COMMON_INCLUDES}
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/nlohmann
+)
 
 # Add the analysis tool executable
 add_executable(analysis_tool "${CMAKE_CURRENT_SOURCE_DIR}/src/bonus/analysis/analysis_tool.cpp")
