@@ -1,7 +1,7 @@
 #pragma once
 
 #include "players/basic/basic_tank_algorithm.h"
-#include "players/offensive_battle_info.h"
+#include "players/offensive/offensive_battle_info.h"
 #include <optional>
 #include <vector>
 

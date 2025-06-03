@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
-#include "players/offensive_player.h"
-#include "players/offensive_battle_info.h"
+#include "players/offensive/offensive_player.h"
+#include "players/offensive/offensive_battle_info.h"
 #include "TankAlgorithm.h"
 #include "SatelliteView.h"
 #include "utils/point.h"
@@ -92,7 +92,7 @@ TEST(OffensivePlayerTest, KeepsTrackingTargetIfItMoves) {
 }
 
 TEST(OffensivePlayerTest, ChoosesClosestTankAfterTargetDestroyed) {
-    // Initial board: two enemy tanks, own tank at (1,1)
+    // Initial board: enemy tank at (2,0), own tank at (1,1)
     // Enemy tanks at (0,0) and (2,0), should pick (0,0) as closest to (0,0)
     std::vector<std::vector<char>> board1 = {
         {'2', ' ', '3'},

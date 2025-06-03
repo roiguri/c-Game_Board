@@ -1,4 +1,4 @@
-#include "players/offensive_player.h"
+#include "players/offensive/offensive_player.h"
 #include <limits>
 #include <cmath>
 

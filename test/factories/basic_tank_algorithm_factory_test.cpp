@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "factories/basic_tank_algorithm_factory.h"
 #include "players/basic/basic_tank_algorithm.h"
-#include "algo/offensive_tank_algorithm.h"
+#include "players/offensive/offensive_tank_algorithm.h"
 #include <memory>
 
 TEST(BasicTankAlgorithmFactoryTest, CreatesBasicTankAlgorithm) {

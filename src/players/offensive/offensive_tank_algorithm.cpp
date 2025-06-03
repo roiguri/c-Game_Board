@@ -1,5 +1,5 @@
-#include "algo/offensive_tank_algorithm.h"
-#include "players/offensive_battle_info.h"
+#include "players/offensive/offensive_tank_algorithm.h"
+#include "players/offensive/offensive_battle_info.h"
 #include "game_board.h"
 #include "utils/direction.h"
 #include "bonus/logger/logger.h"

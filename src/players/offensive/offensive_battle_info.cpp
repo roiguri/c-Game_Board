@@ -1,4 +1,4 @@
-#include "players/offensive_battle_info.h"
+#include "players/offensive/offensive_battle_info.h"
 
 // --- Target Information Implementation ---
 
