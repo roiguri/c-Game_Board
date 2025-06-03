@@ -6,9 +6,7 @@
 #include <fstream>
 #include <iostream>
 
-AnalysisSummarizer::AnalysisSummarizer() {
-    // Constructor - nothing to initialize for now
-}
+AnalysisSummarizer::AnalysisSummarizer() {}
 
 double AnalysisSummarizer::calculateWinRate(int wins, int totalGames) {
     if (totalGames == 0) {
@@ -63,12 +61,9 @@ std::string AnalysisSummarizer::generateOverallResults(const std::map<std::strin
 }
 
 std::string AnalysisSummarizer::generateDimensionalAnalysis(
-    const std::map<int, GameOutcomeCounts>& widthAnalysis,
-    const std::map<int, GameOutcomeCounts>& heightAnalysis,
+    const std::map<int, GameOutcomeCounts>& boardSizeAnalysis,
     const std::map<float, GameOutcomeCounts>& wallDensityAnalysis,
     const std::map<float, GameOutcomeCounts>& mineDensityAnalysis,
-    const std::map<std::string, GameOutcomeCounts>& symmetryAnalysis,
-    const std::map<int, GameOutcomeCounts>& maxStepsAnalysis,
     const std::map<int, GameOutcomeCounts>& numShellsAnalysis,
     const std::map<int, GameOutcomeCounts>& numTanksAnalysis
 ) {
@@ -77,35 +72,17 @@ std::string AnalysisSummarizer::generateDimensionalAnalysis(
     ss << "===================\n\n";
     ss << std::fixed << std::setprecision(1);
     
-    // Width Analysis
-    ss << "Board Width Effects:\n";
+    // Board Size Analysis
+    ss << "Board Size Effects:\n";
     ss << "--------------------\n";
-    for (const auto& pair : widthAnalysis) {
-        int width = pair.first;
+    for (const auto& pair : boardSizeAnalysis) {
+        int size = pair.first;
         const GameOutcomeCounts& counts = pair.second;
         double p1Rate = calculateWinRate(counts.player1Wins, counts.totalGames);
         double p2Rate = calculateWinRate(counts.player2Wins, counts.totalGames);
         double tieRate = calculateWinRate(counts.ties, counts.totalGames);
         
-        ss << "Width " << std::setw(2) << width << ": ";
-        ss << "P1: " << std::setw(4) << p1Rate << "% | ";
-        ss << "P2: " << std::setw(4) << p2Rate << "% | ";
-        ss << "Ties: " << std::setw(4) << tieRate << "% | ";
-        ss << "Games: " << counts.totalGames << "\n";
-    }
-    ss << "\n";
-    
-    // Height Analysis
-    ss << "Board Height Effects:\n";
-    ss << "---------------------\n";
-    for (const auto& pair : heightAnalysis) {
-        int height = pair.first;
-        const GameOutcomeCounts& counts = pair.second;
-        double p1Rate = calculateWinRate(counts.player1Wins, counts.totalGames);
-        double p2Rate = calculateWinRate(counts.player2Wins, counts.totalGames);
-        double tieRate = calculateWinRate(counts.ties, counts.totalGames);
-        
-        ss << "Height " << std::setw(2) << height << ": ";
+        ss << "Size " << std::setw(2) << size << "x" << size << ": ";
         ss << "P1: " << std::setw(4) << p1Rate << "% | ";
         ss << "P2: " << std::setw(4) << p2Rate << "% | ";
         ss << "Ties: " << std::setw(4) << tieRate << "% | ";
@@ -143,42 +120,6 @@ std::string AnalysisSummarizer::generateDimensionalAnalysis(
         
         ss << "Density " << std::setw(4) << std::setprecision(2) << density << ": ";
         ss << "P1: " << std::setw(4) << std::setprecision(1) << p1Rate << "% | ";
-        ss << "P2: " << std::setw(4) << p2Rate << "% | ";
-        ss << "Ties: " << std::setw(4) << tieRate << "% | ";
-        ss << "Games: " << counts.totalGames << "\n";
-    }
-    ss << "\n";
-    
-    // Symmetry Analysis
-    ss << "Symmetry Type Effects:\n";
-    ss << "----------------------\n";
-    for (const auto& pair : symmetryAnalysis) {
-        const std::string& symmetry = pair.first;
-        const GameOutcomeCounts& counts = pair.second;
-        double p1Rate = calculateWinRate(counts.player1Wins, counts.totalGames);
-        double p2Rate = calculateWinRate(counts.player2Wins, counts.totalGames);
-        double tieRate = calculateWinRate(counts.ties, counts.totalGames);
-        
-        ss << "Symmetry " << std::setw(10) << symmetry << ": ";
-        ss << "P1: " << std::setw(4) << p1Rate << "% | ";
-        ss << "P2: " << std::setw(4) << p2Rate << "% | ";
-        ss << "Ties: " << std::setw(4) << tieRate << "% | ";
-        ss << "Games: " << counts.totalGames << "\n";
-    }
-    ss << "\n";
-    
-    // Max Steps Analysis
-    ss << "Max Steps Effects:\n";
-    ss << "------------------\n";
-    for (const auto& pair : maxStepsAnalysis) {
-        int steps = pair.first;
-        const GameOutcomeCounts& counts = pair.second;
-        double p1Rate = calculateWinRate(counts.player1Wins, counts.totalGames);
-        double p2Rate = calculateWinRate(counts.player2Wins, counts.totalGames);
-        double tieRate = calculateWinRate(counts.ties, counts.totalGames);
-        
-        ss << "Steps " << std::setw(4) << steps << ": ";
-        ss << "P1: " << std::setw(4) << p1Rate << "% | ";
         ss << "P2: " << std::setw(4) << p2Rate << "% | ";
         ss << "Ties: " << std::setw(4) << tieRate << "% | ";
         ss << "Games: " << counts.totalGames << "\n";
@@ -245,12 +186,9 @@ bool AnalysisSummarizer::saveReportToFile(const std::string& report, const std::
 
 std::string AnalysisSummarizer::generateSummaryReport(
     const std::map<std::string, GameOutcomeCounts>& overallResults,
-    const std::map<int, GameOutcomeCounts>& widthAnalysis,
-    const std::map<int, GameOutcomeCounts>& heightAnalysis,
+    const std::map<int, GameOutcomeCounts>& boardSizeAnalysis,
     const std::map<float, GameOutcomeCounts>& wallDensityAnalysis,
-    const std::map<float, GameOutcomeCounts>& mineDensityAnalysis,
-    const std::map<std::string, GameOutcomeCounts>& symmetryAnalysis,
-    const std::map<int, GameOutcomeCounts>& maxStepsAnalysis,
+    const std::map<float, GameOutcomeCounts>& mineDensityAnalysis,  
     const std::map<int, GameOutcomeCounts>& numShellsAnalysis,
     const std::map<int, GameOutcomeCounts>& numTanksAnalysis
 ) {
@@ -266,12 +204,9 @@ std::string AnalysisSummarizer::generateSummaryReport(
     report << generateHeader(totalGames);
     report << generateOverallResults(overallResults);
     report << generateDimensionalAnalysis(
-        widthAnalysis,
-        heightAnalysis, 
+        boardSizeAnalysis,
         wallDensityAnalysis,
         mineDensityAnalysis,
-        symmetryAnalysis,
-        maxStepsAnalysis,
         numShellsAnalysis,
         numTanksAnalysis
     );

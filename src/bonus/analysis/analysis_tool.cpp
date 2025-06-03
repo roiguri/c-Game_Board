@@ -63,7 +63,8 @@ int AnalysisTool::runAnalysis(const std::string& configFile) {
         option::ForegroundColor{Color::green},
         option::ShowElapsedTime{true},
         option::ShowRemainingTime{true},
-        option::FontStyles{std::vector<FontStyle>{FontStyle::bold}}
+        option::FontStyles{std::vector<FontStyle>{FontStyle::bold}},
+        option::ShowPercentage{true}
     };
     
     for (size_t i = 0; i < configs.size(); ++i) {

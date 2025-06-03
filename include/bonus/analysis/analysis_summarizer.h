@@ -22,24 +22,18 @@ public:
      * @brief Generate a comprehensive summary report
      * 
      * @param overallResults Results grouped by configuration key
-     * @param widthAnalysis Results grouped by width
-     * @param heightAnalysis Results grouped by height
+     * @param boardSizeAnalysis Results grouped by board size
      * @param wallDensityAnalysis Results grouped by wall density
      * @param mineDensityAnalysis Results grouped by mine density
-     * @param symmetryAnalysis Results grouped by symmetry type
-     * @param maxStepsAnalysis Results grouped by max steps
      * @param numShellsAnalysis Results grouped by shell count
      * @param numTanksAnalysis Results grouped by tank count
      * @return Formatted summary report as string
      */
     std::string generateSummaryReport(
         const std::map<std::string, GameOutcomeCounts>& overallResults,
-        const std::map<int, GameOutcomeCounts>& widthAnalysis,
-        const std::map<int, GameOutcomeCounts>& heightAnalysis,
+        const std::map<int, GameOutcomeCounts>& boardSizeAnalysis,
         const std::map<float, GameOutcomeCounts>& wallDensityAnalysis,
         const std::map<float, GameOutcomeCounts>& mineDensityAnalysis,
-        const std::map<std::string, GameOutcomeCounts>& symmetryAnalysis,
-        const std::map<int, GameOutcomeCounts>& maxStepsAnalysis,
         const std::map<int, GameOutcomeCounts>& numShellsAnalysis,
         const std::map<int, GameOutcomeCounts>& numTanksAnalysis
     );
@@ -73,23 +67,17 @@ private:
     /**
      * @brief Generate dimensional analysis section
      * 
-     * @param widthAnalysis Results by width
-     * @param heightAnalysis Results by height
+     * @param boardSizeAnalysis Results by board size
      * @param wallDensityAnalysis Results by wall density
      * @param mineDensityAnalysis Results by mine density
-     * @param symmetryAnalysis Results by symmetry
-     * @param maxStepsAnalysis Results by max steps
      * @param numShellsAnalysis Results by shell count
      * @param numTanksAnalysis Results by tank count
      * @return Formatted dimensional analysis string
      */
     std::string generateDimensionalAnalysis(
-        const std::map<int, GameOutcomeCounts>& widthAnalysis,
-        const std::map<int, GameOutcomeCounts>& heightAnalysis,
+        const std::map<int, GameOutcomeCounts>& boardSizeAnalysis,
         const std::map<float, GameOutcomeCounts>& wallDensityAnalysis,
         const std::map<float, GameOutcomeCounts>& mineDensityAnalysis,
-        const std::map<std::string, GameOutcomeCounts>& symmetryAnalysis,
-        const std::map<int, GameOutcomeCounts>& maxStepsAnalysis,
         const std::map<int, GameOutcomeCounts>& numShellsAnalysis,
         const std::map<int, GameOutcomeCounts>& numTanksAnalysis
     );
