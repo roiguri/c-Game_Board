@@ -48,6 +48,15 @@ public:
     bool saveReportToFile(const std::string& report, const std::string& filename);
 
 private:
+    struct StatResult {
+        double winRate;
+        double marginOfError;
+        bool isSignificant;
+        bool hasAdequateSample;
+    };
+    
+    StatResult calculateStats(int wins, int totalGames);
+
     /**
      * @brief Generate header section of the report
      * 

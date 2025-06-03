@@ -48,14 +48,29 @@ std::string AnalysisSummarizer::generateOverallResults(const std::map<std::strin
         totalGames += counts.totalGames;
     }
     
+    StatResult p1Overall = calculateStats(totalPlayer1Wins, totalGames);
+    StatResult p2Overall = calculateStats(totalPlayer2Wins, totalGames);
+    
     std::stringstream ss;
     ss << "OVERALL RESULTS\n";
     ss << "===============\n";
     ss << std::fixed << std::setprecision(1);
-    ss << "Player 1 Wins: " << totalPlayer1Wins << " (" << calculateWinRate(totalPlayer1Wins, totalGames) << "%)\n";
-    ss << "Player 2 Wins: " << totalPlayer2Wins << " (" << calculateWinRate(totalPlayer2Wins, totalGames) << "%)\n";
-    ss << "Ties: " << totalTies << " (" << calculateWinRate(totalTies, totalGames) << "%)\n";
-    ss << "Total Games: " << totalGames << "\n\n";
+    
+    ss << "Player 1: " << p1Overall.winRate << "% [±" << p1Overall.marginOfError << "%]";
+    if (p1Overall.isSignificant) ss << " *";
+    ss << "\n";
+    
+    ss << "Player 2: " << p2Overall.winRate << "% [±" << p2Overall.marginOfError << "%]";
+    if (p2Overall.isSignificant) ss << " *";
+    ss << "\n";
+    
+    ss << "Ties: " << calculateWinRate(totalTies, totalGames) << "%\n";
+    ss << "Total Games: " << totalGames << "\n";
+    
+    if (p1Overall.isSignificant || p2Overall.isSignificant) {
+        ss << "\n* = Statistically significant difference from 50%\n";
+    }
+    ss << "\n";
     
     return ss.str();
 }
@@ -74,19 +89,25 @@ std::string AnalysisSummarizer::generateDimensionalAnalysis(
     
     // Board Size Analysis
     ss << "Board Size Effects:\n";
-    ss << "--------------------\n";
+    ss << "-------------------\n";
     for (const auto& pair : boardSizeAnalysis) {
         int size = pair.first;
         const GameOutcomeCounts& counts = pair.second;
-        double p1Rate = calculateWinRate(counts.player1Wins, counts.totalGames);
-        double p2Rate = calculateWinRate(counts.player2Wins, counts.totalGames);
-        double tieRate = calculateWinRate(counts.ties, counts.totalGames);
+        
+        StatResult p1Stats = calculateStats(counts.player1Wins, counts.totalGames);
+        StatResult p2Stats = calculateStats(counts.player2Wins, counts.totalGames);
         
         ss << "Size " << std::setw(2) << size << "x" << size << ": ";
-        ss << "P1: " << std::setw(4) << p1Rate << "% | ";
-        ss << "P2: " << std::setw(4) << p2Rate << "% | ";
-        ss << "Ties: " << std::setw(4) << tieRate << "% | ";
-        ss << "Games: " << counts.totalGames << "\n";
+        ss << "P1: " << std::setw(4) << p1Stats.winRate << "% ";
+        ss << "[±" << std::setw(4) << p1Stats.marginOfError << "%]";
+        if (p1Stats.isSignificant) ss << " *";
+        
+        ss << " | P2: " << std::setw(4) << p2Stats.winRate << "% ";
+        ss << "[±" << std::setw(4) << p2Stats.marginOfError << "%]";
+        if (p2Stats.isSignificant) ss << " *";
+        
+        if (!p1Stats.hasAdequateSample) ss << " [LOW SAMPLE]";
+        ss << " | Games: " << counts.totalGames << "\n";
     }
     ss << "\n";
     
@@ -96,15 +117,21 @@ std::string AnalysisSummarizer::generateDimensionalAnalysis(
     for (const auto& pair : wallDensityAnalysis) {
         float density = pair.first;
         const GameOutcomeCounts& counts = pair.second;
-        double p1Rate = calculateWinRate(counts.player1Wins, counts.totalGames);
-        double p2Rate = calculateWinRate(counts.player2Wins, counts.totalGames);
-        double tieRate = calculateWinRate(counts.ties, counts.totalGames);
+        
+        StatResult p1Stats = calculateStats(counts.player1Wins, counts.totalGames);
+        StatResult p2Stats = calculateStats(counts.player2Wins, counts.totalGames);
         
         ss << "Density " << std::setw(4) << std::setprecision(2) << density << ": ";
-        ss << "P1: " << std::setw(4) << std::setprecision(1) << p1Rate << "% | ";
-        ss << "P2: " << std::setw(4) << p2Rate << "% | ";
-        ss << "Ties: " << std::setw(4) << tieRate << "% | ";
-        ss << "Games: " << counts.totalGames << "\n";
+        ss << "P1: " << std::setw(4) << std::setprecision(1) << p1Stats.winRate << "% ";
+        ss << "[±" << std::setw(4) << p1Stats.marginOfError << "%]";
+        if (p1Stats.isSignificant) ss << " *";
+        
+        ss << " | P2: " << std::setw(4) << p2Stats.winRate << "% ";
+        ss << "[±" << std::setw(4) << p2Stats.marginOfError << "%]";
+        if (p2Stats.isSignificant) ss << " *";
+        
+        if (!p1Stats.hasAdequateSample) ss << " [LOW SAMPLE]";
+        ss << " | Games: " << counts.totalGames << "\n";
     }
     ss << "\n";
     
@@ -114,15 +141,21 @@ std::string AnalysisSummarizer::generateDimensionalAnalysis(
     for (const auto& pair : mineDensityAnalysis) {
         float density = pair.first;
         const GameOutcomeCounts& counts = pair.second;
-        double p1Rate = calculateWinRate(counts.player1Wins, counts.totalGames);
-        double p2Rate = calculateWinRate(counts.player2Wins, counts.totalGames);
-        double tieRate = calculateWinRate(counts.ties, counts.totalGames);
+        
+        StatResult p1Stats = calculateStats(counts.player1Wins, counts.totalGames);
+        StatResult p2Stats = calculateStats(counts.player2Wins, counts.totalGames);
         
         ss << "Density " << std::setw(4) << std::setprecision(2) << density << ": ";
-        ss << "P1: " << std::setw(4) << std::setprecision(1) << p1Rate << "% | ";
-        ss << "P2: " << std::setw(4) << p2Rate << "% | ";
-        ss << "Ties: " << std::setw(4) << tieRate << "% | ";
-        ss << "Games: " << counts.totalGames << "\n";
+        ss << "P1: " << std::setw(4) << std::setprecision(1) << p1Stats.winRate << "% ";
+        ss << "[±" << std::setw(4) << p1Stats.marginOfError << "%]";
+        if (p1Stats.isSignificant) ss << " *";
+        
+        ss << " | P2: " << std::setw(4) << p2Stats.winRate << "% ";
+        ss << "[±" << std::setw(4) << p2Stats.marginOfError << "%]";
+        if (p2Stats.isSignificant) ss << " *";
+        
+        if (!p1Stats.hasAdequateSample) ss << " [LOW SAMPLE]";
+        ss << " | Games: " << counts.totalGames << "\n";
     }
     ss << "\n";
     
@@ -132,15 +165,21 @@ std::string AnalysisSummarizer::generateDimensionalAnalysis(
     for (const auto& pair : numShellsAnalysis) {
         int shells = pair.first;
         const GameOutcomeCounts& counts = pair.second;
-        double p1Rate = calculateWinRate(counts.player1Wins, counts.totalGames);
-        double p2Rate = calculateWinRate(counts.player2Wins, counts.totalGames);
-        double tieRate = calculateWinRate(counts.ties, counts.totalGames);
+        
+        StatResult p1Stats = calculateStats(counts.player1Wins, counts.totalGames);
+        StatResult p2Stats = calculateStats(counts.player2Wins, counts.totalGames);
         
         ss << "Shells " << std::setw(2) << shells << ": ";
-        ss << "P1: " << std::setw(4) << p1Rate << "% | ";
-        ss << "P2: " << std::setw(4) << p2Rate << "% | ";
-        ss << "Ties: " << std::setw(4) << tieRate << "% | ";
-        ss << "Games: " << counts.totalGames << "\n";
+        ss << "P1: " << std::setw(4) << p1Stats.winRate << "% ";
+        ss << "[±" << std::setw(4) << p1Stats.marginOfError << "%]";
+        if (p1Stats.isSignificant) ss << " *";
+        
+        ss << " | P2: " << std::setw(4) << p2Stats.winRate << "% ";
+        ss << "[±" << std::setw(4) << p2Stats.marginOfError << "%]";
+        if (p2Stats.isSignificant) ss << " *";
+        
+        if (!p1Stats.hasAdequateSample) ss << " [LOW SAMPLE]";
+        ss << " | Games: " << counts.totalGames << "\n";
     }
     ss << "\n";
     
@@ -150,17 +189,29 @@ std::string AnalysisSummarizer::generateDimensionalAnalysis(
     for (const auto& pair : numTanksAnalysis) {
         int tanks = pair.first;
         const GameOutcomeCounts& counts = pair.second;
-        double p1Rate = calculateWinRate(counts.player1Wins, counts.totalGames);
-        double p2Rate = calculateWinRate(counts.player2Wins, counts.totalGames);
-        double tieRate = calculateWinRate(counts.ties, counts.totalGames);
+        
+        StatResult p1Stats = calculateStats(counts.player1Wins, counts.totalGames);
+        StatResult p2Stats = calculateStats(counts.player2Wins, counts.totalGames);
         
         ss << "Tanks " << std::setw(1) << tanks << ": ";
-        ss << "P1: " << std::setw(4) << p1Rate << "% | ";
-        ss << "P2: " << std::setw(4) << p2Rate << "% | ";
-        ss << "Ties: " << std::setw(4) << tieRate << "% | ";
-        ss << "Games: " << counts.totalGames << "\n";
+        ss << "P1: " << std::setw(4) << p1Stats.winRate << "% ";
+        ss << "[±" << std::setw(4) << p1Stats.marginOfError << "%]";
+        if (p1Stats.isSignificant) ss << " *";
+        
+        ss << " | P2: " << std::setw(4) << p2Stats.winRate << "% ";
+        ss << "[±" << std::setw(4) << p2Stats.marginOfError << "%]";
+        if (p2Stats.isSignificant) ss << " *";
+        
+        if (!p1Stats.hasAdequateSample) ss << " [LOW SAMPLE]";
+        ss << " | Games: " << counts.totalGames << "\n";
     }
     ss << "\n";
+    
+    // Legend
+    ss << "Legend:\n";
+    ss << "* = Statistically significant (performance different from 50%)\n";
+    ss << "[±X%] = 95% confidence interval margin of error\n";
+    ss << "[LOW SAMPLE] = Sample size < 30, results may be unreliable\n\n";
     
     return ss.str();
 }
@@ -216,4 +267,22 @@ std::string AnalysisSummarizer::generateSummaryReport(
     report << "Analysis complete. Check CSV files in output/ directory for detailed data.\n";
     
     return report.str();
+}
+
+AnalysisSummarizer::StatResult AnalysisSummarizer::calculateStats(int wins, int totalGames) {
+    if (totalGames == 0) {
+        return {0.0, 0.0, false, false};
+    }
+    
+    double p = (double)wins / totalGames;
+    double standardError = sqrt(p * (1 - p) / totalGames);
+    double marginOfError = 1.96 * standardError * 100.0; // Convert to percentage
+    
+    // Check significance: is 50% outside the confidence interval?
+    bool isSignificant = (p + 1.96 * standardError < 0.5) || (p - 1.96 * standardError > 0.5);
+    
+    // Check sample adequacy
+    bool hasAdequateSample = (totalGames >= 30) && (wins >= 5) && ((totalGames - wins) >= 5);
+    
+    return {p * 100.0, marginOfError, isSignificant, hasAdequateSample};
 }
