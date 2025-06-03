@@ -11,8 +11,8 @@
 
 #include "bonus/board_generator.h"
 #include "game_manager.h"
-#include "algo/basic_tank_algorithm_factory.h"
-#include "players/basic_player_factory.h"
+#include "factories/basic_tank_algorithm_factory.h"
+#include "factories/basic_player_factory.h"
 #include "bonus/logger/logger_config.h"
 #include "bonus/analysis/analysis_tool.h"
 #include "bonus/analysis/analysis_utils.h"

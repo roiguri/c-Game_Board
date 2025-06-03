@@ -5,8 +5,8 @@
 #include <iostream>
 #include "bonus/cli/cli_parser.h" // Added include
 #include "game_manager.h"
-#include "algo/basic_tank_algorithm_factory.h"
-#include "players/basic_player_factory.h"
+#include "factories/basic_tank_algorithm_factory.h"
+#include "factories/basic_player_factory.h"
 #include "bonus/logger/logger_config.h"
 
 // Run the game with a specified board file
