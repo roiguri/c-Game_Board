@@ -1,6 +1,6 @@
 #pragma once
 
-#include "players/battle_info_impl.h"
+#include "players/basic/battle_info_impl.h"
 #include "utils/point.h"
 #include <optional>
 

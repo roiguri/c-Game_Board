@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
-#include "players/basic_player.h"
-#include "players/battle_info_impl.h"
+#include "players/basic/basic_player.h"
+#include "players/basic/battle_info_impl.h"
 #include "SatelliteView.h"
 #include "TankAlgorithm.h"
 #include "utils/point.h"

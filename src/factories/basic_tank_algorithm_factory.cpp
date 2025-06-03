@@ -1,6 +1,6 @@
-#include "algo/basic_tank_algorithm_factory.h"
-#include "algo/basic_tank_algorithm.h"
-#include "algo/offensive_tank_algorithm.h"
+#include "factories/basic_tank_algorithm_factory.h"
+#include "players/basic/basic_tank_algorithm.h"
+#include "players/offensive/offensive_tank_algorithm.h"
 
 std::unique_ptr<TankAlgorithm> BasicTankAlgorithmFactory::create(
     int playerIndex, 

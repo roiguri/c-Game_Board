@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
-#include "players/basic_player_factory.h"
-#include "players/basic_player.h"
-#include "players/offensive_player.h"
+#include "factories/basic_player_factory.h"
+#include "players/basic/basic_player.h"
+#include "players/offensive/offensive_player.h"
 #include "TankAlgorithm.h"
 #include "SatelliteView.h"
 #include <memory>
