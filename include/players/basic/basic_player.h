@@ -2,7 +2,7 @@
 
 #include "Player.h"
 #include "BattleInfo.h"
-#include "players/battle_info_impl.h"
+#include "players/basic/battle_info_impl.h"
 #include <memory>
 
 /**

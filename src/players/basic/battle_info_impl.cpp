@@ -1,4 +1,4 @@
-#include "players/battle_info_impl.h"
+#include "players/basic/battle_info_impl.h"
 
 BattleInfoImpl::BattleInfoImpl(int boardWidth, int boardHeight)
     : m_boardWidth(boardWidth), m_boardHeight(boardHeight), m_gameBoard(boardWidth, boardHeight) {}

@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
-#include "algo/basic_tank_algorithm.h"
+#include "players/basic/basic_tank_algorithm.h"
 #include "game_board.h"
 #include "objects/tank.h"
 #include "utils/point.h"
-#include "players/battle_info_impl.h"
+#include "players/basic/battle_info_impl.h"
 #include <vector>
 #include <string>
 #include <gmock/gmock.h>

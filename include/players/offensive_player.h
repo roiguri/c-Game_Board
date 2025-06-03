@@ -1,6 +1,6 @@
 #pragma once
 
-#include "players/basic_player.h"
+#include "players/basic/basic_player.h"
 #include "players/offensive_battle_info.h"
 #include <optional>
 

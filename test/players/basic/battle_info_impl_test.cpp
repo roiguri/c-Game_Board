@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "players/battle_info_impl.h"
+#include "players/basic/battle_info_impl.h"
 #include "game_board.h"
 #include "utils/point.h"
 #include <string>

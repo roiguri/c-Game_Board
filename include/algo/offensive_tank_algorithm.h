@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algo/basic_tank_algorithm.h"
+#include "players/basic/basic_tank_algorithm.h"
 #include "players/offensive_battle_info.h"
 #include <optional>
 #include <vector>
