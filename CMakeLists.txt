@@ -37,14 +37,30 @@ else()
     add_definitions(-DENABLE_VISUALIZATION)
 endif()
 
+# Explicitly remove main game and analysis tool sources from library sources
+list(REMOVE_ITEM CORE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+list(REMOVE_ITEM CORE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/bonus/analysis/analysis_tool.cpp")
+
 # Create the core library
 add_library(tanks_game_lib ${ALL_SOURCES} ${ALL_HEADERS} ${COMMON_HEADERS})
-target_include_directories(tanks_game_lib PUBLIC ${COMMON_INCLUDES})
+target_include_directories(tanks_game_lib PUBLIC 
+    ${COMMON_INCLUDES}
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+)
 
 # Main executable
 add_executable(tanks_game src/main.cpp)
 target_link_libraries(tanks_game PRIVATE tanks_game_lib)
 target_include_directories(tanks_game PRIVATE ${COMMON_INCLUDES})
+
+# Add the analysis tool executable
+add_executable(analysis_tool "${CMAKE_CURRENT_SOURCE_DIR}/src/bonus/analysis/analysis_tool.cpp")
+target_link_libraries(analysis_tool PRIVATE tanks_game_lib)
+target_include_directories(analysis_tool PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/common)
+set_target_properties(analysis_tool
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
 
 # Testing configuration
 if(ENABLE_TESTING)
@@ -74,6 +90,7 @@ if(ENABLE_TESTING)
     endif()
     
     add_executable(tanks_game_tests ${TEST_SOURCES})
+    target_compile_definitions(tanks_game_tests PRIVATE TEST_BUILD) 
     target_include_directories(tanks_game_tests PRIVATE ${COMMON_INCLUDES})
     target_link_libraries(tanks_game_tests PRIVATE tanks_game_lib gtest gmock gtest_main)
     set_target_properties(tanks_game_tests PROPERTIES 
