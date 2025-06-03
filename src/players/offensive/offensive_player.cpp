@@ -14,45 +14,9 @@ void OffensivePlayer::updateTankWithBattleInfo(TankAlgorithm& tank, SatelliteVie
 }
 
 void OffensivePlayer::populateBattleInfo(SatelliteView& satelliteView) {
-    m_offensiveBattleInfo.clear();
-    // TODO: Use BasicPlayer's logic to populate the board, tanks, shells, etc.
-    for (size_t y = 0; y < m_boardHeight; ++y) {
-        for (size_t x = 0; x < m_boardWidth; ++x) {
-            char obj = satelliteView.getObjectAt(x, y);
-            GameBoard::CellType cellType = GameBoard::CellType::Empty;
-            switch (obj) {
-                case '#':
-                    cellType = GameBoard::CellType::Wall;
-                    break;
-                case '@':
-                    cellType = GameBoard::CellType::Mine;
-                    break;
-                case '%':
-                    cellType = GameBoard::CellType::Empty;
-                    m_offensiveBattleInfo.setOwnTankPosition(Point(x, y));
-                    break;
-                case '*':
-                    cellType = GameBoard::CellType::Empty;
-                    m_offensiveBattleInfo.addShellPosition(Point(x, y));
-                    break;
-                case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': {
-                    cellType = GameBoard::CellType::Empty;
-                    int tankPlayerId = obj - '0';
-                    if (tankPlayerId == m_playerIndex) {
-                        m_offensiveBattleInfo.addFriendlyTankPosition(Point(x, y));
-                    } else {
-                        m_offensiveBattleInfo.addEnemyTankPosition(Point(x, y));
-                    }
-                    break;
-                }
-                case ' ':
-                default:
-                    cellType = GameBoard::CellType::Empty;
-                    break;
-            }
-            m_offensiveBattleInfo.setCellType(x, y, cellType);
-        }
-    }
+    // Use BasicPlayer's static parsing utility to populate offensive battle info directly
+    BasicPlayer::parseSatelliteViewToBattleInfo(m_offensiveBattleInfo, satelliteView, 
+                                                m_playerIndex, m_boardWidth, m_boardHeight);
     updateTarget();
 }
 

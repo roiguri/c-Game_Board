@@ -68,5 +68,23 @@ protected:
     */
    virtual void populateBattleInfo(SatelliteView& satelliteView);
    
+   /**
+    * @brief Static utility to parse satellite view into any BattleInfoImpl object
+    * 
+    * This static method contains the core parsing logic that can be reused by
+    * any class working with BattleInfoImpl-derived objects.
+    * 
+    * @param battleInfo The battle info object to populate
+    * @param satelliteView The satellite view to query
+    * @param playerIndex The player ID for distinguishing friendly vs enemy tanks
+    * @param boardWidth Width of the game board
+    * @param boardHeight Height of the game board
+    */
+   static void parseSatelliteViewToBattleInfo(BattleInfoImpl& battleInfo, 
+                                              SatelliteView& satelliteView,
+                                              int playerIndex,
+                                              size_t boardWidth, 
+                                              size_t boardHeight);
+   
    friend class BasicPlayerTest;
 };

@@ -23,9 +23,17 @@ void BasicPlayer::updateTankWithBattleInfo(TankAlgorithm& tank, SatelliteView& s
 }
 
 void BasicPlayer::populateBattleInfo(SatelliteView& satelliteView) {
-    m_battleInfo.clear();
-    for (size_t y = 0; y < m_boardHeight; ++y) {
-        for (size_t x = 0; x < m_boardWidth; ++x) {
+    parseSatelliteViewToBattleInfo(m_battleInfo, satelliteView, m_playerIndex, m_boardWidth, m_boardHeight);
+}
+
+void BasicPlayer::parseSatelliteViewToBattleInfo(BattleInfoImpl& battleInfo, 
+                                                 SatelliteView& satelliteView,
+                                                 int playerIndex,
+                                                 size_t boardWidth, 
+                                                 size_t boardHeight) {
+    battleInfo.clear();
+    for (size_t y = 0; y < boardHeight; ++y) {
+        for (size_t x = 0; x < boardWidth; ++x) {
             char obj = satelliteView.getObjectAt(x, y);
             GameBoard::CellType cellType = GameBoard::CellType::Empty;
             switch (obj) {
@@ -37,19 +45,19 @@ void BasicPlayer::populateBattleInfo(SatelliteView& satelliteView) {
                     break;
                 case '%':
                     cellType = GameBoard::CellType::Empty;
-                    m_battleInfo.setOwnTankPosition(Point(x, y));
+                    battleInfo.setOwnTankPosition(Point(x, y));
                     break;
                 case '*':
                     cellType = GameBoard::CellType::Empty;
-                    m_battleInfo.addShellPosition(Point(x, y));
+                    battleInfo.addShellPosition(Point(x, y));
                     break;
                 case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': {
                     cellType = GameBoard::CellType::Empty;
                     int tankPlayerId = obj - '0';
-                    if (tankPlayerId == m_playerIndex) {
-                        m_battleInfo.addFriendlyTankPosition(Point(x, y));
+                    if (tankPlayerId == playerIndex) {
+                        battleInfo.addFriendlyTankPosition(Point(x, y));
                     } else {
-                        m_battleInfo.addEnemyTankPosition(Point(x, y));
+                        battleInfo.addEnemyTankPosition(Point(x, y));
                     }
                     break;
                 }
@@ -58,7 +66,7 @@ void BasicPlayer::populateBattleInfo(SatelliteView& satelliteView) {
                     cellType = GameBoard::CellType::Empty;
                     break;
             }
-            m_battleInfo.setCellType(x, y, cellType);
+            battleInfo.setCellType(x, y, cellType);
         }
     }
 }
