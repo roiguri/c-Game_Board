@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <utility> // For std::pair, used in pairwise comparisons
 #include "bonus/analysis/analysis_tool.h"  // For Winner enum and GameOutcomeCounts
 
 /**
