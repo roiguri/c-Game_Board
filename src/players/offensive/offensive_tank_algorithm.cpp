@@ -26,26 +26,27 @@ void OffensiveTankAlgorithm::updateBattleInfo(BattleInfo& info) {
 }
 
 ActionRequest OffensiveTankAlgorithm::getAction() {
+    ActionRequest action = ActionRequest::GetBattleInfo;
     // 1. Update battle info if necessary
     m_turnsSinceLastUpdate++;
     if (m_turnsSinceLastUpdate > 3) {
-        return ActionRequest::GetBattleInfo;
-    }
-    ActionRequest action = getActionToSafePosition();
-    // 2. Avoid if in danger (from shells)
-    if (isInDangerFromShells()) {
-        // No need to update action, already called getActionToSafePosition()
-    } else if (canShootEnemy()) {
-        action = ActionRequest::Shoot;
-    } else if (m_targetPosition) {
-        auto turnAction = turnToShootAction();
-        if (turnAction.has_value()) {
-            action = turnAction.value();
-        } else {
-            updatePathToTarget();
-            auto moveAction = followCurrentPath();
-            if (moveAction.has_value()) {
-                action = moveAction.value();
+        // Update battle info is default action
+    } else {
+        // 2. Avoid if in danger (from shells)
+        if (isInDangerFromShells()) {
+            action = getActionToSafePosition();
+        } else if (canShootEnemy()) {
+            action = ActionRequest::Shoot;
+        } else if (m_targetPosition) {
+            auto turnAction = turnToShootAction();
+            if (turnAction.has_value()) {
+                action = turnAction.value();
+            } else {
+                updatePathToTarget();
+                auto moveAction = followCurrentPath();
+                if (moveAction.has_value()) {
+                    action = moveAction.value();
+                }
             }
         }
     }
@@ -162,6 +163,11 @@ std::vector<Point> OffensiveTankAlgorithm::findPathBFS(const Point& start, const
                 m_gameBoard.isMine(neighbor)) {
                 continue;
             }
+
+            if (current == start && !isPositionSafe(neighbor)) {
+                continue;
+            }
+
             visited.insert(neighbor);
             cameFrom[neighbor] = current;
             q.push(neighbor);

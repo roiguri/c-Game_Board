@@ -31,11 +31,10 @@ void BasicPlayer::parseSatelliteViewToBattleInfo(BattleInfoImpl& battleInfo,
                                                  int playerIndex,
                                                  size_t boardWidth, 
                                                  size_t boardHeight) {
-    battleInfo.clear();
     for (size_t y = 0; y < boardHeight; ++y) {
         for (size_t x = 0; x < boardWidth; ++x) {
             char obj = satelliteView.getObjectAt(x, y);
-            GameBoard::CellType cellType = GameBoard::CellType::Empty;
+            GameBoard::CellType cellType = battleInfo.getCellType(x, y);
             switch (obj) {
                 case '#':
                     cellType = GameBoard::CellType::Wall;
@@ -48,7 +47,6 @@ void BasicPlayer::parseSatelliteViewToBattleInfo(BattleInfoImpl& battleInfo,
                     battleInfo.setOwnTankPosition(Point(x, y));
                     break;
                 case '*':
-                    cellType = GameBoard::CellType::Empty;
                     battleInfo.addShellPosition(Point(x, y));
                     break;
                 case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': {

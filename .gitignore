@@ -54,3 +54,4 @@ CTestTestfile.cmake
 # Configuration files
 *.config
 .cursor
+CLAUDE.md

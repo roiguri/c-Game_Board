@@ -19,22 +19,18 @@ BasicTankAlgorithm::~BasicTankAlgorithm() = default;
 
 ActionRequest BasicTankAlgorithm::getAction() {
     m_turnsSinceLastUpdate++;
-    ActionRequest action;
+    ActionRequest action = getActionToSafePosition();
     // 1. Check if BattleInfo is outdated
     if (m_turnsSinceLastUpdate > 3) {
         action = ActionRequest::GetBattleInfo;
-        return action;
     }
     // 2. Check if in danger
     else if (isInDangerFromShells()) {
-        action = getActionToSafePosition();
+        // No need to update action, already called getActionToSafePosition()    
     }
     // 3. Check if can shoot enemy
     else if (canShootEnemy()) {
         action = ActionRequest::Shoot;
-    } 
-    else {
-        action = getActionToSafePosition();
     }
     
     // Debug log with position, direction, and requested action
@@ -153,7 +149,7 @@ bool BasicTankAlgorithm::isPositionSafe(const Point& position) const {
         return false;
     }
     // Check for mine
-    if (m_gameBoard.getCellType(position.getX(), position.getY()) == GameBoard::CellType::Mine) {
+    if (m_gameBoard.isMine(Point(position.getX(), position.getY()))) {
         return false;
     }
     // Check for tanks (enemy or friendly)
