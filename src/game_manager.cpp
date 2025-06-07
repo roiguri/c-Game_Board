@@ -152,7 +152,6 @@ bool GameManager::saveResults(const std::string& outputFilePath) {
 }
 
 void GameManager::processStep() {
-  // TODO: should these be local variables?
   m_currentBoard = m_board;
   m_currentTanks = m_tanks;
   m_currentShells = m_shells;
