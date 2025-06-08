@@ -41,9 +41,10 @@ public:
      */
     ~GameManager();
 
-    // Delete copy constructor and assignment operator
     GameManager(const GameManager&) = delete;
     GameManager& operator=(const GameManager&) = delete;
+    GameManager(GameManager&&) = default;
+    GameManager& operator=(GameManager&&) = default;
 
     /**
      * @brief Initialize the game with a board file
