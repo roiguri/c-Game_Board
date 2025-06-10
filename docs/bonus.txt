@@ -1,3 +1,81 @@
+# Bonus for exercise 2:
+
+## Centralized Command-Line Interface
+Includes automatic help generation with usage examples, 
+input validation with helpful error messages and error recovery with 
+informative messages.
+
+supported flags:
+--help, -h: Display help information about the cli interface
+--only_generate: Generate board without running game
+--run_generated: Generate board and immediately run game
+--config_path <path>: Specify configuration file path
+--enable_logging: Activate logging system
+--log_level <level>: Set logging verbosity
+--log_to_file: Enable file logging
+--no_console_log: Disable console logging
+--log_file <path>: Specify log file location
+
+## Logger
+- Log Levels: DEBUG, INFO, WARNING, ERROR
+- Output Options: Console, file, or both simultaneously
+
+Configuration Options:
+
+--enable_logging: Activate the logging system
+--log_level <level>: Set minimum log level (debug/info/warning/error)
+--log_to_file: Enable file output
+--log_file <path>: Specify log file path
+--no_console_log: Disable console output
+
+## Player Analysis framework
+Automated testing and statistical analysis system
+
+Tests algorithm performance across different dimensions:
+Board Size, Wall Density, Mine Density, Starting Ammunition, Tanks Per Player
+Outputs: 
+- output/analysis_summary.txt: Summary report with statistical analysis 
+- output/overall_results.csv: Complete results dataset
+- output/[dimension]_analysis.csv: Summary by dimension (1 per dimension)
+
+Statistical analysis includes:
+- Win Rate Calculation: Percentage-based performance metrics
+- Confidence Intervals: 95% confidence intervals for all measurements
+- Statistical Significance: Determines if performance differences are meaningful
+- Sample Validation: Warns about insufficient sample sizes
+- Margin of Error: Calculates and reports measurement uncertainty
+
+### Usage:
+
+Quick analysis with defaults (from build directory):
+./bin/analysis_tool
+
+Custom analysis with configuration:
+./bin/analysis_tool analysis_config.json
+
+Results automatically saved to output/ directory
+
+### Example configuration file:
+{
+  "boardSizes": [10, 15, 20],
+  "wallDensities": [0.1, 0.25, 0.4],
+  "mineDensities": [0.05, 0.1, 0.15],
+  "symmetryType": "horizontal",
+  "numSamples": 10,
+  "maxSteps": 500,
+  "numShells": [16, 20],
+  "numTanksPerPlayer": [1, 2, 3]
+}
+
+Extra features:
+- Configuration validation with warnings for large test runs
+- Estimated runtime calculation
+
+* Example summary report in root directory: summary_report.txt
+
+
+# Bonus for exercise 1:
+
 Visualization System
 
 - HTML-based game visualization with interactive playback

@@ -1,0 +1,47 @@
+TANK BATTLE ANALYSIS SUMMARY
+============================
+Generated: 2025-06-07 13:21:06
+Total Games Played: 60
+
+OVERALL RESULTS
+===============
+Player 1: 26.7% [±11.2%] *
+Player 2: 21.7% [±10.4%] *
+Ties: 51.7%
+Total Games: 60
+
+* = Statistically significant difference from 50%
+
+DIMENSIONAL ANALYSIS
+===================
+
+Board Size Effects:
+-------------------
+Size 10x10: P1: 23.3% [±15.1%] * | P2: 33.3% [±16.9%] | Games: 30
+Size 15x15: P1: 30.0% [±16.4%] * | P2: 10.0% [±10.7%] * | Games: 30
+
+Wall Density Effects:
+---------------------
+Density 0.10: P1: 26.7% [±11.2%] * | P2: 21.7% [±10.4%] * | Games: 60
+
+Mine Density Effects:
+---------------------
+Density 0.05: P1: 26.7% [±11.2%] * | P2: 21.7% [±10.4%] * | Games: 60
+
+Shell Count Effects:
+--------------------
+Shells 10: P1: 26.7% [±11.2%] * | P2: 21.7% [±10.4%] * | Games: 60
+
+Tank Count Effects:
+-------------------
+Tanks 1: P1: 35.0% [±20.9%] | P2: 15.0% [±15.6%] * [LOW SAMPLE] | Games: 20
+Tanks 2: P1: 30.0% [±20.1%] | P2: 35.0% [±20.9%] [LOW SAMPLE] | Games: 20
+Tanks 3: P1: 15.0% [±15.6%] * | P2: 15.0% [±15.6%] * [LOW SAMPLE] | Games: 20
+
+Legend:
+* = Statistically significant (performance different from 50%)
+[±X%] = 95% confidence interval margin of error
+[LOW SAMPLE] = Sample size < 30, results may be unreliable
+
+===========================================
+Analysis complete. Check CSV files in output/ directory for detailed data.

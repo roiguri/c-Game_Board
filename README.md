@@ -83,16 +83,29 @@ cmake -DENABLE_TESTING=ON -DENABLE_VISUALIZATION=ON ..
 make
 ```
 
-### 1. GTest
+
+### 1. CLI System
+Command-line interface with argument parsing and validation.
+Centralizes parsing arguments for all bonus features.
+
+#### Usage: 
+```bash
+# Show help
+./bin/tanks_game --help
+
+# All logging options and board generation options described below
+```
+
+### 2. GTest
 If tests are enabled, run the tests with:
 ```bash
 ./bin/tests/tanks_game_tests
 ```
 
-### 2. Visualization
+### 3. Visualization
 If visualization is enabled in the build, an HTML visualization will be generated alongside the output file.
 
-### 3. Board Generator
+### 4. Board Generator
 #### Usage:
 
 Generate a board without running the game:
@@ -121,7 +134,7 @@ used.
 | num_shells  | <number>                              | 10             |
 | map_name    | <string>                              | Generated Map  |
 
-### 4. Logger System
+### 5. Logger System
 A lightweight, configurable logging system that helps with debugging and monitoring game execution.
 
 #### Usage:
@@ -134,3 +147,28 @@ A lightweight, configurable logging system that helps with debugging and monitor
 ```
 
 The logger supports multiple log levels (debug, info, warning, error) and can output to console, file, or both. When disabled (default), it has no impact on the game.
+
+### Player Analysis Tool
+Automated testing framework for comparing algorithm performance across multiple game dimensions.
+
+#### Usage:
+```bash
+# Run analysis with default configuration
+./bin/analysis_tool
+
+# Run with custom configuration
+./bin/analysis_tool analysis_config.json
+```
+
+#### Analysis Configuration
+example:
+```json
+{
+  "boardSizes": [10, 15, 20],
+  "wallDensities": [0.1, 0.25, 0.4],
+  "mineDensities": [0.05, 0.1, 0.15],
+  "numSamples": 10,
+  "numShells": [16, 20, 24],
+  "numTanksPerPlayer": [1, 2, 3]
+}
+```
