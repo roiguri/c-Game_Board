@@ -72,6 +72,8 @@ Extra features:
 - Estimated runtime calculation
 
 * Example summary report in root directory: summary_report.txt
+* The analysis tool uses third party indicators.hpp for presenting the tool progress 
+  and json.hpp for parsing configuration file. 
 
 
 # Bonus for exercise 1:
