@@ -10,6 +10,12 @@ void BattleInfoImpl::clear() {
     m_shellPositions.clear();
 }
 
+void BattleInfoImpl::softClear() {
+    m_enemyTankPositions.clear();
+    m_friendlyTankPositions.clear();
+    m_shellPositions.clear();
+}
+
 void BattleInfoImpl::setCellType(int x, int y, GameBoard::CellType cellType) {
     m_gameBoard.setCellType(x, y, cellType);
 }

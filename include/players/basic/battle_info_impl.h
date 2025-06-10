@@ -16,6 +16,7 @@ public:
     
     // Board management
     void clear();
+    void softClear(); // clear shells and tanks vectors
     void setCellType(int x, int y, GameBoard::CellType cellType);
     GameBoard::CellType getCellType(int x, int y) const;
     const GameBoard& getGameBoard() const;

@@ -31,6 +31,7 @@ void BasicPlayer::parseSatelliteViewToBattleInfo(BattleInfoImpl& battleInfo,
                                                  int playerIndex,
                                                  size_t boardWidth, 
                                                  size_t boardHeight) {
+    battleInfo.softClear(); // clear only tanks and shells, board will be overriden.
     for (size_t y = 0; y < boardHeight; ++y) {
         for (size_t x = 0; x < boardWidth; ++x) {
             char obj = satelliteView.getObjectAt(x, y);
