@@ -1,0 +1,10 @@
+{
+    "boardSizes": [10, 15],
+    "wallDensities": [0.1],
+    "mineDensities": [0.05],
+    "numSamples": 10,
+    "numShells": [10],
+    "numTanksPerPlayer": [1, 2, 3],
+    "maxSteps": [500],
+    "symmetryType": "horizontal"
+}

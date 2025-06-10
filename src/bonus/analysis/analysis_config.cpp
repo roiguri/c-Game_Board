@@ -28,7 +28,7 @@ bool AnalysisConfig::loadFromFile(const std::string& filename) {
         std::ifstream file(filename);
         if (!file.is_open()) {
             std::cerr << "Warning: Could not open config file '" << filename 
-                      << "'. Using default values." << std::endl;
+                      << "'." << std::endl;
             return false;
         }
         

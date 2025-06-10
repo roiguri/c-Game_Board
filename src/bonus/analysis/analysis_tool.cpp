@@ -39,8 +39,6 @@ int AnalysisTool::runAnalysis(const std::string& configFile) {
             return 1;  // Exit with error code
         }
         std::cout << "Using configuration from: " << configFile << std::endl;
-    } else {
-        std::cout << "Using default configuration." << std::endl;
     }
     
     AnalysisParams params = config.getParams();
