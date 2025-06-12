@@ -64,6 +64,34 @@ bool GameBoard::initialize(const std::vector<std::string>& boardLines,
                   tankPositions.push_back({2, Point(x, y)});
                   cellType = CellType::Empty;
                   break;
+              case '3':
+                  tankPositions.push_back({3, Point(x, y)});
+                  cellType = CellType::Empty;
+                  break;
+              case '4':
+                  tankPositions.push_back({4, Point(x, y)});
+                  cellType = CellType::Empty;
+                  break;
+              case '5':
+                  tankPositions.push_back({5, Point(x, y)});
+                  cellType = CellType::Empty;
+                  break;
+              case '6':
+                  tankPositions.push_back({6, Point(x, y)});
+                  cellType = CellType::Empty;
+                  break;
+              case '7':
+                  tankPositions.push_back({7, Point(x, y)});
+                  cellType = CellType::Empty;
+                  break;
+              case '8':
+                  tankPositions.push_back({8, Point(x, y)});
+                  cellType = CellType::Empty;
+                  break;
+              case '9':
+                  tankPositions.push_back({9, Point(x, y)});
+                  cellType = CellType::Empty;
+                  break;
               case '@':
                   cellType = CellType::Mine;
                   break;

@@ -67,6 +67,13 @@ protected:
     int m_tankIndex;
     int m_turnsSinceLastUpdate = 0;
 
+    /**
+     * @brief Get initial direction for a player based on player ID
+     * @param playerId The player ID (1-9)
+     * @return Direction The initial direction for that player
+     */
+    static Direction getInitialDirection(int playerId);
+
     // State tracking for position, direction, shells, and cooldown
     Point m_trackedPosition;
     Direction m_trackedDirection;

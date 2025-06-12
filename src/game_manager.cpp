@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <unordered_map>
+#include <set>
 #include <satellite_view_impl.h>
 #include "bonus/logger/logger.h"
 
@@ -15,6 +16,7 @@ GameManager::GameManager(PlayerFactory& playerFactory,
       m_tankAlgorithmFactory(tankAlgorithmFactory),
       m_currentStep(0),
       m_gameOver(false),
+      m_isClassic2PlayerGame(false),
       m_remaining_steps(DEFAULT_NO_SHELLS_STEPS),
       m_maximum_steps(100) { 
     #ifdef ENABLE_VISUALIZATION
@@ -42,9 +44,6 @@ bool GameManager::readBoard(const std::string& filePath) {
     m_maximum_steps = maxSteps;
     Tank::setInitialShells(numShells);
 
-    m_player1 = m_playerFactory.create(1, cols, rows, maxSteps, numShells);
-    m_player2 = m_playerFactory.create(2, cols, rows, maxSteps, numShells);
-    
     m_board = GameBoard(cols, rows);
     std::vector<std::string> errors;
 
@@ -57,6 +56,22 @@ bool GameManager::readBoard(const std::string& filePath) {
         std::cerr << "Error: Could not save errors to file" << std::endl;
         return false;
     }
+    
+    // Determine unique player IDs from tank positions and create players
+    std::set<int> uniquePlayerIds;
+    for (const auto& [playerId, position] : tankPositions) {
+        uniquePlayerIds.insert(playerId);
+    }
+    
+    for (int playerId : uniquePlayerIds) {
+        auto player = m_playerFactory.create(playerId, cols, rows, maxSteps, numShells);
+        m_players.push_back({playerId, std::move(player)});
+    }
+    
+    // Determine if this is a classic 2-player game (only players 1 and 2, no others)
+    m_isClassic2PlayerGame = (uniquePlayerIds.size() == 2 && 
+                             uniquePlayerIds.find(1) != uniquePlayerIds.end() && 
+                             uniquePlayerIds.find(2) != uniquePlayerIds.end());
     
     createTanks(tankPositions);
     createTankAlgorithms();
@@ -290,10 +305,13 @@ void GameManager::applyAction(TankWithAlgorithm& controller) {
            }
 
            SatelliteViewImpl satteliteView(m_currentBoard, m_currentTanks, m_currentShells, playerTank.getPosition());
-            if (controller.tank.getPlayerId() == 1) {
-                m_player1->updateTankWithBattleInfo(*controller.algorithm, satteliteView);
-            } else {
-                m_player2->updateTankWithBattleInfo(*controller.algorithm, satteliteView);
+            
+            // Find the corresponding player
+            for (auto& playerWithId : m_players) {
+                if (playerWithId.playerId == controller.tank.getPlayerId()) {
+                    playerWithId.player->updateTankWithBattleInfo(*controller.algorithm, satteliteView);
+                    break;
+                }
             }
           }
           actionResult = true;
@@ -324,33 +342,69 @@ void GameManager::moveShellsOnce() {
 }
 
 bool GameManager::checkGameOver() {
-    int player1Alive = 0;
-    int player2Alive = 0;
+    // Count alive tanks per player
+    std::unordered_map<int, int> playersAlive;
     for (const auto& tank : m_tanks) {
         if (!tank.isDestroyed()) {
-            if (tank.getPlayerId() == 1) player1Alive++;
-            else if (tank.getPlayerId() == 2) player2Alive++;
+            playersAlive[tank.getPlayerId()]++;
         }
     }
 
-    if (player1Alive > 0 && player2Alive == 0) {
-        m_gameResult = "Player 1 won with " + std::to_string(player1Alive) + " tanks still alive";
+    // Count how many players have tanks alive
+    int playersWithTanks = 0;
+    int winningPlayer = -1;
+    int winningPlayerTanks = 0;
+    
+    for (const auto& [playerId, tankCount] : playersAlive) {
+        if (tankCount > 0) {
+            playersWithTanks++;
+            winningPlayer = playerId;
+            winningPlayerTanks = tankCount;
+        }
+    }
+
+    // Check win conditions
+    if (playersWithTanks == 1) {
+        m_gameResult = "Player " + std::to_string(winningPlayer) + " won with " + std::to_string(winningPlayerTanks) + " tanks still alive";
         return true;
     }
-    if (player2Alive > 0 && player1Alive == 0) {
-        m_gameResult = "Player 2 won with " + std::to_string(player2Alive) + " tanks still alive";
-        return true;
-    }
-    if (player1Alive == 0 && player2Alive == 0) {
-        m_gameResult = "Tie, both players have zero tanks";
+    if (playersWithTanks == 0) {
+        if (m_isClassic2PlayerGame) {
+            m_gameResult = "Tie, both players have zero tanks";
+        } else {
+            m_gameResult = "Tie, all players have zero tanks";
+        }
         return true;
     }
     if (m_remaining_steps <= 0) {
-        m_gameResult = "Tie, both players have zero shells for " + std::to_string(DEFAULT_NO_SHELLS_STEPS) + " steps";
+        if (m_isClassic2PlayerGame) {
+            m_gameResult = "Tie, both players have zero shells for " + std::to_string(DEFAULT_NO_SHELLS_STEPS) + " steps";
+        } else {
+            m_gameResult = "Tie, all players have zero shells for " + std::to_string(DEFAULT_NO_SHELLS_STEPS) + " steps";
+        }
         return true;
     }
     if (m_currentStep >= m_maximum_steps) {
-        m_gameResult = "Tie, reached max steps = " + std::to_string(m_maximum_steps) + ", player 1 has " + std::to_string(player1Alive) + " tanks, player 2 has " + std::to_string(player2Alive) + " tanks";
+        if (m_isClassic2PlayerGame) {
+            // Preserve original 2-player format
+            int player1Tanks = 0, player2Tanks = 0;
+            for (const auto& [playerId, tankCount] : playersAlive) {
+                if (playerId == 1) player1Tanks = tankCount;
+                else if (playerId == 2) player2Tanks = tankCount;
+            }
+            m_gameResult = "Tie, reached max steps = " + std::to_string(m_maximum_steps) + 
+                          ", player 1 has " + std::to_string(player1Tanks) + 
+                          " tanks, player 2 has " + std::to_string(player2Tanks) + " tanks";
+        } else {
+            // Multi-player format
+            std::string resultStr = "Tie, reached max steps = " + std::to_string(m_maximum_steps);
+            for (const auto& [playerId, tankCount] : playersAlive) {
+                if (tankCount > 0) {
+                    resultStr += ", player " + std::to_string(playerId) + " has " + std::to_string(tankCount) + " tanks";
+                }
+            }
+            m_gameResult = resultStr;
+        }
         return true;
     }
     // Game continues
@@ -413,11 +467,30 @@ std::string GameManager::actionToString(ActionRequest action) {
     }
 }
 
+Direction GameManager::getInitialDirection(int playerId) {
+    const Direction directions[] = {
+        Direction::Left,        // Player 1
+        Direction::Right,       // Player 2  
+        Direction::Up,          // Player 3
+        Direction::Down,        // Player 4
+        Direction::DownLeft,   // Player 5
+        Direction::DownRight,   // Player 6
+        Direction::UpLeft,   // Player 7
+        Direction::UpRight,   // Player 8
+        Direction::Left         // Player 9 (wrap around)
+    };
+    
+    if (playerId >= 1 && playerId <= 9) {
+        return directions[playerId - 1];
+    }
+    return Direction::Left; // Default fallback
+}
+
 void GameManager::createTanks(const std::vector<std::pair<int, Point>>& tankPositions) {
     LOG_INFO("Creating tanks");
     m_tanks.clear();
     for (const auto& [playerId, position] : tankPositions) {
-        Direction dir = (playerId == 1) ? Direction::Left : Direction::Right;
+        Direction dir = getInitialDirection(playerId);
         m_tanks.emplace_back(playerId, position, dir);
     }
     LOG_INFO("Tanks created");

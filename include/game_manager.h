@@ -72,9 +72,14 @@ public:
     };
 
 private:
+    // Player structure with ID
+    struct PlayerWithId {
+        int playerId;
+        std::unique_ptr<Player> player;
+    };
+    
     // Players
-    std::unique_ptr<Player> m_player1;
-    std::unique_ptr<Player> m_player2;
+    std::vector<PlayerWithId> m_players;
 
     // Factories
     PlayerFactory& m_playerFactory;
@@ -83,6 +88,7 @@ private:
     // Game state tracking
     int m_currentStep;
     bool m_gameOver;
+    bool m_isClassic2PlayerGame;
     int m_remaining_steps;
     int m_maximum_steps;
     std::string m_gameResult;
@@ -126,6 +132,9 @@ private:
 
     // Create tank objects based on tank positions
     void createTanks(const std::vector<std::pair<int, Point>>& tankPositions);
+
+    // Get initial direction for a player based on player ID
+    Direction getInitialDirection(int playerId);
 
     // Save recoverable errors to input_errors.txt file
     bool saveErrorsToFile(const std::vector<std::string>& errors) const;

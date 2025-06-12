@@ -45,7 +45,21 @@ protected:
         return manager.m_board;
     }
     static void SetPlayer1(GameManager& manager, std::unique_ptr<Player> player) {
-        manager.m_player1 = std::move(player);
+        // Find player 1 in the players vector and replace it
+        for (auto& playerWithId : manager.m_players) {
+            if (playerWithId.playerId == 1) {
+                playerWithId.player = std::move(player);
+                return;
+            }
+        }
+        // If player 1 doesn't exist, add it
+        manager.m_players.push_back({1, std::move(player)});
+    }
+    static void SetIsClassic2PlayerGame(GameManager& manager, bool value) {
+        manager.m_isClassic2PlayerGame = value;
+    }
+    static bool GetIsClassic2PlayerGame(GameManager& manager) {
+        return manager.m_isClassic2PlayerGame;
     }
     static void LogAction(GameManager& manager) {
         manager.logAction();
@@ -806,6 +820,7 @@ TEST_F(GameManagerTest, CheckGameOver_TieZeroTanks) {
     std::vector<std::pair<int, Point>> positions = { {1, Point(0,0)}, {2, Point(1,0)} };
     CreateTanks(*manager, positions);
     CreateTankAlgorithms(*manager);
+    SetIsClassic2PlayerGame(*manager, true); // Set for test environment
     for (auto& t : Tanks()) t.destroy();
     bool over = CallCheckGameOver();
     EXPECT_TRUE(over);
@@ -816,6 +831,7 @@ TEST_F(GameManagerTest, CheckGameOver_TieMaxSteps) {
     std::vector<std::pair<int, Point>> positions = { {1, Point(0,0)}, {2, Point(1,0)} };
     CreateTanks(*manager, positions);
     CreateTankAlgorithms(*manager);
+    SetIsClassic2PlayerGame(*manager, true); // Set for test environment
     SetMaxSteps(5);
     SetCurrentStep(5);
     bool over = CallCheckGameOver();
@@ -838,6 +854,7 @@ TEST_F(GameManagerTest, CheckGameOver_TieZeroShellsForExactly40Steps) {
     std::vector<std::pair<int, Point>> positions = { {1, Point(0,0)}, {2, Point(1,0)} };
     CreateTanks(*manager, positions);
     CreateTankAlgorithms(*manager);
+    SetIsClassic2PlayerGame(*manager, true); // Set for test environment
     
     // Drain all shells from tanks
     for (auto& tank : Tanks()) {
@@ -996,6 +1013,7 @@ TEST_F(GameManagerTest, Run_TieAfter40StepsWithZeroShells_Integration) {
     
     CreateTanks(*manager, positions);
     CreateTankAlgorithms(*manager);
+    SetIsClassic2PlayerGame(*manager, true); // Set for test environment
     
     // Verify tanks have full shells initially
     for (const auto& tank : Tanks()) {
@@ -1043,5 +1061,125 @@ TEST_F(GameManagerTest, Run_TieAfter40StepsWithZeroShells_Integration) {
     // Verify both tanks have 0 shells
     for (const auto& tank : Tanks()) {
         EXPECT_EQ(tank.getRemainingShells(), 0);
+    }
+}
+
+// Tests for isClassic2PlayerGame detection
+TEST_F(GameManagerTest, IsClassic2PlayerGame_DetectionTests) {
+    // Test 1: Classic 2-player game (players 1 and 2 only)
+    {
+        // Create a simple board with only players 1 and 2
+        std::string boardContent = R"(Test Board
+MaxSteps = 100
+NumShells = 10
+Rows = 3
+Cols = 3
+1 2
+   
+   )";
+        
+        // Write to temporary file
+        std::ofstream tempFile("test_2player.txt");
+        tempFile << boardContent;
+        tempFile.close();
+        
+        GameManager testManager(playerFactory, algoFactory);
+        EXPECT_TRUE(testManager.readBoard("test_2player.txt"));
+        EXPECT_TRUE(GetIsClassic2PlayerGame(testManager));
+        
+        // Clean up
+        std::remove("test_2player.txt");
+    }
+    
+    // Test 2: Multi-player game (players 1, 2, and 3)
+    {
+        std::string boardContent = R"(Multi Player Board
+MaxSteps = 100
+NumShells = 10
+Rows = 3
+Cols = 3
+1 2
+3  
+   )";
+        
+        std::ofstream tempFile("test_3player.txt");
+        tempFile << boardContent;
+        tempFile.close();
+        
+        GameManager testManager(playerFactory, algoFactory);
+        EXPECT_TRUE(testManager.readBoard("test_3player.txt"));
+        EXPECT_FALSE(GetIsClassic2PlayerGame(testManager));
+        
+        std::remove("test_3player.txt");
+    }
+    
+    // Test 3: Only player 1 (should be false)
+    {
+        std::string boardContent = R"(Single Player Board
+MaxSteps = 100
+NumShells = 10
+Rows = 3
+Cols = 3
+1  
+   
+   )";
+        
+        std::ofstream tempFile("test_1player.txt");
+        tempFile << boardContent;
+        tempFile.close();
+        
+        GameManager testManager(playerFactory, algoFactory);
+        EXPECT_TRUE(testManager.readBoard("test_1player.txt"));
+        EXPECT_FALSE(GetIsClassic2PlayerGame(testManager));
+        
+        std::remove("test_1player.txt");
+    }
+    
+    // Test 4: Players 2 and 3 (missing player 1, should be false)
+    {
+        std::string boardContent = R"(No Player 1 Board
+MaxSteps = 100
+NumShells = 10
+Rows = 3
+Cols = 3
+2 3
+   
+   )";
+        
+        std::ofstream tempFile("test_2and3player.txt");
+        tempFile << boardContent;
+        tempFile.close();
+        
+        GameManager testManager(playerFactory, algoFactory);
+        EXPECT_TRUE(testManager.readBoard("test_2and3player.txt"));
+        EXPECT_FALSE(GetIsClassic2PlayerGame(testManager));
+        
+        std::remove("test_2and3player.txt");
+    }
+    
+    // Test 5: 9-player game (should be false)
+    {
+        std::string boardContent = R"(Max Players Board
+MaxSteps = 100
+NumShells = 10
+Rows = 3
+Cols = 9
+123456789)";
+        
+        std::ofstream tempFile("test_9player.txt");
+        tempFile << boardContent;
+        tempFile.close();
+        
+        GameManager testManager(playerFactory, algoFactory);
+        EXPECT_TRUE(testManager.readBoard("test_9player.txt"));
+        EXPECT_FALSE(GetIsClassic2PlayerGame(testManager));
+        
+        std::remove("test_9player.txt");
+    }
+    
+    // Test 6: Default initialization (should be false)
+    {
+        GameManager testManager(playerFactory, algoFactory);
+        EXPECT_FALSE(GetIsClassic2PlayerGame(testManager));
     }
 }
