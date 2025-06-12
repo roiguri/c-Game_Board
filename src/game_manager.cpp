@@ -130,6 +130,21 @@ void GameManager::run() {
   LOG_INFO("Game ended after " + std::to_string(m_currentStep) + " steps");
   LOG_INFO("Result: " + m_gameResult);
 
+  #ifdef ENABLE_VISUALIZATION
+  if (m_visualizationManager) {
+      std::string finalMessage = "Game ended after " + std::to_string(m_currentStep) + " steps. Result: " + m_gameResult;
+      
+      m_visualizationManager->captureGameState(
+          m_currentStep + 1,
+          m_board,
+          m_tanks,
+          m_shells,
+          m_remaining_steps,
+          finalMessage
+      );
+  }
+  #endif
+
   saveResults(m_outputFilePath);
 }
 

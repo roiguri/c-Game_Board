@@ -242,7 +242,14 @@ std::string HTMLVisualizer::generateGameDataJS() const {
     js << "        WALL: 1,\n";
     js << "        MINE: 2,\n";
     js << "        TANK1: 3,\n";
-    js << "        TANK2: 4\n";
+    js << "        TANK2: 4,\n";
+    js << "        TANK3: 5,\n";
+    js << "        TANK4: 6,\n";
+    js << "        TANK5: 7,\n";
+    js << "        TANK6: 8,\n";
+    js << "        TANK7: 9,\n";
+    js << "        TANK8: 10,\n";
+    js << "        TANK9: 11\n";
     js << "    },\n";
     
     // Add direction enum mapping for reference
