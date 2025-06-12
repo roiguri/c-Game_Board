@@ -26,7 +26,6 @@
         <div class="status">
             <span id="stepDisplay">Step: 0 / {{TOTAL_STEPS}}</span>
             <span id="countdownDisplay" class="countdown-display"></span>
-            <span id="messageDisplay"></span>
         </div>
         <div class="board-container">
             <div id="gameBoard" class="game-board"></div>
@@ -40,16 +39,14 @@
             <div class="legend-item"><div class="legend-color shell"></div><div class="legend-text">Shell</div></div>
         </div>
         <div class="stats-container">
-            <div id="player1Stats" class="player-stats player1">
-                <h3>Player 1</h3>
-                <div>Status: <span id="player1Status">Active</span></div>
-                <div>Shells: <span id="player1Shells">0</span></div>
+            <div id="tankStats" class="tank-stats">
+                <h3>Tank Status</h3>
+                <div id="tankList" class="tank-list"></div>
             </div>
-            <div id="player2Stats" class="player-stats player2">
-                <h3>Player 2</h3>
-                <div>Status: <span id="player2Status">Active</span></div>
-                <div>Shells: <span id="player2Shells">0</span></div>
-            </div>
+        </div>
+        <div class="action-log-container">
+            <h3>Action Log</h3>
+            <div id="actionLog" class="action-log"></div>
         </div>
     </div>
     <script>

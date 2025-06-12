@@ -9,13 +9,32 @@
 BasicTankAlgorithm::BasicTankAlgorithm(int playerId, int tankIndex)
     : m_playerId(playerId), m_tankIndex(tankIndex), m_gameBoard(5, 5) {
     m_trackedPosition = Point(0, 0);
-    m_trackedDirection = (playerId == 1) ? Direction::Left : Direction::Right;
+    m_trackedDirection = getInitialDirection(playerId);
     m_trackedShells = Tank::INITIAL_SHELLS;
     m_trackedCooldown = 0;
     m_turnsSinceLastUpdate = 4;
 }
 
 BasicTankAlgorithm::~BasicTankAlgorithm() = default;
+
+Direction BasicTankAlgorithm::getInitialDirection(int playerId) {
+    const Direction directions[] = {
+        Direction::Left,        // Player 1
+        Direction::Right,       // Player 2  
+        Direction::Up,          // Player 3
+        Direction::Down,        // Player 4
+        Direction::DownLeft,    // Player 5
+        Direction::DownRight,   // Player 6
+        Direction::UpLeft,      // Player 7
+        Direction::UpRight,     // Player 8
+        Direction::Left         // Player 9 (wrap around)
+    };
+    
+    if (playerId >= 1 && playerId <= 9) {
+        return directions[playerId - 1];
+    }
+    return Direction::Left; // Default fallback
+}
 
 ActionRequest BasicTankAlgorithm::getAction() {
     m_turnsSinceLastUpdate++;

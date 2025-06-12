@@ -55,8 +55,8 @@ button:disabled {
 
 .status {
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 15px;
   font-size: 14px;
   padding: 5px 10px;
@@ -129,6 +129,34 @@ button:disabled {
   background-color: #f44336;
 }
 
+.tank3, .shell3 {
+  background-color: #4caf50;
+}
+
+.tank4, .shell4 {
+  background-color: #ff9800;
+}
+
+.tank5, .shell5 {
+  background-color: #9c27b0;
+}
+
+.tank6, .shell6 {
+  background-color: #00bcd4;
+}
+
+.tank7, .shell7 {
+  background-color: #795548;
+}
+
+.tank8, .shell8 {
+  background-color: #607d8b;
+}
+
+.tank9, .shell9 {
+  background-color: #e91e63;
+}
+
 .cannon {
   position: absolute;
   height: 4px;
@@ -165,27 +193,84 @@ button:disabled {
   border: 1px solid #000;
 }
 
-.stats-container {
-  display: flex;
-  justify-content: space-between;
+.action-log-container {
   margin-bottom: 20px;
 }
 
-.player-stats {
-  padding: 10px;
-  border-radius: 4px;
-  width: 45%;
-}
-
-.player-stats h3 {
+.action-log-container h3 {
   margin-top: 0;
   margin-bottom: 10px;
+  text-align: center;
 }
 
-.player1 {
-  background-color: rgba(33, 150, 243, 0.1);
+.action-log {
+  height: 60px;
+  overflow-y: auto;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 8px;
 }
 
-.player2 {
-  background-color: rgba(244, 67, 54, 0.1);
+.stats-container {
+  margin-bottom: 20px;
+}
+
+.tank-stats h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.tank-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.tank-info {
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 120px;
+  background-color: #fff;
+}
+
+.tank-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  border: 1px solid #000;
+  flex-shrink: 0;
+}
+
+.tank-details {
+  flex: 1;
+  line-height: 1.2;
+}
+
+.tank-player {
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.tank-status {
+  font-size: 10px;
+  color: #666;
+}
+
+.tank-destroyed {
+  opacity: 0.5;
+  background-color: #f5f5f5;
 }

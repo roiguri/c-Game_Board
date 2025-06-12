@@ -1,5 +1,14 @@
 # Bonus for exercise 2:
 
+## Multiple Player Support
+
+Extended the game engine to support 2-9 players while maintaining full backwards compatibility:
+
+- **Core Game Engine**: Refactored from hardcoded 2-player system to flexible N-player architecture
+- **Player Assignment**: Modulo 2 logic (odd players = Basic/Defensive, even players = Offensive)
+- **Board Parsing**: Extended to support characters '1'-'9' for player identification
+- Board generation and Analysis tool only support 2 players
+
 ## Centralized Command-Line Interface
 Includes automatic help generation with usage examples, 
 input validation with helpful error messages and error recovery with 
@@ -75,6 +84,11 @@ Extra features:
 * The analysis tool uses third party indicators.hpp for presenting the tool progress 
   and json.hpp for parsing configuration file. 
 
+## Optimized Visualization System (probably does not count for bonus)
+
+support for multiple tank display and up to 9 players.
+- Support for up to 9 players.
+- present metadata per tank: remaining shells per tank + destroyed state.
 
 # Bonus for exercise 1:
 

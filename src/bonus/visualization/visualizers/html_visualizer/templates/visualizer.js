@@ -9,11 +9,8 @@ const btnLast = document.getElementById('btnLast');
 const speedSlider = document.getElementById('speedSlider');
 const stepDisplay = document.getElementById('stepDisplay');
 const countdownDisplay = document.getElementById('countdownDisplay');
-const messageDisplay = document.getElementById('messageDisplay');
-const player1Status = document.getElementById('player1Status');
-const player1Shells = document.getElementById('player1Shells');
-const player2Status = document.getElementById('player2Status');
-const player2Shells = document.getElementById('player2Shells');
+const actionLog = document.getElementById('actionLog');
+const tankList = document.getElementById('tankList');
 
 // State variables
 let currentSnapshotIndex = 0;
@@ -70,9 +67,11 @@ function renderSnapshot(index) {
     
     const snapshot = gameData.snapshots[index];
     
+    // Update current index first
+    currentSnapshotIndex = index;
+    
     // Update status displays
     stepDisplay.textContent = `Step: ${snapshot.step} / ${gameData.snapshots[gameData.snapshots.length - 1].step}`;
-    messageDisplay.textContent = snapshot.message;
     
     // Update countdown display
     if (snapshot.countdown > 0) {
@@ -119,6 +118,13 @@ function renderSnapshot(index) {
                     break;
                 case gameData.cellTypes.TANK1:
                 case gameData.cellTypes.TANK2:
+                case gameData.cellTypes.TANK3:
+                case gameData.cellTypes.TANK4:
+                case gameData.cellTypes.TANK5:
+                case gameData.cellTypes.TANK6:
+                case gameData.cellTypes.TANK7:
+                case gameData.cellTypes.TANK8:
+                case gameData.cellTypes.TANK9:
                     // Tanks are rendered separately
                     break;
             }
@@ -131,7 +137,7 @@ function renderSnapshot(index) {
         if (!cell) return;
         
         if (!tank.destroyed) {
-            cell.classList.add(tank.playerId === 1 ? 'tank1' : 'tank2');
+            cell.classList.add(`tank${tank.playerId}`);
             
             // Add cannon
             const cannon = document.createElement('div');
@@ -211,14 +217,6 @@ function renderSnapshot(index) {
             cell.appendChild(cannon);
         }
         
-        // Update player stats
-        if (tank.playerId === 1) {
-            player1Status.textContent = tank.destroyed ? 'Destroyed' : 'Active';
-            player1Shells.textContent = tank.remainingShells;
-        } else if (tank.playerId === 2) {
-            player2Status.textContent = tank.destroyed ? 'Destroyed' : 'Active';
-            player2Shells.textContent = tank.remainingShells;
-        }
     });
     
     // Render shells
@@ -233,13 +231,17 @@ function renderSnapshot(index) {
         cell.appendChild(shellElement);
     });
     
+    // Update tank stats display
+    updateTankStats(snapshot);
+    
+    // Update action log
+    updateActionLog();
+    
     // Update button states
     btnFirst.disabled = index === 0;
     btnPrev.disabled = index === 0;
     btnNext.disabled = index === gameData.snapshots.length - 1;
     btnLast.disabled = index === gameData.snapshots.length - 1;
-    
-    currentSnapshotIndex = index;
 }
 
 // Helper to get a cell at specific coordinates
@@ -310,6 +312,78 @@ function updatePlaybackSpeed() {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', initialize);
+
+// Update tank stats display
+function updateTankStats(snapshot) {
+    tankList.innerHTML = '';
+    
+    // Sort tanks by player ID for consistent ordering
+    const sortedTanks = [...snapshot.tanks].sort((a, b) => a.playerId - b.playerId);
+    
+    sortedTanks.forEach(tank => {
+        const tankDiv = document.createElement('div');
+        tankDiv.className = 'tank-info';
+        if (tank.destroyed) {
+            tankDiv.classList.add('tank-destroyed');
+        }
+        
+        const colorDiv = document.createElement('div');
+        colorDiv.className = `tank-color tank${tank.playerId}`;
+        
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'tank-details';
+        detailsDiv.innerHTML = `
+            <div class="tank-player">P${tank.playerId}</div>
+            <div class="tank-status">${tank.destroyed ? 'Destroyed' : tank.remainingShells + ' shells'}</div>
+        `;
+        
+        tankDiv.appendChild(colorDiv);
+        tankDiv.appendChild(detailsDiv);
+        tankList.appendChild(tankDiv);
+    });
+}
+
+// Update action log display
+function updateActionLog() {
+    // Clear the log
+    actionLog.innerHTML = '';
+    
+    const currentSnapshot = gameData.snapshots[currentSnapshotIndex];
+    
+    // If we're at the last step, try to show game result
+    if (currentSnapshotIndex === gameData.snapshots.length - 1) {
+        // Check all snapshots for any result-like message
+        for (let i = gameData.snapshots.length - 1; i >= 0; i--) {
+            const snap = gameData.snapshots[i];
+            
+            if (snap.message && snap.message.trim() !== '' && 
+                snap.message !== `Step ${snap.step}`) {
+                // This is a meaningful message, use it as the result
+                const logEntry = document.createElement('div');
+                logEntry.innerHTML = `<strong>Game Complete:</strong> ${snap.message}`;
+                actionLog.appendChild(logEntry);
+                return;
+            }
+        }
+        
+        // If no meaningful message found, show basic completion
+        const logEntry = document.createElement('div');
+        logEntry.innerHTML = `<strong>Game Complete</strong>`;
+        actionLog.appendChild(logEntry);
+        return;
+    }
+    
+    // Show only the current snapshot's message if it's meaningful
+    if (currentSnapshot && currentSnapshot.message && 
+        currentSnapshot.message !== '' && 
+        currentSnapshot.message !== `Step ${currentSnapshot.step}` &&
+        currentSnapshot.message.trim() !== '') {
+        
+        const logEntry = document.createElement('div');
+        logEntry.innerHTML = `<strong>Step ${currentSnapshot.step}:</strong> ${currentSnapshot.message}`;
+        actionLog.appendChild(logEntry);
+    }
+}
 
 // If document already loaded, initialize immediately
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
