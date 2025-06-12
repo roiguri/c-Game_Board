@@ -2,9 +2,10 @@
 
 ## Overview
 
-A program simulating a two-tank battle on a 2D board. 
+A program simulating multi-player tank battles on a 2D board supporting 2-9 players. 
 Features algorithmic strategies, walls, mines, and artillery with collision
-mechanics.
+mechanics. Player assignment follows modulo 2 logic (odd players = Basic/Defensive, 
+even players = Offensive).
 
 ## Input File Format
 
@@ -16,11 +17,13 @@ Specifies board layout:
   3. NumShells = <NUM>
   4. Rows = <NUM>
   5. Cols = <NUM>
-* Subsequent lines: board content (`#`: Wall (2 hits), `1`: Player 1 tank, `2`: Player 2 tank, `@`: Mine, ` `: Empty).
+* Subsequent lines: board content (`#`: Wall (2 hits), `1`-`9`: Player tanks, `@`: Mine, ` `: Empty).
 * In order to start the game the file must include all header lines.
+* Supports 2-9 players (must include players 1 and 2 at minimum).
 
-### Example Board File
+### Example Board Files
 
+**2-Player Battle:**
 ```
 Complex Battle Arena
 MaxSteps = 1000
@@ -42,6 +45,30 @@ Cols = 15
  1     @@#  @#  
        #          
       # 2      
+```
+
+**Multi-Player Battle (up to 9 players):**
+```
+A great map
+MaxSteps = 500
+NumShells = 20
+Rows = 15
+Cols = 15
+   @ @    # ##@
+   3         # 
+ # #     # @  #
+    @ #        
+@     2#@ @    
+4     # #   @#
+      #     # #
+    @ ##@@ #   
+ @ #    2  @  #
+  #@#@   1  2# 
+ ###   #       
+ @@   # @  #@ @
+ ##  ## 1  #@# 
+#     #   3   #
+1 56789   ## #
 ```
 
 ## Output Format
