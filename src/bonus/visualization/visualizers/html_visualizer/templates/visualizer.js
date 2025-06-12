@@ -67,6 +67,9 @@ function renderSnapshot(index) {
     
     const snapshot = gameData.snapshots[index];
     
+    // Update current index first
+    currentSnapshotIndex = index;
+    
     // Update status displays
     stepDisplay.textContent = `Step: ${snapshot.step} / ${gameData.snapshots[gameData.snapshots.length - 1].step}`;
     
@@ -239,8 +242,6 @@ function renderSnapshot(index) {
     btnPrev.disabled = index === 0;
     btnNext.disabled = index === gameData.snapshots.length - 1;
     btnLast.disabled = index === gameData.snapshots.length - 1;
-    
-    currentSnapshotIndex = index;
 }
 
 // Helper to get a cell at specific coordinates
@@ -344,28 +345,44 @@ function updateTankStats(snapshot) {
 
 // Update action log display
 function updateActionLog() {
-    // Clear and rebuild log up to current step
+    // Clear the log
     actionLog.innerHTML = '';
     
-    // Show entries from start up to current step, filtering out empty or generic messages
-    for (let i = 0; i <= currentSnapshotIndex && i < gameData.snapshots.length; i++) {
-        const snap = gameData.snapshots[i];
-        
-        // Skip empty messages or generic step messages without action details
-        if (!snap.message || 
-            snap.message === '' || 
-            snap.message === `Step ${snap.step}` ||
-            snap.message.trim() === '') {
-            continue;
+    const currentSnapshot = gameData.snapshots[currentSnapshotIndex];
+    
+    // If we're at the last step, try to show game result
+    if (currentSnapshotIndex === gameData.snapshots.length - 1) {
+        // Check all snapshots for any result-like message
+        for (let i = gameData.snapshots.length - 1; i >= 0; i--) {
+            const snap = gameData.snapshots[i];
+            
+            if (snap.message && snap.message.trim() !== '' && 
+                snap.message !== `Step ${snap.step}`) {
+                // This is a meaningful message, use it as the result
+                const logEntry = document.createElement('div');
+                logEntry.innerHTML = `<strong>Game Complete:</strong> ${snap.message}`;
+                actionLog.appendChild(logEntry);
+                return;
+            }
         }
         
+        // If no meaningful message found, show basic completion
         const logEntry = document.createElement('div');
-        logEntry.innerHTML = `<strong>Step ${snap.step}:</strong> ${snap.message}`;
+        logEntry.innerHTML = `<strong>Game Complete</strong>`;
         actionLog.appendChild(logEntry);
+        return;
     }
     
-    // Auto-scroll to bottom
-    actionLog.scrollTop = actionLog.scrollHeight;
+    // Show only the current snapshot's message if it's meaningful
+    if (currentSnapshot && currentSnapshot.message && 
+        currentSnapshot.message !== '' && 
+        currentSnapshot.message !== `Step ${currentSnapshot.step}` &&
+        currentSnapshot.message.trim() !== '') {
+        
+        const logEntry = document.createElement('div');
+        logEntry.innerHTML = `<strong>Step ${currentSnapshot.step}:</strong> ${currentSnapshot.message}`;
+        actionLog.appendChild(logEntry);
+    }
 }
 
 // If document already loaded, initialize immediately
