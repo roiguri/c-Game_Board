@@ -330,9 +330,9 @@ mv src/players/* Algorithm/players/ 2>/dev/null || true
 ```
 
 **Success Criteria:**
-- [ ] `Algorithm/players/basic/` contains BasicPlayer and BasicTankAlgorithm
-- [ ] `Algorithm/players/offensive/` contains OffensivePlayer and OffensiveTankAlgorithm
-- [ ] No player files remain in original directories
+- [x] `Algorithm/players/basic/` contains BasicPlayer and BasicTankAlgorithm
+- [x] `Algorithm/players/offensive/` contains OffensivePlayer and OffensiveTankAlgorithm
+- [x] No player files remain in original directories
 
 **End State:** All player strategy implementations are in Algorithm project.
 
