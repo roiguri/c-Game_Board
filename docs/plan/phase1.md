@@ -354,9 +354,9 @@ rm -rf build/
 ```
 
 **Success Criteria:**
-- [ ] `Simulator/main.cpp` exists
-- [ ] No CMake files remain
-- [ ] Original `src/` and `include/` directories are empty or removed
+- [x] `Simulator/main.cpp` exists
+- [ ] No CMake files remain (will remove after creating new build system)
+- [x] Original `src/` and `include/` directories removed, test mocks moved to `UserCommon/utils/testing/`
 
 **End State:** Main executable is in Simulator, old build system removed.
 
