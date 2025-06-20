@@ -53,9 +53,9 @@ public:
 ```
 
 **Success Criteria:**
-- [ ] `common/GameResult.h` exists with exact struct from instructions.md
-- [ ] `common/AbstractGameManager.h` exists with exact interface from instructions.md
-- [ ] Both headers compile independently: `g++ -c common/GameResult.h -o /dev/null`
+- [x] `common/GameResult.h` exists with exact struct from instructions.md
+- [x] `common/AbstractGameManager.h` exists with exact interface from instructions.md
+- [x] Both headers compile independently: `g++ -c common/GameResult.h -o /dev/null`
 
 **End State:** Assignment-required interface headers exist and compile.
 
@@ -108,10 +108,10 @@ using PlayerFactory =
 ```
 
 **Success Criteria:**
-- [ ] `TankAlgorithm.h` includes required `using TankAlgorithmFactory` declaration
-- [ ] `Player.h` includes required `using PlayerFactory` declaration
-- [ ] `Player.h` contains only pure virtual methods (no constructor)
-- [ ] All updated headers compile: `g++ -c common/*.h`
+- [x] `TankAlgorithm.h` includes required `using TankAlgorithmFactory` declaration
+- [x] `Player.h` includes required `using PlayerFactory` declaration
+- [x] `Player.h` contains only pure virtual methods (no constructor)
+- [x] All updated headers compile: `g++ -c common/*.h`
 
 **End State:** Interface headers match Assignment 3 specifications exactly.
 
@@ -171,9 +171,9 @@ GameManagerRegistration register_me_##class_name \
 ```
 
 **Success Criteria:**
-- [ ] All 3 registration headers exist in `common/`
-- [ ] Headers contain exact macro definitions from instructions.md
-- [ ] Headers compile without implementation: `g++ -c common/*Registration.h`
+- [x] All 3 registration headers exist in `common/`
+- [x] Headers contain exact macro definitions from instructions.md
+- [x] Headers compile without implementation: `g++ -c common/*Registration.h`
 
 **End State:** Registration infrastructure headers exist (stubs only, no implementation).
 
@@ -207,10 +207,10 @@ int main() { return 0; }
 3. Compile test: `g++ test_interfaces.cpp -o test && rm test`
 
 **Success Criteria:**
-- [ ] All headers compile individually without errors
-- [ ] All headers can be included together
-- [ ] No circular dependency issues
-- [ ] Test compilation succeeds
+- [x] All headers compile individually without errors
+- [x] All headers can be included together
+- [x] No circular dependency issues
+- [x] Test compilation succeeds
 
 **End State:** Complete interface layer is functional and ready for implementation.
 
@@ -238,9 +238,9 @@ mkdir -p UserCommon/bonus/
 2. Verify `common/` directory exists with interface headers
 
 **Success Criteria:**
-- [ ] All 5 main directories exist: `Simulator/`, `Algorithm/`, `GameManager/`, `common/`, `UserCommon/`
-- [ ] Subdirectories follow logical organization
-- [ ] `tree -d` shows complete directory structure
+- [x] All 5 main directories exist: `Simulator/`, `Algorithm/`, `GameManager/`, `common/`, `UserCommon/`
+- [x] Subdirectories follow logical organization
+- [x] `tree -d` shows complete directory structure
 
 **End State:** Directory structure matches Assignment 3 requirements.
 
@@ -248,7 +248,7 @@ mkdir -p UserCommon/bonus/
 
 ### Step 1B.2: Move UserCommon Files
 
-**Objective:** Relocate shared utilities and bonus features to UserCommon, combining src/include hierarchies.
+**Objective:** Relocate shared utilities and bonus features to UserCommon, combining src/include/test hierarchies.
 
 **Actions:**
 1. Move utility classes:
@@ -267,10 +267,10 @@ rmdir include/utils src/utils include/bonus src/bonus 2>/dev/null || true
 ```
 
 **Success Criteria:**
-- [ ] `UserCommon/utils/` contains Point, Direction, MidPoint classes (.h and .cpp)
-- [ ] `UserCommon/bonus/` contains visualization, logging, CLI, analysis, board generator
-- [ ] No utility or bonus files remain in original `src/` or `include/`
-- [ ] File count matches expected: `find UserCommon -name "*.cpp" -o -name "*.h" | wc -l`
+- [x] `UserCommon/utils/` contains Point, Direction, MidPoint classes (.h, .cpp, and test files)
+- [x] `UserCommon/bonus/` contains visualization, logging, CLI, analysis, board generator (with test files)
+- [x] No utility or bonus files remain in original `src/` or `include/`
+- [x] File count matches expected: `find UserCommon -name "*.cpp" -o -name "*.h" | wc -l`
 
 **End State:** All shared utilities and bonus features are in UserCommon.
 
