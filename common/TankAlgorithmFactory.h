@@ -3,6 +3,7 @@
 #include "TankAlgorithm.h"
 #include <memory>
 
+// TODO: remove this after refactoring
 /**
  * @class TankAlgorithmFactory
  * @brief Factory interface for creating TankAlgorithm objects

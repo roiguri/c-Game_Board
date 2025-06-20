@@ -3,6 +3,7 @@
 #include "Player.h"
 #include <memory>
 
+// TODO: remove this after refactoring
 /**
  * @class PlayerFactory
  * @brief Factory interface for creating Player objects.

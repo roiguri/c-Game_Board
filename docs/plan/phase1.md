@@ -1,168 +1,406 @@
-# Phase 1: Project Restructuring - Implementation Plan
+# Phase 1 Implementation Guide: Complete Project Restructuring
 
 ## Overview
-This plan restructures the Tank Battle codebase from a single-project CMake build to the multi-project structure required by Assignment 3, using traditional Makefiles with static libraries.
+This guide restructures the Tank Battle codebase to meet Assignment 3 requirements. You will transform from a single CMake project to 5 separate projects with proper interfaces, directory structure, and build system. **Refer to instructions.md for Assignment 3 specifications when indicated.**
 
-## Step 1: Create Directory Structure
-Create the 5 main folders and subdirectories maintaining current hierarchy:
+---
 
+## Phase 1A: Interface Alignment (Foundation)
+
+### Step 1A.1: Add Missing Interface Headers
+
+**Objective:** Create the interface headers required by Assignment 3 that are currently missing.
+
+**Context:** Refer to instructions.md section "API and Abstract Base Classes" for exact specifications.
+
+**Actions:**
+1. Create `common/GameResult.h`:
+```cpp
+#pragma once
+#include <vector>
+
+struct GameResult {
+    int winner; // 0 = tie
+    enum Reason { ALL_TANKS_DEAD, MAX_STEPS, ZERO_SHELLS };
+    Reason reason;
+    std::vector<size_t> remaining_tanks; // index 0 = player 1, etc.
+};
+```
+
+2. Create `common/AbstractGameManager.h`:
+```cpp
+#pragma once
+#include "GameResult.h"
+#include "SatelliteView.h"
+#include "Player.h"
+#include "TankAlgorithm.h"
+#include <memory>
+#include <functional>
+
+using GameManagerFactory = std::function<std::unique_ptr<AbstractGameManager>()>;
+
+class AbstractGameManager {
+public:
+    virtual ~AbstractGameManager() {}
+    virtual GameResult run(
+        size_t map_width, size_t map_height,
+        SatelliteView& map, // <= assume it is a snapshot, NOT updated
+        size_t max_steps, size_t num_shells,
+        Player& player1, Player& player2,
+        TankAlgorithmFactory player1_tank_algo_factory,
+        TankAlgorithmFactory player2_tank_algo_factory) = 0;
+};
+```
+
+**Success Criteria:**
+- [ ] `common/GameResult.h` exists with exact struct from instructions.md
+- [ ] `common/AbstractGameManager.h` exists with exact interface from instructions.md
+- [ ] Both headers compile independently: `g++ -c common/GameResult.h -o /dev/null`
+
+**End State:** Assignment-required interface headers exist and compile.
+
+---
+
+### Step 1A.2: Update Existing Interface Headers
+
+**Objective:** Modify current interface headers to match Assignment 3 specifications exactly.
+
+**Context:** Refer to instructions.md "API and Abstract Base Classes" for required factory signatures.
+
+**Actions:**
+1. Update `common/TankAlgorithm.h`:
+```cpp
+#pragma once
+#include "BattleInfo.h"
+#include "ActionRequest.h"
+#include <memory>
+#include <functional>
+
+class TankAlgorithm {
+public:
+    virtual ~TankAlgorithm() {}
+    virtual ActionRequest getAction() = 0;
+    virtual void updateBattleInfo(BattleInfo& info) = 0;
+};
+
+using TankAlgorithmFactory = 
+    std::function<std::unique_ptr<TankAlgorithm>(int player_index, int tank_index)>;
+```
+
+2. Update `common/Player.h`:
+```cpp
+#pragma once
+#include "TankAlgorithm.h"
+#include "SatelliteView.h"
+#include <memory>
+#include <functional>
+
+class Player {
+public:
+    virtual ~Player() {}
+    virtual void updateTankWithBattleInfo
+        (TankAlgorithm& tank, SatelliteView& satellite_view) = 0;
+};
+
+using PlayerFactory = 
+    std::function<std::unique_ptr<Player>
+    (int player_index, size_t x, size_t y, size_t max_steps, size_t num_shells)>;
+```
+
+**Success Criteria:**
+- [ ] `TankAlgorithm.h` includes required `using TankAlgorithmFactory` declaration
+- [ ] `Player.h` includes required `using PlayerFactory` declaration
+- [ ] `Player.h` contains only pure virtual methods (no constructor)
+- [ ] All updated headers compile: `g++ -c common/*.h`
+
+**End State:** Interface headers match Assignment 3 specifications exactly.
+
+---
+
+### Step 1A.3: Create Registration Header Stubs
+
+**Objective:** Create registration header structures required by Assignment 3 (implementation will be added in later phases).
+
+**Context:** Refer to instructions.md "Automatic Registration" section for macro specifications.
+
+**Actions:**
+1. Create `common/PlayerRegistration.h`:
+```cpp
+#pragma once
+#include "Player.h"
+
+struct PlayerRegistration {
+    PlayerRegistration(PlayerFactory);
+};
+
+#define REGISTER_PLAYER(class_name) \
+PlayerRegistration register_me_##class_name \
+    ( [] (int player_index, size_t x, size_t y, size_t max_steps, size_t num_shells) { \
+        return std::make_unique<class_name>(player_index, x, y, max_steps, num_shells); \
+    } );
+```
+
+2. Create `common/TankAlgorithmRegistration.h`:
+```cpp
+#pragma once
+#include "TankAlgorithm.h"
+
+struct TankAlgorithmRegistration {
+    TankAlgorithmRegistration(TankAlgorithmFactory);
+};
+
+#define REGISTER_TANK_ALGORITHM(class_name) \
+TankAlgorithmRegistration register_me_##class_name \
+    ( [](int player_index, int tank_index) { \
+        return std::make_unique<class_name>(player_index, tank_index); \
+    } );
+```
+
+3. Create `common/GameManagerRegistration.h`:
+```cpp
+#pragma once
+#include "AbstractGameManager.h"
+
+struct GameManagerRegistration {
+    GameManagerRegistration(GameManagerFactory);
+};
+
+#define REGISTER_GAME_MANAGER(class_name) \
+GameManagerRegistration register_me_##class_name \
+    ( [] () { return std::make_unique<class_name>(); } );
+```
+
+**Success Criteria:**
+- [ ] All 3 registration headers exist in `common/`
+- [ ] Headers contain exact macro definitions from instructions.md
+- [ ] Headers compile without implementation: `g++ -c common/*Registration.h`
+
+**End State:** Registration infrastructure headers exist (stubs only, no implementation).
+
+---
+
+### Step 1A.4: Test Interface Compilation
+
+**Objective:** Verify all interface headers compile correctly together.
+
+**Actions:**
+1. Test all common headers compile:
+```bash
+cd common && g++ -c *.h
+```
+2. Create simple test file to verify includes work:
+```cpp
+// test_interfaces.cpp
+#include "common/ActionRequest.h"
+#include "common/BattleInfo.h"
+#include "common/Player.h"
+#include "common/TankAlgorithm.h"
+#include "common/SatelliteView.h"
+#include "common/GameResult.h"
+#include "common/AbstractGameManager.h"
+#include "common/PlayerRegistration.h"
+#include "common/TankAlgorithmRegistration.h"
+#include "common/GameManagerRegistration.h"
+
+int main() { return 0; }
+```
+3. Compile test: `g++ test_interfaces.cpp -o test && rm test`
+
+**Success Criteria:**
+- [ ] All headers compile individually without errors
+- [ ] All headers can be included together
+- [ ] No circular dependency issues
+- [ ] Test compilation succeeds
+
+**End State:** Complete interface layer is functional and ready for implementation.
+
+---
+
+## Phase 1B: Directory Restructure (Structure)
+
+### Step 1B.1: Create Project Directory Structure
+
+**Objective:** Establish the 5-folder structure mandated by Assignment 3.
+
+**Context:** Refer to instructions.md for exact folder requirements and organization.
+
+**Actions:**
+1. Create main project directories:
 ```bash
 mkdir -p Simulator/
 mkdir -p Algorithm/players/basic/
 mkdir -p Algorithm/players/offensive/
-mkdir -p Algorithm/factories/
 mkdir -p GameManager/objects/
 mkdir -p GameManager/factories/
 mkdir -p UserCommon/utils/
 mkdir -p UserCommon/bonus/
-# common/ already exists
 ```
+2. Verify `common/` directory exists with interface headers
 
-**Test:** `find . -type d | sort` should show new structure
+**Success Criteria:**
+- [ ] All 5 main directories exist: `Simulator/`, `Algorithm/`, `GameManager/`, `common/`, `UserCommon/`
+- [ ] Subdirectories follow logical organization
+- [ ] `tree -d` shows complete directory structure
 
-## Step 2: Move common/ Files (Assignment Provided)
-The `common/` directory should already contain the assignment-provided interface files.
+**End State:** Directory structure matches Assignment 3 requirements.
 
-**Verify files exist:**
-- `ActionRequest.h`, `BattleInfo.h`, `Player.h`, `SatelliteView.h`, `TankAlgorithm.h`, etc.
+---
 
-**Test:** `ls common/` shows all interface files
+### Step 1B.2: Move UserCommon Files
 
-## Step 3: Move UserCommon Files (Shared Utilities + Bonus)
-Combine src/include hierarchies into single project structure:
+**Objective:** Relocate shared utilities and bonus features to UserCommon, combining src/include hierarchies.
 
+**Actions:**
+1. Move utility classes:
 ```bash
-# Move utils (combine src and include)
-mv include/utils/* UserCommon/utils/
-mv src/utils/* UserCommon/utils/
-
-# Move bonus features (combine src and include) 
-mv include/bonus/* UserCommon/bonus/
-mv src/bonus/* UserCommon/bonus/
+mv include/utils/* UserCommon/utils/ 2>/dev/null || true
+mv src/utils/* UserCommon/utils/ 2>/dev/null || true
 ```
-
-**Result:** `UserCommon/utils/point.h`, `UserCommon/utils/point.cpp`, etc.
-
-**Test:** 
+2. Move bonus features:
 ```bash
-cd UserCommon && find . -name "*.h" -o -name "*.cpp" | wc -l
-# Should show all utils + bonus files
+mv include/bonus/* UserCommon/bonus/ 2>/dev/null || true
+mv src/bonus/* UserCommon/bonus/ 2>/dev/null || true
 ```
-
-## Step 4: Move GameManager Core (Game Engine)
-Move all game engine components, combining src/include:
-
+3. Remove empty directories:
 ```bash
-# Core game files
-mv include/game_manager.h GameManager/
-mv src/game_manager.cpp GameManager/
-mv include/game_board.h GameManager/
-mv src/game_board.cpp GameManager/
-
-# Game objects
-mv include/objects/* GameManager/objects/
-mv src/objects/* GameManager/objects/
-
-# Supporting systems
-mv include/collision_handler.h GameManager/
-mv src/collision_handler.cpp GameManager/
-mv include/file_loader.h GameManager/
-mv src/file_loader.cpp GameManager/
-mv include/satellite_view_impl.h GameManager/
-mv src/satellite_view_impl.cpp GameManager/
-
-# Factories (belong with game engine)
-mv include/factories/basic_*_factory.h GameManager/factories/
-mv src/factories/basic_*_factory.cpp GameManager/factories/
+rmdir include/utils src/utils include/bonus src/bonus 2>/dev/null || true
 ```
 
-**Test:**
+**Success Criteria:**
+- [ ] `UserCommon/utils/` contains Point, Direction, MidPoint classes (.h and .cpp)
+- [ ] `UserCommon/bonus/` contains visualization, logging, CLI, analysis, board generator
+- [ ] No utility or bonus files remain in original `src/` or `include/`
+- [ ] File count matches expected: `find UserCommon -name "*.cpp" -o -name "*.h" | wc -l`
+
+**End State:** All shared utilities and bonus features are in UserCommon.
+
+---
+
+### Step 1B.3: Move GameManager Files
+
+**Objective:** Relocate game engine components to GameManager project.
+
+**Actions:**
+1. Move core game files:
 ```bash
-cd GameManager && find . -name "*.h" -o -name "*.cpp" | wc -l
-# Should show all game engine files
+mv include/game_manager.h GameManager/ 2>/dev/null || true
+mv src/game_manager.cpp GameManager/ 2>/dev/null || true
+mv include/game_board.h GameManager/ 2>/dev/null || true
+mv src/game_board.cpp GameManager/ 2>/dev/null || true
 ```
-
-## Step 5: Move Algorithm Files (Player Strategies)
-Move player strategy implementations:
-
+2. Move game objects:
 ```bash
-# Move players (maintain basic/offensive structure)
-mv include/players/* Algorithm/players/
-mv src/players/* Algorithm/players/
+mv include/objects/* GameManager/objects/ 2>/dev/null || true
+mv src/objects/* GameManager/objects/ 2>/dev/null || true
 ```
-
-**Test:**
+3. Move supporting systems:
 ```bash
-cd Algorithm && find . -name "*.h" -o -name "*.cpp" | wc -l
-# Should show all player strategy files
+mv include/collision_handler.h GameManager/ 2>/dev/null || true
+mv src/collision_handler.cpp GameManager/ 2>/dev/null || true
+mv include/file_loader.h GameManager/ 2>/dev/null || true
+mv src/file_loader.cpp GameManager/ 2>/dev/null || true
+mv include/satellite_view_impl.h GameManager/ 2>/dev/null || true
+mv src/satellite_view_impl.cpp GameManager/ 2>/dev/null || true
+```
+4. Move factories:
+```bash
+mv include/factories/* GameManager/factories/ 2>/dev/null || true
+mv src/factories/* GameManager/factories/ 2>/dev/null || true
 ```
 
-## Step 6: Move Simulator Files (Main Executable)
+**Success Criteria:**
+- [ ] `GameManager/` contains game_manager, game_board, collision_handler, file_loader, satellite_view_impl
+- [ ] `GameManager/objects/` contains tank, shell, game_object classes
+- [ ] `GameManager/factories/` contains all factory implementations
+- [ ] No game engine files remain in original directories
+
+**End State:** All game engine components are in GameManager project.
+
+---
+
+### Step 1B.4: Move Algorithm Files
+
+**Objective:** Relocate player strategy implementations to Algorithm project.
+
+**Actions:**
+1. Move player strategies:
+```bash
+mv include/players/* Algorithm/players/ 2>/dev/null || true
+mv src/players/* Algorithm/players/ 2>/dev/null || true
+```
+
+**Success Criteria:**
+- [ ] `Algorithm/players/basic/` contains BasicPlayer and BasicTankAlgorithm
+- [ ] `Algorithm/players/offensive/` contains OffensivePlayer and OffensiveTankAlgorithm
+- [ ] No player files remain in original directories
+
+**End State:** All player strategy implementations are in Algorithm project.
+
+---
+
+### Step 1B.5: Move Simulator Files
+
+**Objective:** Relocate main executable to Simulator project.
+
+**Actions:**
+1. Move main file:
 ```bash
 mv src/main.cpp Simulator/main.cpp
 ```
-
-**Test:** `ls Simulator/` shows `main.cpp`
-
-## Step 7: Remove Old CMake (Since Directory Structure Changed)
+2. Remove old build system:
 ```bash
 rm -f CMakeLists.txt
 rm -rf build/
 ```
 
-**Test:** No CMake files remain in root
+**Success Criteria:**
+- [ ] `Simulator/main.cpp` exists
+- [ ] No CMake files remain
+- [ ] Original `src/` and `include/` directories are empty or removed
 
-## Step 8: Update Include Paths (Project by Project)
+**End State:** Main executable is in Simulator, old build system removed.
 
-### 8a: UserCommon
-Update internal includes within utils/ and bonus/:
-- Change `#include "utils/point.h"` → `#include "UserCommon/utils/point.h"`
-- Change relative includes to absolute paths
+---
 
-**Test:** 
-```bash
-cd UserCommon && g++ -c utils/point.cpp -I.. 
-# Should compile successfully
-```
+### Step 1B.6: Update Include Paths
 
-### 8b: GameManager  
-Update includes to reference UserCommon and common:
-- Change `#include "utils/point.h"` → `#include "UserCommon/utils/point.h"`
-- Change `#include "Player.h"` → `#include "common/Player.h"`
-- Update all game engine internal includes
+**Objective:** Fix all include statements to use absolute paths from project root.
 
-**Test:**
-```bash
-cd GameManager && g++ -c game_board.cpp -I..
-# Should compile successfully
-```
+**Actions:**
+1. Update UserCommon includes:
+   - Change `#include "point.h"` → `#include "UserCommon/utils/point.h"`
+   - Update all internal UserCommon references
 
-### 8c: Algorithm
-Update includes to reference UserCommon and common:
-- Change `#include "TankAlgorithm.h"` → `#include "common/TankAlgorithm.h"`
-- Change `#include "Player.h"` → `#include "common/Player.h"`
-- Update utils references to UserCommon
+2. Update GameManager includes:
+   - Change `#include "utils/point.h"` → `#include "UserCommon/utils/point.h"`
+   - Change `#include "Player.h"` → `#include "common/Player.h"`
+   - Update all GameManager internal references
 
-**Test:**
-```bash
-cd Algorithm && g++ -c players/basic/basic_player.cpp -I..
-# Should compile successfully
-```
+3. Update Algorithm includes:
+   - Change `#include "TankAlgorithm.h"` → `#include "common/TankAlgorithm.h"`
+   - Change `#include "utils/point.h"` → `#include "UserCommon/utils/point.h"`
 
-### 8d: Simulator
-Update includes to reference all projects:
-- Change `#include "game_manager.h"` → `#include "GameManager/game_manager.h"`
-- Add includes for factories and other components
+4. Update Simulator includes:
+   - Change `#include "game_manager.h"` → `#include "GameManager/game_manager.h"`
+   - Add factory includes as needed
 
-**Test:**
-```bash
-cd Simulator && g++ -c main.cpp -I..
-# Should compile successfully
-```
+**Success Criteria:**
+- [ ] All includes use absolute paths from project root
+- [ ] No relative paths (`../`) remain in any files
+- [ ] Each project compiles individually: `cd [Project] && g++ -c *.cpp *.h -I..`
 
-## Step 9: Create Minimal Makefiles
+**End State:** All include paths use absolute references and compile correctly.
 
-### 9a: UserCommon/Makefile
+---
+
+## Phase 1C: Build System Creation (Infrastructure)
+
+### Step 1C.1: Create Individual Project Makefiles
+
+**Objective:** Establish build system for each project as static libraries.
+
+**Actions:**
+1. Create `UserCommon/Makefile`:
 ```makefile
 SOURCES := $(shell find . -name "*.cpp" | grep -v bonus)
 OBJECTS := $(SOURCES:.cpp=.o)
@@ -179,7 +417,7 @@ clean:
 .PHONY: clean
 ```
 
-### 9b: GameManager/Makefile
+2. Create `GameManager/Makefile`:
 ```makefile
 SOURCES := $(shell find . -name "*.cpp")
 OBJECTS := $(SOURCES:.cpp=.o)
@@ -188,7 +426,7 @@ libgamemanager.a: $(OBJECTS)
 	ar rcs $@ $(OBJECTS)
 
 %.o: %.cpp
-	g++ -c $< -o $@ -I.. -I../UserCommon
+	g++ -c $< -o $@ -I..
 
 clean:
 	rm -f $(OBJECTS) libgamemanager.a
@@ -196,7 +434,7 @@ clean:
 .PHONY: clean
 ```
 
-### 9c: Algorithm/Makefile
+3. Create `Algorithm/Makefile`:
 ```makefile
 SOURCES := $(shell find . -name "*.cpp")
 OBJECTS := $(SOURCES:.cpp=.o)
@@ -205,7 +443,7 @@ libalgorithm.a: $(OBJECTS)
 	ar rcs $@ $(OBJECTS)
 
 %.o: %.cpp
-	g++ -c $< -o $@ -I.. -I../UserCommon
+	g++ -c $< -o $@ -I..
 
 clean:
 	rm -f $(OBJECTS) libalgorithm.a
@@ -213,7 +451,7 @@ clean:
 .PHONY: clean
 ```
 
-### 9d: Simulator/Makefile
+4. Create `Simulator/Makefile`:
 ```makefile
 simulator: main.o
 	g++ -o $@ $< -L../UserCommon -L../GameManager -L../Algorithm \
@@ -228,12 +466,21 @@ clean:
 .PHONY: clean
 ```
 
-**Test After Each Makefile:**
-```bash
-cd [ProjectDir] && make && echo "SUCCESS: $PWD compiled"
-```
+**Success Criteria:**
+- [ ] Each project builds successfully: `cd [Project] && make`
+- [ ] Static libraries are created: `ls */lib*.a`
+- [ ] No compilation errors or warnings
 
-## Step 10: Create Root Makefile
+**End State:** Each project has working Makefile and builds independently.
+
+---
+
+### Step 1C.2: Create Root Makefile
+
+**Objective:** Provide coordinated build system respecting dependencies.
+
+**Actions:**
+1. Create root `Makefile`:
 ```makefile
 all: usercommon gamemanager algorithm simulator
 
@@ -258,51 +505,241 @@ clean:
 .PHONY: all usercommon gamemanager algorithm simulator clean
 ```
 
-**Test:** `make clean && make all` should build everything
+**Success Criteria:**
+- [ ] `make all` builds everything in correct order
+- [ ] `make clean` cleans all projects
+- [ ] Dependencies are respected (UserCommon built first)
 
-## Step 11: Final Validation
-```bash
-# Full clean build
-make clean && make all
-
-# Verify executable exists
-ls -la Simulator/simulator
-
-# Test basic execution (may show usage, but shouldn't crash)
-./Simulator/simulator
-```
+**End State:** Complete build system works from root directory.
 
 ---
 
-## Validation Commands Summary
+### Step 1C.3: Test Full Build System
+
+**Objective:** Verify complete system builds and basic functionality works.
+
+**Actions:**
+1. Test full build:
 ```bash
-# After file moves
-find . -name "*.cpp" -o -name "*.h" | wc -l  # Count total files
-
-# After include updates  
-find . -name "*.cpp" | xargs grep "#include.*/" | head -10  # Check paths
-
-# After makefiles
-make clean && make all  # Full build test
-
-# Verify structure
-tree -d  # Show directory structure
+make clean && make all
+```
+2. Verify artifacts:
+```bash
+ls -la UserCommon/libusercommon.a
+ls -la GameManager/libgamemanager.a
+ls -la Algorithm/libalgorithm.a
+ls -la Simulator/simulator
+```
+3. Test basic execution:
+```bash
+./Simulator/simulator
 ```
 
-## Key Notes
-- **No namespaces yet** - saving for Phase 2 after structure is stable
-- **Minimal makefiles** - just compile and link, no bonus features
-- **Static libraries first** - easier to debug before converting to .so files
-- **Absolute include paths only** - `#include "UserCommon/utils/point.h"`
-- **Test after each step** - catch issues early before they compound
+**Success Criteria:**
+- [ ] Full build completes without errors
+- [ ] All libraries and executable are created
+- [ ] Simulator runs (may show usage, but no crashes)
 
-## Success Criteria
-✅ All 5 project directories exist with correct file organization  
-✅ All projects compile individually with their Makefiles  
-✅ Root Makefile builds everything in correct dependency order  
-✅ Simulator executable is created and can run basic commands  
-✅ No CMake dependencies remain
+**End State:** Complete build system functional, ready for interface refactoring.
 
-## Next steps - removed from phase 1:
-- Adding namespace.
-- Adding bonus support.
+---
+
+## Phase 1D: GameManager Interface Refactoring (Core Logic)
+
+### Step 1D.1: Add GameResult Support
+
+**Objective:** Update current GameManager to use GameResult struct for game outcomes.
+
+**Context:** Current game result handling needs to match GameResult struct from instructions.md.
+
+**Actions:**
+1. Update `GameManager/game_manager.h`:
+   - Add `#include "common/GameResult.h"`
+   - Change return type of result methods to use GameResult
+   - Add private method to convert current result format to GameResult
+
+2. Update `GameManager/game_manager.cpp`:
+   - Implement GameResult population logic
+   - Map current win/tie detection to GameResult::winner and GameResult::reason
+   - Populate remaining_tanks vector with current tank counts
+
+**Success Criteria:**
+- [ ] GameManager includes and uses GameResult struct
+- [ ] Game ending logic populates GameResult correctly
+- [ ] Current game functionality still works end-to-end
+- [ ] `make gamemanager` compiles without errors
+
+**End State:** GameManager uses GameResult for all game outcome reporting.
+
+---
+
+### Step 1D.2: Implement AbstractGameManager Interface
+
+**Objective:** Make current GameManager implement the AbstractGameManager interface required by Assignment 3.
+
+**Context:** Refer to instructions.md AbstractGameManager interface specification.
+
+**Actions:**
+1. Update `GameManager/game_manager.h`:
+   - Add `#include "common/AbstractGameManager.h"`
+   - Make GameManager inherit from AbstractGameManager
+   - Declare the run() method with exact signature from instructions.md
+
+2. Update `GameManager/game_manager.cpp`:
+   - Implement the run() method with required signature
+   - Adapt current run logic to work with new parameters
+   - Create SatelliteView snapshot from current board state
+   - Use provided Player references and factory functions
+
+**Success Criteria:**
+- [ ] GameManager inherits from AbstractGameManager
+- [ ] run() method has exact signature from instructions.md
+- [ ] Implementation uses provided players and factories correctly
+- [ ] `make gamemanager` compiles without errors
+
+**End State:** GameManager fully implements Assignment 3 interface requirements.
+
+---
+
+### Step 1D.3: Test Refactored GameManager
+
+**Objective:** Verify refactored GameManager works with existing code.
+
+**Actions:**
+1. Create simple test to verify GameManager functionality:
+```cpp
+// test_gamemanager.cpp
+#include "GameManager/game_manager.h"
+#include "common/AbstractGameManager.h"
+
+int main() {
+    // Basic test that GameManager can be created and interface is correct
+    // (Full testing will happen after factory refactoring)
+    return 0;
+}
+```
+2. Compile test: `g++ test_gamemanager.cpp -I. -o test && rm test`
+
+**Success Criteria:**
+- [ ] GameManager compiles with new interface
+- [ ] Basic instantiation works
+- [ ] Interface inheritance is correct
+
+**End State:** Refactored GameManager is ready for factory integration.
+
+---
+
+## Phase 1E: Factory System Refactoring (Integration)
+
+### Step 1E.1: Remove Factory Class Inheritance
+
+**Objective:** Convert existing factory classes from inheritance-based to standalone classes.
+
+**Context:** Assignment 3 requires function-based factories, not class inheritance.
+
+**Actions:**
+1. Update `GameManager/factories/basic_player_factory.h`:
+   - Remove inheritance from PlayerFactory interface
+   - Keep the create() method but make class standalone
+   - Remove any virtual inheritance
+
+2. Update `GameManager/factories/basic_tank_algorithm_factory.h`:
+   - Remove inheritance from TankAlgorithmFactory interface
+   - Keep the create() method but make class standalone
+   - Remove any virtual inheritance
+
+**Success Criteria:**
+- [ ] Factory classes no longer inherit from interface classes
+- [ ] Factory classes retain their create() methods
+- [ ] `make gamemanager` compiles successfully
+
+**End State:** Factory classes are standalone, ready for function conversion.
+
+---
+
+### Step 1E.2: Create Function-Based Factory Integration
+
+**Objective:** Update main.cpp to use function-based factories while leveraging existing factory classes.
+
+**Actions:**
+1. Update `Simulator/main.cpp`:
+   - Create function-based factories that use existing factory classes:
+```cpp
+#include "GameManager/factories/basic_player_factory.h"
+#include "GameManager/factories/basic_tank_algorithm_factory.h"
+
+// Create function-based factories
+PlayerFactory createPlayerFactory() {
+    static BasicPlayerFactory factory;
+    return [&factory](int player_index, size_t x, size_t y, size_t max_steps, size_t num_shells) {
+        return factory.create(player_index, x, y, max_steps, num_shells);
+    };
+}
+
+TankAlgorithmFactory createTankAlgorithmFactory() {
+    static BasicTankAlgorithmFactory factory;
+    return [&factory](int player_index, int tank_index) {
+        return factory.create(player_index, tank_index);
+    };
+}
+```
+2. Update main() to use function-based factories with AbstractGameManager
+
+**Success Criteria:**
+- [ ] main.cpp creates and uses function-based factories
+- [ ] Function factories utilize existing factory classes
+- [ ] AbstractGameManager receives proper factory functions
+- [ ] `make simulator` compiles successfully
+
+**End State:** Complete system uses Assignment 3 function-based factory pattern.
+
+---
+
+### Step 1E.3: Test Complete Factory System
+
+**Objective:** Verify end-to-end functionality with new factory system.
+
+**Actions:**
+1. Build complete system:
+```bash
+make clean && make all
+```
+2. Test basic game functionality:
+```bash
+./Simulator/simulator [test_board_file]
+```
+3. Verify factory functions create correct objects
+
+**Success Criteria:**
+- [ ] Complete system builds without errors
+- [ ] Simulator executable runs games successfully
+- [ ] Factory functions create working Player and TankAlgorithm objects
+- [ ] Game results use GameResult struct correctly
+
+**End State:** Complete Phase 1 - system matches Assignment 3 requirements and is ready for Phase 2 (namespaces and shared libraries).
+
+---
+
+## Phase 1 Completion Checklist
+
+**Interface Compliance:**
+- [ ] All Assignment 3 interfaces exist in `common/`
+- [ ] GameManager implements AbstractGameManager
+- [ ] Function-based factories replace class-based factories
+- [ ] GameResult struct used for all game outcomes
+
+**Directory Structure:**
+- [ ] 5 projects: Simulator/, Algorithm/, GameManager/, common/, UserCommon/
+- [ ] Files properly organized according to Assignment 3
+- [ ] No files remain in old src/ or include/ directories
+
+**Build System:**
+- [ ] Each project has working Makefile
+- [ ] Root Makefile coordinates builds with dependencies
+- [ ] Static libraries build successfully
+- [ ] Complete system builds: `make clean && make all`
+
+**Functionality:**
+- [ ] Simulator executable runs games
+- [ ] All include paths use absolute references
+- [ ] System ready for Phase 2 (namespaces and .so conversion)
