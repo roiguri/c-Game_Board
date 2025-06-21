@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Player.h"
 #include <memory>
+
+#include "Player.h"
 
 // TODO: remove this after refactoring
 /**

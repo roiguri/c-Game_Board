@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Player.h"
-#include "BattleInfo.h"
-#include "players/basic/battle_info_impl.h"
 #include <memory>
+
+#include "Algorithm/players/basic/battle_info_impl.h"
+#include "common/BattleInfo.h"
+#include "common/Player.h"
 
 /**
 * @class BasicPlayer

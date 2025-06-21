@@ -1,6 +1,7 @@
-#include "bonus/visualization/core/visualization_manager.h"
 #include <iostream>
-#include "bonus/logger/logger.h"
+
+#include "UserCommon/bonus/logger/logger.h"
+#include "UserCommon/bonus/visualization/core/visualization_manager.h"
 
 VisualizationManager::VisualizationManager()
     : m_liveVisualizationEnabled(false) {

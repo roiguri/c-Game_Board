@@ -1,12 +1,13 @@
-#include "bonus/board_generator.h"
+#include <algorithm>
+#include <chrono>
+#include <ctime>
 #include <fstream>
-#include <sstream>
 #include <iostream>
 #include <queue>
 #include <set>
-#include <ctime>
-#include <algorithm>
-#include <chrono>
+#include <sstream>
+
+#include "UserCommon/bonus/board_generator.h"
 
 BoardGenerator::BoardGenerator() {
     // Initialize with default values from BoardConfig

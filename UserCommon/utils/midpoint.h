@@ -1,7 +1,7 @@
 // midpoint.h
 #pragma once
 
-#include "utils/point.h"
+#include "UserCommon/utils/point.h"
 
 /**
  * @class MidPoint

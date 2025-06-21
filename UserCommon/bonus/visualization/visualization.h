@@ -8,10 +8,10 @@
  * a simple way to integrate visualization into the game.
  */
 
-#include "bonus/visualization/core/game_snapshot.h"
-#include "bonus/visualization/core/visualizer_base.h"
-#include "bonus/visualization/core/visualization_manager.h"
-#include "bonus/visualization/visualizers/html_visualizer/html_visualizer.h"
+#include "UserCommon/bonus/visualization/core/game_snapshot.h"
+#include "UserCommon/bonus/visualization/core/visualizer_base.h"
+#include "UserCommon/bonus/visualization/core/visualization_manager.h"
+#include "UserCommon/bonus/visualization/visualizers/html_visualizer/html_visualizer.h"
 
 // Forward declarations for concrete visualizers
 // When implementing these classes, uncomment these lines

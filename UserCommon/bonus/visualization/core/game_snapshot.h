@@ -1,10 +1,11 @@
 #pragma once
 
-#include <vector>
 #include <string>
-#include "game_board.h"
-#include "objects/tank.h"
-#include "objects/shell.h"
+#include <vector>
+
+#include "GameManager/game_board.h"
+#include "GameManager/objects/shell.h"
+#include "GameManager/objects/tank.h"
 
 /**
  * @brief Lightweight representation of Tank state for visualization

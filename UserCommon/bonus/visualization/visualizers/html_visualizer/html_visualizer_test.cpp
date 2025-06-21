@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
-#include "bonus/visualization/visualizers/html_visualizer/html_visualizer.h"
-#include "game_board.h"
-#include "objects/tank.h"
-#include "objects/shell.h"
+#include "UserCommon/bonus/visualization/visualizers/html_visualizer/html_visualizer.h"
+#include "GameManager/game_board.h"
+#include "GameManager/objects/tank.h"
+#include "GameManager/objects/shell.h"
 #include <fstream>
 #include <filesystem>
 

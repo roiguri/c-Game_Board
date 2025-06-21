@@ -2,7 +2,8 @@
 
 #include <string>
 #include <vector>
-#include "bonus/visualization/core/game_snapshot.h"
+
+#include "UserCommon/bonus/visualization/core/game_snapshot.h"
 
 /**
  * @brief Base interface for all visualizers

@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "bonus/board_generator.h"
+#include "UserCommon/bonus/board_generator.h"
 #include <fstream>
 #include <algorithm>
 #include <set>

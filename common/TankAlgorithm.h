@@ -1,9 +1,10 @@
 #pragma once
 
+#include <functional>
+#include <memory>
+
 #include "ActionRequest.h"
 #include "BattleInfo.h"
-#include <memory>
-#include <functional>
 
 class TankAlgorithm {  
 public:  

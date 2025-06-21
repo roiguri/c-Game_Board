@@ -1,8 +1,9 @@
 #pragma once
 
 #include <string>
-#include "bonus/board_generator.h" // For BoardConfig
-#include "bonus/analysis/analysis_tool.h" // For Winner enum
+
+#include "UserCommon/bonus/analysis/analysis_tool.h" // For Winner enum
+#include "UserCommon/bonus/board_generator.h" // For BoardConfig
 
 // Stateless helper functions for analysis
 Winner ParseGameResult(const std::string& resultLine);

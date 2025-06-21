@@ -1,8 +1,9 @@
-#include "bonus/analysis/result_aggregator.h"
 #include <filesystem>
 #include <iostream>
-#include "bonus/analysis/analysis_tool.h"
-#include "bonus/analysis/analysis_reporter.h"
+
+#include "UserCommon/bonus/analysis/analysis_reporter.h"
+#include "UserCommon/bonus/analysis/analysis_tool.h"
+#include "UserCommon/bonus/analysis/result_aggregator.h"
 
 void ResultAggregator::updateResults(const BoardConfig& config, const std::string& configKey, Winner outcome) {
     // Overall results

@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "utils/midpoint.h"
+#include "UserCommon/utils/midpoint.h"
 
 class MidPointTest : public ::testing::Test {
 protected:

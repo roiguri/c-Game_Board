@@ -1,6 +1,7 @@
-#include "satellite_view_impl.h"
 #include <cstddef>
 #include <iostream>
+
+#include "GameManager/satellite_view_impl.h"
 
 // Character mapping
 constexpr char WALL_CHAR = '#';

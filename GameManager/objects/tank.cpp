@@ -1,4 +1,4 @@
-#include "objects/tank.h"
+#include "GameManager/objects/tank.h"
 
 int Tank::INITIAL_SHELLS = 16;
 void Tank::setInitialShells(int shells) {

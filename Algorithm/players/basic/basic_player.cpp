@@ -1,11 +1,11 @@
-#include "players/basic/basic_player.h"
-#include "players/basic/battle_info_impl.h"
 #include <cassert>
 #include <iostream>
 
+#include "Algorithm/players/basic/basic_player.h"
+#include "Algorithm/players/basic/battle_info_impl.h"
+
 BasicPlayer::BasicPlayer(int playerIndex, size_t x, size_t y, size_t maxSteps, size_t numShells)
-    : Player(playerIndex, x, y, maxSteps, numShells),
-      m_playerIndex(playerIndex),
+    : m_playerIndex(playerIndex),
       m_boardWidth(x),
       m_boardHeight(y),
       m_maxSteps(maxSteps),

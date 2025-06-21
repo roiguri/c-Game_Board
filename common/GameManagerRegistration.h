@@ -1,4 +1,5 @@
 #pragma once
+
 #include "AbstractGameManager.h"
 
 // TODO: basic stub - requires full implementation.

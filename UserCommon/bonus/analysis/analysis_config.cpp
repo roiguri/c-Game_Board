@@ -1,6 +1,7 @@
-#include "bonus/analysis/analysis_config.h"
-#include <iostream>
 #include <fstream>
+#include <iostream>
+
+#include "UserCommon/bonus/analysis/analysis_config.h"
 
 AnalysisConfig::AnalysisConfig() {
     setDefaults();

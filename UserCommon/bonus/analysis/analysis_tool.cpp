@@ -1,26 +1,26 @@
-#include <iostream>
-#include <vector>
-#include <string>
-#include <map>
-#include <fstream>
-#include <filesystem> // For std::filesystem operations
-#include <ctime>      // For std::time for seeding
-#include <sstream>    // For std::ostringstream (key generation)
-#include <iomanip>    // For std::fixed and std::setprecision (key generation)
 #include <algorithm>
-
-#include "bonus/board_generator.h"
-#include "game_manager.h"
-#include "factories/basic_tank_algorithm_factory.h"
-#include "factories/basic_player_factory.h"
-#include "bonus/logger/logger_config.h"
-#include "bonus/analysis/analysis_tool.h"
-#include "bonus/analysis/analysis_utils.h"
-#include "bonus/analysis/board_manager.h"
-#include "bonus/analysis/result_aggregator.h"
-#include "bonus/analysis/analysis_params.h"
-#include "bonus/analysis/analysis_config.h"
+#include <ctime>
+#include <filesystem>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <map>
 #include <random>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include "UserCommon/bonus/analysis/analysis_config.h"
+#include "UserCommon/bonus/analysis/analysis_params.h"
+#include "UserCommon/bonus/analysis/analysis_tool.h"
+#include "UserCommon/bonus/analysis/analysis_utils.h"
+#include "UserCommon/bonus/analysis/board_manager.h"
+#include "UserCommon/bonus/analysis/result_aggregator.h"
+#include "UserCommon/bonus/board_generator.h"
+#include "UserCommon/bonus/logger/logger_config.h"
+#include "factories/basic_player_factory.h"
+#include "factories/basic_tank_algorithm_factory.h"
+#include "game_manager.h"
 #include "indicators/indicators.hpp"
 
 #ifndef TEST_BUILD

@@ -1,12 +1,13 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 #include <string>
-#include "bonus/visualization/core/visualizer_base.h"
-#include "game_board.h"
-#include "objects/tank.h"
-#include "objects/shell.h"
+#include <vector>
+
+#include "GameManager/game_board.h"
+#include "GameManager/objects/shell.h"
+#include "GameManager/objects/tank.h"
+#include "UserCommon/bonus/visualization/core/visualizer_base.h"
 
 /**
  * @brief Manager class that coordinates multiple visualizers

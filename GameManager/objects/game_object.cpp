@@ -1,4 +1,4 @@
-#include "objects/game_object.h"
+#include "GameManager/objects/game_object.h"
 
 GameObject::GameObject(int playerId, const Point& position, Direction direction)
     : m_playerId(playerId),

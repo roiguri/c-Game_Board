@@ -1,16 +1,15 @@
-#include "bonus/visualization/visualizers/html_visualizer/html_visualizer.h"
-#include <fstream>
-#include <sstream>
-#include <iostream>
 #include <algorithm>
-#include "bonus/logger/logger.h"
-
+#include <fstream>
+#include <iostream>
+#include <limits.h>
+#include <sstream>
+#include <unistd.h>
 #ifdef _WIN32
 #include <windows.h>
-#else
-#include <unistd.h>
-#include <limits.h>
 #endif
+
+#include "UserCommon/bonus/logger/logger.h"
+#include "UserCommon/bonus/visualization/visualizers/html_visualizer/html_visualizer.h"
 
 HTMLVisualizer::HTMLVisualizer(const std::string& templatePath) {
     if (!templatePath.empty()) {

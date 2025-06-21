@@ -1,5 +1,6 @@
-#include "collision_handler.h"
 #include <map>
+
+#include "GameManager/collision_handler.h"
 
 void CollisionHandler::resolveAllCollisions(
   std::vector<Tank>& tanks,

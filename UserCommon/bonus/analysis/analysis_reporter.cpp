@@ -1,6 +1,7 @@
-#include "bonus/analysis/analysis_reporter.h"
 #include <fstream>
 #include <iostream>
+
+#include "UserCommon/bonus/analysis/analysis_reporter.h"
 
 void AnalysisReporter::writeOverallResultsCsv(const std::string& filename, const std::map<std::string, GameOutcomeCounts>& results) {
     std::ofstream file(filename);

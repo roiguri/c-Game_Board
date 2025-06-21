@@ -1,7 +1,7 @@
 // test/bonus/logger/logger_test.cpp
 #include "gtest/gtest.h"
-#include "bonus/logger/logger.h"
-#include "bonus/logger/logger_config.h"
+#include "UserCommon/bonus/logger/logger.h"
+#include "UserCommon/bonus/logger/logger_config.h"
 #include <fstream>
 #include <string>
 #include <filesystem>

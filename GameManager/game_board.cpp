@@ -1,6 +1,7 @@
-#include "game_board.h"
-#include <sstream>
 #include <iostream>
+#include <sstream>
+
+#include "GameManager/game_board.h"
 
 GameBoard::GameBoard() : m_width(0), m_height(0) {}
 

@@ -1,10 +1,11 @@
 #pragma once
 
-#include <vector>
-#include <string>
 #include <map>
-#include "bonus/board_generator.h"
-#include "bonus/analysis/analysis_params.h"
+#include <string>
+#include <vector>
+
+#include "UserCommon/bonus/analysis/analysis_params.h"
+#include "UserCommon/bonus/board_generator.h"
 
 enum class Winner { PLAYER1, PLAYER2, TIE, UNKNOWN };
 

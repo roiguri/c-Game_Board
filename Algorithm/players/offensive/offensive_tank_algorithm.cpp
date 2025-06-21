@@ -1,12 +1,13 @@
-#include "players/offensive/offensive_tank_algorithm.h"
-#include "players/offensive/offensive_battle_info.h"
-#include "game_board.h"
-#include "utils/direction.h"
-#include "bonus/logger/logger.h"
-#include <queue>
-#include <set>
 #include <algorithm>
 #include <iostream>
+#include <queue>
+#include <set>
+
+#include "Algorithm/players/offensive/offensive_battle_info.h"
+#include "Algorithm/players/offensive/offensive_tank_algorithm.h"
+#include "GameManager/game_board.h"
+#include "UserCommon/bonus/logger/logger.h"
+#include "UserCommon/utils/direction.h"
 
 OffensiveTankAlgorithm::OffensiveTankAlgorithm(int playerId, int tankIndex)
     : BasicTankAlgorithm(playerId, tankIndex) {}

@@ -1,6 +1,7 @@
-#include "bonus/visualization/core/game_snapshot.h"
-#include <sstream>
 #include <iomanip>
+#include <sstream>
+
+#include "UserCommon/bonus/visualization/core/game_snapshot.h"
 
 TankState::TankState(const Tank& tank) 
     : playerId(tank.getPlayerId()),

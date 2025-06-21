@@ -1,10 +1,11 @@
 #pragma once
 
-#include <string>
-#include <random>
-#include <vector>
 #include <map>
-#include "game_board.h"
+#include <random>
+#include <string>
+#include <vector>
+
+#include "GameManager/game_board.h"
 
 /**
  * @brief Configuration for board generation

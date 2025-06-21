@@ -385,11 +385,21 @@ rm -rf build/
    - Add factory includes as needed
 
 **Success Criteria:**
-- [ ] All includes use absolute paths from project root
-- [ ] No relative paths (`../`) remain in any files
-- [ ] Each project compiles individually: `cd [Project] && g++ -c *.cpp *.h -I..`
+- [x] All includes use absolute paths from project root
+- [x] No relative paths (`../`) remain in any files
+- [x] Each project compiles individually: `cd [Project] && g++ -c *.cpp *.h -I..`
+- [x] All header files (.h) follow standardized include structure:
+  - #pragma once
+  - blank line
+  - all system includes (#include <...>) grouped together and alphabetically sorted
+  - blank line
+  - all local includes (#include "...") grouped together and alphabetically sorted
+- [x] All CPP files (.cpp) follow standardized include structure:
+  - all system includes (#include <...>) grouped together and alphabetically sorted
+  - blank line
+  - all local includes (#include "...") grouped together and alphabetically sorted
 
-**End State:** All include paths use absolute references and compile correctly.
+**End State:** All include paths use absolute references, follow standardized structure, and compile correctly.
 
 ---
 

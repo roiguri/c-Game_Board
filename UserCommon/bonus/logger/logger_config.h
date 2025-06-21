@@ -1,9 +1,10 @@
 // include/bonus/logger/logger_config.h
 #pragma once
 
-#include "bonus/logger/logger.h"
-#include "bonus/cli/cli_parser.h" // Add this
 #include <string>
+
+#include "UserCommon/bonus/cli/cli_parser.h" // Add this
+#include "UserCommon/bonus/logger/logger.h"
 
 /**
  * @brief Simple logger configuration from command line

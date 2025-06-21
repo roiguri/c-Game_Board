@@ -1,7 +1,8 @@
 #pragma once
 
-#include "TankAlgorithm.h"
 #include <memory>
+
+#include "TankAlgorithm.h"
 
 // TODO: remove this after refactoring
 /**

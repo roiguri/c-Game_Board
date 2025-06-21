@@ -1,8 +1,9 @@
 #pragma once
 
-#include "players/basic/basic_player.h"
-#include "players/offensive/offensive_battle_info.h"
 #include <optional>
+
+#include "Algorithm/players/basic/basic_player.h"
+#include "Algorithm/players/offensive/offensive_battle_info.h"
 
 /**
  * @class OffensivePlayer

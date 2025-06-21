@@ -1,9 +1,10 @@
 #pragma once
 
-#include <string>
-#include "utils/point.h"
-#include <ostream>
 #include <optional>
+#include <ostream>
+#include <string>
+
+#include "UserCommon/utils/point.h"
 
 /**
  * @class Direction

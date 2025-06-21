@@ -1,9 +1,10 @@
 #pragma once
 
-#include "utils/point.h"
-#include "game_board.h"
 #include <vector>
-#include "BattleInfo.h"
+
+#include "GameManager/game_board.h"
+#include "UserCommon/utils/point.h"
+#include "common/BattleInfo.h"
 /**
  * @class BattleInfo
  * @brief Contains battlefield information shared between Player and Tank

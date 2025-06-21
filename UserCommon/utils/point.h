@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string>
 #include <cmath>
 #include <ostream>
+#include <string>
 
 /**
  * @class Point

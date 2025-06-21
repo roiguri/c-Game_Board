@@ -1,9 +1,10 @@
 #pragma once
 
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
-#include "bonus/analysis/analysis_tool.h"  // For Winner enum and GameOutcomeCounts
+
+#include "UserCommon/bonus/analysis/analysis_tool.h"  // For Winner enum and GameOutcomeCounts
 
 /**
  * @brief Generates structured summary reports from analysis results

@@ -1,10 +1,11 @@
 #pragma once
 
-#include <string>
 #include <map>
-#include "bonus/board_generator.h" // For BoardConfig
-#include "bonus/analysis/analysis_tool.h" // For Winner, GameOutcomeCounts
-#include "bonus/analysis/analysis_summarizer.h"
+#include <string>
+
+#include "UserCommon/bonus/analysis/analysis_summarizer.h"
+#include "UserCommon/bonus/analysis/analysis_tool.h" // For Winner, GameOutcomeCounts
+#include "UserCommon/bonus/board_generator.h" // For BoardConfig
 
 class ResultAggregator {
 public:

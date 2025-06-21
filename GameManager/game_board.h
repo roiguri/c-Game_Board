@@ -1,8 +1,10 @@
 #pragma once
-#include <vector>
+
 #include <map>
 #include <string>
-#include "utils/point.h"
+#include <vector>
+
+#include "UserCommon/utils/point.h"
 
 /**
  * @class GameBoard

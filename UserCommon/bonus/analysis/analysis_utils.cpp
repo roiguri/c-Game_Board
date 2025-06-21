@@ -1,7 +1,8 @@
-#include "bonus/analysis/analysis_utils.h"
+#include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <iomanip>
+
+#include "UserCommon/bonus/analysis/analysis_utils.h"
 
 Winner ParseGameResult(const std::string& resultLine) {
     if (resultLine.find("Player 1 won") != std::string::npos) {

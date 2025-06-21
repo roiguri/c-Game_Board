@@ -1,11 +1,12 @@
 #pragma once
 
-#include "SatelliteView.h"
 #include <vector>
-#include "game_board.h"
-#include "objects/tank.h"
-#include "objects/shell.h"
-#include "utils/point.h"
+
+#include "GameManager/game_board.h"
+#include "GameManager/objects/shell.h"
+#include "GameManager/objects/tank.h"
+#include "UserCommon/utils/point.h"
+#include "common/SatelliteView.h"
 
 /**
  * @class SatelliteViewImpl

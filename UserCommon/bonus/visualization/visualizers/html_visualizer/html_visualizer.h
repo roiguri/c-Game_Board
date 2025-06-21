@@ -1,9 +1,10 @@
 #pragma once
 
-#include "bonus/visualization/core/visualizer_base.h"
-#include <vector>
-#include <string>
 #include <filesystem>
+#include <string>
+#include <vector>
+
+#include "UserCommon/bonus/visualization/core/visualizer_base.h"
 
 /**
  * @brief HTML-based visualizer that generates an interactive web visualization

@@ -1,8 +1,9 @@
-#include "file_loader.h"
-#include <fstream>
-#include <sstream>
-#include <iostream>
 #include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+
+#include "GameManager/file_loader.h"
 
 std::vector<std::string> FileLoader::loadBoardFile(
     const std::string& filePath,

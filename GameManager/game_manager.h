@@ -1,18 +1,19 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include "game_board.h"
-#include "objects/tank.h"
-#include "objects/shell.h"
-#include "collision_handler.h"
-#include "TankAlgorithmFactory.h"
-#include "PlayerFactory.h"
+
 #include "ActionRequest.h"
+#include "GameManager/collision_handler.h"
+#include "GameManager/game_board.h"
+#include "GameManager/objects/shell.h"
+#include "GameManager/objects/tank.h"
+#include "PlayerFactory.h"
+#include "TankAlgorithmFactory.h"
 
 #ifdef ENABLE_VISUALIZATION
-#include "bonus/visualization/visualization.h"
+#include "UserCommon/bonus/visualization/visualization.h"
 #endif
 
 /**

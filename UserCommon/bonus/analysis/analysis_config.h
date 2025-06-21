@@ -1,8 +1,9 @@
 #pragma once
 
-#include "bonus/analysis/analysis_params.h"
 #include <string>
+
 #include "nlohmann/json.hpp"
+#include "UserCommon/bonus/analysis/analysis_params.h"
 
 /**
  * @brief Configuration manager for the analysis tool

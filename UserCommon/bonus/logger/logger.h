@@ -1,8 +1,8 @@
 // include/bonus/logger/logger.h
 #pragma once
 
-#include <string>
 #include <fstream>
+#include <string>
 
 /**
  * @brief Simple logging system for the Tank Battle game

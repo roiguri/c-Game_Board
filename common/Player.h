@@ -1,9 +1,10 @@
 #pragma once
 
-#include "TankAlgorithm.h"
-#include "SatelliteView.h"
-#include <memory>
 #include <functional>
+#include <memory>
+
+#include "SatelliteView.h"
+#include "TankAlgorithm.h"
 
 // TODO: update cpp files accordingly.
 class Player {  

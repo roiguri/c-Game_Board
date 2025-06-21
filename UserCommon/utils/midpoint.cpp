@@ -1,5 +1,6 @@
-#include "utils/midpoint.h"
 #include <cmath>
+
+#include "UserCommon/utils/midpoint.h"
 
 MidPoint::MidPoint() : Point(), m_halfX(false), m_halfY(false) {}
 

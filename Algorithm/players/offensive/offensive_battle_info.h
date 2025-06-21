@@ -1,8 +1,9 @@
 #pragma once
 
-#include "players/basic/battle_info_impl.h"
-#include "utils/point.h"
 #include <optional>
+
+#include "Algorithm/players/basic/battle_info_impl.h"
+#include "UserCommon/utils/point.h"
 
 class OffensiveBattleInfo : public BattleInfoImpl {
 public:

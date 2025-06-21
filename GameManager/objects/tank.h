@@ -1,6 +1,6 @@
 #pragma once
 
-#include "objects/game_object.h"
+#include "GameManager/objects/game_object.h"
 
 /**
  * @class Tank

@@ -1,4 +1,5 @@
 #pragma once
+
 #include "TankAlgorithm.h"
 
 // TODO: basic stub - requires full implementation.

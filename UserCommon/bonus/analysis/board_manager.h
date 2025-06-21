@@ -1,7 +1,8 @@
 #pragma once
 
 #include <string>
-#include "bonus/board_generator.h" // For BoardConfig
+
+#include "UserCommon/bonus/board_generator.h" // For BoardConfig
 
 class BoardManager {
 public:

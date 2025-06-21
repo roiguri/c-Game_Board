@@ -1,12 +1,13 @@
 #pragma once
 
-#include <string>
-#include <map>
-#include <iostream>
 #include <fstream>
-#include <type_traits>
 #include <iomanip>
-#include "bonus/analysis/analysis_tool.h" // For GameOutcomeCounts
+#include <iostream>
+#include <map>
+#include <string>
+#include <type_traits>
+
+#include "UserCommon/bonus/analysis/analysis_tool.h" // For GameOutcomeCounts
 
 class AnalysisReporter {
 public:

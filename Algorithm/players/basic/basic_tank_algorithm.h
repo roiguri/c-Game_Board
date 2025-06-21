@@ -1,13 +1,14 @@
 #pragma once
 
-#include "TankAlgorithm.h"
-#include "players/basic/battle_info_impl.h"
-#include "game_board.h"
-#include "utils/point.h"
-#include <vector>
-#include <objects/tank.h>
-#include <optional>
 #include <functional>
+#include <optional>
+#include <vector>
+
+#include "Algorithm/players/basic/battle_info_impl.h"
+#include "GameManager/game_board.h"
+#include "GameManager/objects/tank.h"
+#include "UserCommon/utils/point.h"
+#include "common/TankAlgorithm.h"
 
 /**
  * @class BasicTankAlgorithm

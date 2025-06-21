@@ -1,13 +1,14 @@
-#include "bonus/board_generator.h"
-#include <string>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
-#include "bonus/cli/cli_parser.h" // Added include
-#include "game_manager.h"
-#include "factories/basic_tank_algorithm_factory.h"
-#include "factories/basic_player_factory.h"
-#include "bonus/logger/logger_config.h"
+#include <string>
+
+#include "GameManager/factories/basic_player_factory.h"
+#include "GameManager/factories/basic_tank_algorithm_factory.h"
+#include "GameManager/game_manager.h"
+#include "UserCommon/bonus/board_generator.h"
+#include "UserCommon/bonus/cli/cli_parser.h"
+#include "UserCommon/bonus/logger/logger_config.h"
 
 // Run the game with a specified board file
 int runGameWithFile(const std::string& filePath) {

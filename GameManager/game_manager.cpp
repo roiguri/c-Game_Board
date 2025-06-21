@@ -1,14 +1,15 @@
-#include "game_manager.h"
-#include "file_loader.h"
-#include "collision_handler.h"
-#include <iostream>
-#include <fstream>
 #include <algorithm>
 #include <filesystem>
-#include <unordered_map>
+#include <fstream>
+#include <iostream>
 #include <set>
-#include <satellite_view_impl.h>
-#include "bonus/logger/logger.h"
+#include <unordered_map>
+
+#include "GameManager/collision_handler.h"
+#include "GameManager/file_loader.h"
+#include "GameManager/game_manager.h"
+#include "GameManager/satellite_view_impl.h"
+#include "UserCommon/bonus/logger/logger.h"
 
 GameManager::GameManager(PlayerFactory& playerFactory,
                        TankAlgorithmFactory& tankAlgorithmFactory)

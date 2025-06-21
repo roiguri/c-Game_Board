@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
-#include "bonus/visualization/core/game_snapshot.h"
-#include "game_board.h"
-#include "objects/tank.h"
-#include "objects/shell.h"
+#include "UserCommon/bonus/visualization/core/game_snapshot.h"
+#include "GameManager/game_board.h"
+#include "GameManager/objects/tank.h"
+#include "GameManager/objects/shell.h"
 
 class GameSnapshotTest : public ::testing::Test {
 protected:

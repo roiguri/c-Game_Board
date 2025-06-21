@@ -1,5 +1,8 @@
-#include "TankAlgorithm.h"
+#pragma once
+
 #include <vector>
+
+#include "TankAlgorithm.h"
 
 class MockAlgorithm : public TankAlgorithm {
   public:

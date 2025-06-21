@@ -1,6 +1,7 @@
-#include "players/offensive/offensive_player.h"
-#include <limits>
 #include <cmath>
+#include <limits>
+
+#include "Algorithm/players/offensive/offensive_player.h"
 
 OffensivePlayer::OffensivePlayer(int playerIndex, size_t x, size_t y, size_t maxSteps, size_t numShells)
     : BasicPlayer(playerIndex, x, y, maxSteps, numShells),

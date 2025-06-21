@@ -1,7 +1,7 @@
 #pragma once
 
-#include "utils/point.h"
-#include "utils/direction.h"
+#include "UserCommon/utils/direction.h"
+#include "UserCommon/utils/point.h"
 
 /**
  * @class GameObject

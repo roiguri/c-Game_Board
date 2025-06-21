@@ -1,6 +1,7 @@
-#include "bonus/analysis/board_manager.h"
 #include <filesystem>
 #include <iostream>
+
+#include "UserCommon/bonus/analysis/board_manager.h"
 
 bool BoardManager::generateBoard(const BoardConfig& config) {
     m_generator = BoardGenerator(config);

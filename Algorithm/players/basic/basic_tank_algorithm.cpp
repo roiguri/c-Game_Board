@@ -1,10 +1,11 @@
-#include "players/basic/basic_tank_algorithm.h"
-#include "objects/tank.h"
-#include "utils/point.h"
-#include "utils/direction.h"
-#include "bonus/logger/logger.h"
 #include <cassert>
 #include <iostream>
+
+#include "Algorithm/players/basic/basic_tank_algorithm.h"
+#include "objects/tank.h"
+#include "UserCommon/bonus/logger/logger.h"
+#include "UserCommon/utils/direction.h"
+#include "UserCommon/utils/point.h"
 
 BasicTankAlgorithm::BasicTankAlgorithm(int playerId, int tankIndex)
     : m_playerId(playerId), m_tankIndex(tankIndex), m_gameBoard(5, 5) {
