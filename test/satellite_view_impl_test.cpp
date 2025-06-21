@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "satellite_view_impl.h"
+#include "UserCommon/satellite_view_impl.h"
 #include "game_board.h"
 #include "objects/tank.h"
 #include "objects/shell.h"

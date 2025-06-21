@@ -583,6 +583,9 @@ ls -la Simulator/simulator
 
 ---
 
+### Unfinished tasks:
+- create namespaces
+
 ### Step 1D.2: Implement AbstractGameManager Interface
 
 **Objective:** Make current GameManager implement the AbstractGameManager interface required by Assignment 3.

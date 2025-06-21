@@ -8,7 +8,7 @@
 #include "GameManager/collision_handler.h"
 #include "GameManager/file_loader.h"
 #include "GameManager/game_manager.h"
-#include "GameManager/satellite_view_impl.h"
+#include "UserCommon/satellite_view_impl.h"
 #include "UserCommon/bonus/logger/logger.h"
 
 GameManager::GameManager(PlayerFactory& playerFactory,
