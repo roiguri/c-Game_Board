@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "Simulator/file_loader.h"
+#include "Simulator/file_satellite_view.h"
 
 std::vector<std::string> FileLoader::loadBoardFile(
     const std::string& filePath,
@@ -71,4 +72,16 @@ bool FileLoader::parseKeyValue(const std::string& line, const std::string& key, 
     std::istringstream iss(right);
     iss >> value;
     return !iss.fail();
+}
+
+FileLoader::BoardInfo FileLoader::loadBoardWithSatelliteView(const std::string& filePath) {
+    BoardInfo info{};
+    
+    std::vector<std::string> boardData = loadBoardFile(filePath, info.rows, info.cols, info.maxSteps, info.numShells);
+    
+    if (!boardData.empty()) {
+        info.satelliteView = std::make_unique<FileSatelliteView>(boardData, info.rows, info.cols);
+    }
+    
+    return info;
 }

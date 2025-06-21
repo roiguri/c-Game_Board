@@ -1,7 +1,12 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
+
+#include "common/SatelliteView.h"
+
+class FileSatelliteView;
 
 /**
  * @brief Utility class for loading and parsing game board files
@@ -12,6 +17,29 @@
  */
 class FileLoader {
 public:
+    /**
+     * @brief Structure containing all board information loaded from file
+     */
+    struct BoardInfo {
+        int rows;
+        int cols; 
+        int maxSteps;
+        int numShells;
+        std::unique_ptr<SatelliteView> satelliteView;
+    };
+    
+    /**
+     * @brief Load a board file and return BoardInfo with SatelliteView
+     * 
+     * Reads the file at the given path, parses the header lines for game parameters,
+     * and returns a BoardInfo struct containing all parsed data including a SatelliteView.
+     * 
+     * @param filePath Path to the board file to load
+     * @return BoardInfo struct with all parsed data and SatelliteView,
+     *         or a BoardInfo with null satelliteView if loading failed
+     */
+    static BoardInfo loadBoardWithSatelliteView(const std::string& filePath);
+
     /**
      * @brief Load a board file and parse its contents according to assignment format
      * 
