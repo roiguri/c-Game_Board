@@ -4,13 +4,16 @@
 #include <string>
 #include <vector>
 
-#include "ActionRequest.h"
 #include "GameManager/collision_handler.h"
 #include "GameManager/game_board.h"
 #include "GameManager/objects/shell.h"
 #include "GameManager/objects/tank.h"
-#include "PlayerFactory.h"
-#include "TankAlgorithmFactory.h"
+#include "common/AbstractGameManager.h"
+#include "common/GameResult.h"
+#include "common/SatelliteView.h"
+#include "common/ActionRequest.h"
+#include "common/Player.h"
+#include "common/TankAlgorithm.h"
 
 #ifdef ENABLE_VISUALIZATION
 #include "UserCommon/bonus/visualization/visualization.h"
@@ -62,7 +65,13 @@ public:
      * 
      * Processes turns, applies actions, and checks for game end conditions
      */
-    void run();
+    GameResult run(
+        size_t map_width, size_t map_height,
+        SatelliteView& map, // <= assume it is a snapshot, NOT updated
+        size_t max_steps, size_t num_shells,
+        Player& player1, Player& player2,
+        TankAlgorithmFactory player1_tank_algo_factory,
+        TankAlgorithmFactory player2_tank_algo_factory);
 
     struct TankWithAlgorithm {
         Tank& tank;
@@ -93,6 +102,7 @@ private:
     int m_remaining_steps;
     int m_maximum_steps;
     std::string m_gameResult;
+    GameResult m_finalGameResult;
     std::vector<std::string> m_gameLog;
     CollisionHandler m_collisionHandler;
 

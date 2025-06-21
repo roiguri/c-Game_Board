@@ -82,104 +82,116 @@ bool GameManager::readBoard(const std::string& filePath) {
     return true;
 }
 
-void GameManager::run() {
-  m_currentStep = 1;
-  m_gameOver = false;
-  m_gameLog.clear();
+GameResult GameManager::run(
+        size_t map_width, size_t map_height,
+        SatelliteView& map, // <= assume it is a snapshot, NOT updated
+        size_t max_steps, size_t num_shells,
+        Player& player1, Player& player2,
+        TankAlgorithmFactory player1_tank_algo_factory,
+        TankAlgorithmFactory player2_tank_algo_factory) {
+    // TODO: initialization
+    // TODO: create readSatelliteView method
 
-  #ifdef ENABLE_VISUALIZATION
-  if (m_visualizationManager) {
-      std::string stepMessage = "Game started";
-      
-      // Capture the game state for visualization
-      m_visualizationManager->captureGameState(
-          m_currentStep,
-          m_board,
-          m_tanks,
-          m_shells,
-          m_remaining_steps,
-          stepMessage
-      );
-  }
-  #endif
+    // Start Game:
+    m_currentStep = 1;
+    m_gameOver = false;
+    m_gameLog.clear();
 
-  LOG_INFO("Starting game loop");
-  
-  while (!m_gameOver) {
-      LOG_DEBUG("Processing step " + std::to_string(m_currentStep));
-      processStep();
-      
-      bool tanksOutOfShells = true;
-      for (const auto& tank : m_tanks) {
-          if (!tank.isDestroyed() && tank.getRemainingShells() > 0) {
-              tanksOutOfShells = false;
-              break;
-          }
-      }
-      
-      if (tanksOutOfShells) {
-          m_remaining_steps--;
-      }
-      m_gameOver = checkGameOver();
-      m_currentStep++;
-  }
-  
-  m_gameLog.push_back(
-    "Game ended after " + std::to_string(m_currentStep) + " steps"
-  );
-  m_gameLog.push_back("Result: " + m_gameResult);
-  LOG_INFO("Game ended after " + std::to_string(m_currentStep) + " steps");
-  LOG_INFO("Result: " + m_gameResult);
+    #ifdef ENABLE_VISUALIZATION
+    if (m_visualizationManager) {
+        std::string stepMessage = "Game started";
+        
+        // Capture the game state for visualization
+        m_visualizationManager->captureGameState(
+            m_currentStep,
+            m_board,
+            m_tanks,
+            m_shells,
+            m_remaining_steps,
+            stepMessage
+        );
+    }
+    #endif
 
-  #ifdef ENABLE_VISUALIZATION
-  if (m_visualizationManager) {
-      std::string finalMessage = "Game ended after " + std::to_string(m_currentStep) + " steps. Result: " + m_gameResult;
-      
-      m_visualizationManager->captureGameState(
-          m_currentStep + 1,
-          m_board,
-          m_tanks,
-          m_shells,
-          m_remaining_steps,
-          finalMessage
-      );
-  }
-  #endif
+    LOG_INFO("Starting game loop");
+    
+    while (!m_gameOver) {
+        LOG_DEBUG("Processing step " + std::to_string(m_currentStep));
+        processStep();
+        
+        bool tanksOutOfShells = true;
+        for (const auto& tank : m_tanks) {
+            if (!tank.isDestroyed() && tank.getRemainingShells() > 0) {
+                tanksOutOfShells = false;
+                break;
+            }
+        }
+        
+        if (tanksOutOfShells) {
+            m_remaining_steps--;
+        }
+        m_gameOver = checkGameOver();
+        m_currentStep++;
+    }
+    
+    m_gameLog.push_back(
+        "Game ended after " + std::to_string(m_currentStep) + " steps"
+    );
+    m_gameLog.push_back("Result: " + m_gameResult);
+    LOG_INFO("Game ended after " + std::to_string(m_currentStep) + " steps");
+    LOG_INFO("Result: " + m_gameResult);
 
-  saveResults(m_outputFilePath);
+    #ifdef ENABLE_VISUALIZATION
+    if (m_visualizationManager) {
+        std::string finalMessage = "Game ended after " + std::to_string(m_currentStep) + " steps. Result: " + m_gameResult;
+        
+        m_visualizationManager->captureGameState(
+            m_currentStep + 1,
+            m_board,
+            m_tanks,
+            m_shells,
+            m_remaining_steps,
+            finalMessage
+        );
+    }
+    #endif
+
+    saveResults(m_outputFilePath);
+    
+    return m_finalGameResult;
 }
 
-bool GameManager::saveResults(const std::string& outputFilePath) {
-  std::ofstream outputFile(outputFilePath);
-  if (!outputFile.is_open()) {
-      std::cerr << "Error: Could not open output file " << 
-        outputFilePath << std::endl;
-      return false;
-  }
-  for (const auto& logEntry : m_gameLog) {
-      outputFile << logEntry << std::endl;
-  }
-  
-  outputFile.close();
+    bool GameManager::saveResults(const std::string& outputFilePath) {
+    std::ofstream outputFile(outputFilePath);
+    if (!outputFile.is_open()) {
+        std::cerr << "Error: Could not open output file " << 
+            outputFilePath << std::endl;
+        return false;
+    }
+    for (const auto& logEntry : m_gameLog) {
+        outputFile << logEntry << std::endl;
+    }
+    
+    outputFile.close();
 
-  #ifdef ENABLE_VISUALIZATION
-  if (m_visualizationManager) {
-      std::string visualizationPath = outputFilePath;
-      size_t dotPos = visualizationPath.find_last_of('.');
-      if (dotPos != std::string::npos) {
-          visualizationPath = visualizationPath.substr(0, dotPos);
-      }
-      visualizationPath += "_visualization";
-      
-      if (m_visualizationManager->generateOutputs(visualizationPath)) {
-          LOG_INFO("Visualization generated at " + visualizationPath + ".html");
-      } else {
-          LOG_ERROR("Failed to generate visualization.");
-          return false;
-      }
-  }
-  #endif
-  return true;
+    #ifdef ENABLE_VISUALIZATION
+    if (m_visualizationManager) {
+        std::string visualizationPath = outputFilePath;
+        size_t dotPos = visualizationPath.find_last_of('.');
+        if (dotPos != std::string::npos) {
+            visualizationPath = visualizationPath.substr(0, dotPos);
+        }
+        visualizationPath += "_visualization";
+        
+        if (m_visualizationManager->generateOutputs(visualizationPath)) {
+            LOG_INFO("Visualization generated at " + visualizationPath + ".html");
+        } else {
+            LOG_ERROR("Failed to generate visualization.");
+            return false;
+        }
+    }
+    #endif
+    return true;
 }
 
 void GameManager::processStep() {
@@ -358,15 +370,16 @@ void GameManager::moveShellsOnce() {
 }
 
 bool GameManager::checkGameOver() {
+    std::set<int> playerIds; // TODO: move this to a class member
     // Count alive tanks per player
     std::unordered_map<int, int> playersAlive;
     for (const auto& tank : m_tanks) {
+        playerIds.insert(tank.getPlayerId());
         if (!tank.isDestroyed()) {
             playersAlive[tank.getPlayerId()]++;
         }
     }
 
-    // Count how many players have tanks alive
     int playersWithTanks = 0;
     int winningPlayer = -1;
     int winningPlayerTanks = 0;
@@ -378,10 +391,20 @@ bool GameManager::checkGameOver() {
             winningPlayerTanks = tankCount;
         }
     }
+    
+    std::vector<size_t> remainingTanks(playerIds.size(), 0);
+    for (const auto& [playerId, tankCount] : playersAlive) {
+        if (playerId > 0) {
+            remainingTanks[playerId - 1] = tankCount; // Convert to 0-based index
+        }
+    }
 
     // Check win conditions
     if (playersWithTanks == 1) {
         m_gameResult = "Player " + std::to_string(winningPlayer) + " won with " + std::to_string(winningPlayerTanks) + " tanks still alive";
+        m_finalGameResult.winner = winningPlayer;
+        m_finalGameResult.reason = GameResult::ALL_TANKS_DEAD;
+        m_finalGameResult.remaining_tanks = remainingTanks;
         return true;
     }
     if (playersWithTanks == 0) {
@@ -390,6 +413,9 @@ bool GameManager::checkGameOver() {
         } else {
             m_gameResult = "Tie, all players have zero tanks";
         }
+        m_finalGameResult.winner = 0; // Tie
+        m_finalGameResult.reason = GameResult::ALL_TANKS_DEAD;
+        m_finalGameResult.remaining_tanks = remainingTanks;
         return true;
     }
     if (m_remaining_steps <= 0) {
@@ -398,6 +424,9 @@ bool GameManager::checkGameOver() {
         } else {
             m_gameResult = "Tie, all players have zero shells for " + std::to_string(DEFAULT_NO_SHELLS_STEPS) + " steps";
         }
+        m_finalGameResult.winner = 0; // Tie
+        m_finalGameResult.reason = GameResult::ZERO_SHELLS;
+        m_finalGameResult.remaining_tanks = remainingTanks;
         return true;
     }
     if (m_currentStep >= m_maximum_steps) {
@@ -421,6 +450,9 @@ bool GameManager::checkGameOver() {
             }
             m_gameResult = resultStr;
         }
+        m_finalGameResult.winner = 0; // Tie
+        m_finalGameResult.reason = GameResult::MAX_STEPS;
+        m_finalGameResult.remaining_tanks = remainingTanks;
         return true;
     }
     // Game continues
