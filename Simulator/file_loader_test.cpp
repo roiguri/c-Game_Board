@@ -68,7 +68,7 @@ TEST_F(FileLoaderTest, LoadBoardFile_ValidFile) {
     EXPECT_EQ(cols, 5);
     EXPECT_EQ(maxSteps, 1000);
     EXPECT_EQ(numShells, 20);
-    EXPECT_EQ(result.size(), 5);
+    EXPECT_EQ(result.size(), 5u);
     for (size_t i = 0; i < result.size(); ++i) {
         EXPECT_EQ(result[i], content[i+5]); // +5 to skip header
     }
