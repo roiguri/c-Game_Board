@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "GameManager/file_loader.h"
+#include "Simulator/file_loader.h"
 
 std::vector<std::string> FileLoader::loadBoardFile(
     const std::string& filePath,
