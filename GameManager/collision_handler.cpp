@@ -1,6 +1,6 @@
 #include <map>
 
-#include "GameManager/collision_handler.h"
+#include "collision_handler.h"
 
 namespace GameManager_098765432_123456789 {
 
