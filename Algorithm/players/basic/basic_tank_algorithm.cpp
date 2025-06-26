@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "Algorithm/players/basic/basic_tank_algorithm.h"
-#include "objects/tank.h"
+#include "UserCommon/objects/tank.h"
 #include "UserCommon/bonus/logger/logger.h"
 #include "UserCommon/utils/direction.h"
 #include "UserCommon/utils/point.h"

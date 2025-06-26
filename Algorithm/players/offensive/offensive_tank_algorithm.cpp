@@ -5,7 +5,7 @@
 
 #include "Algorithm/players/offensive/offensive_battle_info.h"
 #include "Algorithm/players/offensive/offensive_tank_algorithm.h"
-#include "GameManager/game_board.h"
+#include "UserCommon/game_board.h"
 #include "UserCommon/bonus/logger/logger.h"
 #include "UserCommon/utils/direction.h"
 

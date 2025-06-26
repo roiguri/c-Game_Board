@@ -5,8 +5,8 @@
 #include <vector>
 
 #include "Algorithm/players/basic/battle_info_impl.h"
-#include "GameManager/game_board.h"
-#include "GameManager/objects/tank.h"
+#include "UserCommon/game_board.h"
+#include "UserCommon/objects/tank.h"
 #include "UserCommon/utils/point.h"
 #include "common/TankAlgorithm.h"
 

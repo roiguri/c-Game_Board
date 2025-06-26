@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "game_board.h"
+#include "UserCommon/game_board.h"
 #include <vector>
 #include <string>
 #include <map>

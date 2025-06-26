@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "GameManager/game_board.h"
+#include "UserCommon/game_board.h"
 #include "UserCommon/utils/point.h"
 #include "common/BattleInfo.h"
 /**

@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "players/basic/basic_tank_algorithm.h"
-#include "game_board.h"
-#include "objects/tank.h"
+#include "UserCommon/game_board.h"
+#include "UserCommon/objects/tank.h"
 #include "utils/point.h"
 #include "players/basic/battle_info_impl.h"
 #include <vector>

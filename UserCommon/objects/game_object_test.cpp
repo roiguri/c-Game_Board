@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "objects/game_object.h"
+#include "UserCommon/objects/game_object.h"
 #include "utils/point.h"
 #include "utils/direction.h"
 

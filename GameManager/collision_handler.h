@@ -3,9 +3,9 @@
 #include <set>
 #include <vector>
 
-#include "GameManager/game_board.h"
-#include "GameManager/objects/shell.h"
-#include "GameManager/objects/tank.h"
+#include "UserCommon/game_board.h"
+#include "UserCommon/objects/shell.h"
+#include "UserCommon/objects/tank.h"
 #include "UserCommon/utils/midpoint.h"
 
 namespace GameManager_098765432_123456789 {

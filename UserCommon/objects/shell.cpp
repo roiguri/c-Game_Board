@@ -1,4 +1,4 @@
-#include "GameManager/objects/shell.h"
+#include "UserCommon/objects/shell.h"
 
 Shell::Shell(int playerId, const Point& position, Direction direction)
     : GameObject(playerId, position, direction) {

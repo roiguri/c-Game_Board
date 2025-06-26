@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "GameManager/game_board.h"
-#include "GameManager/objects/shell.h"
-#include "GameManager/objects/tank.h"
+#include "UserCommon/game_board.h"
+#include "UserCommon/objects/shell.h"
+#include "UserCommon/objects/tank.h"
 #include "UserCommon/bonus/visualization/core/visualizer_base.h"
 
 /**

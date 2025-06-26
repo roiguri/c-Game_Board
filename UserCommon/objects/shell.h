@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GameManager/objects/game_object.h"
+#include "UserCommon/objects/game_object.h"
 
 /**
  * @class Shell

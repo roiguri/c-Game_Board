@@ -5,9 +5,9 @@
 #include <vector>
 
 #include "GameManager/collision_handler.h"
-#include "GameManager/game_board.h"
-#include "GameManager/objects/shell.h"
-#include "GameManager/objects/tank.h"
+#include "UserCommon/game_board.h"
+#include "UserCommon/objects/shell.h"
+#include "UserCommon/objects/tank.h"
 #include "common/AbstractGameManager.h"
 #include "common/GameResult.h"
 #include "common/SatelliteView.h"

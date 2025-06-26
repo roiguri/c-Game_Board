@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
 #include "UserCommon/bonus/visualization/core/visualization_manager.h"
-#include "GameManager/game_board.h"
-#include "GameManager/objects/tank.h"
-#include "GameManager/objects/shell.h"
+#include "UserCommon/game_board.h"
+#include "UserCommon/objects/tank.h"
+#include "UserCommon/objects/shell.h"
 #include <memory>
 
 // Mock visualizer for testing

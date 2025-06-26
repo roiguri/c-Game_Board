@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "players/basic/battle_info_impl.h"
-#include "game_board.h"
+#include "UserCommon/game_board.h"
 #include "utils/point.h"
 #include <string>
 #include <vector>

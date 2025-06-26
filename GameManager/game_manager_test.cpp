@@ -2,7 +2,7 @@
 #include "game_manager.h"
 #include "UserCommon/utils/testing/mock_player.h"
 #include "UserCommon/utils/testing/mock_algorithm.h"
-#include "objects/shell.h"
+#include "UserCommon/objects/shell.h"
 #include "utils/point.h"
 #include "utils/direction.h"
 #include "common/SatelliteView.h"

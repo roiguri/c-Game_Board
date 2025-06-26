@@ -3,183 +3,50 @@
     "tasks": [
       {
         "id": 1,
-        "title": "Add AbstractGameManager Interface Compliance",
-        "description": "Update GameManager to fully comply with AbstractGameManager interface including signature changes, namespace wrapping, and registration system",
-        "status": "done",
+        "title": "Create Simulator Project Structure and Core Components",
+        "description": "Establish the Simulator project with proper directory structure, build system, command-line interface, and core simulation orchestration logic.",
+        "details": "Create the Simulator/ directory with proper makefile for building the main executable. Implement command-line argument parsing for both comparative and competitive modes with proper validation and error handling. Design the core Simulator class that can orchestrate multiple game instances, manage dynamic library loading (.so files), and coordinate threading. Implement file discovery utilities for finding game managers, algorithms, and maps in specified directories. Set up the foundation for result collection and output file generation with timestamped naming. Ensure the executable follows the naming convention simulator_<submitter_ids>.",
+        "testStrategy": "Verify command-line parsing works correctly for both modes with all required and optional arguments. Test error handling for missing arguments, invalid file paths, and non-existent directories. Confirm the simulator executable builds successfully and has the correct naming convention. Test file discovery functions with sample directories. Validate that the basic simulator structure can be instantiated and initialized without crashes.",
+        "status": "pending",
         "dependencies": [],
-        "priority": "high",
-        "details": "Update run() method signature to match AbstractGameManager exactly: GameResult run(size_t map_width, size_t map_height, const SatelliteView& map, size_t max_steps, size_t num_shells, Player& player1, Player& player2, TankAlgorithmFactory player1_tank_algo_factory, TankAlgorithmFactory player2_tank_algo_factory). Note the const SatelliteView& parameter change. Update GameResult to include new gameState and rounds fields. Add parameterless constructor alongside existing factory-based constructor. Wrap entire GameManager implementation in GameManager_<submitter_ids> namespace. Add REGISTER_GAME_MANAGER macro call in .cpp file. Ensure all existing functionality remains intact while supporting new registration system.",
-        "testStrategy": "Verify GameManager compiles with corrected AbstractGameManager interface signature. Test both constructors work (parameterless for registration, existing for current usage). Confirm new run() method accepts const SatelliteView parameter. Validate GameResult includes all required fields (gameState, rounds). Test registration system integration. Ensure existing functionality preserved through current test suite.",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Update run() method signature to match AbstractGameManager",
-            "description": "Change SatelliteView& parameter to const SatelliteView& in run() method signature",
-            "status": "done",
-            "dependencies": [],
-            "details": "",
-            "testStrategy": ""
-          },
-          {
-            "id": 2,
-            "title": "Update GameResult structure",
-            "description": "Add gameState and rounds fields to GameResult to match new interface specification",
-            "status": "done",
-            "dependencies": [],
-            "details": "",
-            "testStrategy": ""
-          },
-          {
-            "id": 3,
-            "title": "Add parameterless constructor",
-            "description": "Implement parameterless constructor for registration system while maintaining existing factory constructor",
-            "status": "done",
-            "dependencies": [],
-            "details": "",
-            "testStrategy": ""
-          },
-          {
-            "id": 4,
-            "title": "Wrap GameManager in namespace",
-            "description": "Wrap entire GameManager implementation in GameManager_<submitter_ids> namespace",
-            "status": "done",
-            "dependencies": [],
-            "details": "",
-            "testStrategy": ""
-          },
-          {
-            "id": 5,
-            "title": "Add registration macro call",
-            "description": "Add REGISTER_GAME_MANAGER macro call in GameManager .cpp file for auto-registration",
-            "status": "done",
-            "dependencies": [],
-            "details": "",
-            "testStrategy": ""
-          }
-        ]
+        "priority": "medium",
+        "subtasks": []
       },
       {
         "id": 2,
-        "title": "Implement SatelliteView to GameBoard Parsing",
-        "description": "Create readSatelliteView() method to convert SatelliteView input into internal game state, replacing file-based initialization",
-        "details": "Implement readSatelliteView() method that converts SatelliteView character grid to vector<string> board lines. Use SatelliteView::getObjectAt(x,y) to read map dimensions and content. Adapt existing GameBoard::initialize() logic to work with parsed data instead of file lines. Extract tank positions (characters '1', '2') and validate board structure. Handle wall characters ('#'), empty spaces (' '), and invalid characters with appropriate error handling. Store parsed data in member variables for game initialization. Ensure compatibility with existing board validation logic.",
-        "testStrategy": "Create mock SatelliteView implementations with various board configurations. Test parsing of valid boards with tanks, walls, and empty spaces. Verify tank position extraction for players 1 and 2. Test error handling for invalid characters and malformed boards. Compare parsed board state with file-based parsing results for identical maps.",
-        "priority": "high",
+        "title": "Refactor Input Validation from GameManager to Simulator",
+        "description": "Move input validation and error handling logic from GameManager to Simulator to centralize error handling and improve separation of concerns.",
+        "details": "Extract all input validation logic currently in GameManager that handles command-line arguments, file path validation, and parameter checking. Move this logic to the Simulator class where it belongs according to the new architecture. This includes: validating game map files exist and are readable, checking that algorithm .so files are valid and loadable, verifying GameManager .so files are accessible, validating numeric parameters (num_threads, max_steps, num_shells), and ensuring directory paths are valid and contain expected files. Update GameManager to focus solely on game execution logic, removing any command-line or file system validation. Implement proper error propagation from Simulator to provide meaningful error messages to users. Ensure all validation happens before any dynamic library loading or game execution begins.",
+        "testStrategy": "Test that invalid file paths are caught by Simulator before GameManager execution. Verify that malformed .so files are detected at Simulator level. Confirm that GameManager no longer performs input validation and focuses only on game logic. Test error messages are clear and helpful when validation fails. Ensure that valid inputs still work correctly after the refactoring.",
+        "status": "pending",
         "dependencies": [
           1
         ],
-        "status": "done",
-        "subtasks": [
-          {
-            "id": 2,
-            "title": "Implement character grid reading from SatelliteView",
-            "description": "Create method to read all characters from SatelliteView using discovered dimensions and convert to vector<string> format",
-            "dependencies": [
-              1
-            ],
-            "details": "Use nested loops with discovered width/height to call getObjectAt() for each coordinate. Convert the 2D character data into vector<string> where each string represents a row. Handle any exceptions from invalid coordinate access gracefully.\n<info added on 2025-06-26T10:47:51.033Z>\nUse provided map_width and map_height parameters instead of discovering dimensions from the map. Remove dependency on subtask 2.1 since dimensions are already available as method parameters. Update loops to iterate from 0 to map_width-1 and 0 to map_height-1 directly.\n</info added on 2025-06-26T10:47:51.033Z>",
-            "status": "done",
-            "testStrategy": "Test with various map contents including walls, spaces, and tank positions. Verify correct row/column ordering and character preservation"
-          },
-          {
-            "id": 3,
-            "title": "Extract and validate tank positions from parsed grid",
-            "description": "Scan the parsed character grid to locate tank positions ('1', '2') and validate their placement according to game rules",
-            "dependencies": [
-              2
-            ],
-            "details": "Iterate through parsed vector<string> to find characters '1' and '2'. Store their coordinates and validate that exactly one of each exists. Check that tank positions are not on walls or invalid locations. Create data structures to store initial tank positions for game initialization.",
-            "status": "done",
-            "testStrategy": "Test with maps having correct tank placement, missing tanks, duplicate tanks, and tanks in invalid positions"
-          },
-          {
-            "id": 4,
-            "title": "Implement board structure validation and character handling",
-            "description": "Validate the parsed board contains only valid characters and has proper structure for gameplay",
-            "dependencies": [
-              2
-            ],
-            "details": "Check that all characters in the parsed grid are valid ('#' for walls, ' ' for empty spaces, '1'/'2' for tanks). Implement error handling for invalid characters. Ensure board has proper boundaries and playable area. Apply existing GameBoard validation logic to the parsed data.",
-            "status": "done",
-            "testStrategy": "Test with maps containing invalid characters, malformed boundaries, and edge cases like all-wall or all-empty maps"
-          },
-          {
-            "id": 5,
-            "title": "Integrate readSatelliteView() with existing GameBoard initialization",
-            "description": "Replace file-based initialization in GameBoard::initialize() with SatelliteView parsing while maintaining compatibility",
-            "dependencies": [
-              3,
-              4
-            ],
-            "details": "Modify GameBoard::initialize() to accept SatelliteView parameter instead of filename. Call readSatelliteView() to get parsed data, then use existing logic that processes vector<string> board lines. Ensure all member variables are properly initialized and existing game logic continues to work unchanged.",
-            "status": "done",
-            "testStrategy": "Integration tests comparing file-based vs SatelliteView-based initialization results. Verify game state consistency and proper initialization of all board components"
-          },
-          {
-            "id": 6,
-            "title": "Update GameManager::readBoard to use SatelliteView input",
-            "description": "Modify the existing readBoard method to accept SatelliteView and dimensions instead of file path",
-            "details": "Create new overload of readBoard that takes (const SatelliteView&, size_t width, size_t height, size_t max_steps, size_t num_shells) parameters. Use the new readSatelliteView() method internally. Maintain existing file-based readBoard for backward compatibility. Ensure all member variables are properly initialized.",
-            "status": "done",
-            "dependencies": [
-              "2.5"
-            ],
-            "parentTaskId": 2
-          },
-          {
-            "id": 7,
-            "title": "Integrate SatelliteView parsing into run() method",
-            "description": "Update the run() method to use the new SatelliteView-based readBoard instead of file-based initialization",
-            "details": "Replace the TODO comments in run() method with actual implementation. Call the new readBoard overload with provided parameters (map, map_width, map_height, max_steps, num_shells). Initialize players using the provided player1_tank_algo_factory and player2_tank_algo_factory. Set up the game state and start the main game loop. Ensure proper error handling and game result population.",
-            "status": "done",
-            "dependencies": [
-              "2.6"
-            ],
-            "parentTaskId": 2
-          }
-        ]
-      },
-      {
-        "id": 3,
-        "title": "Integrate Factory-Based Algorithm Creation",
-        "description": "Replace internal algorithm factories with parameter-based TankAlgorithmFactory functions and integrate PlayerFactory for dynamic algorithm and player loading",
-        "status": "done",
-        "dependencies": [
-          2
-        ],
-        "priority": "high",
-        "details": "Remove member factory variables from GameManager class. Modify both tank creation logic and player creation logic to use provided factory parameters. For each tank found during SatelliteView parsing, call appropriate TankAlgorithmFactory (player1_tank_algo_factory for player 1 tanks, player2_tank_algo_factory for player 2 tanks) with correct player_index and tank_index parameters. Update Player object creation to use PlayerFactory instead of direct instantiation - call provided Player& player1 and Player& player2 parameters in the run method. Handle tank indexing correctly - tank_index should increment per player (0,1,2... for each player's tanks). Store factory functions as member variables during game execution. Integrate both player and algorithm creation through the factory pattern. Ensure thread-safety for factory calls if needed.",
-        "testStrategy": "Create mock TankAlgorithmFactory and PlayerFactory functions that return test algorithms and players. Verify correct factory is called for each player's tanks and players. Test tank_index increments properly (0,1,2... per player). Validate player_index matches tank ownership (1 for player 1 tanks, 2 for player 2 tanks). Test Player object creation through factory pattern. Test with various tank configurations and verify both algorithm and player assignment correctness. Verify integration between Player objects and their associated TankAlgorithm instances.",
-        "subtasks": []
-      },
-      {
-        "id": 4,
-        "title": "Implement GameResult Structure Generation",
-        "description": "Modify game end detection to populate and return GameResult structure instead of generating output files",
-        "details": "Modify checkGameOver() method to return GameResult struct. Implement winner determination logic: winner=1 if only player 1 has tanks, winner=2 if only player 2 has tanks, winner=0 for tie. Set GameResult::Reason enum correctly: ALL_TANKS_DEAD when no tanks remain, MAX_STEPS when step limit reached, ZERO_SHELLS when all players out of ammunition. Populate remaining_tanks vector with count of surviving tanks per player (index 0 = player 1 count, index 1 = player 2 count). Track round number throughout game loop. Remove all file output generation from GameManager. Return GameResult from main run() method.",
-        "testStrategy": "Test all game end scenarios: player 1 victory, player 2 victory, tie by tank elimination, tie by max steps, tie by shell depletion. Verify GameResult fields are populated correctly for each scenario. Test remaining_tanks count accuracy. Validate round number tracking. Ensure no files are created during game execution.",
         "priority": "medium",
-        "dependencies": [
-          3
-        ],
-        "status": "done",
         "subtasks": []
-      },
+      }
+    ],
+    "metadata": {
+      "created": "2025-06-26T09:35:35.122Z",
+      "updated": "2025-06-26T15:28:47.030Z",
+      "description": "Tasks for master context"
+    }
+  },
+  "GameManager": {
+    "tasks": [
       {
-        "id": 5,
-        "title": "Clean Up Legacy Interface and Dependencies",
-        "description": "Remove deprecated methods and file I/O dependencies to finalize the refactored interface",
-        "details": "Remove old readBoard() method and file-based run() overloads. Clean up FileLoader dependencies and includes. Remove member variables related to file paths and output generation. Update constructor to remove file-related parameters. Ensure all internal methods use new data flow (SatelliteView → parsing → game execution → GameResult). Remove unused imports and forward declarations. Update error handling to return appropriate error codes rather than printing to console. Verify namespace compliance if required. Clean up any remaining backward compatibility code.",
-        "testStrategy": "Verify compilation succeeds with only new interface methods. Test that no file I/O occurs during game execution. Validate error handling returns appropriate codes. Ensure namespace compliance if applicable. Run static analysis to identify unused code. Test with various error conditions to verify robust error handling.",
+        "id": 1,
+        "title": "Conditional Verbose Output in GameManager",
+        "description": "Modify GameManager to only generate output files when verbose parameter is true, eliminating all file output for normal simulator operation.",
+        "details": "Remove all file output generation logic from GameManager run() method when verbose=false. The AbstractGameManager interface includes a verbose parameter that should control whether output files are created. When verbose=true, maintain existing file output behavior for debugging/analysis purposes. When verbose=false (normal simulator operation), skip all file I/O operations including board state files, game progression logs, and final result files. Update constructor to accept verbose parameter and store as member variable. Modify all output-generating methods to check verbose flag before writing files. Ensure file output paths and naming conventions match assignment 2 requirements when verbose=true. Remove any hardcoded file output that doesn't respect the verbose flag. Update error handling to not create error log files when verbose=false.",
+        "testStrategy": "Test GameManager with verbose=true to verify existing file output behavior is preserved. Test with verbose=false to confirm no files are created during game execution. Verify file system is not accessed when verbose=false using filesystem monitoring tools. Test both successful games and error scenarios with verbose=false to ensure no file output occurs. Validate that verbose parameter is properly passed through constructor and stored. Test edge cases like file permission errors when verbose=true vs verbose=false behavior.",
+        "status": "pending",
+        "dependencies": [],
         "priority": "medium",
-        "dependencies": [
-          4
-        ],
-        "status": "done",
         "subtasks": []
       },
       {
-        "id": 6,
+        "id": 99,
         "title": "Validation and Integration Testing",
         "description": "Comprehensive testing of refactored GameManager with various inputs and integration scenarios for Simulator compatibility",
         "details": "Create comprehensive test suite covering SatelliteView parsing, factory integration, and GameResult generation. Test with various board sizes and configurations. Validate performance meets simulation requirements (target <100ms per game for threading). Test thread-safety if GameManager will be used concurrently. Create integration tests simulating Simulator usage patterns. Test edge cases: empty boards, single-tank scenarios, maximum tank configurations. Verify memory management and cleanup. Performance profiling to identify bottlenecks. Load testing with rapid successive game execution.",
@@ -190,38 +57,12 @@
         ],
         "status": "pending",
         "subtasks": []
-      },
-      {
-        "id": 7,
-        "title": "Add Namespace Wrapper to GameManager",
-        "description": "Wrap all GameManager code in the unique namespace GameManager_<submitter_ids> as required by assignment 3 specifications for dynamic library loading.",
-        "details": "Create namespace GameManager_098765432_123456789 (using actual submitter IDs) around all GameManager class code in both header and implementation files. Move all class definitions, method implementations, and related types into the namespace. Update include guards and forward declarations to work within namespace context. Ensure AbstractGameManager interface compliance is maintained within namespace. Update any internal cross-references between classes to use fully qualified names or appropriate using declarations. Handle registration macro usage within namespace - the REGISTER_GAME_MANAGER macro should be called with the fully namespaced class name. Verify no naming conflicts with standard library or other dependencies. Consider namespace aliasing for commonly used types if needed for readability.",
-        "testStrategy": "Verify GameManager compiles successfully within namespace wrapper. Test that REGISTER_GAME_MANAGER macro works with namespaced class name. Compile and link GameManager as shared library (.so) to ensure namespace doesn't break dynamic loading. Test basic functionality still works - create GameManager instance through factory and run a simple game. Verify no naming conflicts by compiling with multiple similar namespaced libraries. Check that AbstractGameManager interface is still properly implemented within namespace. Run existing GameManager tests to ensure functionality is preserved.",
-        "status": "in-progress",
-        "dependencies": [
-          1
-        ],
-        "priority": "medium",
-        "subtasks": []
-      },
-      {
-        "id": 8,
-        "title": "Conditional Verbose Output in GameManager",
-        "description": "Modify GameManager to only generate output files when verbose parameter is true, eliminating all file output for normal simulator operation.",
-        "details": "Remove all file output generation logic from GameManager run() method when verbose=false. The AbstractGameManager interface includes a verbose parameter that should control whether output files are created. When verbose=true, maintain existing file output behavior for debugging/analysis purposes. When verbose=false (normal simulator operation), skip all file I/O operations including board state files, game progression logs, and final result files. Update constructor to accept verbose parameter and store as member variable. Modify all output-generating methods to check verbose flag before writing files. Ensure file output paths and naming conventions match assignment 2 requirements when verbose=true. Remove any hardcoded file output that doesn't respect the verbose flag. Update error handling to not create error log files when verbose=false.",
-        "testStrategy": "Test GameManager with verbose=true to verify existing file output behavior is preserved. Test with verbose=false to confirm no files are created during game execution. Verify file system is not accessed when verbose=false using filesystem monitoring tools. Test both successful games and error scenarios with verbose=false to ensure no file output occurs. Validate that verbose parameter is properly passed through constructor and stored. Test edge cases like file permission errors when verbose=true vs verbose=false behavior.",
-        "status": "pending",
-        "dependencies": [
-          7
-        ],
-        "priority": "medium",
-        "subtasks": []
       }
     ],
     "metadata": {
-      "created": "2025-06-26T09:35:35.122Z",
-      "updated": "2025-06-26T14:28:51.918Z",
-      "description": "Tasks for master context"
+      "created": "2025-06-26T15:20:47.254Z",
+      "updated": "2025-06-26T15:20:47.254Z",
+      "description": "Tag created on 6/26/2025"
     }
   }
 }

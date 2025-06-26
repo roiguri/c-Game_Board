@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "GameManager/game_board.h"
+#include "UserCommon/game_board.h"
 
 /**
  * @brief Configuration for board generation

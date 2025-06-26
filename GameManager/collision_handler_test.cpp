@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
 #include "collision_handler.h"
-#include "objects/tank.h"
-#include "objects/shell.h"
-#include "game_board.h"
+#include "UserCommon/objects/tank.h"
+#include "UserCommon/objects/shell.h"
+#include "UserCommon/game_board.h"
 #include "utils/direction.h"
 
 class CollisionHandlerTest : public ::testing::Test {
