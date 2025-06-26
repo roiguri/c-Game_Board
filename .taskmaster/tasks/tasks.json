@@ -1,0 +1,87 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Add AbstractGameManager Interface Compliance",
+        "description": "Implement AbstractGameManager inheritance and create skeleton run() method to establish interface compliance while maintaining existing functionality",
+        "details": "Add inheritance from AbstractGameManager to GameManager class. Create new run() method with exact signature: GameResult run(size_t map_width, size_t map_height, SatelliteView& map, size_t max_steps, size_t num_shells, Player& player1, Player& player2, TankAlgorithmFactory player1_tank_algo_factory, TankAlgorithmFactory player2_tank_algo_factory). Initially implement as wrapper calling existing run() method. Update class declaration in header file. Ensure compilation succeeds with new interface. Keep all existing methods functional during transition.",
+        "testStrategy": "Verify GameManager compiles with AbstractGameManager interface. Test that existing functionality remains intact by running current test suite. Confirm new run() method can be called with mock parameters. Validate inheritance hierarchy using dynamic_cast checks.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement SatelliteView to GameBoard Parsing",
+        "description": "Create readSatelliteView() method to convert SatelliteView input into internal game state, replacing file-based initialization",
+        "details": "Implement readSatelliteView() method that converts SatelliteView character grid to vector<string> board lines. Use SatelliteView::getObjectAt(x,y) to read map dimensions and content. Adapt existing GameBoard::initialize() logic to work with parsed data instead of file lines. Extract tank positions (characters '1', '2') and validate board structure. Handle wall characters ('#'), empty spaces (' '), and invalid characters with appropriate error handling. Store parsed data in member variables for game initialization. Ensure compatibility with existing board validation logic.",
+        "testStrategy": "Create mock SatelliteView implementations with various board configurations. Test parsing of valid boards with tanks, walls, and empty spaces. Verify tank position extraction for players 1 and 2. Test error handling for invalid characters and malformed boards. Compare parsed board state with file-based parsing results for identical maps.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Integrate Factory-Based Algorithm Creation",
+        "description": "Replace internal algorithm factories with parameter-based TankAlgorithmFactory functions for dynamic algorithm loading",
+        "details": "Remove member factory variables from GameManager class. Modify tank creation logic to use provided TankAlgorithmFactory parameters. For each tank found during SatelliteView parsing, call appropriate factory (player1_tank_algo_factory for player 1 tanks, player2_tank_algo_factory for player 2 tanks) with correct player_index and tank_index parameters. Update Player object creation to use factory-generated algorithms. Handle tank indexing correctly - tank_index should increment per player (0,1,2... for each player's tanks). Store factory functions as member variables during game execution. Ensure thread-safety for factory calls if needed.",
+        "testStrategy": "Create mock TankAlgorithmFactory functions that return test algorithms. Verify correct factory is called for each player's tanks. Test tank_index increments properly (0,1,2... per player). Validate player_index matches tank ownership (1 for player 1 tanks, 2 for player 2 tanks). Test with various tank configurations and verify algorithm assignment correctness.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Implement GameResult Structure Generation",
+        "description": "Modify game end detection to populate and return GameResult structure instead of generating output files",
+        "details": "Modify checkGameOver() method to return GameResult struct. Implement winner determination logic: winner=1 if only player 1 has tanks, winner=2 if only player 2 has tanks, winner=0 for tie. Set GameResult::Reason enum correctly: ALL_TANKS_DEAD when no tanks remain, MAX_STEPS when step limit reached, ZERO_SHELLS when all players out of ammunition. Populate remaining_tanks vector with count of surviving tanks per player (index 0 = player 1 count, index 1 = player 2 count). Track round number throughout game loop. Remove all file output generation from GameManager. Return GameResult from main run() method.",
+        "testStrategy": "Test all game end scenarios: player 1 victory, player 2 victory, tie by tank elimination, tie by max steps, tie by shell depletion. Verify GameResult fields are populated correctly for each scenario. Test remaining_tanks count accuracy. Validate round number tracking. Ensure no files are created during game execution.",
+        "priority": "medium",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Clean Up Legacy Interface and Dependencies",
+        "description": "Remove deprecated methods and file I/O dependencies to finalize the refactored interface",
+        "details": "Remove old readBoard() method and file-based run() overloads. Clean up FileLoader dependencies and includes. Remove member variables related to file paths and output generation. Update constructor to remove file-related parameters. Ensure all internal methods use new data flow (SatelliteView → parsing → game execution → GameResult). Remove unused imports and forward declarations. Update error handling to return appropriate error codes rather than printing to console. Verify namespace compliance if required. Clean up any remaining backward compatibility code.",
+        "testStrategy": "Verify compilation succeeds with only new interface methods. Test that no file I/O occurs during game execution. Validate error handling returns appropriate codes. Ensure namespace compliance if applicable. Run static analysis to identify unused code. Test with various error conditions to verify robust error handling.",
+        "priority": "medium",
+        "dependencies": [
+          4
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Validation and Integration Testing",
+        "description": "Comprehensive testing of refactored GameManager with various inputs and integration scenarios for Simulator compatibility",
+        "details": "Create comprehensive test suite covering SatelliteView parsing, factory integration, and GameResult generation. Test with various board sizes and configurations. Validate performance meets simulation requirements (target <100ms per game for threading). Test thread-safety if GameManager will be used concurrently. Create integration tests simulating Simulator usage patterns. Test edge cases: empty boards, single-tank scenarios, maximum tank configurations. Verify memory management and cleanup. Performance profiling to identify bottlenecks. Load testing with rapid successive game execution.",
+        "testStrategy": "Execute comprehensive test suite covering all refactored functionality. Performance benchmarking with target <100ms per game execution. Memory leak detection using valgrind or similar tools. Thread safety testing with concurrent game execution. Integration testing with mock Simulator scenarios. Stress testing with various board configurations and algorithm combinations.",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-06-26T09:35:35.122Z",
+      "updated": "2025-06-26T09:35:35.122Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
