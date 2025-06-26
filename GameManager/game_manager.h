@@ -21,6 +21,8 @@
 
 namespace GameManager_098765432_123456789 {
 
+using namespace UserCommon_098765432_123456789;
+
 /**
  * @brief Manages the overall game flow and state for the tank battle simulation
  * 

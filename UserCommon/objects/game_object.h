@@ -3,6 +3,8 @@
 #include "UserCommon/utils/direction.h"
 #include "UserCommon/utils/point.h"
 
+namespace UserCommon_098765432_123456789 {
+
 /**
  * @class GameObject
  * @brief Base class for all game objects in the tank battle simulation
@@ -87,3 +89,5 @@ protected:
     Direction m_direction;
     bool m_destroyed;
 };
+
+} // namespace UserCommon_098765432_123456789

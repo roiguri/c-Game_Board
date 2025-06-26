@@ -10,6 +10,8 @@
 
 namespace GameManager_098765432_123456789 {
 
+using namespace UserCommon_098765432_123456789;
+
 /**
  * @class CollisionHandler
  * @brief Manages collision detection and resolution between game objects

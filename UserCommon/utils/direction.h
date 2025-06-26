@@ -6,6 +6,8 @@
 
 #include "UserCommon/utils/point.h"
 
+namespace UserCommon_098765432_123456789 {
+
 /**
  * @class Direction
  * @brief Represents the 8 possible directions for movement and orientation
@@ -50,7 +52,7 @@ std::string directionToString(Direction direction);
  *  degrees (1/8 turn)
  * @return The new direction after rotation
  */
-Direction rotateLeft(Direction direction, bool quarterTurn = false);
+Direction getRotateLeftDirection(Direction direction, bool quarterTurn = false);
 
 /**
  * @brief Rotates a direction clockwise.
@@ -60,7 +62,7 @@ Direction rotateLeft(Direction direction, bool quarterTurn = false);
  *  degrees (1/8 turn)
  * @return The new direction after rotation
  */
-Direction rotateRight(Direction direction, bool quarterTurn = false);
+Direction getRotateRightDirection(Direction direction, bool quarterTurn = false);
 
 /**
  * @brief Gets the delta movement Point for a given direction.
@@ -94,3 +96,5 @@ std::optional<Direction> getDirectionToPoint(
  * @return The output stream
  */
 std::ostream& operator<<(std::ostream& os, Direction dir);
+
+} // namespace UserCommon_098765432_123456789

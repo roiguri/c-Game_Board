@@ -8,6 +8,8 @@
 #include "UserCommon/utils/point.h"
 #include "common/SatelliteView.h"
 
+namespace UserCommon_098765432_123456789 {
+
 /**
  * @class SatelliteViewImpl
  * @brief Concrete implementation of SatelliteView providing a read-only view of the game board.
@@ -53,4 +55,6 @@ private:
     const std::vector<Shell>& m_shells;
     Point m_currentTankPos;
     bool m_hasCurrentTank; // Whether to mark current tank with '%'
-}; 
+};
+
+} // namespace UserCommon_098765432_123456789 

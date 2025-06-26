@@ -3,6 +3,8 @@
 
 #include "UserCommon/satellite_view_impl.h"
 
+namespace UserCommon_098765432_123456789 {
+
 // Character mapping
 constexpr char WALL_CHAR = '#';
 constexpr char MINE_CHAR = '@';
@@ -64,4 +66,6 @@ char SatelliteViewImpl::getObjectAt(size_t x, size_t y) const {
         default:
             return EMPTY_CHAR;
     }
-} 
+}
+
+} // namespace UserCommon_098765432_123456789 

@@ -4,6 +4,8 @@
 #include <ostream>
 #include <string>
 
+namespace UserCommon_098765432_123456789 {
+
 /**
  * @class Point
  * @brief Represents a 2D coordinate in the game world
@@ -60,3 +62,5 @@ private:
   int m_x;
   int m_y;
 };
+
+} // namespace UserCommon_098765432_123456789

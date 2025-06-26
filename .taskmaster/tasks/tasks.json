@@ -57,11 +57,35 @@
         ],
         "status": "pending",
         "subtasks": []
+      },
+      {
+        "id": 100,
+        "title": "Add namespace UserCommon_098765432_123456789 to UserCommon bonus features",
+        "description": "Wrap all classes and functions in 49 remaining UserCommon bonus feature files with the unique namespace UserCommon_098765432_123456789 to comply with assignment requirements.",
+        "details": "Add namespace UserCommon_098765432_123456789 wrapper to all remaining 49 files in UserCommon bonus directories: bonus/logger (logging utilities, file handlers, log formatters), bonus/cli (command line parsing, argument validation, help text generation), bonus/visualization (game state rendering, ASCII art generation, color output), bonus/analysis (game statistics, performance metrics, result analysis), and bonus/board_generator (procedural map generation, validation algorithms). Update all header files with namespace opening/closing braces. Update all source files to include namespace wrapper. Update all internal references between bonus modules to use fully qualified names or appropriate using declarations. Ensure no naming conflicts with standard library or other project namespaces. Update any forward declarations to include namespace qualification. Verify all template specializations work correctly within namespace. Test compilation of all bonus feature combinations.",
+        "testStrategy": "Compile each bonus directory independently to verify namespace compliance. Test inter-module dependencies within bonus features work correctly. Verify no naming conflicts or ambiguous references. Test that bonus features can be optionally included/excluded during build. Run existing bonus feature test suites to ensure functionality unchanged. Check that namespace-qualified names resolve correctly in all usage contexts. Verify template instantiations and specializations work within namespace.",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 101,
+        "title": "Update Algorithm directory to use UserCommon namespace",
+        "description": "Add 'using namespace UserCommon_098765432_123456789;' statements to all Algorithm files that reference UserCommon classes to establish proper namespace usage after UserCommon refactoring.",
+        "details": "Add 'using namespace UserCommon_098765432_123456789;' declaration at the top of each Algorithm source file (.cpp and .h files) that references UserCommon classes. This includes files that use game board utilities, object classes (Tank, Shell, GameObject), utility classes (Point, Direction, Midpoint), and SatelliteView implementations. Place the using statement after include directives but before any Algorithm namespace declarations. Update any explicit UserCommon:: qualifications to rely on the using statement instead. Verify all Algorithm files compile correctly with the namespace usage. Test that Algorithm classes can properly instantiate and use UserCommon objects without namespace conflicts. Ensure the using statement doesn't interfere with Algorithm's own namespace wrapper Algorithm_098765432_123456789.",
+        "testStrategy": "Compile each Algorithm file individually to verify namespace resolution works correctly. Test Algorithm functionality that depends on UserCommon classes (game board access, object manipulation, utility functions). Verify no ambiguous symbol resolution or naming conflicts occur. Test Algorithm registration and factory creation still works with namespace changes. Build Algorithm shared library (.so) and verify it loads correctly. Run basic algorithm tests to ensure UserCommon integration remains functional.",
+        "status": "pending",
+        "dependencies": [
+          100
+        ],
+        "priority": "medium",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-06-26T15:20:47.254Z",
-      "updated": "2025-06-26T15:20:47.254Z",
+      "updated": "2025-06-26T16:13:33.235Z",
       "description": "Tag created on 6/26/2025"
     }
   }

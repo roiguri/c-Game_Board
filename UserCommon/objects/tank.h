@@ -2,6 +2,8 @@
 
 #include "UserCommon/objects/game_object.h"
 
+namespace UserCommon_098765432_123456789 {
+
 /**
  * @class Tank
  * @brief Represents a player-controlled tank in the game
@@ -183,3 +185,5 @@ private:
     bool m_continuousBackward;
     Point m_backwardPosition;
 };
+
+} // namespace UserCommon_098765432_123456789

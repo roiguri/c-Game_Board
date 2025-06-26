@@ -6,6 +6,8 @@
 
 #include "UserCommon/utils/point.h"
 
+namespace UserCommon_098765432_123456789 {
+
 /**
  * @class GameBoard
  * @brief Represents the game board for the tank battle simulation
@@ -201,3 +203,5 @@ private:
     size_t m_width;
     size_t m_height;
 };
+
+} // namespace UserCommon_098765432_123456789

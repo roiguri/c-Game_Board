@@ -1,5 +1,7 @@
 #include "UserCommon/objects/game_object.h"
 
+namespace UserCommon_098765432_123456789 {
+
 GameObject::GameObject(int playerId, const Point& position, Direction direction)
     : m_playerId(playerId),
       m_position(position),
@@ -44,3 +46,5 @@ void GameObject::destroy() {
 void GameObject::updatePreviousPosition() {
     m_previousPosition = m_position;
 }
+
+} // namespace UserCommon_098765432_123456789

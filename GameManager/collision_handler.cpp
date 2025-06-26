@@ -4,6 +4,8 @@
 
 namespace GameManager_098765432_123456789 {
 
+using namespace UserCommon_098765432_123456789;
+
 void CollisionHandler::resolveAllCollisions(
   std::vector<Tank>& tanks,
   std::vector<Shell>& shells,

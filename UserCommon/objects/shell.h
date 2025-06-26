@@ -2,6 +2,8 @@
 
 #include "UserCommon/objects/game_object.h"
 
+namespace UserCommon_098765432_123456789 {
+
 /**
  * @class Shell
  * @brief Represents a shell (artillery) fired by a tank
@@ -30,3 +32,5 @@ class Shell : public GameObject {
        */
       Point getNextPosition() const;
   };
+
+} // namespace UserCommon_098765432_123456789

@@ -3,6 +3,8 @@
 
 #include "UserCommon/game_board.h"
 
+namespace UserCommon_098765432_123456789 {
+
 GameBoard::GameBoard() : m_width(0), m_height(0) {}
 
 GameBoard::GameBoard(size_t width, size_t height) : m_width(width), m_height(height) {
@@ -257,3 +259,5 @@ int GameBoard::stepDistance(const Point& a, const Point& b, size_t width, size_t
     // Chebyshev distance (since diagonal and orthogonal moves cost the same)
     return std::max(dx, dy);
 }
+
+} // namespace UserCommon_098765432_123456789

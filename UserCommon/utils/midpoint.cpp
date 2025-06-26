@@ -2,6 +2,8 @@
 
 #include "UserCommon/utils/midpoint.h"
 
+namespace UserCommon_098765432_123456789 {
+
 MidPoint::MidPoint() : Point(), m_halfX(false), m_halfY(false) {}
 
 MidPoint::MidPoint(int x, int y, bool halfX, bool halfY) 
@@ -136,3 +138,5 @@ std::ostream& operator<<(std::ostream& os, const MidPoint& mp) {
     os << mp.toString();
     return os;
 }
+
+} // namespace UserCommon_098765432_123456789

@@ -2,6 +2,8 @@
 #include "UserCommon/utils/direction.h"
 #include "UserCommon/utils/point.h"
 
+using namespace UserCommon_098765432_123456789;
+
 TEST(DirectionTest, DirectionToString) {
     EXPECT_EQ(directionToString(Direction::Up), "Up");
     EXPECT_EQ(directionToString(Direction::UpRight), "UpRight");
@@ -14,47 +16,47 @@ TEST(DirectionTest, DirectionToString) {
 }
 
 TEST(DirectionTest, RotateLeftEighth) {
-    EXPECT_EQ(rotateLeft(Direction::Up, false), Direction::UpLeft);
-    EXPECT_EQ(rotateLeft(Direction::UpRight, false), Direction::Up);
-    EXPECT_EQ(rotateLeft(Direction::Right, false), Direction::UpRight);
-    EXPECT_EQ(rotateLeft(Direction::DownRight, false), Direction::Right);
-    EXPECT_EQ(rotateLeft(Direction::Down, false), Direction::DownRight);
-    EXPECT_EQ(rotateLeft(Direction::DownLeft, false), Direction::Down);
-    EXPECT_EQ(rotateLeft(Direction::Left, false), Direction::DownLeft);
-    EXPECT_EQ(rotateLeft(Direction::UpLeft, false), Direction::Left);
+    EXPECT_EQ(getRotateLeftDirection(Direction::Up, false), Direction::UpLeft);
+    EXPECT_EQ(getRotateLeftDirection(Direction::UpRight, false), Direction::Up);
+    EXPECT_EQ(getRotateLeftDirection(Direction::Right, false), Direction::UpRight);
+    EXPECT_EQ(getRotateLeftDirection(Direction::DownRight, false), Direction::Right);
+    EXPECT_EQ(getRotateLeftDirection(Direction::Down, false), Direction::DownRight);
+    EXPECT_EQ(getRotateLeftDirection(Direction::DownLeft, false), Direction::Down);
+    EXPECT_EQ(getRotateLeftDirection(Direction::Left, false), Direction::DownLeft);
+    EXPECT_EQ(getRotateLeftDirection(Direction::UpLeft, false), Direction::Left);
 }
 
 TEST(DirectionTest, RotateLeftQuarter) {
-    EXPECT_EQ(rotateLeft(Direction::Up, true), Direction::Left);
-    EXPECT_EQ(rotateLeft(Direction::UpRight, true), Direction::UpLeft);
-    EXPECT_EQ(rotateLeft(Direction::Right, true), Direction::Up);
-    EXPECT_EQ(rotateLeft(Direction::DownRight, true), Direction::UpRight);
-    EXPECT_EQ(rotateLeft(Direction::Down, true), Direction::Right);
-    EXPECT_EQ(rotateLeft(Direction::DownLeft, true), Direction::DownRight);
-    EXPECT_EQ(rotateLeft(Direction::Left, true), Direction::Down);
-    EXPECT_EQ(rotateLeft(Direction::UpLeft, true), Direction::DownLeft);
+    EXPECT_EQ(getRotateLeftDirection(Direction::Up, true), Direction::Left);
+    EXPECT_EQ(getRotateLeftDirection(Direction::UpRight, true), Direction::UpLeft);
+    EXPECT_EQ(getRotateLeftDirection(Direction::Right, true), Direction::Up);
+    EXPECT_EQ(getRotateLeftDirection(Direction::DownRight, true), Direction::UpRight);
+    EXPECT_EQ(getRotateLeftDirection(Direction::Down, true), Direction::Right);
+    EXPECT_EQ(getRotateLeftDirection(Direction::DownLeft, true), Direction::DownRight);
+    EXPECT_EQ(getRotateLeftDirection(Direction::Left, true), Direction::Down);
+    EXPECT_EQ(getRotateLeftDirection(Direction::UpLeft, true), Direction::DownLeft);
 }
 
 TEST(DirectionTest, RotateRightEighth) {
-    EXPECT_EQ(rotateRight(Direction::Up, false), Direction::UpRight);
-    EXPECT_EQ(rotateRight(Direction::UpRight, false), Direction::Right);
-    EXPECT_EQ(rotateRight(Direction::Right, false), Direction::DownRight);
-    EXPECT_EQ(rotateRight(Direction::DownRight, false), Direction::Down);
-    EXPECT_EQ(rotateRight(Direction::Down, false), Direction::DownLeft);
-    EXPECT_EQ(rotateRight(Direction::DownLeft, false), Direction::Left);
-    EXPECT_EQ(rotateRight(Direction::Left, false), Direction::UpLeft);
-    EXPECT_EQ(rotateRight(Direction::UpLeft, false), Direction::Up);
+    EXPECT_EQ(getRotateRightDirection(Direction::Up, false), Direction::UpRight);
+    EXPECT_EQ(getRotateRightDirection(Direction::UpRight, false), Direction::Right);
+    EXPECT_EQ(getRotateRightDirection(Direction::Right, false), Direction::DownRight);
+    EXPECT_EQ(getRotateRightDirection(Direction::DownRight, false), Direction::Down);
+    EXPECT_EQ(getRotateRightDirection(Direction::Down, false), Direction::DownLeft);
+    EXPECT_EQ(getRotateRightDirection(Direction::DownLeft, false), Direction::Left);
+    EXPECT_EQ(getRotateRightDirection(Direction::Left, false), Direction::UpLeft);
+    EXPECT_EQ(getRotateRightDirection(Direction::UpLeft, false), Direction::Up);
 }
 
 TEST(DirectionTest, RotateRightQuarter) {
-    EXPECT_EQ(rotateRight(Direction::Up, true), Direction::Right);
-    EXPECT_EQ(rotateRight(Direction::UpRight, true), Direction::DownRight);
-    EXPECT_EQ(rotateRight(Direction::Right, true), Direction::Down);
-    EXPECT_EQ(rotateRight(Direction::DownRight, true), Direction::DownLeft);
-    EXPECT_EQ(rotateRight(Direction::Down, true), Direction::Left);
-    EXPECT_EQ(rotateRight(Direction::DownLeft, true), Direction::UpLeft);
-    EXPECT_EQ(rotateRight(Direction::Left, true), Direction::Up);
-    EXPECT_EQ(rotateRight(Direction::UpLeft, true), Direction::UpRight);
+    EXPECT_EQ(getRotateRightDirection(Direction::Up, true), Direction::Right);
+    EXPECT_EQ(getRotateRightDirection(Direction::UpRight, true), Direction::DownRight);
+    EXPECT_EQ(getRotateRightDirection(Direction::Right, true), Direction::Down);
+    EXPECT_EQ(getRotateRightDirection(Direction::DownRight, true), Direction::DownLeft);
+    EXPECT_EQ(getRotateRightDirection(Direction::Down, true), Direction::Left);
+    EXPECT_EQ(getRotateRightDirection(Direction::DownLeft, true), Direction::UpLeft);
+    EXPECT_EQ(getRotateRightDirection(Direction::Left, true), Direction::Up);
+    EXPECT_EQ(getRotateRightDirection(Direction::UpLeft, true), Direction::UpRight);
 }
 
 TEST(DirectionTest, GetDirectionDeltaDefault) {
@@ -85,44 +87,44 @@ TEST(DirectionTest, FullRotationSequence) {
     
     // Rotate left 8 times (should end up back at Up)
     for (int i = 0; i < 8; i++) {
-        dir = rotateLeft(dir, false);
+        dir = getRotateLeftDirection(dir, false);
     }
     EXPECT_EQ(dir, Direction::Up);
     
     // Rotate right 8 times (should end up back at Up)
     for (int i = 0; i < 8; i++) {
-        dir = rotateRight(dir, false);
+        dir = getRotateRightDirection(dir, false);
     }
     EXPECT_EQ(dir, Direction::Up);
     
     // Rotate left 4 times with quarter turns (should end up back at Up)
     dir = Direction::Up;
     for (int i = 0; i < 4; i++) {
-        dir = rotateLeft(dir, true);
+        dir = getRotateLeftDirection(dir, true);
     }
     EXPECT_EQ(dir, Direction::Up);
     
     // Rotate right 4 times with quarter turns (should end up back at Up)
     dir = Direction::Up;
     for (int i = 0; i < 4; i++) {
-        dir = rotateRight(dir, true);
+        dir = getRotateRightDirection(dir, true);
     }
     EXPECT_EQ(dir, Direction::Up);
 }
 
 TEST(DirectionTest, OppositeDirections) {
     // One full half-rotation (4 eighth turns or 2 quarter turns) should give the opposite direction
-    EXPECT_EQ(rotateLeft(rotateLeft(Direction::Up, true), true), Direction::Down); // Second quarter turn
+    EXPECT_EQ(getRotateLeftDirection(getRotateLeftDirection(Direction::Up, true), true), Direction::Down); // Second quarter turn
     
     // Test all opposites
-    EXPECT_EQ(rotateLeft(rotateLeft(rotateLeft(rotateLeft(Direction::Up, false), false), false), false), Direction::Down);
-    EXPECT_EQ(rotateLeft(rotateLeft(rotateLeft(rotateLeft(Direction::UpRight, false), false), false), false), Direction::DownLeft);
-    EXPECT_EQ(rotateLeft(rotateLeft(rotateLeft(rotateLeft(Direction::Right, false), false), false), false), Direction::Left);
-    EXPECT_EQ(rotateLeft(rotateLeft(rotateLeft(rotateLeft(Direction::DownRight, false), false), false), false), Direction::UpLeft);
-    EXPECT_EQ(rotateLeft(rotateLeft(rotateLeft(rotateLeft(Direction::Down, false), false), false), false), Direction::Up);
-    EXPECT_EQ(rotateLeft(rotateLeft(rotateLeft(rotateLeft(Direction::DownLeft, false), false), false), false), Direction::UpRight);
-    EXPECT_EQ(rotateLeft(rotateLeft(rotateLeft(rotateLeft(Direction::Left, false), false), false), false), Direction::Right);
-    EXPECT_EQ(rotateLeft(rotateLeft(rotateLeft(rotateLeft(Direction::UpLeft, false), false), false), false), Direction::DownRight);
+    EXPECT_EQ(getRotateLeftDirection(getRotateLeftDirection(getRotateLeftDirection(getRotateLeftDirection(Direction::Up, false), false), false), false), Direction::Down);
+    EXPECT_EQ(getRotateLeftDirection(getRotateLeftDirection(getRotateLeftDirection(getRotateLeftDirection(Direction::UpRight, false), false), false), false), Direction::DownLeft);
+    EXPECT_EQ(getRotateLeftDirection(getRotateLeftDirection(getRotateLeftDirection(getRotateLeftDirection(Direction::Right, false), false), false), false), Direction::Left);
+    EXPECT_EQ(getRotateLeftDirection(getRotateLeftDirection(getRotateLeftDirection(getRotateLeftDirection(Direction::DownRight, false), false), false), false), Direction::UpLeft);
+    EXPECT_EQ(getRotateLeftDirection(getRotateLeftDirection(getRotateLeftDirection(getRotateLeftDirection(Direction::Down, false), false), false), false), Direction::Up);
+    EXPECT_EQ(getRotateLeftDirection(getRotateLeftDirection(getRotateLeftDirection(getRotateLeftDirection(Direction::DownLeft, false), false), false), false), Direction::UpRight);
+    EXPECT_EQ(getRotateLeftDirection(getRotateLeftDirection(getRotateLeftDirection(getRotateLeftDirection(Direction::Left, false), false), false), false), Direction::Right);
+    EXPECT_EQ(getRotateLeftDirection(getRotateLeftDirection(getRotateLeftDirection(getRotateLeftDirection(Direction::UpLeft, false), false), false), false), Direction::DownRight);
 }
 
 TEST(DirectionTest, StreamInsertionOperator) {

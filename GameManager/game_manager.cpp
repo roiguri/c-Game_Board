@@ -13,6 +13,8 @@
 
 namespace GameManager_098765432_123456789 {
 
+using namespace UserCommon_098765432_123456789;
+
 GameManager::GameManager(bool verbose [[maybe_unused]])
     : m_currentStep(0),
       m_gameOver(false),

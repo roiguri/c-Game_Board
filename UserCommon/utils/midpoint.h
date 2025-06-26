@@ -3,6 +3,8 @@
 
 #include "UserCommon/utils/point.h"
 
+namespace UserCommon_098765432_123456789 {
+
 /**
  * @class MidPoint
  * @brief Represents a point with potential half-coordinate values
@@ -147,3 +149,5 @@ private:
     bool m_halfX;
     bool m_halfY;
 };
+
+} // namespace UserCommon_098765432_123456789

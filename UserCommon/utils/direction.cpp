@@ -1,5 +1,7 @@
 #include "UserCommon/utils/direction.h"
 
+namespace UserCommon_098765432_123456789 {
+
 std::string directionToString(Direction direction) {
     switch (direction) {
         case Direction::Up:       return "Up";
@@ -14,7 +16,7 @@ std::string directionToString(Direction direction) {
     }
 }
 
-Direction rotateLeft(Direction direction, bool quarterTurn) {
+Direction getRotateLeftDirection(Direction direction, bool quarterTurn) {
     int step = quarterTurn ? 2 : 1;
     // Cast to int to perform modular arithmetic on ordered enum values
     int directionIndex = static_cast<int>(direction);
@@ -25,7 +27,7 @@ Direction rotateLeft(Direction direction, bool quarterTurn) {
     return static_cast<Direction>(directionIndex);
 }
 
-Direction rotateRight(Direction direction, bool quarterTurn) {
+Direction getRotateRightDirection(Direction direction, bool quarterTurn) {
     int step = quarterTurn ? 2 : 1;
     // Cast to int to perform modular arithmetic on ordered enum values
     int directionIndex = static_cast<int>(direction);
@@ -77,3 +79,5 @@ std::ostream& operator<<(std::ostream& os, Direction dir) {
   os << directionToString(dir);
   return os;
 }
+
+} // namespace UserCommon_098765432_123456789

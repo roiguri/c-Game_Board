@@ -1,4 +1,7 @@
 #include "UserCommon/objects/tank.h"
+#include "UserCommon/utils/direction.h"
+
+namespace UserCommon_098765432_123456789 {
 
 int Tank::INITIAL_SHELLS = 16;
 void Tank::setInitialShells(int shells) {
@@ -102,7 +105,7 @@ bool Tank::rotateLeft(bool quarterTurn) {
     return false;
   }
   
-  m_direction = ::rotateLeft(m_direction, quarterTurn);
+  m_direction = getRotateLeftDirection(m_direction, quarterTurn);
   m_continuousBackward = false;
   return true;
 }
@@ -113,7 +116,7 @@ bool Tank::rotateRight(bool quarterTurn) {
     return false;
   }
   
-  m_direction = ::rotateRight(m_direction, quarterTurn);
+  m_direction = getRotateRightDirection(m_direction, quarterTurn);
   m_continuousBackward = false;
   return true;
 }
@@ -146,3 +149,5 @@ void Tank::doNothing() {
   m_previousPosition = m_position;
   isInBackwardMovement();
 }
+
+} // namespace UserCommon_098765432_123456789

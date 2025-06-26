@@ -199,20 +199,20 @@ std::vector<Point> BasicTankAlgorithm::getSafePositions() const {
 
 ActionRequest BasicTankAlgorithm::getRotationToDirection(Direction current, Direction target) {
     if (current == target) return ActionRequest::DoNothing;
-    if (target == rotateRight(current, false)) return ActionRequest::RotateRight45;
-    if (target == rotateLeft(current, false)) return ActionRequest::RotateLeft45;
-    if (target == rotateRight(current, true)) return ActionRequest::RotateRight90;
-    if (target == rotateLeft(current, true)) return ActionRequest::RotateLeft90;
+    if (target == getRotateRightDirection(current, false)) return ActionRequest::RotateRight45;
+    if (target == getRotateLeftDirection(current, false)) return ActionRequest::RotateLeft45;
+    if (target == getRotateRightDirection(current, true)) return ActionRequest::RotateRight90;
+    if (target == getRotateLeftDirection(current, true)) return ActionRequest::RotateLeft90;
     // Fallback: choose the shortest rotation
     int stepsClockwise = 0, stepsCounterClockwise = 0;
     Direction tempDir = current;
     while (tempDir != target && stepsClockwise < 8) {
-        tempDir = rotateRight(tempDir, false);
+        tempDir = getRotateRightDirection(tempDir, false);
         stepsClockwise++;
     }
     tempDir = current;
     while (tempDir != target && stepsCounterClockwise < 8) {
-        tempDir = rotateLeft(tempDir, false);
+        tempDir = getRotateLeftDirection(tempDir, false);
         stepsCounterClockwise++;
     }
     return (stepsClockwise <= stepsCounterClockwise) ? ActionRequest::RotateRight90 : ActionRequest::RotateLeft90;
@@ -242,12 +242,12 @@ BasicTankAlgorithm::SafeMoveOption BasicTankAlgorithm::getSafeMoveOption(const P
             int leftSteps = 0, rightSteps = 0;
             Direction temp = currentDir;
             while (temp != targetDir && leftSteps < 8) {
-                temp = rotateLeft(temp, false);
+                temp = getRotateLeftDirection(temp, false);
                 leftSteps++;
             }
             temp = currentDir;
             while (temp != targetDir && rightSteps < 8) {
-                temp = rotateRight(temp, false);
+                temp = getRotateRightDirection(temp, false);
                 rightSteps++;
             }
             option.cost = std::min(leftSteps, rightSteps) + 1;
@@ -283,16 +283,16 @@ void BasicTankAlgorithm::updateState(ActionRequest lastAction) {
             break;
         }
         case ActionRequest::RotateLeft90:
-            m_trackedDirection = rotateLeft(m_trackedDirection, true);
+            m_trackedDirection = getRotateLeftDirection(m_trackedDirection, true);
             break;
         case ActionRequest::RotateLeft45:
-            m_trackedDirection = rotateLeft(m_trackedDirection, false);
+            m_trackedDirection = getRotateLeftDirection(m_trackedDirection, false);
             break;
         case ActionRequest::RotateRight90:
-            m_trackedDirection = rotateRight(m_trackedDirection, true);
+            m_trackedDirection = getRotateRightDirection(m_trackedDirection, true);
             break;
         case ActionRequest::RotateRight45:
-            m_trackedDirection = rotateRight(m_trackedDirection, false);
+            m_trackedDirection = getRotateRightDirection(m_trackedDirection, false);
             break;
         case ActionRequest::Shoot:
             if (m_trackedShells > 0) m_trackedShells--;
