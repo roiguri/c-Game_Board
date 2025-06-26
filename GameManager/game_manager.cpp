@@ -7,8 +7,8 @@
 
 #include "collision_handler.h"
 #include "game_manager.h"
-#include "UserCommon/satellite_view_impl.h"
-#include "UserCommon/bonus/logger/logger.h"
+#include "satellite_view_impl.h"
+#include "bonus/logger/logger.h"
 #include "common/GameManagerRegistration.h"
 
 namespace GameManager_098765432_123456789 {

@@ -25,9 +25,15 @@ set_target_properties(GameManager_098765432_123456789 PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build/GameManager"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build/GameManager"
-    CXX_VISIBILITY_PRESET hidden
-    VISIBILITY_INLINES_HIDDEN ON
 )
+
+# Only set hidden visibility if not building tests
+if(NOT ENABLE_TESTING)
+    set_target_properties(GameManager_098765432_123456789 PROPERTIES
+        CXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+    )
+endif()
 
 # Include directories for GameManager library
 target_include_directories(GameManager_098765432_123456789 PUBLIC
@@ -64,7 +70,10 @@ if(ENABLE_TESTING)
         "${CMAKE_SOURCE_DIR}/UserCommon"
     )
     
-    # Link test executable
+    # Link test executable - include UserCommon sources directly for testing
+    target_sources(GameManager_tests PRIVATE 
+        ${USERCOMMON_SOURCES}
+    )
     target_link_libraries(GameManager_tests PRIVATE
         GameManager_098765432_123456789
         gtest

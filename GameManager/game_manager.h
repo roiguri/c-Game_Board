@@ -5,9 +5,9 @@
 #include <vector>
 
 #include "collision_handler.h"
-#include "UserCommon/game_board.h"
-#include "UserCommon/objects/shell.h"
-#include "UserCommon/objects/tank.h"
+#include "game_board.h"
+#include "objects/shell.h"
+#include "objects/tank.h"
 #include "common/AbstractGameManager.h"
 #include "common/GameResult.h"
 #include "common/SatelliteView.h"
@@ -16,7 +16,7 @@
 #include "common/TankAlgorithm.h"
 
 #ifdef ENABLE_VISUALIZATION
-#include "UserCommon/bonus/visualization/visualization.h"
+#include "bonus/visualization/visualization.h"
 #endif
 
 namespace GameManager_098765432_123456789 {
