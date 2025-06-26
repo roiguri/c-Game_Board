@@ -63,10 +63,13 @@ public:
      * @param map_height Height of the map
      * @param max_steps Maximum number of steps allowed
      * @param num_shells Number of shells per tank
+     * @param player1_factory Factory for creating player 1 tank algorithms
+     * @param player2_factory Factory for creating player 2 tank algorithms
      * @return true if initialization was successful, false otherwise
      */
     bool readBoard(const SatelliteView& satellite_view, size_t map_width, size_t map_height, 
-                   size_t max_steps, size_t num_shells);
+                   size_t max_steps, size_t num_shells,
+                   TankAlgorithmFactory player1_factory, TankAlgorithmFactory player2_factory);
     
     /**
      * @brief Run the game loop until completion
@@ -90,10 +93,13 @@ public:
     };
 
 private:
+    // TODO: consider removing this struct
     // Player structure with ID
     struct PlayerWithId {
         int playerId;
-        std::unique_ptr<Player> player;
+        Player& player;
+        
+        PlayerWithId(int id, Player& p) : playerId(id), player(p) {}
     };
     
     // Players
@@ -146,8 +152,8 @@ private:
     // Log an action taken by a player
     std::string logAction();
     
-    // Create algorithm instances for all tanks
-    void createTankAlgorithms();
+    // Create algorithm instances for all tanks using provided factories
+    void createTankAlgorithms(TankAlgorithmFactory player1_factory, TankAlgorithmFactory player2_factory);
 
     // Create tank objects based on tank positions
     void createTanks(const std::vector<std::pair<int, Point>>& tankPositions);

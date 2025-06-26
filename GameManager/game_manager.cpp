@@ -49,7 +49,8 @@ GameManager::~GameManager() {
 }
 
 bool GameManager::readBoard(const SatelliteView& satellite_view, size_t map_width, size_t map_height, 
-                           size_t max_steps, size_t num_shells) {
+                           size_t max_steps, size_t num_shells,
+                           TankAlgorithmFactory player1_factory, TankAlgorithmFactory player2_factory) {
     std::vector<std::string> boardLines = 
       readSatelliteView(satellite_view, map_width, map_height);
     if (boardLines.empty()) {
@@ -76,7 +77,7 @@ bool GameManager::readBoard(const SatelliteView& satellite_view, size_t map_widt
     m_isClassic2PlayerGame = true;
     
     createTanks(tankPositions);
-    createTankAlgorithms();
+    createTankAlgorithms(player1_factory, player2_factory);
 
     return true;
 }
@@ -89,13 +90,13 @@ GameResult GameManager::run(
         TankAlgorithmFactory player1_tank_algo_factory,
         TankAlgorithmFactory player2_tank_algo_factory) {
 
-    // TODO: replace with references to players
-    m_players.push_back({1, std::unique_ptr<Player>(&player1)});
-    m_players.push_back({2, std::unique_ptr<Player>(&player2)});
+    // Store references to the provided players
+    m_players.push_back(PlayerWithId(1, player1));
+    m_players.push_back(PlayerWithId(2, player2));
     
     // TODO: figure out when (and if) we have unrecoverable errors
     // Initialize game using readBoard method
-    if (!readBoard(map, map_width, map_height, max_steps, num_shells)) {
+    if (!readBoard(map, map_width, map_height, max_steps, num_shells, player1_tank_algo_factory, player2_tank_algo_factory)) {
         // Return error result if board initialization failed
         GameResult errorResult;
         errorResult.winner = 0; // tie
@@ -103,9 +104,7 @@ GameResult GameManager::run(
         errorResult.remaining_tanks = {0, 0};
         return errorResult;
     }
-    
-    // TODO: Handle player2_tank_algo_factory for multi-tank scenarios
-
+ 
     // Start Game:
     m_currentStep = 1;
     m_gameOver = false;
@@ -353,7 +352,7 @@ void GameManager::applyAction(TankWithAlgorithm& controller) {
             // Find the corresponding player
             for (auto& playerWithId : m_players) {
                 if (playerWithId.playerId == controller.tank.getPlayerId()) {
-                    playerWithId.player->updateTankWithBattleInfo(*controller.algorithm, satteliteView);
+                    playerWithId.player.updateTankWithBattleInfo(*controller.algorithm, satteliteView);
                     break;
                 }
             }
@@ -590,14 +589,25 @@ void GameManager::removeDestroyedShells() {
   );
 }
 
-void GameManager::createTankAlgorithms() {
+void GameManager::createTankAlgorithms(TankAlgorithmFactory player1_factory, TankAlgorithmFactory player2_factory) {
     LOG_INFO("Creating tank algorithms");
     // Map from playerId to current tank index for that player
     std::unordered_map<int, int> playerTankCounts;
     for (auto& tank : m_tanks) {
         int playerId = tank.getPlayerId();
         int tankIndex = playerTankCounts[playerId]++;
-        auto algo = (*m_tankAlgorithmFactory)(playerId, tankIndex);
+        
+        // Use the appropriate factory based on player ID
+        std::unique_ptr<TankAlgorithm> algo;
+        if (playerId == 1) {
+            algo = player1_factory(playerId, tankIndex);
+        } else if (playerId == 2) {
+            algo = player2_factory(playerId, tankIndex);
+        } else {
+            LOG_ERROR("Invalid player ID: " + std::to_string(playerId));
+            continue;
+        }
+        
         m_tankControllers.push_back(TankWithAlgorithm{tank, std::move(algo)});
     }
     LOG_INFO("Tank algorithms created");
