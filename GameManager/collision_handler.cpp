@@ -2,6 +2,8 @@
 
 #include "GameManager/collision_handler.h"
 
+namespace GameManager_098765432_123456789 {
+
 void CollisionHandler::resolveAllCollisions(
   std::vector<Tank>& tanks,
   std::vector<Shell>& shells,
@@ -205,3 +207,4 @@ void CollisionHandler::markPathExplosionAt(const Point& from, const Point& to) {
     }
 }
 
+} // namespace GameManager_098765432_123456789

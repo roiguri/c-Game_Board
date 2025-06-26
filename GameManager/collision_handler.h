@@ -8,6 +8,8 @@
 #include "GameManager/objects/tank.h"
 #include "UserCommon/utils/midpoint.h"
 
+namespace GameManager_098765432_123456789 {
+
 /**
  * @class CollisionHandler
  * @brief Manages collision detection and resolution between game objects
@@ -89,3 +91,5 @@ private:
     // For Test purposes
     friend class CollisionHandlerTest;
 };
+
+} // namespace GameManager_098765432_123456789

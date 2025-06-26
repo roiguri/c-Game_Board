@@ -19,6 +19,8 @@
 #include "UserCommon/bonus/visualization/visualization.h"
 #endif
 
+namespace GameManager_098765432_123456789 {
+
 /**
  * @brief Manages the overall game flow and state for the tank battle simulation
  * 
@@ -183,3 +185,5 @@ private:
     std::unique_ptr<VisualizationManager> m_visualizationManager;
     #endif
 };
+
+} // namespace GameManager_098765432_123456789

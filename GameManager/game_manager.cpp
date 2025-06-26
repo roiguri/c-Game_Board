@@ -11,6 +11,8 @@
 #include "UserCommon/bonus/logger/logger.h"
 #include "common/GameManagerRegistration.h"
 
+namespace GameManager_098765432_123456789 {
+
 GameManager::GameManager(bool verbose [[maybe_unused]])
     : m_currentStep(0),
       m_gameOver(false),
@@ -631,5 +633,4 @@ std::vector<std::string> GameManager::readSatelliteView(const SatelliteView& sat
     return boardLines;
 }
 
-// Register this GameManager for dynamic loading
-REGISTER_GAME_MANAGER(GameManager)
+} // namespace GameManager_098765432_123456789
