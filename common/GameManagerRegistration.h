@@ -9,4 +9,4 @@ struct GameManagerRegistration {
 
 #define REGISTER_GAME_MANAGER(class_name) \
 GameManagerRegistration register_me_##class_name \
-    ( [] () { return std::make_unique<class_name>(); } );
+    ( [] (bool verbose) { return std::make_unique<class_name>(verbose); } );

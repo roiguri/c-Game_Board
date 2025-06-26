@@ -6,15 +6,32 @@
 #include <unordered_map>
 
 #include "GameManager/collision_handler.h"
-#include "Simulator/file_loader.h"
 #include "GameManager/game_manager.h"
 #include "UserCommon/satellite_view_impl.h"
 #include "UserCommon/bonus/logger/logger.h"
+#include "common/GameManagerRegistration.h"
+
+GameManager::GameManager(bool verbose [[maybe_unused]])
+    : m_playerFactory(nullptr),
+      m_tankAlgorithmFactory(nullptr),
+      m_currentStep(0),
+      m_gameOver(false),
+      m_isClassic2PlayerGame(false),
+      m_remaining_steps(DEFAULT_NO_SHELLS_STEPS),
+      m_maximum_steps(100) {
+    // This constructor is for registration system only
+    // Actual factories will be provided through run() method
+    #ifdef ENABLE_VISUALIZATION
+    if (verbose) {
+        m_visualizationManager = createVisualizationManager();
+    }
+    #endif
+}
 
 GameManager::GameManager(PlayerFactory& playerFactory,
                        TankAlgorithmFactory& tankAlgorithmFactory)
-    : m_playerFactory(playerFactory),
-      m_tankAlgorithmFactory(tankAlgorithmFactory),
+    : m_playerFactory(&playerFactory),
+      m_tankAlgorithmFactory(&tankAlgorithmFactory),
       m_currentStep(0),
       m_gameOver(false),
       m_isClassic2PlayerGame(false),
@@ -31,21 +48,18 @@ GameManager::~GameManager() {
     #endif
 }
 
-bool GameManager::readBoard(const std::string& filePath) {
-    int rows = 0;
-    int cols = 0;
-    int maxSteps = 0;
-    int numShells = 0;
+bool GameManager::readBoard(const SatelliteView& satellite_view, size_t map_width, size_t map_height, 
+                           size_t max_steps, size_t num_shells) {
     std::vector<std::string> boardLines = 
-      FileLoader::loadBoardFile(filePath, rows, cols, maxSteps, numShells);
+      readSatelliteView(satellite_view, map_width, map_height);
     if (boardLines.empty()) {
         return false;
     }
 
-    m_maximum_steps = maxSteps;
-    Tank::setInitialShells(numShells);
+    m_maximum_steps = max_steps;
+    Tank::setInitialShells(num_shells);
 
-    m_board = GameBoard(cols, rows);
+    m_board = GameBoard(map_width, map_height);
     std::vector<std::string> errors;
 
     std::vector<std::pair<int, Point>> tankPositions;
@@ -58,39 +72,39 @@ bool GameManager::readBoard(const std::string& filePath) {
         return false;
     }
     
-    // Determine unique player IDs from tank positions and create players
-    std::set<int> uniquePlayerIds;
-    for (const auto& [playerId, position] : tankPositions) {
-        uniquePlayerIds.insert(playerId);
-    }
-    
-    for (int playerId : uniquePlayerIds) {
-        auto player = m_playerFactory.create(playerId, cols, rows, maxSteps, numShells);
-        m_players.push_back({playerId, std::move(player)});
-    }
-    
-    // Determine if this is a classic 2-player game (only players 1 and 2, no others)
-    m_isClassic2PlayerGame = (uniquePlayerIds.size() == 2 && 
-                             uniquePlayerIds.find(1) != uniquePlayerIds.end() && 
-                             uniquePlayerIds.find(2) != uniquePlayerIds.end());
+    // TODO: consider support for multi-player games
+    m_isClassic2PlayerGame = true;
     
     createTanks(tankPositions);
     createTankAlgorithms();
-
-    setOutputFilePath(filePath);
 
     return true;
 }
 
 GameResult GameManager::run(
         size_t map_width, size_t map_height,
-        SatelliteView& map, // <= assume it is a snapshot, NOT updated
+        const SatelliteView& map, // <= assume it is a snapshot, NOT updated
         size_t max_steps, size_t num_shells,
         Player& player1, Player& player2,
         TankAlgorithmFactory player1_tank_algo_factory,
         TankAlgorithmFactory player2_tank_algo_factory) {
-    // TODO: initialization
-    // TODO: create readSatelliteView method
+
+    // TODO: replace with references to players
+    m_players.push_back({1, std::unique_ptr<Player>(&player1)});
+    m_players.push_back({2, std::unique_ptr<Player>(&player2)});
+    
+    // TODO: figure out when (and if) we have unrecoverable errors
+    // Initialize game using readBoard method
+    if (!readBoard(map, map_width, map_height, max_steps, num_shells)) {
+        // Return error result if board initialization failed
+        GameResult errorResult;
+        errorResult.winner = 0; // tie
+        errorResult.reason = GameResult::Reason::ALL_TANKS_DEAD;
+        errorResult.remaining_tanks = {0, 0};
+        return errorResult;
+    }
+    
+    // TODO: Handle player2_tank_algo_factory for multi-tank scenarios
 
     // Start Game:
     m_currentStep = 1;
@@ -158,7 +172,9 @@ GameResult GameManager::run(
 
     saveResults(m_outputFilePath);
     
-    return m_finalGameResult;
+    // TODO: return by value?
+    // TODO: store final game state (satellite view) and rounds (steps) in m_finalGameResult
+    return std::move(m_finalGameResult);
 }
 
     bool GameManager::saveResults(const std::string& outputFilePath) {
@@ -581,12 +597,13 @@ void GameManager::createTankAlgorithms() {
     for (auto& tank : m_tanks) {
         int playerId = tank.getPlayerId();
         int tankIndex = playerTankCounts[playerId]++;
-        auto algo = m_tankAlgorithmFactory.create(playerId, tankIndex);
+        auto algo = (*m_tankAlgorithmFactory)(playerId, tankIndex);
         m_tankControllers.push_back(TankWithAlgorithm{tank, std::move(algo)});
     }
     LOG_INFO("Tank algorithms created");
 }
 
+// TODO: only output if verbose = true
 void GameManager::setOutputFilePath(const std::string& inputFilePath) {
     std::filesystem::path inputPath(inputFilePath);
     std::string directory = inputPath.parent_path().string();
@@ -598,3 +615,27 @@ void GameManager::setOutputFilePath(const std::string& inputFilePath) {
         m_outputFilePath = directory + "/output_" + filename;
     }
 }
+
+std::vector<std::string> GameManager::readSatelliteView(const SatelliteView& satellite_view, 
+                                                       size_t map_width, 
+                                                       size_t map_height) const {
+    std::vector<std::string> boardLines;
+    boardLines.reserve(map_height);
+    
+    for (size_t y = 0; y < map_height; ++y) {
+        std::string row;
+        row.reserve(map_width);
+        
+        for (size_t x = 0; x < map_width; ++x) {
+            char ch = satellite_view.getObjectAt(x, y);
+            row.push_back(ch);
+        }
+        
+        boardLines.push_back(row);
+    }
+    
+    return boardLines;
+}
+
+// Register this GameManager for dynamic loading
+REGISTER_GAME_MANAGER(GameManager)

@@ -1,14 +1,35 @@
 #include <gtest/gtest.h>
 #include "game_manager.h"
-#include "test/mock_player.h"
-#include "test/mock_algorithm.h"
+#include "UserCommon/utils/testing/mock_player.h"
+#include "UserCommon/utils/testing/mock_algorithm.h"
 #include "objects/shell.h"
 #include "utils/point.h"
 #include "utils/direction.h"
+#include "common/SatelliteView.h"
 #include <memory>
 #include <fstream>
+#include <sstream>
 #include <cstdio> // for std::remove
 #include <iostream>
+
+// Simple mock SatelliteView for testing readSatelliteView
+class MockSatelliteView : public SatelliteView {
+private:
+    std::vector<std::string> m_grid;
+    size_t m_width;
+    size_t m_height;
+
+public:
+    MockSatelliteView(const std::vector<std::string>& grid) 
+        : m_grid(grid), m_height(grid.size()), m_width(grid.empty() ? 0 : grid[0].length()) {}
+
+    char getObjectAt(size_t x, size_t y) const override {
+        if (y >= m_height || x >= m_grid[y].length()) {
+            return ' '; // Return space for out-of-bounds
+        }
+        return m_grid[y][x];
+    }
+};
 
 // Test fixture for GameManager
 class GameManagerTest : public ::testing::Test {
@@ -76,6 +97,56 @@ protected:
     // Helper to call setOutputFilePath for testing
     static void CallSetOutputFilePath(GameManager& manager, const std::string& inputPath) {
         manager.setOutputFilePath(inputPath);
+    }
+
+    // Helper to call readSatelliteView for testing
+    static std::vector<std::string> CallReadSatelliteView(GameManager& manager, 
+                                                         const SatelliteView& view,
+                                                         size_t width, size_t height) {
+        return manager.readSatelliteView(view, width, height);
+    }
+
+    // Helper to parse board content and call new readBoard method
+    bool CallReadBoardFromContent(GameManager& manager, const std::string& boardContent) {
+        std::istringstream iss(boardContent);
+        std::string line;
+        
+        // Skip first line (title)
+        std::getline(iss, line);
+        
+        // Parse metadata
+        size_t maxSteps = 100, numShells = 10, rows = 0, cols = 0;
+        while (std::getline(iss, line)) {
+            if (line.find("MaxSteps") != std::string::npos) {
+                maxSteps = std::stoul(line.substr(line.find('=') + 1));
+            } else if (line.find("NumShells") != std::string::npos) {
+                numShells = std::stoul(line.substr(line.find('=') + 1));
+            } else if (line.find("Rows") != std::string::npos) {
+                rows = std::stoul(line.substr(line.find('=') + 1));
+            } else if (line.find("Cols") != std::string::npos) {
+                cols = std::stoul(line.substr(line.find('=') + 1));
+                break; // Board content follows
+            }
+        }
+        
+        // Read board lines
+        std::vector<std::string> boardLines;
+        for (size_t i = 0; i < rows; ++i) {
+            if (std::getline(iss, line)) {
+                // Ensure line is exactly cols length
+                if (line.length() < cols) {
+                    line.append(cols - line.length(), ' ');
+                } else if (line.length() > cols) {
+                    line = line.substr(0, cols);
+                }
+                boardLines.push_back(line);
+            } else {
+                boardLines.push_back(std::string(cols, ' ')); // Fill with spaces if missing
+            }
+        }
+        
+        MockSatelliteView mockView(boardLines);
+        return manager.readBoard(mockView, cols, rows, maxSteps, numShells);
     }
 
     void SetUp() override {
@@ -1078,17 +1149,9 @@ Cols = 3
    
    )";
         
-        // Write to temporary file
-        std::ofstream tempFile("test_2player.txt");
-        tempFile << boardContent;
-        tempFile.close();
-        
         GameManager testManager(playerFactory, algoFactory);
-        EXPECT_TRUE(testManager.readBoard("test_2player.txt"));
+        EXPECT_TRUE(CallReadBoardFromContent(testManager, boardContent));
         EXPECT_TRUE(GetIsClassic2PlayerGame(testManager));
-        
-        // Clean up
-        std::remove("test_2player.txt");
     }
     
     // Test 2: Multi-player game (players 1, 2, and 3)
@@ -1102,15 +1165,9 @@ Cols = 3
 3  
    )";
         
-        std::ofstream tempFile("test_3player.txt");
-        tempFile << boardContent;
-        tempFile.close();
-        
         GameManager testManager(playerFactory, algoFactory);
-        EXPECT_TRUE(testManager.readBoard("test_3player.txt"));
+        EXPECT_TRUE(CallReadBoardFromContent(testManager, boardContent));
         EXPECT_FALSE(GetIsClassic2PlayerGame(testManager));
-        
-        std::remove("test_3player.txt");
     }
     
     // Test 3: Only player 1 (should be false)
@@ -1124,15 +1181,9 @@ Cols = 3
    
    )";
         
-        std::ofstream tempFile("test_1player.txt");
-        tempFile << boardContent;
-        tempFile.close();
-        
         GameManager testManager(playerFactory, algoFactory);
-        EXPECT_TRUE(testManager.readBoard("test_1player.txt"));
+        EXPECT_TRUE(CallReadBoardFromContent(testManager, boardContent));
         EXPECT_FALSE(GetIsClassic2PlayerGame(testManager));
-        
-        std::remove("test_1player.txt");
     }
     
     // Test 4: Players 2 and 3 (missing player 1, should be false)
@@ -1146,15 +1197,9 @@ Cols = 3
    
    )";
         
-        std::ofstream tempFile("test_2and3player.txt");
-        tempFile << boardContent;
-        tempFile.close();
-        
         GameManager testManager(playerFactory, algoFactory);
-        EXPECT_TRUE(testManager.readBoard("test_2and3player.txt"));
+        EXPECT_TRUE(CallReadBoardFromContent(testManager, boardContent));
         EXPECT_FALSE(GetIsClassic2PlayerGame(testManager));
-        
-        std::remove("test_2and3player.txt");
     }
     
     // Test 5: 9-player game (should be false)
@@ -1166,15 +1211,9 @@ Rows = 3
 Cols = 9
 123456789)";
         
-        std::ofstream tempFile("test_9player.txt");
-        tempFile << boardContent;
-        tempFile.close();
-        
         GameManager testManager(playerFactory, algoFactory);
-        EXPECT_TRUE(testManager.readBoard("test_9player.txt"));
+        EXPECT_TRUE(CallReadBoardFromContent(testManager, boardContent));
         EXPECT_FALSE(GetIsClassic2PlayerGame(testManager));
-        
-        std::remove("test_9player.txt");
     }
     
     // Test 6: Default initialization (should be false)
@@ -1182,4 +1221,64 @@ Cols = 9
         GameManager testManager(playerFactory, algoFactory);
         EXPECT_FALSE(GetIsClassic2PlayerGame(testManager));
     }
+}
+
+// Test readSatelliteView functionality
+TEST_F(GameManagerTest, ReadSatelliteViewBasic) {
+    // Create a simple 3x3 test grid with walls, tanks, and empty spaces
+    std::vector<std::string> expectedGrid = {
+        "# 1",
+        " @ ",
+        "2  "
+    };
+    
+    MockSatelliteView mockView(expectedGrid);
+    
+    // Call readSatelliteView through the helper
+    std::vector<std::string> result = CallReadSatelliteView(*manager, mockView, 3, 3);
+    
+    // Verify the result matches the expected grid
+    ASSERT_EQ(result.size(), 3);
+    EXPECT_EQ(result[0], "# 1");
+    EXPECT_EQ(result[1], " @ ");
+    EXPECT_EQ(result[2], "2  ");
+}
+
+TEST_F(GameManagerTest, ReadSatelliteViewEmptyBoard) {
+    // Create a 2x2 empty board
+    std::vector<std::string> expectedGrid = {
+        "  ",
+        "  "
+    };
+    
+    MockSatelliteView mockView(expectedGrid);
+    
+    std::vector<std::string> result = CallReadSatelliteView(*manager, mockView, 2, 2);
+    
+    ASSERT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], "  ");
+    EXPECT_EQ(result[1], "  ");
+}
+
+TEST_F(GameManagerTest, ReadSatelliteViewSingleCell) {
+    // Create a 1x1 board with a wall
+    std::vector<std::string> expectedGrid = {"#"};
+    
+    MockSatelliteView mockView(expectedGrid);
+    
+    std::vector<std::string> result = CallReadSatelliteView(*manager, mockView, 1, 1);
+    
+    ASSERT_EQ(result.size(), 1);
+    EXPECT_EQ(result[0], "#");
+}
+
+TEST_F(GameManagerTest, ReadSatelliteViewZeroDimensions) {
+    // Test edge case with zero dimensions
+    std::vector<std::string> expectedGrid = {};
+    
+    MockSatelliteView mockView(expectedGrid);
+    
+    std::vector<std::string> result = CallReadSatelliteView(*manager, mockView, 0, 0);
+    
+    EXPECT_EQ(result.size(), 0);
 }

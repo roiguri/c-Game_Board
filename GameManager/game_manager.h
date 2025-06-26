@@ -29,7 +29,7 @@
  * - Handling movement, collisions, and game rules
  * - Tracking game history and saving results
  */
-class GameManager {
+class GameManager : public AbstractGameManager {
 public:
     /** Default number of steps allowed when tanks run out of shells */
     static constexpr int DEFAULT_NO_SHELLS_STEPS = 40;
@@ -37,6 +37,9 @@ public:
     /**
      * @brief Construct a new Game Manager object with default state
      */
+    GameManager(bool verbose = false);
+    
+    // TODO: remove this constructor
     GameManager(PlayerFactory& playerFactory,
                 TankAlgorithmFactory& tankAlgorithmFactory);
     
@@ -51,14 +54,19 @@ public:
     GameManager& operator=(GameManager&&) = default;
 
     /**
-     * @brief Initialize the game with a board file
+     * @brief Initialize the game with SatelliteView input and provided players
      * 
-     * Loads the game board, creates tanks, and initializes algorithms
+     * Loads the game board from SatelliteView, sets up tanks, and initializes algorithms
      * 
-     * @param filePath Path to the board file
+     * @param satellite_view The SatelliteView to read from
+     * @param map_width Width of the map
+     * @param map_height Height of the map
+     * @param max_steps Maximum number of steps allowed
+     * @param num_shells Number of shells per tank
      * @return true if initialization was successful, false otherwise
      */
-    bool readBoard(const std::string& filePath);
+    bool readBoard(const SatelliteView& satellite_view, size_t map_width, size_t map_height, 
+                   size_t max_steps, size_t num_shells);
     
     /**
      * @brief Run the game loop until completion
@@ -67,11 +75,11 @@ public:
      */
     GameResult run(
         size_t map_width, size_t map_height,
-        SatelliteView& map, // <= assume it is a snapshot, NOT updated
+        const SatelliteView& map, // <= assume it is a snapshot, NOT updated
         size_t max_steps, size_t num_shells,
         Player& player1, Player& player2,
         TankAlgorithmFactory player1_tank_algo_factory,
-        TankAlgorithmFactory player2_tank_algo_factory);
+        TankAlgorithmFactory player2_tank_algo_factory) override;
 
     struct TankWithAlgorithm {
         Tank& tank;
@@ -91,9 +99,9 @@ private:
     // Players
     std::vector<PlayerWithId> m_players;
 
-    // Factories
-    PlayerFactory& m_playerFactory;
-    TankAlgorithmFactory& m_tankAlgorithmFactory;
+    // Factories (optional for registration-based construction)
+    PlayerFactory* m_playerFactory;
+    TankAlgorithmFactory* m_tankAlgorithmFactory;
 
     // Game state tracking
     int m_currentStep;
@@ -161,6 +169,11 @@ private:
 
     // Set output file path from input file path
     void setOutputFilePath(const std::string& inputFilePath);
+
+    // Read character grid from SatelliteView and convert to vector<string> format
+    std::vector<std::string> readSatelliteView(const SatelliteView& satellite_view, 
+                                               size_t map_width, 
+                                               size_t map_height) const;
 
     // For testing purposes
     friend class GameManagerTest;

@@ -24,7 +24,7 @@ char FileSatelliteView::getObjectAt(size_t x, size_t y) const {
         ch == '@' ||    // Mine
         ch == ' ' ||    // Empty
         ch == '*' ||    // Shell
-        ch == '%' ||    // Current tank
+        ch == '%' ||    // Current tank // TODO: % should be empty space
         (ch >= '1' && ch <= '9')) {  // Tank players 1-9
         return ch;
     }
