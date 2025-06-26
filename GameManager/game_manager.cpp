@@ -413,13 +413,11 @@ bool GameManager::checkGameOver() {
             remainingTanks[playerId - 1] = tankCount; // Convert to 0-based index
         }
     }
-
+    // TODO: verify current step is correct in GameResult
     // Check win conditions
     if (playersWithTanks == 1) {
         m_gameResult = "Player " + std::to_string(winningPlayer) + " won with " + std::to_string(winningPlayerTanks) + " tanks still alive";
-        m_finalGameResult.winner = winningPlayer;
-        m_finalGameResult.reason = GameResult::ALL_TANKS_DEAD;
-        m_finalGameResult.remaining_tanks = remainingTanks;
+        populateGameResult(winningPlayer, GameResult::ALL_TANKS_DEAD, remainingTanks);
         return true;
     }
     if (playersWithTanks == 0) {
@@ -428,9 +426,7 @@ bool GameManager::checkGameOver() {
         } else {
             m_gameResult = "Tie, all players have zero tanks";
         }
-        m_finalGameResult.winner = 0; // Tie
-        m_finalGameResult.reason = GameResult::ALL_TANKS_DEAD;
-        m_finalGameResult.remaining_tanks = remainingTanks;
+        populateGameResult(0, GameResult::ALL_TANKS_DEAD, remainingTanks);
         return true;
     }
     if (m_remaining_steps <= 0) {
@@ -439,9 +435,7 @@ bool GameManager::checkGameOver() {
         } else {
             m_gameResult = "Tie, all players have zero shells for " + std::to_string(DEFAULT_NO_SHELLS_STEPS) + " steps";
         }
-        m_finalGameResult.winner = 0; // Tie
-        m_finalGameResult.reason = GameResult::ZERO_SHELLS;
-        m_finalGameResult.remaining_tanks = remainingTanks;
+        populateGameResult(0, GameResult::ZERO_SHELLS, remainingTanks);
         return true;
     }
     if (m_currentStep >= m_maximum_steps) {
@@ -465,13 +459,19 @@ bool GameManager::checkGameOver() {
             }
             m_gameResult = resultStr;
         }
-        m_finalGameResult.winner = 0; // Tie
-        m_finalGameResult.reason = GameResult::MAX_STEPS;
-        m_finalGameResult.remaining_tanks = remainingTanks;
+        populateGameResult(0, GameResult::MAX_STEPS, remainingTanks);
         return true;
     }
     // Game continues
     return false;
+}
+
+void GameManager::populateGameResult(int winner, GameResult::Reason reason, const std::vector<size_t>& remainingTanks) {
+    m_finalGameResult.winner = winner;
+    m_finalGameResult.reason = reason;
+    m_finalGameResult.remaining_tanks = remainingTanks;
+    m_finalGameResult.rounds = m_currentStep;
+    m_finalGameResult.gameState = std::make_unique<SatelliteViewImpl>(m_board, m_tanks, m_shells);
 }
 
 std::string GameManager::logAction() {

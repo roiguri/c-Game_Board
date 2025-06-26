@@ -149,6 +149,9 @@ private:
     // Determines if a tank was destroyed or other end conditions have been met
     bool checkGameOver();
     
+    // Helper method to populate GameResult with common fields
+    void populateGameResult(int winner, GameResult::Reason reason, const std::vector<size_t>& remainingTanks);
+    
     // Log an action taken by a player
     std::string logAction();
     

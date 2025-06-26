@@ -8,7 +8,7 @@
 **Changes after the draft period would be highlighted in the doc.**  
 **Note: if a change creates more work for you (e.g. you already implemented things differently), please raise the issue in the assignment forum before rushing to change your code\!**
 
-**Submission deadline: August-10th 2025, 23:30.**  
+**Submission deadline: August-~~10th~~ 24th, 2025, 23:30.**  
 **Note: Submission Instructions appear inside the doc, below\!**
 
 **Assignment 3 \- Requirements and Guidelines**
@@ -33,7 +33,7 @@ You are required to organize your submission into **5 folders**: 3 folders for 3
 3. **“GameManager”** folder: in order to allow load of different GameManager “.so” files (together or separately), the name of the .so file must be unique, using the ids of the submitters, as follows: GameManager\_098765432\_123456789.so additionally, all your code shall be located inside a namespace with the unique name GameManager\_098765432\_123456789  
 4. “Common” and “UserCommon” (there are no makefiles in these folders\!):   
    1. **“Common”** folder: shall include the common files required by more than one project, published by the Advanced Topics in Programing staff as the files that shall be used “as is” without any change. DO NOT add your own files into this folder\!  
-   2. **“UserCommon”** folder: shall include your own common files, files that are required by more than one project. Your makefiles and includes may use those files where needed to avoid duplication.
+   2. **“UserCommon”** folder: shall include your own common files, files that are required by more than one project. Your makefiles and includes may use those files where needed to avoid duplication. All your code in this folder shall be located inside a namespace with the unique name UserCommon\_098765432\_123456789
 
 ## **The Simulator**
 
@@ -189,6 +189,8 @@ struct GameResult {
 	enum Reason { ALL\_TANKS\_DEAD, MAX\_STEPS, ZERO\_SHELLS };  
 Reason reason;  
 std::vector\<size\_t\> remaining\_tanks; // index 0 \= player 1, etc.  
+std::unique\_ptr\<SatelliteView\> gameState; // at end of game  
+size\_t rounds; // total number of rounds  
 };  
 \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
@@ -199,14 +201,14 @@ public:
 	virtual \~AbstractGameManager() {}  
 virtual GameResult run(  
 size\_t map\_width, size\_t map\_height,  
-	SatelliteView& map, // \<= assume it is a snapshot, NOT updated  
+	const SatelliteView& map, // \<= a snapshot, NOT updated  
 size\_t max\_steps, size\_t num\_shells,  
 Player& player1, Player& player2,  
 TankAlgorithmFactory player1\_tank\_algo\_factory,  
 TankAlgorithmFactory player2\_tank\_algo\_factory) \= 0;  
 };
 
-using GameManagerFactory \= std::function\<std::unique\_ptr\<AbstractGameManager\>()\>;
+using GameManagerFactory \= std::function\<std::unique\_ptr\<AbstractGameManager\>(bool verbose)\>;
 
 \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 

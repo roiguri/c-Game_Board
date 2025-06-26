@@ -16,7 +16,12 @@ SatelliteViewImpl::SatelliteViewImpl(const GameBoard& board,
     const std::vector<Tank>& tanks,
     const std::vector<Shell>& shells,
     const Point& currentTankPos)
-    : m_board(board), m_tanks(tanks), m_shells(shells), m_currentTankPos(currentTankPos) {}
+    : m_board(board), m_tanks(tanks), m_shells(shells), m_currentTankPos(currentTankPos), m_hasCurrentTank(true) {}
+
+SatelliteViewImpl::SatelliteViewImpl(const GameBoard& board,
+    const std::vector<Tank>& tanks,
+    const std::vector<Shell>& shells)
+    : m_board(board), m_tanks(tanks), m_shells(shells), m_currentTankPos(-1, -1), m_hasCurrentTank(false) {}
 
 char SatelliteViewImpl::getObjectAt(size_t x, size_t y) const {
     // Cast as board uses int for coordinates (for wrapping calculations)
@@ -25,8 +30,8 @@ char SatelliteViewImpl::getObjectAt(size_t x, size_t y) const {
     if (x >= m_board.getWidth() || y >= m_board.getHeight()) {
         return OUT_OF_BOARD_CHAR;
     }
-    // Mark the current tank position with '%'
-    if (m_currentTankPos.getX() == x_int && m_currentTankPos.getY() == y_int) {
+    // Mark the current tank position with '%' only if we have a current tank
+    if (m_hasCurrentTank && m_currentTankPos.getX() == x_int && m_currentTankPos.getY() == y_int) {
         return CURRENT_TANK_CHAR;
     }
     // Check for tank at (x, y)

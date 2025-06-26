@@ -30,6 +30,16 @@ public:
                      const Point& currentTankPos);
 
     /**
+     * @brief Constructs a SatelliteViewImpl for final game state (no current tank marking)
+     * @param board Reference to the game board
+     * @param tanks Reference to a vector of tanks (const)
+     * @param shells Reference to a vector of shells (const)
+     */
+    SatelliteViewImpl(const GameBoard& board,
+                     const std::vector<Tank>& tanks,
+                     const std::vector<Shell>& shells);
+
+    /**
      * @brief Gets the object at a specific board position as a character
      * @param x The x-coordinate (column)
      * @param y The y-coordinate (row)
@@ -42,4 +52,5 @@ private:
     const std::vector<Tank>& m_tanks;
     const std::vector<Shell>& m_shells;
     Point m_currentTankPos;
+    bool m_hasCurrentTank; // Whether to mark current tank with '%'
 }; 
