@@ -3,7 +3,11 @@
 #include "UserCommon/objects/tank.h"
 #include "UserCommon/objects/shell.h"
 #include "UserCommon/game_board.h"
-#include "utils/direction.h"
+#include "UserCommon/utils/direction.h"
+
+namespace GameManager_098765432_123456789 {
+
+using namespace UserCommon_098765432_123456789;
 
 class CollisionHandlerTest : public ::testing::Test {
 protected:
@@ -701,3 +705,5 @@ TEST_F(CollisionHandlerTest, DetectPathCrossings_NonAdjacentPaths_NoExplosion) {
   EXPECT_FALSE(tanks[0].isDestroyed());
   EXPECT_FALSE(tanks[1].isDestroyed());
 }
+
+} // namespace GameManager_098765432_123456789

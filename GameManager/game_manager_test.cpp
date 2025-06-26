@@ -3,14 +3,18 @@
 #include "UserCommon/utils/testing/mock_player.h"
 #include "UserCommon/utils/testing/mock_algorithm.h"
 #include "UserCommon/objects/shell.h"
-#include "utils/point.h"
-#include "utils/direction.h"
+#include "UserCommon/utils/point.h"
+#include "UserCommon/utils/direction.h"
 #include "common/SatelliteView.h"
 #include <memory>
 #include <fstream>
 #include <sstream>
 #include <cstdio> // for std::remove
 #include <iostream>
+
+namespace GameManager_098765432_123456789 { 
+
+using namespace UserCommon_098765432_123456789;
 
 // Simple mock SatelliteView for testing readSatelliteView
 class MockSatelliteView : public SatelliteView {
@@ -1282,3 +1286,5 @@ TEST_F(GameManagerTest, ReadSatelliteViewZeroDimensions) {
     
     EXPECT_EQ(result.size(), 0);
 }
+
+} // namespace GameManager_098765432_123456789

@@ -81,11 +81,24 @@
         ],
         "priority": "medium",
         "subtasks": []
+      },
+      {
+        "id": 102,
+        "title": "Add registration declaration for Algorithm factories",
+        "description": "Add proper registration declarations to Algorithm factory classes to ensure they are correctly registered with the factory system for runtime instantiation.",
+        "details": "Add registration declarations to all Algorithm factory classes (basic_player_factory, basic_tank_algorithm_factory, and any other factory implementations) to ensure they are properly registered with the central factory registry system. This typically involves adding static registration calls or registration macros at the file level that will execute during program initialization. Update factory header files to include necessary registration declarations. Ensure registration happens before main() execution through static initialization or explicit registration calls. Verify factory classes follow the proper inheritance hierarchy and implement required interface methods. Update any factory manager or registry classes to properly handle Algorithm factory registrations. Consider thread-safety if factories will be accessed concurrently during simulation.",
+        "testStrategy": "Compile Algorithm factories and verify registration occurs during program startup. Test factory instantiation through registry lookup to confirm proper registration. Verify factory classes can be discovered and instantiated by name or type. Test multiple factory registrations work without conflicts. Create unit tests that verify factory registration state before and after initialization. Test factory cleanup and deregistration if supported. Verify integration with existing GameManager factory usage patterns.",
+        "status": "pending",
+        "dependencies": [
+          101
+        ],
+        "priority": "medium",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-06-26T15:20:47.254Z",
-      "updated": "2025-06-26T16:13:33.235Z",
+      "updated": "2025-06-26T19:01:39.004Z",
       "description": "Tag created on 6/26/2025"
     }
   },
@@ -99,7 +112,7 @@
         "testStrategy": "Verify CMake configuration generates without errors, confirm C++17 standard is set, validate compiler flags are applied, and ensure build options are correctly defined",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -288,7 +301,7 @@
     ],
     "metadata": {
       "created": "2025-06-26T17:42:23.385Z",
-      "updated": "2025-06-26T17:48:51.427Z",
+      "updated": "2025-06-26T19:03:13.217Z",
       "description": "Tasks for build context"
     }
   }
