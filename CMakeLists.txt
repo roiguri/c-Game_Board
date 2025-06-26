@@ -40,9 +40,17 @@ list(REMOVE_ITEM USERCOMMON_SOURCES ${ANALYSIS_SOURCES})
 file(GLOB_RECURSE USERCOMMON_TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon/*_test.cpp")
 list(REMOVE_ITEM USERCOMMON_SOURCES ${USERCOMMON_TEST_SOURCES})
 
+# Remove all bonus test files for now
+file(GLOB_RECURSE BONUS_TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon/bonus/*_test.cpp")
+list(REMOVE_ITEM USERCOMMON_TEST_SOURCES ${BONUS_TEST_SOURCES})
+
 # Remove testing directory as it contains gtest dependencies
 file(GLOB_RECURSE TESTING_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon/utils/testing/*.cpp")
 list(REMOVE_ITEM USERCOMMON_SOURCES ${TESTING_SOURCES})
+
+# Remove all bonus sources for the test build for now  
+file(GLOB_RECURSE ALL_BONUS_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon/bonus/*.cpp")
+list(REMOVE_ITEM USERCOMMON_SOURCES ${ALL_BONUS_SOURCES})
 
 # Remove visualization sources if disabled
 if(NOT ENABLE_VISUALIZATION)
@@ -60,6 +68,21 @@ set(COMMON_INCLUDE_DIRS
     "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon"
 )
 
+# Create UserCommon test executable
+if(ENABLE_TESTING)
+    # Create usercommon_tests executable
+    add_executable(usercommon_tests ${USERCOMMON_TEST_SOURCES})
+    
+    # Link UserCommon sources and Google Test
+    target_sources(usercommon_tests PRIVATE ${USERCOMMON_SOURCES})
+    target_link_libraries(usercommon_tests PRIVATE gtest gtest_main)
+    target_include_directories(usercommon_tests PRIVATE ${COMMON_INCLUDE_DIRS})
+    
+    # Add to CTest
+    enable_testing()
+    add_test(NAME UserCommonTests COMMAND usercommon_tests)
+endif()
+
 # Add project subdirectories
 add_subdirectory(GameManager)
 
@@ -70,7 +93,7 @@ add_custom_target(all_projects
 )
 
 add_custom_target(all_tests
-    DEPENDS gamemanager_tests
+    DEPENDS gamemanager_tests usercommon_tests
     COMMENT "Building all test executables"
 )
 

@@ -1,7 +1,9 @@
 #include "gtest/gtest.h"
-#include "UserCommon/objects/game_object.h"
+#include "objects/game_object.h"
 #include "utils/point.h"
 #include "utils/direction.h"
+
+using namespace UserCommon_098765432_123456789;
 
 class GameObjectTest : public ::testing::Test {
 protected:

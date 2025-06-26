@@ -2,11 +2,11 @@
 
 #include <vector>
 
-#include "UserCommon/game_board.h"
-#include "UserCommon/objects/shell.h"
-#include "UserCommon/objects/tank.h"
-#include "UserCommon/utils/point.h"
-#include "common/SatelliteView.h"
+#include "game_board.h"
+#include "objects/shell.h"
+#include "objects/tank.h"
+#include "utils/point.h"
+#include "SatelliteView.h"
 
 namespace UserCommon_098765432_123456789 {
 

@@ -1,5 +1,5 @@
-#include "UserCommon/objects/tank.h"
-#include "UserCommon/utils/direction.h"
+#include "tank.h"
+#include "utils/direction.h"
 
 namespace UserCommon_098765432_123456789 {
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "UserCommon/utils/direction.h"
-#include "UserCommon/utils/point.h"
+#include "utils/direction.h"
+#include "utils/point.h"
 
 namespace UserCommon_098765432_123456789 {
 

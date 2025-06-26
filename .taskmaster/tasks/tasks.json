@@ -106,202 +106,32 @@
     "tasks": [
       {
         "id": 1,
-        "title": "Create Root CMakeLists.txt with Global Configuration",
-        "description": "Establish the root build system with global C++17 configuration, compiler flags, and build options",
-        "details": "Create root CMakeLists.txt with minimum CMake version 3.14+, set C++17 standard, configure compiler flags (-Wall -Wextra -Werror -pedantic -fPIC), define build options (ENABLE_TESTING=ON, ENABLE_VISUALIZATION=OFF), set CMAKE_RUNTIME_OUTPUT_DIRECTORY to build/, and establish project structure foundation",
-        "testStrategy": "Verify CMake configuration generates without errors, confirm C++17 standard is set, validate compiler flags are applied, and ensure build options are correctly defined",
-        "priority": "high",
+        "title": "Ensure GameManager Tests Pass and Are Comprehensive",
+        "description": "Verify that all GameManager tests compile and execute successfully, fix any failing tests, and ensure the test suite is comprehensive and stable.",
+        "details": "1. Locate and examine all GameManager test files in the project directory structure\n2. Compile all GameManager tests using the appropriate build system (CMake/make)\n3. Run the complete GameManager test suite and identify any failing tests\n4. Debug and fix compilation errors, including missing includes, namespace issues, or linker problems\n5. Analyze test failures to determine root causes (logic errors, incorrect assertions, missing setup/teardown)\n6. Fix failing test cases by correcting either the test logic or the underlying GameManager implementation\n7. Review test coverage to ensure all GameManager public methods and edge cases are tested\n8. Add missing test cases for uncovered functionality, error conditions, and boundary conditions\n9. Verify that tests follow consistent naming conventions and testing patterns used in the project\n10. Ensure all tests properly clean up resources and don't interfere with each other\n11. Run the complete test suite multiple times to verify stability and eliminate flaky tests",
+        "testStrategy": "1. Compile all GameManager tests without warnings or errors\n2. Execute the full GameManager test suite with 100% pass rate\n3. Run tests multiple times to ensure consistent results\n4. Verify test output is clear and informative for both passing and failing scenarios\n5. Check that test coverage includes all critical GameManager functionality\n6. Validate that tests can be run individually and as part of the complete suite\n7. Ensure tests complete within reasonable time limits\n8. Confirm that test setup and teardown properly isolate test cases",
+        "status": "pending",
         "dependencies": [],
-        "status": "done",
+        "priority": "medium",
         "subtasks": []
       },
       {
         "id": 2,
-        "title": "Implement Google Test Dependency Management",
-        "description": "Configure FetchContent to download and setup Google Test framework for all projects",
-        "details": "Use FetchContent_Declare and FetchContent_MakeAvailable to download Google Test to third_party/googletest/, configure gtest and gtest_main libraries, set proper include directories, and make available to all subdirectories with find_package integration",
-        "testStrategy": "Verify Google Test is downloaded to correct location, confirm gtest libraries are available, validate include paths are set correctly, and test basic gtest compilation",
-        "priority": "high",
+        "title": "Add Bonus Features to Build System with Tests",
+        "description": "Integrate all UserCommon bonus feature directories into the CMake build configuration and create comprehensive test binaries for bonus features.",
+        "details": "1. Scan UserCommon directory structure to identify all bonus feature subdirectories and their source files\n2. Update CMakeLists.txt to include bonus feature directories in the build configuration\n3. Create individual test executables for each bonus feature using the existing test framework patterns\n4. Configure CMake to compile bonus feature source files with proper include paths and dependencies\n5. Add bonus feature test targets to the main build system with appropriate compiler flags\n6. Ensure bonus features link correctly with core UserCommon libraries and dependencies\n7. Update build scripts to handle bonus feature compilation alongside main project components\n8. Configure test discovery so bonus feature tests are included in the complete test suite\n9. Verify that bonus features don't break existing build configurations or introduce conflicts\n10. Document the bonus feature build process and any special requirements",
+        "testStrategy": "1. Verify all bonus feature directories are detected and included in CMake configuration\n2. Compile the entire project including bonus features without warnings or errors\n3. Execute all bonus feature test binaries individually to ensure they run successfully\n4. Run the complete test suite including bonus features with 100% pass rate\n5. Test build system with and without bonus features enabled to ensure flexibility\n6. Verify bonus feature tests integrate properly with existing test infrastructure\n7. Check that bonus feature compilation doesn't increase build time excessively\n8. Validate that bonus features can be built on different platforms if applicable\n9. Ensure clean builds work correctly with bonus features included\n10. Test that bonus feature removal doesn't break the main build system",
+        "status": "pending",
         "dependencies": [
           1
         ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 3,
-        "title": "Create UserCommon Source Collection System",
-        "description": "Implement recursive collection of UserCommon source and header files for sharing across projects",
-        "details": "Use file(GLOB_RECURSE) to collect all UserCommon/*.cpp files into USERCOMMON_SOURCES variable, collect all UserCommon/*.h files into USERCOMMON_HEADERS variable, handle conditional compilation for visualization features based on ENABLE_VISUALIZATION, and propagate variables to subdirectories using PARENT_SCOPE",
-        "testStrategy": "Verify all UserCommon source files are collected correctly, confirm variables are available in subdirectories, validate conditional compilation excludes visualization when disabled, and test file collection updates when new files are added",
-        "priority": "high",
-        "dependencies": [
-          1
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 4,
-        "title": "Setup Directory Structure and Output Paths",
-        "description": "Configure proper directory structure with build/, third_party/, and project-specific output locations",
-        "details": "Create build/ directory structure with subdirectories for each project, configure CMAKE_ARCHIVE_OUTPUT_DIRECTORY and CMAKE_LIBRARY_OUTPUT_DIRECTORY, set up proper paths for test executables in build/ProjectName/, and ensure shared libraries output to project directories",
-        "testStrategy": "Verify directory structure is created correctly, confirm output paths direct to proper locations, validate build artifacts are placed in correct directories, and test both debug and release configurations",
         "priority": "medium",
-        "dependencies": [
-          1
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 5,
-        "title": "Create GameManager CMakeLists.txt Foundation",
-        "description": "Establish GameManager project build system with proper library configuration and dependencies",
-        "details": "Create GameManager/CMakeLists.txt with project definition, configure shared library target GameManager_098765432_123456789, set proper include directories (GameManager/, Common/, UserCommon/), configure shared library properties (SONAME, symbol visibility), and establish dependency on parent-provided variables",
-        "testStrategy": "Verify GameManager CMakeLists.txt parses correctly, confirm library target is properly configured, validate include directories are set correctly, and test shared library properties are applied",
-        "priority": "high",
-        "dependencies": [
-          2,
-          3
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 6,
-        "title": "Implement GameManager Source File Integration",
-        "description": "Configure GameManager library to compile all GameManager source files and integrate UserCommon sources",
-        "details": "Use file(GLOB) to collect all GameManager/*.cpp files, integrate USERCOMMON_SOURCES from parent scope into library target, handle conditional compilation for visualization features, configure proper source file dependencies, and ensure namespace preservation for UserCommon code",
-        "testStrategy": "Verify all GameManager source files are included in build, confirm UserCommon sources are compiled into library, validate conditional compilation works correctly, and test library contains expected symbols",
-        "priority": "high",
-        "dependencies": [
-          5
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 7,
-        "title": "Configure GameManager Shared Library Properties",
-        "description": "Set proper shared library properties including symbol visibility, naming, and output location",
-        "details": "Set library OUTPUT_NAME to GameManager_098765432_123456789, configure LIBRARY_OUTPUT_DIRECTORY to GameManager/, set symbol visibility to hidden by default with explicit exports, configure SONAME property, and ensure position-independent code compilation",
-        "testStrategy": "Verify shared library is created with correct name and location, confirm symbol visibility is properly configured, validate SONAME is set correctly, and test library can be loaded dynamically",
-        "priority": "high",
-        "dependencies": [
-          6
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 8,
-        "title": "Implement GameManager Test Configuration",
-        "description": "Create test executable configuration with proper dependencies and Google Test integration",
-        "details": "Create GameManager_tests executable target, collect all GameManager/test/*.cpp files, link against GameManager library and Google Test libraries, set output directory to build/GameManager/, configure proper include paths for test files, and ensure test executable has access to all required headers",
-        "testStrategy": "Verify test executable compiles successfully, confirm linking with GameManager library and Google Test, validate test executable can run basic tests, and ensure all test files are included",
-        "priority": "medium",
-        "dependencies": [
-          7
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 9,
-        "title": "Setup CTest Integration and Test Discovery",
-        "description": "Configure CTest for test discovery and execution across all projects",
-        "details": "Enable CTest with enable_testing(), add GameManager tests using add_test(), configure test discovery for Google Test, set proper test working directories, configure test timeout and parallel execution, and ensure tests can be run individually or collectively",
-        "testStrategy": "Verify CTest discovers all tests correctly, confirm tests can be run with ctest command, validate individual test execution works, and test parallel test execution",
-        "priority": "medium",
-        "dependencies": [
-          8
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 10,
-        "title": "Create Root-Level Convenience Targets",
-        "description": "Implement high-level build targets for coordinated project building and testing",
-        "details": "Create all_projects custom target that depends on all project libraries, implement all_tests target for building all test executables, create run_all_tests target that builds and executes all tests, configure proper target dependencies and execution order",
-        "testStrategy": "Verify all_projects target builds all libraries correctly, confirm all_tests target builds all test executables, validate run_all_tests executes all tests and reports results, and test target dependencies work correctly",
-        "priority": "medium",
-        "dependencies": [
-          9
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 11,
-        "title": "Configure Include Path Management",
-        "description": "Establish proper include path strategy for cross-project dependencies and header access",
-        "details": "Configure target_include_directories for public/private include paths, set up Common/ and UserCommon/ as public includes, configure project-specific includes as private, establish include path conventions for different file types, and ensure proper header accessibility across projects",
-        "testStrategy": "Verify all required headers can be included correctly, confirm include path precedence works as expected, validate both public and private includes function properly, and test cross-project header access",
-        "priority": "medium",
-        "dependencies": [
-          7
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 12,
-        "title": "Implement Conditional Compilation for Visualization",
-        "description": "Configure conditional compilation system for visualization features based on ENABLE_VISUALIZATION option",
-        "details": "Implement conditional source file inclusion for visualization code, configure preprocessor definitions based on ENABLE_VISUALIZATION option, handle optional dependencies for visualization libraries, exclude visualization sources when disabled, and ensure clean compilation in both modes",
-        "testStrategy": "Verify compilation succeeds with ENABLE_VISUALIZATION=ON and OFF, confirm visualization sources are properly included/excluded, validate preprocessor definitions are set correctly, and test functionality in both modes",
-        "priority": "low",
-        "dependencies": [
-          6
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 13,
-        "title": "Configure Parallel Build Support",
-        "description": "Ensure build system supports parallel compilation and proper dependency management",
-        "details": "Configure proper target dependencies to prevent race conditions, ensure thread-safe build operations, optimize dependency chains for parallel execution, configure proper linking order, and validate parallel build stability with make -j",
-        "testStrategy": "Verify parallel builds complete without race conditions, confirm dependency resolution works correctly in parallel, validate build reproducibility across multiple runs, and test various parallel job counts",
-        "priority": "medium",
-        "dependencies": [
-          10
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 14,
-        "title": "Implement Clean Build and Artifact Management",
-        "description": "Configure proper clean targets and build artifact management",
-        "details": "Configure clean target to remove all build artifacts while preserving downloaded dependencies, implement proper artifact separation between intermediate and final outputs, ensure clean builds work correctly, configure proper file permissions and cleanup, and validate incremental build behavior",
-        "testStrategy": "Verify clean target removes all build artifacts correctly, confirm downloaded dependencies are preserved, validate clean builds reproduce identical results, and test incremental build optimization",
-        "priority": "low",
-        "dependencies": [
-          13
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 15,
-        "title": "Validate Complete Build System Integration",
-        "description": "Perform comprehensive validation of the entire build system with all success criteria",
-        "details": "Execute full build validation including library creation, symbol verification, test compilation and execution, dependency checking with ldd, performance validation, and comprehensive testing of all build targets and options. Document all verification commands and expected outputs",
-        "testStrategy": "Run complete test suite including: make gamemanager creates .so file, ldd shows no external dependencies, make gamemanager_tests creates and runs tests, make run_all_tests executes successfully, parallel builds work correctly, and all success criteria from PRD are met",
-        "priority": "high",
-        "dependencies": [
-          14
-        ],
-        "status": "pending",
         "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-06-26T17:42:23.385Z",
-      "updated": "2025-06-26T19:19:58.671Z",
+      "updated": "2025-06-26T21:51:27.652Z",
       "description": "Tasks for build context"
     }
   }

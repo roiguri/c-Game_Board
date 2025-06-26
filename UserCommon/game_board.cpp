@@ -1,7 +1,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "UserCommon/game_board.h"
+#include "game_board.h"
 
 namespace UserCommon_098765432_123456789 {
 

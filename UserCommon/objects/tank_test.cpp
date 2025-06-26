@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
-#include "UserCommon/objects/tank.h"
+#include "objects/tank.h"
+
+using namespace UserCommon_098765432_123456789;
 
 class TankTest : public ::testing::Test {
 protected:

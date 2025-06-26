@@ -1,7 +1,7 @@
 // midpoint.h
 #pragma once
 
-#include "UserCommon/utils/point.h"
+#include "point.h"
 
 namespace UserCommon_098765432_123456789 {
 

@@ -1,7 +1,9 @@
 #include "gtest/gtest.h"
-#include "UserCommon/objects/shell.h"
+#include "objects/shell.h"
 #include "utils/point.h"
 #include "utils/direction.h"
+
+using namespace UserCommon_098765432_123456789;
 
 class ShellTest : public ::testing::Test {
   protected:

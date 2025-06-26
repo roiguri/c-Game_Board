@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 #include <cmath>
 
-#include "UserCommon/utils/point.h"
+#include "utils/point.h"
+
+using namespace UserCommon_098765432_123456789;
 
 TEST(PointTest, DefaultConstructor) {
     Point p;

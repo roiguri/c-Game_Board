@@ -1,11 +1,13 @@
 #include "gtest/gtest.h"
-#include "UserCommon/satellite_view_impl.h"
-#include "UserCommon/game_board.h"
-#include "UserCommon/objects/tank.h"
-#include "UserCommon/objects/shell.h"
+#include "satellite_view_impl.h"
+#include "game_board.h"
+#include "objects/tank.h"
+#include "objects/shell.h"
 #include "utils/point.h"
 #include <vector>
 #include <string>
+
+using namespace UserCommon_098765432_123456789;
 
 TEST(SatelliteViewImplTest, BasicBoardView) {
     // Create a 3x3 board: wall, mine, empty

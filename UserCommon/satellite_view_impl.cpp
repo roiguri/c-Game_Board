@@ -1,7 +1,7 @@
 #include <cstddef>
 #include <iostream>
 
-#include "UserCommon/satellite_view_impl.h"
+#include "satellite_view_impl.h"
 
 namespace UserCommon_098765432_123456789 {
 

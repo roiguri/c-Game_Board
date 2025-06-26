@@ -1,9 +1,11 @@
 #include "gtest/gtest.h"
-#include "UserCommon/game_board.h"
+#include "game_board.h"
 #include <vector>
 #include <string>
 #include <map>
 #include "utils/point.h"
+
+using namespace UserCommon_098765432_123456789;
 
 // Test fixture for GameBoard tests
 class GameBoardTest : public ::testing::Test {

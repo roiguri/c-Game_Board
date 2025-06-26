@@ -1,6 +1,6 @@
 #include <cmath>
 
-#include "UserCommon/utils/midpoint.h"
+#include "midpoint.h"
 
 namespace UserCommon_098765432_123456789 {
 

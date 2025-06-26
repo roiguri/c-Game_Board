@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UserCommon/objects/game_object.h"
+#include "game_object.h"
 
 namespace UserCommon_098765432_123456789 {
 
