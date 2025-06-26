@@ -39,10 +39,6 @@ public:
      */
     GameManager(bool verbose = false);
     
-    // TODO: remove this constructor
-    GameManager(PlayerFactory& playerFactory,
-                TankAlgorithmFactory& tankAlgorithmFactory);
-    
     /**
      * @brief Destroy the Game Manager object and free resources
      */
@@ -105,14 +101,10 @@ private:
     // Players
     std::vector<PlayerWithId> m_players;
 
-    // Factories (optional for registration-based construction)
-    PlayerFactory* m_playerFactory;
-    TankAlgorithmFactory* m_tankAlgorithmFactory;
-
     // Game state tracking
     int m_currentStep;
     bool m_gameOver;
-    bool m_isClassic2PlayerGame;
+    bool m_isClassic2PlayerGame; // TODO: consider removing id multiplayer not implmented
     int m_remaining_steps;
     int m_maximum_steps;
     std::string m_gameResult;

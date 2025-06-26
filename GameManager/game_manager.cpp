@@ -12,9 +12,7 @@
 #include "common/GameManagerRegistration.h"
 
 GameManager::GameManager(bool verbose [[maybe_unused]])
-    : m_playerFactory(nullptr),
-      m_tankAlgorithmFactory(nullptr),
-      m_currentStep(0),
+    : m_currentStep(0),
       m_gameOver(false),
       m_isClassic2PlayerGame(false),
       m_remaining_steps(DEFAULT_NO_SHELLS_STEPS),
@@ -28,19 +26,6 @@ GameManager::GameManager(bool verbose [[maybe_unused]])
     #endif
 }
 
-GameManager::GameManager(PlayerFactory& playerFactory,
-                       TankAlgorithmFactory& tankAlgorithmFactory)
-    : m_playerFactory(&playerFactory),
-      m_tankAlgorithmFactory(&tankAlgorithmFactory),
-      m_currentStep(0),
-      m_gameOver(false),
-      m_isClassic2PlayerGame(false),
-      m_remaining_steps(DEFAULT_NO_SHELLS_STEPS),
-      m_maximum_steps(100) { 
-    #ifdef ENABLE_VISUALIZATION
-    m_visualizationManager = createVisualizationManager();
-    #endif
-}
 
 GameManager::~GameManager() {
     #ifdef ENABLE_VISUALIZATION
@@ -172,7 +157,6 @@ GameResult GameManager::run(
     saveResults(m_outputFilePath);
     
     // TODO: return by value?
-    // TODO: store final game state (satellite view) and rounds (steps) in m_finalGameResult
     return std::move(m_finalGameResult);
 }
 

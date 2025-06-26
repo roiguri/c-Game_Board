@@ -131,7 +131,7 @@
             "title": "Integrate SatelliteView parsing into run() method",
             "description": "Update the run() method to use the new SatelliteView-based readBoard instead of file-based initialization",
             "details": "Replace the TODO comments in run() method with actual implementation. Call the new readBoard overload with provided parameters (map, map_width, map_height, max_steps, num_shells). Initialize players using the provided player1_tank_algo_factory and player2_tank_algo_factory. Set up the game state and start the main game loop. Ensure proper error handling and game result population.",
-            "status": "in-progress",
+            "status": "done",
             "dependencies": [
               "2.6"
             ],
@@ -220,7 +220,7 @@
     ],
     "metadata": {
       "created": "2025-06-26T09:35:35.122Z",
-      "updated": "2025-06-26T11:28:01.340Z",
+      "updated": "2025-06-26T14:16:33.999Z",
       "description": "Tasks for master context"
     }
   }
