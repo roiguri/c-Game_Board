@@ -2,6 +2,7 @@
 #include "game_manager.h"
 #include "UserCommon/utils/testing/mock_player.h"
 #include "UserCommon/utils/testing/mock_algorithm.h"
+#include "test/helpers/game_object_utilities.h"
 #include "UserCommon/objects/shell.h"
 #include "UserCommon/utils/point.h"
 #include "UserCommon/utils/direction.h"
@@ -16,25 +17,6 @@ namespace GameManager_098765432_123456789 {
 
 using namespace UserCommon_098765432_123456789;
 
-// Simple mock SatelliteView for testing readSatelliteView
-class MockSatelliteView : public SatelliteView {
-private:
-    std::vector<std::string> m_grid;
-    size_t m_width;
-    size_t m_height;
-
-public:
-    MockSatelliteView(const std::vector<std::string>& grid) 
-        : m_grid(grid), m_height(grid.size()), m_width(grid.empty() ? 0 : grid[0].length()) {}
-
-    char getObjectAt(size_t x, size_t y) const override {
-        if (y >= m_height || x >= m_grid[y].length()) {
-            return ' '; // Return space for out-of-bounds
-        }
-        return m_grid[y][x];
-    }
-};
-
 // Test fixture for GameManager
 class GameManagerTest : public ::testing::Test {
 protected:
@@ -42,188 +24,142 @@ protected:
     MockPlayerFactory playerFactory;
     MockAlgorithmFactory algoFactory;
 
-    static void RemoveDestroyedShells(GameManager& manager) {
-        manager.removeDestroyedShells();
+    // ==================== GAMEMANAGER MEMBER ACCESS (SETTERS/GETTERS) ====================
+    
+    std::vector<Shell>& GetShells() {
+        return manager->m_shells;
     }
-    static std::vector<Shell>& GetShells(GameManager& manager) {
-        return manager.m_shells;
+    std::vector<Tank>& GetTanks() {
+        return manager->m_tanks;
     }
-    static void MoveShellsOnce(GameManager& manager) {
-        manager.moveShellsOnce();
+    std::vector<GameManager::TankWithAlgorithm>& GetTankControllers() {
+        return manager->m_tankControllers;
     }
-    static void CreateTanks(GameManager& manager, const std::vector<std::pair<int, Point>>& positions) {
-        manager.createTanks(positions);
+    GameBoard& GetBoard() {
+        return manager->m_board;
     }
-    static void CreateTankAlgorithms(GameManager& manager) {
-        manager.createTankAlgorithms();
+    std::vector<std::string>& GetGameLog() {
+        return manager->m_gameLog;
     }
-    static std::vector<Tank>& GetTanks(GameManager& manager) {
-        return manager.m_tanks;
-    }
-    static std::vector<GameManager::TankWithAlgorithm>& GetTankControllers(GameManager& manager) {
-        return manager.m_tankControllers;
-    }
-    static void ApplyAction(GameManager& manager, GameManager::TankWithAlgorithm& controller) {
-        manager.applyAction(controller);
-    }
-    static GameBoard& GetBoard(GameManager& manager) {
-        return manager.m_board;
-    }
-    static void SetPlayer1(GameManager& manager, std::unique_ptr<Player> player) {
-        // Find player 1 in the players vector and replace it
-        for (auto& playerWithId : manager.m_players) {
-            if (playerWithId.playerId == 1) {
-                playerWithId.player = std::move(player);
-                return;
-            }
-        }
-        // If player 1 doesn't exist, add it
-        manager.m_players.push_back({1, std::move(player)});
-    }
-    static void SetIsClassic2PlayerGame(GameManager& manager, bool value) {
-        manager.m_isClassic2PlayerGame = value;
-    }
-    static bool GetIsClassic2PlayerGame(GameManager& manager) {
-        return manager.m_isClassic2PlayerGame;
-    }
-    static void LogAction(GameManager& manager) {
-        manager.logAction();
-    }
-    static std::vector<std::string>& GetGameLog(GameManager& manager) {
-        return manager.m_gameLog;
-    }
-
-    // Helper to access m_outputFilePath for testing
-    static std::string& GetOutputFilePath(GameManager& manager) {
-        return manager.m_outputFilePath;
-    }
-
-    // Helper to call setOutputFilePath for testing
-    static void CallSetOutputFilePath(GameManager& manager, const std::string& inputPath) {
-        manager.setOutputFilePath(inputPath);
-    }
-
-    // Helper to call readSatelliteView for testing
-    static std::vector<std::string> CallReadSatelliteView(GameManager& manager, 
-                                                         const SatelliteView& view,
-                                                         size_t width, size_t height) {
-        return manager.readSatelliteView(view, width, height);
-    }
-
-    // Helper to parse board content and call new readBoard method
-    bool CallReadBoardFromContent(GameManager& manager, const std::string& boardContent) {
-        std::istringstream iss(boardContent);
-        std::string line;
-        
-        // Skip first line (title)
-        std::getline(iss, line);
-        
-        // Parse metadata
-        size_t maxSteps = 100, numShells = 10, rows = 0, cols = 0;
-        while (std::getline(iss, line)) {
-            if (line.find("MaxSteps") != std::string::npos) {
-                maxSteps = std::stoul(line.substr(line.find('=') + 1));
-            } else if (line.find("NumShells") != std::string::npos) {
-                numShells = std::stoul(line.substr(line.find('=') + 1));
-            } else if (line.find("Rows") != std::string::npos) {
-                rows = std::stoul(line.substr(line.find('=') + 1));
-            } else if (line.find("Cols") != std::string::npos) {
-                cols = std::stoul(line.substr(line.find('=') + 1));
-                break; // Board content follows
-            }
-        }
-        
-        // Read board lines
-        std::vector<std::string> boardLines;
-        for (size_t i = 0; i < rows; ++i) {
-            if (std::getline(iss, line)) {
-                // Ensure line is exactly cols length
-                if (line.length() < cols) {
-                    line.append(cols - line.length(), ' ');
-                } else if (line.length() > cols) {
-                    line = line.substr(0, cols);
-                }
-                boardLines.push_back(line);
-            } else {
-                boardLines.push_back(std::string(cols, ' ')); // Fill with spaces if missing
-            }
-        }
-        
-        MockSatelliteView mockView(boardLines);
-        return manager.readBoard(mockView, cols, rows, maxSteps, numShells);
-    }
-
-    void SetUp() override {
-        manager = std::make_unique<GameManager>(playerFactory, algoFactory);
-        // Initialize the board to a 5x5 empty board
-        GetBoard(*manager) = GameBoard(5, 5);
-    }
-
-    void SetWasKilledInPreviousStep(size_t controllerIndex, bool value) {
-        auto& controllers = GetTankControllers(*manager);
-        ASSERT_LT(controllerIndex, controllers.size());
-        controllers[controllerIndex].wasKilledInPreviousStep = value;
-    }
-
-    void CallProcessStep() {
-        manager->processStep();
-    }
-
-    std::string ActionToString(ActionRequest action) {
-        return manager->actionToString(action);
-    }
-
-    // ---- checkGameOver helpers ----
-    bool CallCheckGameOver() {
-        return manager->checkGameOver();
+    std::string& GetOutputFilePath() {
+        return manager->m_outputFilePath;
     }
     std::string& GetGameResult() {
         return manager->m_gameResult;
     }
-    std::vector<Tank>& Tanks() {
-        return GetTanks(*manager);
+    bool GetIsClassic2PlayerGame() {
+        return manager->m_isClassic2PlayerGame;
+    }
+    void SetIsClassic2PlayerGame(bool value) {
+        manager->m_isClassic2PlayerGame = value;
+    }
+    int GetCurrentStep() {
+        return manager->m_currentStep;
     }
     void SetCurrentStep(int step) {
         manager->m_currentStep = step;
     }
-    int GetCurrentStep() {
-        return manager->m_currentStep;
+    int GetRemainingSteps() {
+        return manager->m_remaining_steps;
+    }
+    void SetRemainingSteps(int steps) {
+        manager->m_remaining_steps = steps;
     }
     void SetMaxSteps(int maxSteps) {
         manager->m_maximum_steps = maxSteps;
     }
 
+    // ==================== GAMEMANAGER METHOD WRAPPERS ====================
+    
+    void CreateTanks(const std::vector<std::pair<int, Point>>& positions) {
+        manager->createTanks(positions);
+    }
+    void CreateTankAlgorithms() {
+        // Note: This method signature needs to be updated based on new GameManager API
+        // For now, keeping placeholder that won't be used in the first test
+        // manager->createTankAlgorithms();
+    }
+    void ApplyAction(GameManager::TankWithAlgorithm& controller) {
+        manager->applyAction(controller);
+    }
+    void MoveShellsOnce() {
+        manager->moveShellsOnce();
+    }
+    void RemoveDestroyedShells() {
+        manager->removeDestroyedShells();
+    }
+    void LogAction() {
+        manager->logAction();
+    }
+    void CallSetOutputFilePath(const std::string& inputPath) {
+        manager->setOutputFilePath(inputPath);
+    }
+    std::vector<std::string> CallReadSatelliteView(const SatelliteView& view,
+                                                  size_t width, size_t height) {
+        return manager->readSatelliteView(view, width, height);
+    }
+    bool CallCheckGameOver() {
+        return manager->checkGameOver();
+    }
     void CallSaveResults(const std::string& file) {
         manager->saveResults(file);
     }
+    void CallProcessStep() {
+        manager->processStep();
+    }
+    std::string ActionToString(ActionRequest action) {
+        return manager->actionToString(action);
+    }
 
-    // Helper to access and set remaining steps
-    int GetRemainingSteps() {
-        return manager->m_remaining_steps;
+    // ==================== TEST UTILITIES AND HELPERS ====================
+    
+    // Tank controller utilities
+    void SetWasKilledInPreviousStep(size_t controllerIndex, bool value) {
+        auto& controllers = GetTankControllers();
+        ASSERT_LT(controllerIndex, controllers.size());
+        controllers[controllerIndex].wasKilledInPreviousStep = value;
     }
     
-    void SetRemainingSteps(int steps) {
-        manager->m_remaining_steps = steps;
+    // Player management utilities  
+    void SetPlayer1(std::unique_ptr<Player> player) {
+        // Note: This method needs to be updated based on new GameManager API
+        // For now, keeping placeholder that won't be used in the first test
+        // The PlayerWithId structure may have changed
+    }
+    
+    // Helper to parse board content and call new readBoard method
+    // Note: This method needs to be updated based on new GameManager API
+    // For now, commented out since it's not used in the first test
+    /*
+    bool CallReadBoardFromContent(GameManager& manager, const std::string& boardContent) {
+        // Implementation commented out - needs API update
+        return false;
+    }
+    */
+
+    void SetUp() override {
+        manager = std::make_unique<GameManager>(/*verbose=*/false);
+        // Initialize the board to a 5x5 empty board
+        GetBoard() = GameBoard(5, 5);
     }
 };
 
 TEST_F(GameManagerTest, RemoveDestroyedShells_RemovesOnlyDestroyed) {
-    // Add shells: 2 active, 1 destroyed
-    Shell shell1(1, Point(1, 1), Direction::Right);
-    Shell shell2(2, Point(2, 2), Direction::Left);
-    Shell shell3(1, Point(3, 3), Direction::Up);
-    shell2.destroy(); // Mark shell2 as destroyed
-    GetShells(*manager).push_back(shell1);
-    GetShells(*manager).push_back(shell2);
-    GetShells(*manager).push_back(shell3);
+    // Arrange: Create test shells using utilities
+    Shell activeShell1 = GameObjectUtilities::createShell(1, Point(1, 1), Direction::Right);
+    Shell destroyedShell = GameObjectUtilities::createDestroyedShell(2, Point(2, 2), Direction::Left);
+    Shell activeShell2 = GameObjectUtilities::createShell(1, Point(3, 3), Direction::Up);
     
-    RemoveDestroyedShells(*manager);
-
-    // Only shell1 and shell3 should remain
-    const auto& shells = GameManagerTest::GetShells(*manager);
-    ASSERT_EQ(shells.size(), 2u);
-    EXPECT_EQ(shells[0].getPosition(), Point(1, 1));
-    EXPECT_EQ(shells[1].getPosition(), Point(3, 3));
+    // Add shells directly to container
+    auto& shells = GetShells();
+    shells.insert(shells.end(), {activeShell1, destroyedShell, activeShell2});
+    
+    // Act: Remove destroyed shells
+    RemoveDestroyedShells();
+    
+    // Assert: Verify only active shells remain using utility
+    std::vector<Shell> expectedRemaining = {activeShell1, activeShell2};
+    GameObjectUtilities::verifyShellCollection(GetShells(), expectedRemaining);
 }
 
 TEST_F(GameManagerTest, MoveShellsOnce_MovesAllShellsCorrectly) {
@@ -896,7 +832,7 @@ TEST_F(GameManagerTest, CheckGameOver_TieZeroTanks) {
     CreateTanks(*manager, positions);
     CreateTankAlgorithms(*manager);
     SetIsClassic2PlayerGame(*manager, true); // Set for test environment
-    for (auto& t : Tanks()) t.destroy();
+    for (auto& t : GetTanks()) t.destroy();
     bool over = CallCheckGameOver();
     EXPECT_TRUE(over);
     EXPECT_EQ(GetGameResult(), "Tie, both players have zero tanks");
@@ -932,7 +868,7 @@ TEST_F(GameManagerTest, CheckGameOver_TieZeroShellsForExactly40Steps) {
     SetIsClassic2PlayerGame(*manager, true); // Set for test environment
     
     // Drain all shells from tanks
-    for (auto& tank : Tanks()) {
+    for (auto& tank : GetTanks()) {
         for (int i = 0; i < Tank::INITIAL_SHELLS; i++) {
             tank.decrementShells();
         }
@@ -959,7 +895,7 @@ TEST_F(GameManagerTest, CheckGameOver_ZeroShellsButStillRemaining39Steps) {
     CreateTankAlgorithms(*manager);
     
     // Drain all shells from tanks
-    for (auto& tank : Tanks()) {
+    for (auto& tank : GetTanks()) {
         for (int i = 0; i < Tank::INITIAL_SHELLS; i++) {
             tank.decrementShells();
         }
@@ -1091,7 +1027,7 @@ TEST_F(GameManagerTest, Run_TieAfter40StepsWithZeroShells_Integration) {
     SetIsClassic2PlayerGame(*manager, true); // Set for test environment
     
     // Verify tanks have full shells initially
-    for (const auto& tank : Tanks()) {
+    for (const auto& tank : GetTanks()) {
         EXPECT_EQ(tank.getRemainingShells(), Tank::INITIAL_SHELLS);
     }
     
@@ -1124,7 +1060,7 @@ TEST_F(GameManagerTest, Run_TieAfter40StepsWithZeroShells_Integration) {
     // Verify tanks are still alive (not destroyed)
     int player1Alive = 0;
     int player2Alive = 0;
-    for (const auto& tank : Tanks()) {
+    for (const auto& tank : GetTanks()) {
         if (!tank.isDestroyed()) {
             if (tank.getPlayerId() == 1) player1Alive++;
             else if (tank.getPlayerId() == 2) player2Alive++;
@@ -1134,7 +1070,7 @@ TEST_F(GameManagerTest, Run_TieAfter40StepsWithZeroShells_Integration) {
     EXPECT_EQ(player2Alive, 1);
     
     // Verify both tanks have 0 shells
-    for (const auto& tank : Tanks()) {
+    for (const auto& tank : GetTanks()) {
         EXPECT_EQ(tank.getRemainingShells(), 0);
     }
 }

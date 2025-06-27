@@ -27,6 +27,7 @@ set(HELPER_HEADERS
     helpers/game_result_validator.h
     helpers/game_scenario_builder.h
     helpers/test_utilities.h
+    helpers/game_object_utilities.h
 )
 
 # Create enhanced GameManager test executable

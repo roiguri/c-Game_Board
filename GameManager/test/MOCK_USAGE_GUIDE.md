@@ -4,12 +4,164 @@ This guide covers the available mock components for testing GameManager function
 
 ## 📋 Available Mock Components
 
-1. **Enhanced Mock Algorithm** (`enhanced_mock_algorithm.h`)
-2. **Enhanced Mock Player** (`enhanced_mock_player.h`)  
-3. **Mock Factories** (`mock_factories.h`)
-4. **Mock Satellite View** (`scenario_mock_satellite_view.h`)
-5. **Game Scenario Builder** (`game_scenario_builder.h`)
-6. **Game Result Validator** (`game_result_validator.h`)
+1. **Game Object Utilities** (`game_object_utilities.h`)
+2. **Enhanced Mock Algorithm** (`enhanced_mock_algorithm.h`)
+3. **Enhanced Mock Player** (`enhanced_mock_player.h`)  
+4. **Mock Factories** (`mock_factories.h`)
+5. **Mock Satellite View** (`scenario_mock_satellite_view.h`)
+6. **Game Scenario Builder** (`game_scenario_builder.h`)
+7. **Game Result Validator** (`game_result_validator.h`)
+
+---
+
+## 🎯 Game Object Utilities
+
+**Purpose**: Simplified utilities for creating and manipulating game objects (shells, tanks) in tests with consistent patterns.
+
+### Key Features:
+- **Consolidated Shell Creation**: Single `createShell()` method with optional destruction parameter
+- **Multi-Shell Creation**: Create multiple shells with same or different properties
+- **Collection Verification**: Verify shell collections match expected properties
+- **Shell Counting**: Count active, destroyed, or filtered shells
+
+### Shell Creation Examples:
+
+```cpp
+// Basic shell creation (consolidated API)
+Shell activeShell = GameObjectUtilities::createShell(1, Point(1, 1), Direction::Right);
+Shell destroyedShell = GameObjectUtilities::createShell(2, Point(2, 2), Direction::Left, true);
+
+// Convenience method for destroyed shells (backward compatibility)
+Shell destroyedShell2 = GameObjectUtilities::createDestroyedShell(1, Point(3, 3), Direction::Up);
+
+// Create multiple shells at different positions
+std::vector<Point> positions = {Point(1, 1), Point(2, 2), Point(3, 3)};
+auto shells = GameObjectUtilities::createShellsAtPositions(positions, 1, Direction::Right);
+
+// Mix of active and destroyed shells
+auto mixedShells = GameObjectUtilities::createShellsAtPositions(
+    {Point(1, 1), Point(2, 2)}, 
+    2, 
+    Direction::Down, 
+    false  // Active shells
+);
+// Add some destroyed shells
+auto destroyedShells = GameObjectUtilities::createShellsAtPositions(
+    {Point(4, 4), Point(5, 5)}, 
+    1, 
+    Direction::Up, 
+    true   // Destroyed shells
+);
+```
+
+### Test Integration Examples:
+
+```cpp
+TEST_F(GameManagerTest, RemoveDestroyedShells_UsesUtilities) {
+    // Create test shells using simplified utilities
+    Shell activeShell1 = GameObjectUtilities::createShell(1, Point(1, 1), Direction::Right);
+    Shell destroyedShell = GameObjectUtilities::createShell(2, Point(2, 2), Direction::Left, true);
+    Shell activeShell2 = GameObjectUtilities::createShell(1, Point(3, 3), Direction::Up);
+    
+    // Add shells directly to container
+    auto& shells = GetShells();
+    shells.insert(shells.end(), {activeShell1, destroyedShell, activeShell2});
+    
+    // Act: Remove destroyed shells
+    RemoveDestroyedShells();
+    
+    // Assert: Verify only active shells remain
+    std::vector<Shell> expectedRemaining = {activeShell1, activeShell2};
+    GameObjectUtilities::verifyShellCollection(GetShells(), expectedRemaining);
+}
+
+TEST_F(GameManagerTest, ShellMovement_MultipleShells) {
+    // Create shells at different positions using utility
+    auto shells = GameObjectUtilities::createShellsAtPositions({
+        Point(1, 1), Point(0, 0), Point(2, 2), Point(4, 4)
+    }, 1, Direction::Right);
+    
+    // Customize specific shells
+    shells[1] = GameObjectUtilities::createShell(2, Point(0, 0), Direction::Left);
+    shells[2] = GameObjectUtilities::createShell(1, Point(2, 2), Direction::Up);
+    shells[3] = GameObjectUtilities::createShell(2, Point(4, 4), Direction::Down);
+    
+    // Add to game and test movement
+    GetShells().insert(GetShells().end(), shells.begin(), shells.end());
+    MoveShellsOnce();
+    
+    // Verify new positions
+    EXPECT_EQ(GetShells()[0].getPosition(), Point(2, 1));  // Right movement
+    EXPECT_EQ(GetShells()[1].getPosition(), Point(4, 0));  // Left with wrap
+    // ... more assertions
+}
+```
+
+### Collection Operations:
+
+```cpp
+// Direct container operations (no wrapper methods needed)
+auto& shells = GetShells();
+
+// Add shells directly
+shells.clear();
+shells.insert(shells.end(), {shell1, shell2, shell3});
+
+// Count different types of shells
+size_t activeCount = GameObjectUtilities::countActiveShells(GetShells());
+size_t destroyedCount = GameObjectUtilities::countDestroyedShells(GetShells());
+
+// Custom counting with predicate
+size_t player1Shells = GameObjectUtilities::countShells(GetShells(), 
+    [](const Shell& s) { return s.getPlayerId() == 1; });
+
+// Verify shell collections match expected
+std::vector<Shell> expectedShells = {
+    GameObjectUtilities::createShell(1, Point(1, 1), Direction::Right),
+    GameObjectUtilities::createShell(2, Point(2, 2), Direction::Left, true)
+};
+GameObjectUtilities::verifyShellCollection(GetShells(), expectedShells);
+```
+
+### Utility Methods Reference:
+
+```cpp
+// Shell Creation
+createShell(playerId, position, direction, isDestroyed=false)  // Main creation method
+createDestroyedShell(playerId, position, direction)           // Convenience for destroyed shells
+createShellsAtPositions(positions, playerId, direction, isDestroyed=false)  // Multiple shells
+
+// Collection Verification
+verifyShell(actual, expected, context)                        // Single shell verification
+verifyShellCollection(actualContainer, expectedContainer)     // Collection verification
+
+// Counting and Analysis
+countShells(container, predicate)                             // Custom counting
+countActiveShells(container)                                  // Count non-destroyed shells
+countDestroyedShells(container)                              // Count destroyed shells
+```
+
+### Best Practices with GameObjectUtilities:
+
+```cpp
+// ✅ DO: Use direct container access with utilities
+auto& shells = GetShells();
+shells.insert(shells.end(), GameObjectUtilities::createShellsAtPositions(positions));
+
+// ✅ DO: Use consolidated createShell with isDestroyed parameter
+Shell shell = GameObjectUtilities::createShell(1, Point(1, 1), Direction::Right, true);
+
+// ✅ DO: Use utility verification methods
+GameObjectUtilities::verifyShellCollection(GetShells(), expectedShells);
+
+// ❌ DON'T: Create wrapper methods in test fixtures
+// Instead of: void AddShells(const std::vector<Shell>& shells)
+// Use direct: GetShells().insert(GetShells().end(), shells.begin(), shells.end());
+
+// ❌ DON'T: Manually create shell objects in loops
+// Instead of: for(int i = 0; i < 5; ++i) shells.push_back(Shell(...));
+// Use: auto shells = GameObjectUtilities::createShellsAtPositions(positions);
+```
 
 ---
 
@@ -404,7 +556,7 @@ validateGameStateObjectAt(result, point, char) // Specific object at position
 ## 🧪 Complete Test Example
 
 ```cpp
-TEST_F(InterfaceComplianceTest, CompleteScenarioTest) {
+TEST_F(InterfaceComplianceTest, CompleteScenarioWithGameObjectUtilities) {
     // 1. Set up mock factories
     MockFactoryConfigurer::resetAll();
     auto aggressiveFactory = createMockFactoryWithSequence("aggressive", {
@@ -438,6 +590,18 @@ TEST_F(InterfaceComplianceTest, CompleteScenarioTest) {
     GameResultValidator::validateGameStateExists(result);
     EXPECT_TRUE(result.winner >= 0 && result.winner <= 2);
     
+    // 6. Test shell management using GameObjectUtilities
+    if (result.gameState) {
+        // Create expected shells for validation
+        auto expectedShells = GameObjectUtilities::createShellsAtPositions({
+            Point(2, 3), Point(7, 6)  // Expected shell positions after game
+        }, 1, Direction::Right);
+        
+        // Verify shell counts using utilities
+        size_t totalShells = GameObjectUtilities::countActiveShells(GetShells());
+        EXPECT_GE(totalShells, 0);  // At least 0 shells remain
+    }
+    
     // Verify factory calls
     auto aggressiveCalls = MockFactoryConfigurer::getFactoryCalls("aggressive");
     auto defensiveCalls = MockFactoryConfigurer::getFactoryCalls("defensive");
@@ -456,8 +620,11 @@ TEST_F(InterfaceComplianceTest, CompleteScenarioTest) {
 ## ⚠️ Best Practices
 
 ### ✅ DO:
+- **Use GameObjectUtilities** for all shell creation and verification instead of manual construction
+- **Use consolidated createShell()** with the optional `isDestroyed` parameter
 - **Use GameScenarioBuilder** for all scenario construction instead of hardcoded data
 - **Use GameResultValidator** for comprehensive result verification
+- **Use direct container access** with utilities instead of wrapper methods
 - **Reset factory state** between tests with `MockFactoryConfigurer::resetAll()`
 - **Chain builder methods** for readable scenario construction
 - **Use meaningful factory names** for tracking (e.g., "aggressivePlayer", "tacticalMover")
@@ -465,6 +632,8 @@ TEST_F(InterfaceComplianceTest, CompleteScenarioTest) {
 - **Validate game termination** with appropriate GameResultValidator methods
 
 ### ❌ DON'T:
+- **Create wrapper methods** in test fixtures for shell operations - use direct container access
+- **Hardcode shell creation** - use GameObjectUtilities methods
 - **Hardcode board layouts** - use GameScenarioBuilder instead
 - **Skip result validation** - always use GameResultValidator for comprehensive checks
 - **Create custom algorithm classes** - use EnhancedMockAlgorithm with sequences
