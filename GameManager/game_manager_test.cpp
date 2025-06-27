@@ -2,6 +2,7 @@
 #include "game_manager.h"
 #include "test/helpers/game_object_utilities.h"
 #include "test/mocks/scenario_mock_satellite_view.h"
+#include "test/mocks/mock_factories.h"
 #include "objects/shell.h"
 #include "utils/point.h"
 #include "utils/direction.h"
@@ -71,10 +72,14 @@ protected:
     void CreateTanks(const std::vector<std::pair<int, Point>>& positions) {
         manager->createTanks(positions);
     }
-    void CreateTankAlgorithms() {
-        // Note: This method signature needs to be updated based on new GameManager API
-        // For now, keeping placeholder that won't be used in the first test
-        // manager->createTankAlgorithms();
+    void CreateTankAlgorithms(TankAlgorithmFactory factory1 = nullptr, TankAlgorithmFactory factory2 = nullptr) {
+        if (factory1 == nullptr) {
+            factory1 = mockFactoryDoNothing;
+        }
+        if (factory2 == nullptr) {
+            factory2 = mockFactoryDoNothing;
+        }
+        manager->createTankAlgorithms(factory1, factory2);
     }
     void ApplyAction(GameManager::TankWithAlgorithm& controller) {
         manager->applyAction(controller);
@@ -121,6 +126,11 @@ protected:
         manager = std::make_unique<GameManager>(/*verbose=*/false);
         // Initialize the board to a 5x5 empty board
         GetBoard() = GameBoard(5, 5);
+    }
+
+    void TearDown() override {
+        // Clean up after test
+        MockFactoryConfigurer::resetAll();
     }
 };
 
@@ -284,46 +294,47 @@ TEST_F(GameManagerTest, ReadSatelliteViewZeroDimensions) {
 // 3. saveErrorsToFile(const std::vector<std::string>& errors)
 // ===================================================================== //
 
-// TEST_F(GameManagerTest, SetOutputFilePath_FilenameOnly) {
-//     CallSetOutputFilePath(*manager, "board.txt");
-//     EXPECT_EQ(GetOutputFilePath(*manager), "output_board.txt");
-// }
+// TODO: consider removing
+TEST_F(GameManagerTest, SetOutputFilePath_FilenameOnly) {
+    CallSetOutputFilePath("board.txt");
+    EXPECT_EQ(GetOutputFilePath(), "output_board.txt");
+}
 
-// TEST_F(GameManagerTest, SetOutputFilePath_WithRelativeDirectory) {
-//     CallSetOutputFilePath(*manager, "examples/board.txt");
-//     EXPECT_EQ(GetOutputFilePath(*manager), "examples/output_board.txt");
-// }
+TEST_F(GameManagerTest, SetOutputFilePath_WithRelativeDirectory) {
+    CallSetOutputFilePath("examples/board.txt");
+    EXPECT_EQ(GetOutputFilePath(), "examples/output_board.txt");
+}
 
-// TEST_F(GameManagerTest, SetOutputFilePath_WithAbsoluteDirectory) {
-//     CallSetOutputFilePath(*manager, "/home/user/boards/board.txt");
-//     EXPECT_EQ(GetOutputFilePath(*manager), "/home/user/boards/output_board.txt");
-// }
+TEST_F(GameManagerTest, SetOutputFilePath_WithAbsoluteDirectory) {
+    CallSetOutputFilePath("/home/user/boards/board.txt");
+    EXPECT_EQ(GetOutputFilePath(), "/home/user/boards/output_board.txt");
+}
 
-// TEST_F(GameManagerTest, SetOutputFilePath_WithNestedDirectories) {
-//     CallSetOutputFilePath(*manager, "test/data/boards/complex_board.txt");
-//     EXPECT_EQ(GetOutputFilePath(*manager), "test/data/boards/output_complex_board.txt");
-// }
+TEST_F(GameManagerTest, SetOutputFilePath_WithNestedDirectories) {
+    CallSetOutputFilePath("test/data/boards/complex_board.txt");
+    EXPECT_EQ(GetOutputFilePath(), "test/data/boards/output_complex_board.txt");
+}
 
-// TEST_F(GameManagerTest, SetOutputFilePath_WithDifferentExtension) {
-//     CallSetOutputFilePath(*manager, "my_board.board");
-//     EXPECT_EQ(GetOutputFilePath(*manager), "output_my_board.board");
-// }
+TEST_F(GameManagerTest, SetOutputFilePath_WithDifferentExtension) {
+    CallSetOutputFilePath("my_board.board");
+    EXPECT_EQ(GetOutputFilePath(), "output_my_board.board");
+}
 
-// TEST_F(GameManagerTest, SetOutputFilePath_WithNoExtension) {
-//     CallSetOutputFilePath(*manager, "examples/boardfile");
-//     EXPECT_EQ(GetOutputFilePath(*manager), "examples/output_boardfile");
-// }
+TEST_F(GameManagerTest, SetOutputFilePath_WithNoExtension) {
+    CallSetOutputFilePath("examples/boardfile");
+    EXPECT_EQ(GetOutputFilePath(), "examples/output_boardfile");
+}
 
-// TEST_F(GameManagerTest, SetOutputFilePath_EmptyString) {
-//     // Test edge case with empty string
-//     CallSetOutputFilePath(*manager, "");
-//     EXPECT_EQ(GetOutputFilePath(*manager), "output_");
-// }
+TEST_F(GameManagerTest, SetOutputFilePath_EmptyString) {
+    // Test edge case with empty string
+    CallSetOutputFilePath("");
+    EXPECT_EQ(GetOutputFilePath(), "output_");
+}
 
-// TEST_F(GameManagerTest, SetOutputFilePath_CurrentDirectory) {
-//     CallSetOutputFilePath(*manager, "./board.txt");
-//     EXPECT_EQ(GetOutputFilePath(*manager), "./output_board.txt");
-// }
+TEST_F(GameManagerTest, SetOutputFilePath_CurrentDirectory) {
+    CallSetOutputFilePath("./board.txt");
+    EXPECT_EQ(GetOutputFilePath(), "./output_board.txt");
+}
 
 // ===================================================================== //
 // Game Initialization Methods
@@ -333,37 +344,37 @@ TEST_F(GameManagerTest, ReadSatelliteViewZeroDimensions) {
 // 3. readBoard(const SatelliteView& satellite_view, ...)
 // ===================================================================== //
 
-// TEST_F(GameManagerTest, CreateTanks_CreatesTanksAtCorrectPositions) {
-//     std::vector<std::pair<int, Point>> positions = {
-//         {1, Point(0, 0)},
-//         {2, Point(4, 4)},
-//         {1, Point(2, 2)}
-//     };
-//     CreateTanks(*manager, positions);
-//     auto& tanks = GetTanks(*manager);
-//     ASSERT_EQ(tanks.size(), 3u);
-//     EXPECT_EQ(tanks[0].getPlayerId(), 1);
-//     EXPECT_EQ(tanks[0].getPosition(), Point(0, 0));
-//     EXPECT_EQ(tanks[1].getPlayerId(), 2);
-//     EXPECT_EQ(tanks[1].getPosition(), Point(4, 4));
-//     EXPECT_EQ(tanks[2].getPlayerId(), 1);
-//     EXPECT_EQ(tanks[2].getPosition(), Point(2, 2));
-// }
+TEST_F(GameManagerTest, CreateTanks_CreatesTanksAtCorrectPositions) {
+    std::vector<std::pair<int, Point>> positions = {
+        {1, Point(0, 0)},
+        {2, Point(4, 4)},
+        {1, Point(2, 2)}
+    };
+    CreateTanks(positions);
+    auto& tanks = GetTanks();
+    ASSERT_EQ(tanks.size(), 3u);
+    EXPECT_EQ(tanks[0].getPlayerId(), 1);
+    EXPECT_EQ(tanks[0].getPosition(), Point(0, 0));
+    EXPECT_EQ(tanks[1].getPlayerId(), 2);
+    EXPECT_EQ(tanks[1].getPosition(), Point(4, 4));
+    EXPECT_EQ(tanks[2].getPlayerId(), 1);
+    EXPECT_EQ(tanks[2].getPosition(), Point(2, 2));
+}
 
-// TEST_F(GameManagerTest, CreateTankAlgorithms_AssociatesAlgorithmsWithTanks) {
-//     std::vector<std::pair<int, Point>> positions = {
-//         {1, Point(0, 0)},
-//         {2, Point(4, 4)},
-//         {1, Point(2, 2)}
-//     };
-//     CreateTanks(*manager, positions);
-//     CreateTankAlgorithms(*manager);
-//     auto& controllers = GetTankControllers(*manager);
-//     ASSERT_EQ(controllers.size(), 3u);
-//     for (const auto& controller : controllers) {
-//         EXPECT_NE(controller.algorithm, nullptr);
-//     }
-// }
+TEST_F(GameManagerTest, CreateTankAlgorithms_AssociatesAlgorithmsWithTanks) {
+    std::vector<std::pair<int, Point>> positions = {
+        {1, Point(0, 0)},
+        {2, Point(4, 4)},
+        {1, Point(2, 2)}
+    };
+    CreateTanks(positions);
+    CreateTankAlgorithms();
+    auto& controllers = GetTankControllers();
+    ASSERT_EQ(controllers.size(), 3u);
+    for (const auto& controller : controllers) {
+        EXPECT_NE(controller.algorithm, nullptr);
+    }
+}
 
 // ===================================================================== //
 // Game State Management
