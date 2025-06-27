@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
 #include "collision_handler.h"
-#include "UserCommon/objects/tank.h"
-#include "UserCommon/objects/shell.h"
-#include "UserCommon/game_board.h"
-#include "UserCommon/utils/direction.h"
+#include "objects/tank.h"
+#include "objects/shell.h"
+#include "game_board.h"
+#include "utils/direction.h"
 
 namespace GameManager_098765432_123456789 {
 
