@@ -1,10 +1,14 @@
-#include "gtest/gtest.h"
-#include "UserCommon/bonus/cli/cli_parser.h" // Adjust path as necessary
-#include <vector>
-#include <string>
-#include <cstring> // For strcpy
-#include <sstream> // For redirecting cerr
+#include <cstring>
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include "gtest/gtest.h"
+
+#include "bonus/cli/cli_parser.h"
+
+using namespace UserCommon_098765432_123456789;
 
 namespace { // Anonymous namespace for helpers
     void createArgs(const std::vector<std::string>& arg_strs, int& argc, char**& argv) {

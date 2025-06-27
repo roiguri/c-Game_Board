@@ -48,10 +48,6 @@ list(REMOVE_ITEM USERCOMMON_TEST_SOURCES ${BONUS_TEST_SOURCES})
 file(GLOB_RECURSE TESTING_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon/utils/testing/*.cpp")
 list(REMOVE_ITEM USERCOMMON_SOURCES ${TESTING_SOURCES})
 
-# Remove all bonus sources for the test build for now  
-file(GLOB_RECURSE ALL_BONUS_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon/bonus/*.cpp")
-list(REMOVE_ITEM USERCOMMON_SOURCES ${ALL_BONUS_SOURCES})
-
 # Remove visualization sources if disabled
 if(NOT ENABLE_VISUALIZATION)
     file(GLOB_RECURSE VIZ_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon/bonus/visualization/*.cpp")

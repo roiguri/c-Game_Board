@@ -1,12 +1,15 @@
-// test/bonus/logger/logger_test.cpp
-#include "gtest/gtest.h"
-#include "UserCommon/bonus/logger/logger.h"
-#include "UserCommon/bonus/logger/logger_config.h"
-#include <fstream>
-#include <string>
 #include <filesystem>
+#include <fstream>
 #include <sstream>
 #include <streambuf>
+#include <string>
+
+#include "gtest/gtest.h"
+
+#include "bonus/logger/logger.h"
+#include "bonus/logger/logger_config.h"
+
+using namespace UserCommon_098765432_123456789;
 
 class LoggerTest : public ::testing::Test {
 protected:

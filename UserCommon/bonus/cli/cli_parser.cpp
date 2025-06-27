@@ -1,6 +1,8 @@
 #include <iostream>
 
-#include "UserCommon/bonus/cli/cli_parser.h"
+#include "bonus/cli/cli_parser.h"
+
+namespace UserCommon_098765432_123456789 {
 
 CliParser::CliParser(int argc, char** argv) : argc_(argc), argv_(argv) {
     // Convert argv to a vector of strings for easier processing
@@ -95,3 +97,5 @@ bool CliParser::isNoConsoleLog() const { return noConsoleLog_; }
 std::string CliParser::getLogFile() const { return logFile_; }
 bool CliParser::isLogFileSet() const { return logFileSet_; }
 bool CliParser::isLogLevelSet() const { return logLevelSet_; }
+
+} // namespace UserCommon_098765432_123456789

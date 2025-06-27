@@ -1,10 +1,11 @@
-// include/bonus/logger/logger_config.h
 #pragma once
 
 #include <string>
 
-#include "UserCommon/bonus/cli/cli_parser.h" // Add this
-#include "UserCommon/bonus/logger/logger.h"
+#include "bonus/cli/cli_parser.h"
+#include "bonus/logger/logger.h"
+
+namespace UserCommon_098765432_123456789 {
 
 /**
  * @brief Simple logger configuration from command line
@@ -25,3 +26,5 @@ private:
     // Convert string to log level
     static Logger::Level stringToLevel(const std::string& levelStr);
 };
+
+} // namespace UserCommon_098765432_123456789

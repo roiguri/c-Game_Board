@@ -7,7 +7,9 @@
 #include <set>
 #include <sstream>
 
-#include "UserCommon/bonus/board_generator.h"
+#include "bonus/board_generator.h"
+
+namespace UserCommon_098765432_123456789 {
 
 BoardGenerator::BoardGenerator() {
     // Initialize with default values from BoardConfig
@@ -594,3 +596,5 @@ void BoardGenerator::placeTank(int x, int y, int player) {
     m_tankPositions.push_back({x, y});
     m_board[y][x] = (player == 1) ? '1' : '2';
 }
+
+} // namespace UserCommon_098765432_123456789

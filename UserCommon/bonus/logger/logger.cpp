@@ -4,7 +4,9 @@
 #include <iomanip>
 #include <iostream>
 
-#include "UserCommon/bonus/logger/logger.h"
+#include "bonus/logger/logger.h"
+
+namespace UserCommon_098765432_123456789 {
 
 Logger::Logger()
     : m_level(Level::INFO),
@@ -175,3 +177,5 @@ std::string Logger::getTimestamp() const {
 bool Logger::isInitializedAndEnabled() const {
     return m_initialized && m_enabled;
 }
+
+} // namespace UserCommon_098765432_123456789

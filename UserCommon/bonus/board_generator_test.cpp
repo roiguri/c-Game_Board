@@ -1,9 +1,13 @@
-#include "gtest/gtest.h"
-#include "UserCommon/bonus/board_generator.h"
-#include <fstream>
 #include <algorithm>
-#include <set>
+#include <fstream>
 #include <queue>
+#include <set>
+
+#include "gtest/gtest.h"
+
+#include "bonus/board_generator.h"
+
+using namespace UserCommon_098765432_123456789;
 
 class BoardGeneratorTest : public ::testing::Test {
 protected:

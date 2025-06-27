@@ -5,7 +5,9 @@
 #include <string>
 #include <vector>
 
-#include "UserCommon/game_board.h"
+#include "game_board.h"
+
+namespace UserCommon_098765432_123456789 {
 
 /**
  * @brief Configuration for board generation
@@ -125,3 +127,5 @@ private:
     bool isOccupied(int x, int y) const;
     void placeTank(int x, int y, int player);
 };
+
+} // namespace UserCommon_098765432_123456789

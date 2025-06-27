@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+namespace UserCommon_098765432_123456789 {
+
 class CliParser {
 public:
     CliParser(int argc, char** argv);
@@ -50,3 +52,5 @@ private:
     bool logFileSet_ = false;
     bool logLevelSet_ = false;
 };
+
+} // namespace UserCommon_098765432_123456789

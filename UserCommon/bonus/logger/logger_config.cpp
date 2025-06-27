@@ -3,7 +3,9 @@
 #include <iostream>
 #include <string>
 
-#include "UserCommon/bonus/logger/logger_config.h"
+#include "bonus/logger/logger_config.h"
+
+namespace UserCommon_098765432_123456789 {
 
 bool LoggerConfig::configure(const CliParser& parser) { 
     bool enableLogging = parser.isEnableLogging();
@@ -71,3 +73,5 @@ Logger::Level LoggerConfig::stringToLevel(const std::string& levelStr) {
     // Default to INFO if not recognized
     return Logger::Level::INFO;
 }
+
+} // namespace UserCommon_098765432_123456789

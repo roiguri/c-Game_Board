@@ -1,8 +1,9 @@
-// include/bonus/logger/logger.h
 #pragma once
 
 #include <fstream>
 #include <string>
+
+namespace UserCommon_098765432_123456789 {
 
 /**
  * @brief Simple logging system for the Tank Battle game
@@ -95,8 +96,10 @@ private:
     bool m_enabled;
 };
 
+} // namespace UserCommon_098765432_123456789
+
 // Convenience macros for logging - these check if logging is enabled at runtime
-#define LOG_DEBUG(msg) if(Logger::getInstance().isInitializedAndEnabled()) Logger::getInstance().debug(msg, __FILE__, __LINE__)
-#define LOG_INFO(msg) if(Logger::getInstance().isInitializedAndEnabled()) Logger::getInstance().info(msg, __FILE__, __LINE__)
-#define LOG_WARNING(msg) if(Logger::getInstance().isInitializedAndEnabled()) Logger::getInstance().warning(msg, __FILE__, __LINE__)
-#define LOG_ERROR(msg) if(Logger::getInstance().isInitializedAndEnabled()) Logger::getInstance().error(msg, __FILE__, __LINE__)
+#define LOG_DEBUG(msg) if(UserCommon_098765432_123456789::Logger::getInstance().isInitializedAndEnabled()) UserCommon_098765432_123456789::Logger::getInstance().debug(msg, __FILE__, __LINE__)
+#define LOG_INFO(msg) if(UserCommon_098765432_123456789::Logger::getInstance().isInitializedAndEnabled()) UserCommon_098765432_123456789::Logger::getInstance().info(msg, __FILE__, __LINE__)
+#define LOG_WARNING(msg) if(UserCommon_098765432_123456789::Logger::getInstance().isInitializedAndEnabled()) UserCommon_098765432_123456789::Logger::getInstance().warning(msg, __FILE__, __LINE__)
+#define LOG_ERROR(msg) if(UserCommon_098765432_123456789::Logger::getInstance().isInitializedAndEnabled()) UserCommon_098765432_123456789::Logger::getInstance().error(msg, __FILE__, __LINE__)
