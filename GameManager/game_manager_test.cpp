@@ -1,11 +1,10 @@
 #include <gtest/gtest.h>
 #include "game_manager.h"
-#include "UserCommon/utils/testing/mock_player.h"
-#include "UserCommon/utils/testing/mock_algorithm.h"
 #include "test/helpers/game_object_utilities.h"
-#include "UserCommon/objects/shell.h"
-#include "UserCommon/utils/point.h"
-#include "UserCommon/utils/direction.h"
+#include "test/mocks/scenario_mock_satellite_view.h"
+#include "objects/shell.h"
+#include "utils/point.h"
+#include "utils/direction.h"
 #include "common/SatelliteView.h"
 #include <memory>
 #include <fstream>
@@ -21,8 +20,6 @@ using namespace UserCommon_098765432_123456789;
 class GameManagerTest : public ::testing::Test {
 protected:
     std::unique_ptr<GameManager> manager;
-    MockPlayerFactory playerFactory;
-    MockAlgorithmFactory algoFactory;
 
     // ==================== GAMEMANAGER MEMBER ACCESS (SETTERS/GETTERS) ====================
     
@@ -119,23 +116,6 @@ protected:
         ASSERT_LT(controllerIndex, controllers.size());
         controllers[controllerIndex].wasKilledInPreviousStep = value;
     }
-    
-    // Player management utilities  
-    void SetPlayer1(std::unique_ptr<Player> player) {
-        // Note: This method needs to be updated based on new GameManager API
-        // For now, keeping placeholder that won't be used in the first test
-        // The PlayerWithId structure may have changed
-    }
-    
-    // Helper to parse board content and call new readBoard method
-    // Note: This method needs to be updated based on new GameManager API
-    // For now, commented out since it's not used in the first test
-    /*
-    bool CallReadBoardFromContent(GameManager& manager, const std::string& boardContent) {
-        // Implementation commented out - needs API update
-        return false;
-    }
-    */
 
     void SetUp() override {
         manager = std::make_unique<GameManager>(/*verbose=*/false);
@@ -153,64 +133,61 @@ protected:
 // 4. isClassic2PlayerGame(const GameBoard& board)
 // ===================================================================== //
 
-// TEST_F(GameManagerTest, ReadSatelliteViewBasic) {
-//     // Create a simple 3x3 test grid with walls, tanks, and empty spaces
-//     std::vector<std::string> expectedGrid = {
-//         "# 1",
-//         " @ ",
-//         "2  "
-//     };
+TEST_F(GameManagerTest, ReadSatelliteViewBasic) {
+    std::vector<std::string> expectedGrid = {
+        "# 1",
+        " @ ",
+        "2  "
+    };
+    MockSatelliteView mockView(expectedGrid, 3, 3);
     
-//     MockSatelliteView mockView(expectedGrid);
+    std::vector<std::string> result = CallReadSatelliteView(mockView, 3, 3);
     
-//     // Call readSatelliteView through the helper
-//     std::vector<std::string> result = CallReadSatelliteView(*manager, mockView, 3, 3);
-    
-//     // Verify the result matches the expected grid
-//     ASSERT_EQ(result.size(), 3);
-//     EXPECT_EQ(result[0], "# 1");
-//     EXPECT_EQ(result[1], " @ ");
-//     EXPECT_EQ(result[2], "2  ");
-// }
+    // Verify the result matches the expected grid
+    ASSERT_EQ(result.size(), 3);
+    EXPECT_EQ(result[0], "# 1");
+    EXPECT_EQ(result[1], " @ ");
+    EXPECT_EQ(result[2], "2  ");
+}
 
-// TEST_F(GameManagerTest, ReadSatelliteViewEmptyBoard) {
-//     // Create a 2x2 empty board
-//     std::vector<std::string> expectedGrid = {
-//         "  ",
-//         "  "
-//     };
+TEST_F(GameManagerTest, ReadSatelliteViewEmptyBoard) {
+    // Create a 2x2 empty board
+    std::vector<std::string> expectedGrid = {
+        "  ",
+        "  "
+    };
     
-//     MockSatelliteView mockView(expectedGrid);
+    MockSatelliteView mockView(expectedGrid, 2, 2);
     
-//     std::vector<std::string> result = CallReadSatelliteView(*manager, mockView, 2, 2);
+    std::vector<std::string> result = CallReadSatelliteView(mockView, 2, 2);
     
-//     ASSERT_EQ(result.size(), 2);
-//     EXPECT_EQ(result[0], "  ");
-//     EXPECT_EQ(result[1], "  ");
-// }
+    ASSERT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], "  ");
+    EXPECT_EQ(result[1], "  ");
+}
 
-// TEST_F(GameManagerTest, ReadSatelliteViewSingleCell) {
-//     // Create a 1x1 board with a wall
-//     std::vector<std::string> expectedGrid = {"#"};
+TEST_F(GameManagerTest, ReadSatelliteViewSingleCell) {
+    // Create a 1x1 board with a wall
+    std::vector<std::string> expectedGrid = {"#"};
     
-//     MockSatelliteView mockView(expectedGrid);
+    MockSatelliteView mockView(expectedGrid, 1, 1);
     
-//     std::vector<std::string> result = CallReadSatelliteView(*manager, mockView, 1, 1);
+    std::vector<std::string> result = CallReadSatelliteView(mockView, 1, 1);
     
-//     ASSERT_EQ(result.size(), 1);
-//     EXPECT_EQ(result[0], "#");
-// }
+    ASSERT_EQ(result.size(), 1);
+    EXPECT_EQ(result[0], "#");
+}
 
-// TEST_F(GameManagerTest, ReadSatelliteViewZeroDimensions) {
-//     // Test edge case with zero dimensions
-//     std::vector<std::string> expectedGrid = {};
+TEST_F(GameManagerTest, ReadSatelliteViewZeroDimensions) {
+    // Test edge case with zero dimensions
+    std::vector<std::string> expectedGrid = {};
     
-//     MockSatelliteView mockView(expectedGrid);
+    MockSatelliteView mockView(expectedGrid, 0, 0);
     
-//     std::vector<std::string> result = CallReadSatelliteView(*manager, mockView, 0, 0);
+    std::vector<std::string> result = CallReadSatelliteView(mockView, 0, 0);
     
-//     EXPECT_EQ(result.size(), 0);
-// }
+    EXPECT_EQ(result.size(), 0);
+}
 
 // TEST_F(GameManagerTest, IsClassic2PlayerGame_DetectionTests) {
 //     // Test 1: Classic 2-player game (players 1 and 2 only)
