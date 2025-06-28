@@ -2,13 +2,13 @@
 cmake_minimum_required(VERSION 3.14)
 project(TanksGame_Assignment3)
 
-# Set C++17 standard as specified in assignment requirements
-set(CMAKE_CXX_STANDARD 17)
+# Set C++20 standard as specified in assignment requirements
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Add required compiler flags for shared libraries
-add_compile_options(-Wall -Wextra -Werror -pedantic -fPIC)
+add_compile_options(-Wall -Wextra -Werror -pedantic) # TODO: check if we need -fPIC
 
 # Build configuration options
 option(ENABLE_TESTING "Build tests" ON)
@@ -81,15 +81,16 @@ endif()
 
 # Add project subdirectories
 add_subdirectory(GameManager)
+add_subdirectory(Simulator)
 
 # Global convenience targets
 add_custom_target(all_projects
-    DEPENDS gamemanager
+    DEPENDS gamemanager simulator
     COMMENT "Building all project libraries and executables"
 )
 
 add_custom_target(all_tests
-    DEPENDS gamemanager_tests usercommon_tests
+    DEPENDS gamemanager_tests simulator_tests usercommon_tests
     COMMENT "Building all test executables"
 )
 
