@@ -1,11 +1,15 @@
 #include <cassert>
 #include <iostream>
 
-#include "Algorithm/players/basic/basic_tank_algorithm.h"
+#include "basic_tank_algorithm.h"
 #include "UserCommon/objects/tank.h"
 #include "UserCommon/bonus/logger/logger.h"
 #include "UserCommon/utils/direction.h"
 #include "UserCommon/utils/point.h"
+
+using namespace UserCommon_098765432_123456789;
+
+namespace Algorithm_098765432_123456789 {
 
 BasicTankAlgorithm::BasicTankAlgorithm(int playerId, int tankIndex)
     : m_playerId(playerId), m_tankIndex(tankIndex), m_gameBoard(5, 5) {
@@ -302,4 +306,6 @@ void BasicTankAlgorithm::updateState(ActionRequest lastAction) {
             break; // Ignore MoveBackward, GetBattleInfo, DoNothing for now
     }
     if (m_trackedCooldown < 0) m_trackedCooldown = 0;
-} 
+}
+
+} // namespace Algorithm_098765432_123456789 

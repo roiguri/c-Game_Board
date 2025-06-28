@@ -1,8 +1,12 @@
 #include <cassert>
 #include <iostream>
 
-#include "Algorithm/players/basic/basic_player.h"
-#include "Algorithm/players/basic/battle_info_impl.h"
+#include "basic_player.h"
+#include "battle_info_impl.h"
+
+using namespace UserCommon_098765432_123456789;
+
+namespace Algorithm_098765432_123456789 {
 
 BasicPlayer::BasicPlayer(int playerIndex, size_t x, size_t y, size_t maxSteps, size_t numShells)
     : m_playerIndex(playerIndex),
@@ -69,3 +73,5 @@ void BasicPlayer::parseSatelliteViewToBattleInfo(BattleInfoImpl& battleInfo,
         }
     }
 }
+
+} // namespace Algorithm_098765432_123456789

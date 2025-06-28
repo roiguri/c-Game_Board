@@ -4,11 +4,15 @@
 #include <optional>
 #include <vector>
 
-#include "Algorithm/players/basic/battle_info_impl.h"
+#include "battle_info_impl.h"
 #include "UserCommon/game_board.h"
 #include "UserCommon/objects/tank.h"
 #include "UserCommon/utils/point.h"
 #include "common/TankAlgorithm.h"
+
+using namespace UserCommon_098765432_123456789;
+
+namespace Algorithm_098765432_123456789 {
 
 /**
  * @class BasicTankAlgorithm
@@ -193,4 +197,6 @@ protected:
     static ActionRequest getRotationToDirection(Direction current, Direction target);
 
     friend class BasicTankAlgorithmTest;
-}; 
+};
+
+} // namespace Algorithm_098765432_123456789 

@@ -80,17 +80,18 @@ if(ENABLE_TESTING)
 endif()
 
 # Add project subdirectories
+add_subdirectory(Algorithm)
 add_subdirectory(GameManager)
 add_subdirectory(Simulator)
 
 # Global convenience targets
 add_custom_target(all_projects
-    DEPENDS gamemanager simulator
+    DEPENDS Algorithm_098765432_123456789 gamemanager simulator
     COMMENT "Building all project libraries and executables"
 )
 
 add_custom_target(all_tests
-    DEPENDS gamemanager_tests simulator_tests usercommon_tests
+    DEPENDS algorithm_tests gamemanager_tests simulator_tests usercommon_tests
     COMMENT "Building all test executables"
 )
 

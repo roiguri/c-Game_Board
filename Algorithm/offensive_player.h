@@ -2,21 +2,25 @@
 
 #include <optional>
 
-#include "Algorithm/players/basic/basic_player.h"
-#include "Algorithm/players/offensive/offensive_battle_info.h"
+#include "basic_player.h"
+#include "offensive_battle_info.h"
+
+using namespace UserCommon_098765432_123456789;
+
+namespace Algorithm_098765432_123456789 {
 
 /**
- * @class OffensivePlayer
+ * @class Player_098765432_123456789_A
  * @brief Player that coordinates all tanks to target a single enemy tank.
  *
  * Inherits from BasicPlayer and uses OffensiveBattleInfo to communicate
-target information to all tanks. If the current target is destroyed, selects
-the closest enemy tank to the last known target position.
+ * target information to all tanks. If the current target is destroyed, selects
+ * the closest enemy tank to the last known target position.
  */
-class OffensivePlayer : public BasicPlayer {
+class Player_098765432_123456789_A : public BasicPlayer {
 public:
-    OffensivePlayer(int playerIndex, size_t x, size_t y, size_t maxSteps, size_t numShells);
-    ~OffensivePlayer() override;
+    Player_098765432_123456789_A(int playerIndex, size_t x, size_t y, size_t maxSteps, size_t numShells);
+    ~Player_098765432_123456789_A() override;
 
     void updateTankWithBattleInfo(TankAlgorithm& tank, SatelliteView& satelliteView) override;
 
@@ -52,3 +56,5 @@ protected:
      */
     OffensiveBattleInfo m_offensiveBattleInfo;
 };
+
+} // namespace Algorithm_098765432_123456789

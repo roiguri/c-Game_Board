@@ -2,9 +2,13 @@
 
 #include <memory>
 
-#include "Algorithm/players/basic/battle_info_impl.h"
+#include "battle_info_impl.h"
 #include "common/BattleInfo.h"
 #include "common/Player.h"
+
+using namespace UserCommon_098765432_123456789;
+
+namespace Algorithm_098765432_123456789 {
 
 /**
 * @class BasicPlayer
@@ -89,3 +93,5 @@ protected:
    
    friend class BasicPlayerTest;
 };
+
+} // namespace Algorithm_098765432_123456789

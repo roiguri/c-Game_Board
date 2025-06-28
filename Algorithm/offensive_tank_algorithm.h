@@ -3,11 +3,15 @@
 #include <optional>
 #include <vector>
 
-#include "Algorithm/players/basic/basic_tank_algorithm.h"
-#include "Algorithm/players/offensive/offensive_battle_info.h"
+#include "basic_tank_algorithm.h"
+#include "offensive_battle_info.h"
+
+using namespace UserCommon_098765432_123456789;
+
+namespace Algorithm_098765432_123456789 {
 
 /**
- * @class OffensiveTankAlgorithm
+ * @class TankAlgorithm_098765432_123456789_A
  * @brief Tank algorithm that chases and attacks a designated target tank.
  *
  * Priorities:
@@ -17,10 +21,10 @@
  *   4. Turn to shoot if in line of sight
  *   5. Chase using BFS
  */
-class OffensiveTankAlgorithm : public BasicTankAlgorithm {
+class TankAlgorithm_098765432_123456789_A : public BasicTankAlgorithm {
 public:
-    OffensiveTankAlgorithm(int playerId, int tankIndex);
-    ~OffensiveTankAlgorithm() override;
+    TankAlgorithm_098765432_123456789_A(int playerId, int tankIndex);
+    ~TankAlgorithm_098765432_123456789_A() override;
 
     void updateBattleInfo(BattleInfo& info) override;
     ActionRequest getAction() override;
@@ -66,3 +70,5 @@ private:
 
     friend class OffensiveTankAlgorithmTest;
 };
+
+} // namespace Algorithm_098765432_123456789

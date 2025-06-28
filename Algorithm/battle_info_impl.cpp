@@ -1,4 +1,8 @@
-#include "Algorithm/players/basic/battle_info_impl.h"
+#include "battle_info_impl.h"
+
+using namespace UserCommon_098765432_123456789;
+
+namespace Algorithm_098765432_123456789 {
 
 BattleInfoImpl::BattleInfoImpl(int boardWidth, int boardHeight)
     : m_boardWidth(boardWidth), m_boardHeight(boardHeight), m_gameBoard(boardWidth, boardHeight) {}
@@ -58,4 +62,6 @@ void BattleInfoImpl::setOwnTankPosition(const Point& pos) {
 
 const Point& BattleInfoImpl::getOwnTankPosition() const {
     return m_ownTankPosition;
-} 
+}
+
+} // namespace Algorithm_098765432_123456789 

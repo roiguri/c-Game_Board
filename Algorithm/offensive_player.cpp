@@ -1,27 +1,32 @@
 #include <cmath>
 #include <limits>
 
-#include "Algorithm/players/offensive/offensive_player.h"
+#include "offensive_player.h"
+#include "common/PlayerRegistration.h"
 
-OffensivePlayer::OffensivePlayer(int playerIndex, size_t x, size_t y, size_t maxSteps, size_t numShells)
+using namespace UserCommon_098765432_123456789;
+
+namespace Algorithm_098765432_123456789 {
+
+Player_098765432_123456789_A::Player_098765432_123456789_A(int playerIndex, size_t x, size_t y, size_t maxSteps, size_t numShells)
     : BasicPlayer(playerIndex, x, y, maxSteps, numShells),
       m_offensiveBattleInfo(static_cast<int>(x), static_cast<int>(y)) {}
 
-OffensivePlayer::~OffensivePlayer() = default;
+Player_098765432_123456789_A::~Player_098765432_123456789_A() = default;
 
-void OffensivePlayer::updateTankWithBattleInfo(TankAlgorithm& tank, SatelliteView& satelliteView) {
+void Player_098765432_123456789_A::updateTankWithBattleInfo(TankAlgorithm& tank, SatelliteView& satelliteView) {
     populateBattleInfo(satelliteView);
     tank.updateBattleInfo(m_offensiveBattleInfo);
 }
 
-void OffensivePlayer::populateBattleInfo(SatelliteView& satelliteView) {
+void Player_098765432_123456789_A::populateBattleInfo(SatelliteView& satelliteView) {
     // Use BasicPlayer's static parsing utility to populate offensive battle info directly
     BasicPlayer::parseSatelliteViewToBattleInfo(m_offensiveBattleInfo, satelliteView, 
                                                 m_playerIndex, m_boardWidth, m_boardHeight);
     updateTarget();
 }
 
-void OffensivePlayer::updateTarget() {
+void Player_098765432_123456789_A::updateTarget() {
     const auto& enemyTanks = m_offensiveBattleInfo.getEnemyTankPositions();
     bool targetDestroyed = true;
     if (m_currentTarget.has_value()) {
@@ -51,7 +56,7 @@ void OffensivePlayer::updateTarget() {
     }
 }
 
-std::optional<Point> OffensivePlayer::selectNewTarget(const std::vector<Point>& enemyTanks, const Point& reference) const {
+std::optional<Point> Player_098765432_123456789_A::selectNewTarget(const std::vector<Point>& enemyTanks, const Point& reference) const {
     if (enemyTanks.empty()) return std::nullopt;
     double minDist = std::numeric_limits<double>::max();
     std::optional<Point> closest;
@@ -63,4 +68,10 @@ std::optional<Point> OffensivePlayer::selectNewTarget(const std::vector<Point>& 
         }
     }
     return closest;
-} 
+}
+
+} // namespace Algorithm_098765432_123456789
+
+// Registration at global scope
+using namespace Algorithm_098765432_123456789;
+REGISTER_PLAYER(Player_098765432_123456789_A); 

@@ -5,6 +5,11 @@
 #include "UserCommon/game_board.h"
 #include "UserCommon/utils/point.h"
 #include "common/BattleInfo.h"
+
+using namespace UserCommon_098765432_123456789;
+
+namespace Algorithm_098765432_123456789 {
+
 /**
  * @class BattleInfo
  * @brief Contains battlefield information shared between Player and Tank
@@ -44,3 +49,5 @@ private:
     std::vector<Point> m_shellPositions;
     Point m_ownTankPosition;
 };
+
+} // namespace Algorithm_098765432_123456789

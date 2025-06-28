@@ -2,8 +2,12 @@
 
 #include <optional>
 
-#include "Algorithm/players/basic/battle_info_impl.h"
+#include "battle_info_impl.h"
 #include "UserCommon/utils/point.h"
+
+using namespace UserCommon_098765432_123456789;
+
+namespace Algorithm_098765432_123456789 {
 
 class OffensiveBattleInfo : public BattleInfoImpl {
 public:
@@ -17,3 +21,5 @@ public:
 private:
     std::optional<Point> m_target_tank_position;
 };
+
+} // namespace Algorithm_098765432_123456789

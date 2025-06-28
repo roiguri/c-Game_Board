@@ -3,18 +3,23 @@
 #include <queue>
 #include <set>
 
-#include "Algorithm/players/offensive/offensive_battle_info.h"
-#include "Algorithm/players/offensive/offensive_tank_algorithm.h"
+#include "offensive_battle_info.h"
+#include "offensive_tank_algorithm.h"
 #include "UserCommon/game_board.h"
 #include "UserCommon/bonus/logger/logger.h"
 #include "UserCommon/utils/direction.h"
+#include "common/TankAlgorithmRegistration.h"
 
-OffensiveTankAlgorithm::OffensiveTankAlgorithm(int playerId, int tankIndex)
+using namespace UserCommon_098765432_123456789;
+
+namespace Algorithm_098765432_123456789 {
+
+TankAlgorithm_098765432_123456789_A::TankAlgorithm_098765432_123456789_A(int playerId, int tankIndex)
     : BasicTankAlgorithm(playerId, tankIndex) {}
 
-OffensiveTankAlgorithm::~OffensiveTankAlgorithm() = default;
+TankAlgorithm_098765432_123456789_A::~TankAlgorithm_098765432_123456789_A() = default;
 
-void OffensiveTankAlgorithm::updateBattleInfo(BattleInfo& info) {
+void TankAlgorithm_098765432_123456789_A::updateBattleInfo(BattleInfo& info) {
     // Downcast to OffensiveBattleInfo
     auto* offensiveInfo = dynamic_cast<OffensiveBattleInfo*>(&info);
     if (offensiveInfo && offensiveInfo->getTargetTankPosition().has_value()) {
@@ -26,7 +31,7 @@ void OffensiveTankAlgorithm::updateBattleInfo(BattleInfo& info) {
     BasicTankAlgorithm::updateBattleInfo(info);
 }
 
-ActionRequest OffensiveTankAlgorithm::getAction() {
+ActionRequest TankAlgorithm_098765432_123456789_A::getAction() {
     ActionRequest action = ActionRequest::GetBattleInfo;
     // 1. Update battle info if necessary
     m_turnsSinceLastUpdate++;
@@ -63,7 +68,7 @@ ActionRequest OffensiveTankAlgorithm::getAction() {
     return action;
 }
 
-std::optional<ActionRequest> OffensiveTankAlgorithm::turnToShootAction() const {
+std::optional<ActionRequest> TankAlgorithm_098765432_123456789_A::turnToShootAction() const {
     if (!m_targetPosition) return std::nullopt;
     auto dirOpt = getLineOfSightDirection(m_trackedPosition, m_targetPosition.value());
     if (dirOpt.has_value() && dirOpt.value() != m_trackedDirection) {
@@ -73,7 +78,7 @@ std::optional<ActionRequest> OffensiveTankAlgorithm::turnToShootAction() const {
     return std::nullopt;
 }
 
-void OffensiveTankAlgorithm::updatePathToTarget() {
+void TankAlgorithm_098765432_123456789_A::updatePathToTarget() {
     // Check if we've reached the target
     if (m_trackedPosition == m_targetPosition.value()) {
         m_currentPath.clear();
@@ -105,7 +110,7 @@ void OffensiveTankAlgorithm::updatePathToTarget() {
     }
 }
 
-bool OffensiveTankAlgorithm::isTankOffPath() const {
+bool TankAlgorithm_098765432_123456789_A::isTankOffPath() const {
     if (m_currentPath.empty()) return false;
     
     // Tank is on path if current position is at the first point of path,
@@ -115,14 +120,14 @@ bool OffensiveTankAlgorithm::isTankOffPath() const {
     return !dirOpt.has_value(); // If not adjacent, tank is off path
 }
 
-bool OffensiveTankAlgorithm::isFirstStepValid() const {
+bool TankAlgorithm_098765432_123456789_A::isFirstStepValid() const {
     if (m_currentPath.empty()) return false;
     
     Point nextPoint = m_currentPath.front();
     return isPositionSafe(nextPoint);
 }
 
-std::optional<ActionRequest> OffensiveTankAlgorithm::followCurrentPath() {
+std::optional<ActionRequest> TankAlgorithm_098765432_123456789_A::followCurrentPath() {
     if (!m_currentPath.empty() && m_trackedPosition == m_currentPath.front()) {
         m_currentPath.erase(m_currentPath.begin());
     }
@@ -142,7 +147,7 @@ std::optional<ActionRequest> OffensiveTankAlgorithm::followCurrentPath() {
     return ActionRequest::MoveForward;
 }
 
-std::vector<Point> OffensiveTankAlgorithm::findPathBFS(const Point& start, const Point& target) const {
+std::vector<Point> TankAlgorithm_098765432_123456789_A::findPathBFS(const Point& start, const Point& target) const {
     if (start == target) return {};
     std::queue<Point> q;
     std::map<Point, Point> cameFrom;
@@ -186,3 +191,9 @@ std::vector<Point> OffensiveTankAlgorithm::findPathBFS(const Point& start, const
     }
     return {};
 }
+
+} // namespace Algorithm_098765432_123456789
+
+// Registration at global scope
+using namespace Algorithm_098765432_123456789;
+REGISTER_TANK_ALGORITHM(TankAlgorithm_098765432_123456789_A);
