@@ -3,6 +3,43 @@
     "tasks": [
       {
         "id": 1,
+        "title": "Implement game manager registration functionality to allow dynamic registration and management of game managers in the system",
+        "description": "Create a comprehensive registration system that allows dynamic registration, validation, and management of game manager implementations within the simulation framework.",
+        "details": "Design and implement a GameManagerRegistry class that manages the lifecycle of game manager registration for the simulation system. The system should include: a registration API that accepts game manager identification (name, version, library file path) and validates implementation compatibility with AbstractGameManager interface, a registry storage mechanism that maintains active game manager lists with their library associations and metadata, integration with dynamic library loading to safely load and unload .so files containing game manager implementations, validation logic that ensures registered game managers properly implement the AbstractGameManager interface and have required methods, conflict resolution for duplicate registrations and version management, thread-safe access patterns for concurrent registration/deregistration operations, and integration points with the Simulator component for discovering and loading registered game managers. The registry should support both manual registration via API calls and automatic discovery of game managers in specified directories. Include proper error handling for invalid libraries, missing symbols, and incompatible interfaces.",
+        "testStrategy": "Test registration of valid game manager .so files with proper AbstractGameManager implementation. Verify rejection of invalid or malformed library files that don't implement the required interface. Confirm duplicate registration handling and version conflict resolution works correctly. Test integration with dynamic library loading and symbol resolution. Verify thread-safe concurrent access to the registry from multiple threads. Test automatic discovery functionality in specified directories. Confirm proper cleanup and resource management when unregistering game managers. Verify error handling for corrupted or incompatible library files. Test that registered game managers can be successfully instantiated and used by the Simulator component.",
+        "status": "pending",
+        "dependencies": [
+          3
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Refactor Algorithm component to single source file structure",
+        "description": "Consolidate multiple Algorithm source files into a unified structure to improve maintainability and reduce complexity while preserving all existing functionality.",
+        "details": "Analyze the current Algorithm component structure to identify multiple source files that can be consolidated. Create a single, well-organized source file that combines related functionality from separate files while maintaining clear separation of concerns within the unified structure. This includes: merging related classes and functions from multiple .cpp/.h file pairs into cohesive units, reorganizing the directory structure to reduce file proliferation, updating the CMakeLists.txt or makefile to reflect the new simplified build structure, ensuring all algorithms (BasicPlayer, OffensivePlayer, tank algorithms) remain functional, maintaining proper namespace isolation, and updating any internal includes or dependencies. Preserve the existing public interfaces and factory patterns while simplifying the internal implementation structure. Consider grouping related algorithms together logically rather than having separate files for each minor variation.",
+        "testStrategy": "Verify all existing Algorithm tests pass without modification after refactoring. Confirm that PlayerFactory and TankAlgorithmFactory continue to work correctly with the consolidated structure. Test that all player types (BasicPlayer, OffensivePlayer) and their corresponding tank algorithms function identically to before refactoring. Verify the build system compiles successfully with fewer source files. Run integration tests to ensure GameManager can still load and use all algorithm types. Check that the public API interfaces remain unchanged and backward compatible.",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Implement Player Registration System",
+        "description": "Create a comprehensive registration system that allows players to register their tank algorithms and participate in competitive games with proper validation and management.",
+        "details": "Design and implement a PlayerRegistration class that manages the lifecycle of player registration for competitive games. The system should include: a registration API that accepts player identification (name, team, algorithm file path) and validates algorithm compatibility, a registry storage mechanism that maintains active player lists with their algorithm associations, integration with the existing PlayerFactory to dynamically load registered algorithms, validation logic that ensures algorithm .so files are valid and implement required interfaces, conflict resolution for duplicate player names or algorithm conflicts, and registration status tracking (pending, active, rejected). The system should support both file-based and in-memory registration depending on game mode. Implement proper error handling for invalid algorithms, missing files, or registration conflicts. The registration system should integrate with the Simulator's competitive mode to automatically discover and register players from specified directories, while also supporting manual registration through API calls.",
+        "testStrategy": "Test registration of valid tank algorithms with proper interface implementation. Verify rejection of invalid or malformed algorithm files. Confirm duplicate registration handling and conflict resolution. Test integration with PlayerFactory for dynamic algorithm loading. Verify registration persistence across game sessions when using file-based storage. Test automatic discovery and registration in competitive mode. Confirm proper error messages for various failure scenarios including missing files, invalid algorithms, and registration conflicts.",
+        "status": "pending",
+        "dependencies": [
+          2
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 4,
         "title": "Create Simulator Project Structure and Core Components",
         "description": "Establish the Simulator project with proper directory structure, build system, command-line interface, and core simulation orchestration logic.",
         "details": "Create the Simulator/ directory with proper makefile for building the main executable. Implement command-line argument parsing for both comparative and competitive modes with proper validation and error handling. Design the core Simulator class that can orchestrate multiple game instances, manage dynamic library loading (.so files), and coordinate threading. Implement file discovery utilities for finding game managers, algorithms, and maps in specified directories. Set up the foundation for result collection and output file generation with timestamped naming. Ensure the executable follows the naming convention simulator_<submitter_ids>.",
@@ -13,14 +50,14 @@
         "subtasks": []
       },
       {
-        "id": 2,
+        "id": 5,
         "title": "Refactor Input Validation from GameManager to Simulator",
         "description": "Move input validation and error handling logic from GameManager to Simulator to centralize error handling and improve separation of concerns.",
         "details": "Extract all input validation logic currently in GameManager that handles command-line arguments, file path validation, and parameter checking. Move this logic to the Simulator class where it belongs according to the new architecture. This includes: validating game map files exist and are readable, checking that algorithm .so files are valid and loadable, verifying GameManager .so files are accessible, validating numeric parameters (num_threads, max_steps, num_shells), and ensuring directory paths are valid and contain expected files. Update GameManager to focus solely on game execution logic, removing any command-line or file system validation. Implement proper error propagation from Simulator to provide meaningful error messages to users. Ensure all validation happens before any dynamic library loading or game execution begins.",
         "testStrategy": "Test that invalid file paths are caught by Simulator before GameManager execution. Verify that malformed .so files are detected at Simulator level. Confirm that GameManager no longer performs input validation and focuses only on game logic. Test error messages are clear and helpful when validation fails. Ensure that valid inputs still work correctly after the refactoring.",
         "status": "pending",
         "dependencies": [
-          1
+          3
         ],
         "priority": "medium",
         "subtasks": []
@@ -28,74 +65,12 @@
     ],
     "metadata": {
       "created": "2025-06-26T09:35:35.122Z",
-      "updated": "2025-06-26T15:28:47.030Z",
+      "updated": "2025-06-28T11:06:48.790Z",
       "description": "Tasks for master context"
     }
   },
   "GameManager": {
-    "tasks": [
-      {
-        "id": 1,
-        "title": "Conditional Verbose Output in GameManager",
-        "description": "Modify GameManager to only generate output files when verbose parameter is true, eliminating all file output for normal simulator operation.",
-        "details": "Remove all file output generation logic from GameManager run() method when verbose=false. The AbstractGameManager interface includes a verbose parameter that should control whether output files are created. When verbose=true, maintain existing file output behavior for debugging/analysis purposes. When verbose=false (normal simulator operation), skip all file I/O operations including board state files, game progression logs, and final result files. Update constructor to accept verbose parameter and store as member variable. Modify all output-generating methods to check verbose flag before writing files. Ensure file output paths and naming conventions match assignment 2 requirements when verbose=true. Remove any hardcoded file output that doesn't respect the verbose flag. Update error handling to not create error log files when verbose=false.",
-        "testStrategy": "Test GameManager with verbose=true to verify existing file output behavior is preserved. Test with verbose=false to confirm no files are created during game execution. Verify file system is not accessed when verbose=false using filesystem monitoring tools. Test both successful games and error scenarios with verbose=false to ensure no file output occurs. Validate that verbose parameter is properly passed through constructor and stored. Test edge cases like file permission errors when verbose=true vs verbose=false behavior.",
-        "status": "pending",
-        "dependencies": [],
-        "priority": "medium",
-        "subtasks": []
-      },
-      {
-        "id": 99,
-        "title": "Validation and Integration Testing",
-        "description": "Comprehensive testing of refactored GameManager with various inputs and integration scenarios for Simulator compatibility",
-        "details": "Create comprehensive test suite covering SatelliteView parsing, factory integration, and GameResult generation. Test with various board sizes and configurations. Validate performance meets simulation requirements (target <100ms per game for threading). Test thread-safety if GameManager will be used concurrently. Create integration tests simulating Simulator usage patterns. Test edge cases: empty boards, single-tank scenarios, maximum tank configurations. Verify memory management and cleanup. Performance profiling to identify bottlenecks. Load testing with rapid successive game execution.",
-        "testStrategy": "Execute comprehensive test suite covering all refactored functionality. Performance benchmarking with target <100ms per game execution. Memory leak detection using valgrind or similar tools. Thread safety testing with concurrent game execution. Integration testing with mock Simulator scenarios. Stress testing with various board configurations and algorithm combinations.",
-        "priority": "low",
-        "dependencies": [
-          5
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 100,
-        "title": "Add namespace UserCommon_098765432_123456789 to UserCommon bonus features",
-        "description": "Wrap all classes and functions in 49 remaining UserCommon bonus feature files with the unique namespace UserCommon_098765432_123456789 to comply with assignment requirements.",
-        "details": "Add namespace UserCommon_098765432_123456789 wrapper to all remaining 49 files in UserCommon bonus directories: bonus/logger (logging utilities, file handlers, log formatters), bonus/cli (command line parsing, argument validation, help text generation), bonus/visualization (game state rendering, ASCII art generation, color output), bonus/analysis (game statistics, performance metrics, result analysis), and bonus/board_generator (procedural map generation, validation algorithms). Update all header files with namespace opening/closing braces. Update all source files to include namespace wrapper. Update all internal references between bonus modules to use fully qualified names or appropriate using declarations. Ensure no naming conflicts with standard library or other project namespaces. Update any forward declarations to include namespace qualification. Verify all template specializations work correctly within namespace. Test compilation of all bonus feature combinations.",
-        "testStrategy": "Compile each bonus directory independently to verify namespace compliance. Test inter-module dependencies within bonus features work correctly. Verify no naming conflicts or ambiguous references. Test that bonus features can be optionally included/excluded during build. Run existing bonus feature test suites to ensure functionality unchanged. Check that namespace-qualified names resolve correctly in all usage contexts. Verify template instantiations and specializations work within namespace.",
-        "status": "pending",
-        "dependencies": [],
-        "priority": "medium",
-        "subtasks": []
-      },
-      {
-        "id": 101,
-        "title": "Update Algorithm directory to use UserCommon namespace",
-        "description": "Add 'using namespace UserCommon_098765432_123456789;' statements to all Algorithm files that reference UserCommon classes to establish proper namespace usage after UserCommon refactoring.",
-        "details": "Add 'using namespace UserCommon_098765432_123456789;' declaration at the top of each Algorithm source file (.cpp and .h files) that references UserCommon classes. This includes files that use game board utilities, object classes (Tank, Shell, GameObject), utility classes (Point, Direction, Midpoint), and SatelliteView implementations. Place the using statement after include directives but before any Algorithm namespace declarations. Update any explicit UserCommon:: qualifications to rely on the using statement instead. Verify all Algorithm files compile correctly with the namespace usage. Test that Algorithm classes can properly instantiate and use UserCommon objects without namespace conflicts. Ensure the using statement doesn't interfere with Algorithm's own namespace wrapper Algorithm_098765432_123456789.",
-        "testStrategy": "Compile each Algorithm file individually to verify namespace resolution works correctly. Test Algorithm functionality that depends on UserCommon classes (game board access, object manipulation, utility functions). Verify no ambiguous symbol resolution or naming conflicts occur. Test Algorithm registration and factory creation still works with namespace changes. Build Algorithm shared library (.so) and verify it loads correctly. Run basic algorithm tests to ensure UserCommon integration remains functional.",
-        "status": "pending",
-        "dependencies": [
-          100
-        ],
-        "priority": "medium",
-        "subtasks": []
-      },
-      {
-        "id": 102,
-        "title": "Add registration declaration for Algorithm factories",
-        "description": "Add proper registration declarations to Algorithm factory classes to ensure they are correctly registered with the factory system for runtime instantiation.",
-        "details": "Add registration declarations to all Algorithm factory classes (basic_player_factory, basic_tank_algorithm_factory, and any other factory implementations) to ensure they are properly registered with the central factory registry system. This typically involves adding static registration calls or registration macros at the file level that will execute during program initialization. Update factory header files to include necessary registration declarations. Ensure registration happens before main() execution through static initialization or explicit registration calls. Verify factory classes follow the proper inheritance hierarchy and implement required interface methods. Update any factory manager or registry classes to properly handle Algorithm factory registrations. Consider thread-safety if factories will be accessed concurrently during simulation.",
-        "testStrategy": "Compile Algorithm factories and verify registration occurs during program startup. Test factory instantiation through registry lookup to confirm proper registration. Verify factory classes can be discovered and instantiated by name or type. Test multiple factory registrations work without conflicts. Create unit tests that verify factory registration state before and after initialization. Test factory cleanup and deregistration if supported. Verify integration with existing GameManager factory usage patterns.",
-        "status": "pending",
-        "dependencies": [
-          101
-        ],
-        "priority": "medium",
-        "subtasks": []
-      }
-    ],
+    "tasks": [],
     "metadata": {
       "created": "2025-06-26T15:20:47.254Z",
       "updated": "2025-06-26T19:01:39.004Z",
@@ -122,6 +97,153 @@
       "created": "2025-06-26T17:42:23.385Z",
       "updated": "2025-06-26T21:51:27.652Z",
       "description": "Tasks for build context"
+    }
+  },
+  "gamemanager-registration": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Create GameManagerRegistrar Header File",
+        "description": "Create the GameManagerRegistrar class header with singleton pattern and dynamic loading support",
+        "details": "Implement GameManagerRegistrar.h in simulator/ directory with:\n- GameManagerEntry struct containing so_name, factory, and utility methods\n- Static singleton instance and getter method\n- Methods for creating entries, adding factories, and validation\n- BadGameManagerRegistrationException for error handling\n- Iterator support and findByName functionality\n- Factory pattern integration with AbstractGameManager",
+        "testStrategy": "Unit tests for singleton access, entry creation, factory assignment, validation logic, and exception handling scenarios",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement GameManagerRegistrar Source File",
+        "description": "Create the implementation file for GameManagerRegistrar with singleton initialization",
+        "details": "Implement GameManagerRegistrar.cpp with:\n- Static registrar instance definition\n- getGameManagerRegistrar() method implementation\n- Ensure proper singleton pattern implementation following existing AlgorithmRegistrar pattern",
+        "testStrategy": "Verify singleton behavior, ensure same instance returned across calls, test thread safety if applicable",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Implement GameManagerRegistration Source",
+        "description": "Create GameManagerRegistration.cpp to handle factory registration during dynamic loading",
+        "details": "Implement GameManagerRegistration.cpp with:\n- Constructor taking GameManagerFactory parameter\n- Integration with GameManagerRegistrar to add factory to last entry\n- Follow existing registration pattern from algorithm system\n- Ensure proper factory moving semantics",
+        "testStrategy": "Test factory registration process, verify factory is properly added to registrar, test with mock factories",
+        "priority": "high",
+        "dependencies": [
+          1,
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Create Unit Tests for GameManagerRegistrar",
+        "description": "Implement comprehensive unit tests for the GameManagerRegistrar functionality",
+        "details": "Create GameManagerRegistrarTest.cpp with:\n- MockGameManager class for testing\n- Test fixture with proper setup/teardown\n- Tests for createGameManagerEntry, addGameManagerFactoryToLastEntry\n- Validation tests including failure scenarios\n- findByName functionality tests\n- GameManager instance creation tests\n- Exception handling verification",
+        "testStrategy": "Use GoogleTest framework, mock objects for isolation, cover all public methods and error conditions",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2,
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Integrate Dynamic Loading in Simulator",
+        "description": "Add GameManager dynamic loading functionality to the Simulator class",
+        "details": "Implement in Simulator class:\n- loadGameManagers method with dlopen/dlclose handling\n- Path parsing to extract GameManager names\n- Proper handle management with RAII cleanup\n- Error handling for failed loads\n- Registration validation after loading\n- loadedGameManagerHandles vector for cleanup tracking",
+        "testStrategy": "Test with mock .so files, verify proper cleanup, test error scenarios with invalid files, validate registration process",
+        "priority": "high",
+        "dependencies": [
+          1,
+          2,
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement GameManager Selection and Execution",
+        "description": "Add functionality to select and run specific GameManager implementations by name",
+        "details": "Implement runWithGameManager method:\n- GameManager lookup by name using registrar.findByName\n- Error handling for non-existent GameManagers\n- GameManager instantiation with verbose parameter\n- Game execution with proper parameter passing\n- Result processing and return handling\n- Integration with existing game flow",
+        "testStrategy": "Test GameManager selection, verify proper instantiation, test error cases with invalid names, validate game execution flow",
+        "priority": "high",
+        "dependencies": [
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Add Path Extraction Utility",
+        "description": "Implement utility function to extract GameManager names from file paths",
+        "details": "Implement extractNameFromPath helper method:\n- Handle various path formats with/without directories\n- Remove file extensions (.so)\n- Extract base filename for GameManager identification\n- Robust string parsing with edge case handling\n- Support for different path separators",
+        "testStrategy": "Test with various path formats, edge cases with no extension, paths with multiple dots, Unix/Windows path separators",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implement Error Handling and Logging",
+        "description": "Add comprehensive error handling and logging for GameManager registration system",
+        "details": "Implement robust error handling:\n- Detailed error messages for dlopen failures\n- Registration validation error reporting\n- BadGameManagerRegistrationException handling with context\n- Cleanup on registration failures\n- Verbose logging options for debugging\n- Console output for successful/failed loads",
+        "testStrategy": "Test error scenarios, verify proper cleanup on failures, validate error message quality, test logging output",
+        "priority": "medium",
+        "dependencies": [
+          5,
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Add RAII Cleanup and Resource Management",
+        "description": "Implement proper resource cleanup and memory management for dynamic loading",
+        "details": "Implement Simulator destructor and cleanup:\n- Clear registrar before closing handles\n- Proper dlclose for all loaded handles\n- Exception-safe cleanup procedures\n- Handle management with RAII principles\n- Memory leak prevention\n- Order-dependent cleanup sequence",
+        "testStrategy": "Test destructor execution, verify no memory leaks with valgrind, test exception safety during cleanup",
+        "priority": "high",
+        "dependencies": [
+          5,
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Integration Testing and Documentation",
+        "description": "Create integration tests and document the GameManager registration system",
+        "details": "Complete system integration:\n- End-to-end tests with actual .so file loading\n- Integration with existing test framework\n- Performance testing with multiple GameManagers\n- Documentation of registration process\n- Usage examples and best practices\n- Comparison with AlgorithmRegistrar for consistency",
+        "testStrategy": "Full system tests, performance benchmarks, documentation review, API consistency validation",
+        "priority": "medium",
+        "dependencies": [
+          6,
+          7,
+          8,
+          9
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-06-28T11:12:11.837Z",
+      "updated": "2025-06-28T11:13:19.219Z",
+      "description": "Tasks for gamemanager-registration context"
     }
   }
 }
