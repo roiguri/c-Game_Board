@@ -40,6 +40,7 @@ public:
 
     /**
      * @brief Construct a new Game Manager object with default state
+     * @param verbose Whether to generate output files (default: false)
      */
     GameManager(bool verbose = false);
     
@@ -122,8 +123,8 @@ private:
     std::vector<Shell> m_shells;
     std::vector<TankWithAlgorithm> m_tankControllers;
     
-    // Output file path
-    std::string m_outputFilePath;
+    // Verbose mode flag
+    bool m_verbose;
 
     // Current game state
     GameBoard m_currentBoard;
@@ -166,14 +167,17 @@ private:
     // Remove any destroyed shells from the game
     void removeDestroyedShells();
 
-    // Save the game results to an output file
-    bool saveResults(const std::string& outputFilePath);
+    // Save the game results to an output file (only when verbose=true)
+    bool saveResults(Player& player1, Player& player2);
 
     // Convert ActionRequest to string
     std::string actionToString(ActionRequest action);
 
-    // Set output file path from input file path
-    void setOutputFilePath(const std::string& inputFilePath);
+    // Generate unique output file path with timestamp and player names
+    std::string generateOutputFilePath(const std::string& player1Name, const std::string& player2Name);
+    
+    // Clean filename to remove invalid characters for file system
+    std::string cleanFilename(const std::string& name);
 
     // Read character grid from SatelliteView and convert to vector<string> format
     std::vector<std::string> readSatelliteView(const SatelliteView& satellite_view, 

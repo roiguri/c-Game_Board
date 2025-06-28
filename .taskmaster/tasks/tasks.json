@@ -105,17 +105,6 @@
   "build": {
     "tasks": [
       {
-        "id": 1,
-        "title": "Ensure GameManager Tests Pass and Are Comprehensive",
-        "description": "Verify that all GameManager tests compile and execute successfully, fix any failing tests, and ensure the test suite is comprehensive and stable.",
-        "details": "1. Locate and examine all GameManager test files in the project directory structure\n2. Compile all GameManager tests using the appropriate build system (CMake/make)\n3. Run the complete GameManager test suite and identify any failing tests\n4. Debug and fix compilation errors, including missing includes, namespace issues, or linker problems\n5. Analyze test failures to determine root causes (logic errors, incorrect assertions, missing setup/teardown)\n6. Fix failing test cases by correcting either the test logic or the underlying GameManager implementation\n7. Review test coverage to ensure all GameManager public methods and edge cases are tested\n8. Add missing test cases for uncovered functionality, error conditions, and boundary conditions\n9. Verify that tests follow consistent naming conventions and testing patterns used in the project\n10. Ensure all tests properly clean up resources and don't interfere with each other\n11. Run the complete test suite multiple times to verify stability and eliminate flaky tests",
-        "testStrategy": "1. Compile all GameManager tests without warnings or errors\n2. Execute the full GameManager test suite with 100% pass rate\n3. Run tests multiple times to ensure consistent results\n4. Verify test output is clear and informative for both passing and failing scenarios\n5. Check that test coverage includes all critical GameManager functionality\n6. Validate that tests can be run individually and as part of the complete suite\n7. Ensure tests complete within reasonable time limits\n8. Confirm that test setup and teardown properly isolate test cases",
-        "status": "pending",
-        "dependencies": [],
-        "priority": "medium",
-        "subtasks": []
-      },
-      {
         "id": 2,
         "title": "Add Bonus Features to Build System with Tests",
         "description": "Integrate all UserCommon bonus feature directories into the CMake build configuration and create comprehensive test binaries for bonus features.",

@@ -1,8 +1,13 @@
 #include <algorithm>
+#include <chrono>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <set>
+#include <typeinfo>
 #include <unordered_map>
 
 #include "collision_handler.h"
@@ -15,12 +20,13 @@ namespace GameManager_098765432_123456789 {
 
 using namespace UserCommon_098765432_123456789;
 
-GameManager::GameManager(bool verbose [[maybe_unused]])
+GameManager::GameManager(bool verbose)
     : m_currentStep(0),
       m_gameOver(false),
       m_isClassic2PlayerGame(false),
       m_remaining_steps(DEFAULT_NO_SHELLS_STEPS),
-      m_maximum_steps(100) {
+      m_maximum_steps(100),
+      m_verbose(verbose) {
     // This constructor is for registration system only
     // Actual factories will be provided through run() method
     #ifdef ENABLE_VISUALIZATION
@@ -158,13 +164,22 @@ GameResult GameManager::run(
     }
     #endif
 
-    saveResults(m_outputFilePath);
+    if (m_verbose) {
+        saveResults(player1, player2);
+    }
     
     // TODO: return by value?
     return std::move(m_finalGameResult);
 }
 
-    bool GameManager::saveResults(const std::string& outputFilePath) {
+bool GameManager::saveResults(Player& player1, Player& player2) {
+    // Extract concrete class names for player1 and player2
+    std::string player1Name = cleanFilename(typeid(player1).name());
+    std::string player2Name = cleanFilename(typeid(player2).name());
+    
+    // Generate unique output file path
+    std::string outputFilePath = generateOutputFilePath(player1Name, player2Name);
+    
     std::ofstream outputFile(outputFilePath);
     if (!outputFile.is_open()) {
         std::cerr << "Error: Could not open output file " << 
@@ -601,17 +616,31 @@ void GameManager::createTankAlgorithms(TankAlgorithmFactory player1_factory, Tan
     LOG_INFO("Tank algorithms created");
 }
 
-// TODO: only output if verbose = true
-void GameManager::setOutputFilePath(const std::string& inputFilePath) {
-    std::filesystem::path inputPath(inputFilePath);
-    std::string directory = inputPath.parent_path().string();
-    std::string filename = inputPath.filename().string();
+std::string GameManager::generateOutputFilePath(const std::string& player1Name, const std::string& player2Name) {
+    using namespace std::chrono;
+    auto now = system_clock::now();
+    duration<double> ts = now.time_since_epoch();
+    constexpr size_t NUM_DIGITS = 9;
+    size_t NUM_DIGITS_P = std::pow(10, NUM_DIGITS);    
+    std::ostringstream oss;
+    oss << std::setw(NUM_DIGITS) << std::setfill('0') << size_t(ts.count() * NUM_DIGITS_P) % NUM_DIGITS_P;
+    std::string uniqueId = oss.str();
     
-    if (directory.empty()) {
-        m_outputFilePath = "output_" + filename;
-    } else {
-        m_outputFilePath = directory + "/output_" + filename;
+    return "game_" + player1Name + "_vs_" + player2Name + "_" + uniqueId + ".txt";
+}
+
+std::string GameManager::cleanFilename(const std::string& name) {
+    std::string cleaned = name;
+    
+    // Replace characters that are invalid in filenames with underscores
+    const std::string invalidChars = "\\/:*?\"<>|";
+    for (char& c : cleaned) {
+        if (invalidChars.find(c) != std::string::npos) {
+            c = '_';
+        }
     }
+    
+    return cleaned;
 }
 
 std::vector<std::string> GameManager::readSatelliteView(const SatelliteView& satellite_view, 

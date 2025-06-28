@@ -2,6 +2,7 @@
 #include "game_manager.h"
 #include "test/helpers/game_object_utilities.h"
 #include "test/helpers/game_scenario_builder.h"
+#include "test/helpers/file_test_helper.h"
 #include "test/mocks/scenario_mock_satellite_view.h"
 #include "test/mocks/mock_factories.h"
 #include "objects/shell.h"
@@ -13,6 +14,7 @@
 #include <sstream>
 #include <cstdio> // for std::remove
 #include <iostream>
+#include <typeinfo>
 
 namespace GameManager_098765432_123456789 { 
 
@@ -22,6 +24,7 @@ using namespace UserCommon_098765432_123456789;
 class GameManagerTest : public ::testing::Test {
 protected:
     std::unique_ptr<GameManager> manager;
+    std::unique_ptr<FileTestHelper> fileHelper;
 
     // ==================== GAMEMANAGER MEMBER ACCESS (SETTERS/GETTERS) ====================
     
@@ -40,8 +43,8 @@ protected:
     std::vector<std::string>& GetGameLog() {
         return manager->m_gameLog;
     }
-    std::string& GetOutputFilePath() {
-        return manager->m_outputFilePath;
+    bool GetVerbose() {
+        return manager->m_verbose;
     }
     std::string& GetGameResult() {
         return manager->m_gameResult;
@@ -94,8 +97,11 @@ protected:
     void LogAction() {
         manager->logAction();
     }
-    void CallSetOutputFilePath(const std::string& inputPath) {
-        manager->setOutputFilePath(inputPath);
+    std::string CallGenerateOutputFilePath(const std::string& player1Name, const std::string& player2Name) {
+        return manager->generateOutputFilePath(player1Name, player2Name);
+    }
+    std::string CallCleanFilename(const std::string& name) {
+        return manager->cleanFilename(name);
     }
     std::vector<std::string> CallReadSatelliteView(const SatelliteView& view,
                                                   size_t width, size_t height) {
@@ -103,9 +109,6 @@ protected:
     }
     bool CallCheckGameOver() {
         return manager->checkGameOver();
-    }
-    void CallSaveResults(const std::string& file) {
-        manager->saveResults(file);
     }
     void CallProcessStep() {
         manager->processStep();
@@ -125,6 +128,7 @@ protected:
 
     void SetUp() override {
         manager = std::make_unique<GameManager>(/*verbose=*/false);
+        fileHelper = std::make_unique<FileTestHelper>();
         // Initialize the board to a 5x5 empty board
         GetBoard() = GameBoard(5, 5);
     }
@@ -132,6 +136,7 @@ protected:
     void TearDown() override {
         // Clean up after test
         MockFactoryConfigurer::resetAll();
+        // FileTestHelper destructor will clean up test files
     }
 };
 
@@ -291,50 +296,64 @@ TEST_F(GameManagerTest, ReadSatelliteViewZeroDimensions) {
 // Constructor and Basic Setup
 // ===================================================================== //
 // 1. GameManager(bool verbose)
-// 2. setOutputFilePath(const std::string& inputFilePath)
-// 3. saveErrorsToFile(const std::vector<std::string>& errors)
+// 2. generateOutputFilePath(const std::string& player1Name, const std::string& player2Name)
+// 3. cleanFilename(const std::string& name)
 // ===================================================================== //
 
-// TODO: consider removing
-TEST_F(GameManagerTest, SetOutputFilePath_FilenameOnly) {
-    CallSetOutputFilePath("board.txt");
-    EXPECT_EQ(GetOutputFilePath(), "output_board.txt");
+TEST_F(GameManagerTest, Constructor_VerboseFlagTrue) {
+    manager = std::make_unique<GameManager>(true);
+    EXPECT_TRUE(GetVerbose());
 }
 
-TEST_F(GameManagerTest, SetOutputFilePath_WithRelativeDirectory) {
-    CallSetOutputFilePath("examples/board.txt");
-    EXPECT_EQ(GetOutputFilePath(), "examples/output_board.txt");
+TEST_F(GameManagerTest, Constructor_VerboseFlagFalse) {
+    manager = std::make_unique<GameManager>(false);
+    EXPECT_FALSE(GetVerbose());
 }
 
-TEST_F(GameManagerTest, SetOutputFilePath_WithAbsoluteDirectory) {
-    CallSetOutputFilePath("/home/user/boards/board.txt");
-    EXPECT_EQ(GetOutputFilePath(), "/home/user/boards/output_board.txt");
+TEST_F(GameManagerTest, GenerateOutputFilePath_BasicPlayerNames) {
+    std::string result = CallGenerateOutputFilePath("BasicPlayer", "OffensivePlayer");
+    
+    // Check format: game_BasicPlayer_vs_OffensivePlayer_[timestamp].txt
+    EXPECT_TRUE(result.find("game_BasicPlayer_vs_OffensivePlayer_") == 0);
+    EXPECT_TRUE(result.find(".txt") == result.length() - 4);
+    EXPECT_GT(result.length(), 40); // Should have timestamp
 }
 
-TEST_F(GameManagerTest, SetOutputFilePath_WithNestedDirectories) {
-    CallSetOutputFilePath("test/data/boards/complex_board.txt");
-    EXPECT_EQ(GetOutputFilePath(), "test/data/boards/output_complex_board.txt");
+TEST_F(GameManagerTest, GenerateOutputFilePath_MangledNames) {
+    std::string result = CallGenerateOutputFilePath("11BasicPlayer", "15OffensivePlayer");
+    
+    // Should preserve mangled names
+    EXPECT_TRUE(result.find("game_11BasicPlayer_vs_15OffensivePlayer_") == 0);
+    EXPECT_TRUE(result.find(".txt") == result.length() - 4);
 }
 
-TEST_F(GameManagerTest, SetOutputFilePath_WithDifferentExtension) {
-    CallSetOutputFilePath("my_board.board");
-    EXPECT_EQ(GetOutputFilePath(), "output_my_board.board");
+TEST_F(GameManagerTest, GenerateOutputFilePath_UniqueTimestamps) {
+    std::string result1 = CallGenerateOutputFilePath("Player1", "Player2");
+    std::string result2 = CallGenerateOutputFilePath("Player1", "Player2");
+    
+    EXPECT_TRUE(result1.find("game_Player1_vs_Player2_") == 0);
+    EXPECT_TRUE(result2.find("game_Player1_vs_Player2_") == 0);
+    EXPECT_NE(result1, result2);
 }
 
-TEST_F(GameManagerTest, SetOutputFilePath_WithNoExtension) {
-    CallSetOutputFilePath("examples/boardfile");
-    EXPECT_EQ(GetOutputFilePath(), "examples/output_boardfile");
+TEST_F(GameManagerTest, CleanFilename_ValidName) {
+    std::string result = CallCleanFilename("BasicPlayer");
+    EXPECT_EQ(result, "BasicPlayer");
 }
 
-TEST_F(GameManagerTest, SetOutputFilePath_EmptyString) {
-    // Test edge case with empty string
-    CallSetOutputFilePath("");
-    EXPECT_EQ(GetOutputFilePath(), "output_");
+TEST_F(GameManagerTest, CleanFilename_InvalidCharacters) {
+    std::string result = CallCleanFilename("Basic\\Player:Name*Test?");
+    EXPECT_EQ(result, "Basic_Player_Name_Test_");
 }
 
-TEST_F(GameManagerTest, SetOutputFilePath_CurrentDirectory) {
-    CallSetOutputFilePath("./board.txt");
-    EXPECT_EQ(GetOutputFilePath(), "./output_board.txt");
+TEST_F(GameManagerTest, CleanFilename_AllInvalidCharacters) {
+    std::string result = CallCleanFilename("\\/:*?\"<>|");
+    EXPECT_EQ(result, "_________");
+}
+
+TEST_F(GameManagerTest, CleanFilename_EmptyString) {
+    std::string result = CallCleanFilename("");
+    EXPECT_EQ(result, "");
 }
 
 // ===================================================================== //
@@ -1458,6 +1477,106 @@ TEST_F(GameManagerTest, Run_TieAfter40StepsWithZeroShells_Integration) {
     // Verify both tanks are still alive (not destroyed)
     EXPECT_GT(result.remaining_tanks[0], 0u);
     EXPECT_GT(result.remaining_tanks[1], 0u);
+}
+
+// ===================================================================== //
+// Verbose Output Functionality
+// ===================================================================== //
+// Test that verbose flag controls file output behavior
+// ===================================================================== //
+
+TEST_F(GameManagerTest, Run_VerboseFalse_NoFileOutput) {
+    // Arrange: Create verbose=false manager
+    manager = std::make_unique<GameManager>(false);
+    EXPECT_FALSE(GetVerbose());
+    
+    auto [satelliteView, player1, player2, width, height, maxSteps, numShells] = 
+        GameScenarioBuilder()
+            .withBoardSize(3, 3)
+            .withTwoPlayerSetup(Point(0, 0), Point(2, 0))
+            .withMaxSteps(5)
+            .withNumShells(10)
+            .build();
+
+    // Act: Run the game (should not create output files)
+    GameResult result = manager->run(
+        width, height,
+        satelliteView,
+        maxSteps, numShells,
+        *player1, *player2,
+        mockFactoryDoNothing, mockFactoryDoNothing
+    );
+    
+    // Assert: Game should complete normally but not create output files
+    EXPECT_EQ(result.winner, 0); // Tie due to max steps
+    EXPECT_EQ(result.reason, GameResult::Reason::MAX_STEPS);
+    
+    // Verify no new game_*.txt files were created
+    std::vector<std::string> newFiles = fileHelper->getNewGameFiles();
+    EXPECT_TRUE(newFiles.empty()) << "Expected no files, but found: " << 
+        (newFiles.empty() ? "none" : newFiles[0]);
+}
+
+TEST_F(GameManagerTest, Run_VerboseTrue_CreatesFileOutput) {
+    // Arrange: Create verbose=true manager  
+    manager = std::make_unique<GameManager>(true);
+    EXPECT_TRUE(GetVerbose());
+    
+    auto [satelliteView, player1, player2, width, height, maxSteps, numShells] = 
+        GameScenarioBuilder()
+            .withBoardSize(3, 3)
+            .withTwoPlayerSetup(Point(0, 0), Point(2, 0))
+            .withMaxSteps(5)
+            .withNumShells(10)
+            .build();
+
+    // Act: Run the game (should create output files)
+    GameResult result = manager->run(
+        width, height,
+        satelliteView,
+        maxSteps, numShells,
+        *player1, *player2,
+        mockFactoryDoNothing, mockFactoryDoNothing
+    );
+    
+    // Assert: Game should complete normally and create output files
+    EXPECT_EQ(result.winner, 0); // Tie due to max steps
+    EXPECT_EQ(result.reason, GameResult::Reason::MAX_STEPS);
+    
+    // Verify exactly one new game_*.txt file was created
+    std::vector<std::string> newFiles = fileHelper->getNewGameFiles();
+    ASSERT_EQ(newFiles.size(), 1u) << "Expected exactly 1 file, but found " << newFiles.size();
+    
+    // Verify the filename format includes player class names and timestamp
+    std::string filename = newFiles[0];
+    
+    // Get the actual player class names using typeid (should match what GameManager uses)
+    std::string player1Name = typeid(*player1).name();
+    std::string player2Name = typeid(*player2).name();
+    
+    // Clean the names the same way GameManager does
+    player1Name = FileTestHelper::cleanFilename(player1Name);
+    player2Name = FileTestHelper::cleanFilename(player2Name);
+    
+    // Verify filename format: game_[player1]_vs_[player2]_[timestamp].txt
+    std::string expectedPrefix = "game_" + player1Name + "_vs_" + player2Name + "_";
+    EXPECT_TRUE(FileTestHelper::startsWith(filename, expectedPrefix)) << 
+        "Expected filename to start with '" << expectedPrefix << "', but got: " << filename;
+    EXPECT_TRUE(FileTestHelper::endsWith(filename, ".txt")) << 
+        "Expected filename to end with '.txt', but got: " << filename;
+    
+    // Verify the file exists and has content
+    std::ifstream file(filename);
+    EXPECT_TRUE(file.is_open()) << "Could not open file: " << filename;
+    std::string line;
+    bool hasContent = false;
+    while (std::getline(file, line)) {
+        if (!line.empty()) {
+            hasContent = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(hasContent) << "Expected file to have game log content";
 }
 
 } // namespace GameManager_098765432_123456789
