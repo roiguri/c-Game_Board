@@ -1,7 +1,11 @@
 #include "gtest/gtest.h"
-#include "players/basic/battle_info_impl.h"
+#include "battle_info_impl.h"
 #include "UserCommon/game_board.h"
 #include "utils/point.h"
+
+using namespace UserCommon_098765432_123456789;
+
+namespace Algorithm_098765432_123456789 {
 #include <string>
 #include <vector>
 
@@ -90,4 +94,6 @@ TEST_F(BattleInfoImplTest, OwnTankPositionPersistsAfterClear) {
     info->clear();
     // Own tank position should remain unchanged after clear (unless design says otherwise)
     EXPECT_EQ(info->getOwnTankPosition(), pos);
-} 
+}
+
+} // namespace Algorithm_098765432_123456789 

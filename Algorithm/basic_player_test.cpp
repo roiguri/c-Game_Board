@@ -1,10 +1,14 @@
 #include "gtest/gtest.h"
-#include "players/basic/basic_player.h"
-#include "players/basic/battle_info_impl.h"
+#include "basic_player.h"
+#include "battle_info_impl.h"
 #include "SatelliteView.h"
 #include "TankAlgorithm.h"
 #include "utils/point.h"
 #include <vector>
+
+using namespace UserCommon_098765432_123456789;
+
+namespace Algorithm_098765432_123456789 {
 
 // Mock SatelliteView
 class MockSatelliteView : public SatelliteView {
@@ -115,4 +119,6 @@ TEST_F(BasicPlayerTest, NoOwnTankPositionIfNotPresent) {
     auto& info = getBattleInfo();
     // The default-constructed Point should be (0,0)
     EXPECT_EQ(info.getOwnTankPosition(), Point(0, 0));
-} 
+}
+
+} // namespace Algorithm_098765432_123456789

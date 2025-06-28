@@ -14,6 +14,8 @@ list(REMOVE_ITEM ALGORITHM_SOURCES ${ALGORITHM_TEST_SOURCES})
 # Create shared library with Assignment 3 naming convention
 add_library(Algorithm_098765432_123456789 SHARED ${ALGORITHM_SOURCES})
 
+set_target_properties(Algorithm_098765432_123456789 PROPERTIES PREFIX "")
+
 # Include directories
 target_include_directories(Algorithm_098765432_123456789 PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -33,7 +35,7 @@ if(ENABLE_TESTING)
     add_executable(algorithm_tests ${ALGORITHM_TEST_SOURCES})
     
     # Link Algorithm library and Google Test
-    target_link_libraries(algorithm_tests PRIVATE Algorithm_098765432_123456789 gtest gtest_main)
+    target_link_libraries(algorithm_tests PRIVATE Algorithm_098765432_123456789 gtest gtest_main gmock gmock_main)
     target_include_directories(algorithm_tests PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/.."
         "${CMAKE_CURRENT_SOURCE_DIR}/../common"

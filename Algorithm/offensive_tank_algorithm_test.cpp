@@ -1,18 +1,22 @@
 #include "gtest/gtest.h"
-#include "players/offensive/offensive_tank_algorithm.h"
-#include "players/offensive/offensive_battle_info.h"
+#include "offensive_tank_algorithm.h"
+#include "offensive_battle_info.h"
 #include "utils/point.h"
 #include "utils/direction.h"
+
+using namespace UserCommon_098765432_123456789;
+
+namespace Algorithm_098765432_123456789 {
 #include <memory>
 #include <vector>
 
 class OffensiveTankAlgorithmTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        algo = std::make_unique<OffensiveTankAlgorithm>(1, 0);
+        algo = std::make_unique<TankAlgorithm_098765432_123456789_A>(1, 0);
         setTankState(Point(2,2), Direction::Up);
     }
-    std::unique_ptr<OffensiveTankAlgorithm> algo;
+    std::unique_ptr<TankAlgorithm_098765432_123456789_A> algo;
     // Helper to set tank state
     void setTankState(const Point& pos, Direction dir) {
         setTrackedPosition(pos);
@@ -187,4 +191,6 @@ TEST_F(OffensiveTankAlgorithmTest, GetAction_Priority5_ChaseWithBFS) {
     setTankState(Point(2,2), Direction::Up);
     auto action = algo->getAction();
     EXPECT_TRUE(action == ActionRequest::MoveForward || action == ActionRequest::RotateRight90 || action == ActionRequest::RotateLeft90);
-} 
+}
+
+} // namespace Algorithm_098765432_123456789 

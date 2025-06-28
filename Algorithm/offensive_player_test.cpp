@@ -1,9 +1,13 @@
 #include "gtest/gtest.h"
-#include "players/offensive/offensive_player.h"
-#include "players/offensive/offensive_battle_info.h"
+#include "offensive_player.h"
+#include "offensive_battle_info.h"
 #include "TankAlgorithm.h"
 #include "SatelliteView.h"
 #include "utils/point.h"
+
+using namespace UserCommon_098765432_123456789;
+
+namespace Algorithm_098765432_123456789 {
 #include <vector>
 #include <memory>
 
@@ -34,7 +38,7 @@ public:
 };
 
 TEST(OffensivePlayerTest, Construction) {
-    OffensivePlayer player(1, 3, 3, 10, 5);
+    Player_098765432_123456789_A player(1, 3, 3, 10, 5);
     // Just ensure construction does not throw
     SUCCEED();
 }
@@ -46,7 +50,7 @@ TEST(OffensivePlayerTest, UpdateTankWithBattleInfoSetsTarget) {
         {' ', '%', ' '},
         {' ', ' ', ' '}
     };
-    OffensivePlayer player(1, 3, 3, 10, 5);
+    Player_098765432_123456789_A player(1, 3, 3, 10, 5);
     MockSatelliteView view(board);
     MockTankAlgorithm algo;
     player.updateTankWithBattleInfo(algo, view);
@@ -66,7 +70,7 @@ TEST(OffensivePlayerTest, KeepsTrackingTargetIfItMoves) {
         {' ', '%', ' '},
         {' ', ' ', ' '}
     };
-    OffensivePlayer player(1, 3, 3, 10, 5);
+    Player_098765432_123456789_A player(1, 3, 3, 10, 5);
     MockSatelliteView view1(board1);
     MockTankAlgorithm algo1;
     player.updateTankWithBattleInfo(algo1, view1);
@@ -99,7 +103,7 @@ TEST(OffensivePlayerTest, ChoosesClosestTankAfterTargetDestroyed) {
         {' ', '%', ' '},
         {' ', ' ', ' '}
     };
-    OffensivePlayer player(1, 3, 3, 10, 5);
+    Player_098765432_123456789_A player(1, 3, 3, 10, 5);
     MockSatelliteView view1(board1);
     MockTankAlgorithm algo1;
     player.updateTankWithBattleInfo(algo1, view1);
@@ -131,7 +135,7 @@ TEST(OffensivePlayerTest, ChoosesClosestOfMultipleTanksAfterTargetDestroyed) {
         {' ', '%', ' ', ' '},
         {' ', ' ', '2', ' '}
     };
-    OffensivePlayer player(1, 4, 3, 10, 5);
+    Player_098765432_123456789_A player(1, 4, 3, 10, 5);
     MockSatelliteView view1(board1);
     MockTankAlgorithm algo1;
     player.updateTankWithBattleInfo(algo1, view1);
@@ -155,4 +159,6 @@ TEST(OffensivePlayerTest, ChoosesClosestOfMultipleTanksAfterTargetDestroyed) {
     ASSERT_TRUE(info2->getTargetTankPosition().has_value());
     // Should now pick (2,2) as the new target (closer to last known target (0,0) than (2,2))
     EXPECT_EQ(info2->getTargetTankPosition().value(), Point(3, 2));
-} 
+}
+
+} // namespace Algorithm_098765432_123456789 

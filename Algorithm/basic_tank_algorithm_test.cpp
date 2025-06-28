@@ -1,13 +1,17 @@
 #include "gtest/gtest.h"
-#include "players/basic/basic_tank_algorithm.h"
+#include "gmock/gmock.h"
+#include "basic_tank_algorithm.h"
 #include "UserCommon/game_board.h"
 #include "UserCommon/objects/tank.h"
 #include "utils/point.h"
-#include "players/basic/battle_info_impl.h"
+#include "battle_info_impl.h"
 #include <vector>
 #include <string>
-#include <gmock/gmock.h>
+
+using namespace UserCommon_098765432_123456789;
 using ::testing::UnorderedElementsAreArray;
+
+namespace Algorithm_098765432_123456789 {
 
 class BasicTankAlgorithmTest : public ::testing::Test {
 protected:
@@ -804,4 +808,6 @@ TEST_F(BasicTankAlgorithmTest, IsInDangerFromShells_Point_ShellBlockedByTank) {
     algo->updateBattleInfo(info);
     EXPECT_FALSE(isInDangerFromShells(Point(1, 1)));
 }
+
+} // namespace Algorithm_098765432_123456789
 

@@ -196,4 +196,4 @@ std::vector<Point> TankAlgorithm_098765432_123456789_A::findPathBFS(const Point&
 
 // Registration at global scope
 using namespace Algorithm_098765432_123456789;
-REGISTER_TANK_ALGORITHM(TankAlgorithm_098765432_123456789_A);
+// REGISTER_TANK_ALGORITHM(TankAlgorithm_098765432_123456789_A); // TODO: Implement registration system

@@ -1,6 +1,10 @@
 #include "gtest/gtest.h"
-#include "players/offensive/offensive_battle_info.h"
+#include "offensive_battle_info.h"
 #include "utils/point.h"
+
+using namespace UserCommon_098765432_123456789;
+
+namespace Algorithm_098765432_123456789 {
 
 TEST(OffensiveBattleInfoTest, ConstructorInitializesBase) {
     OffensiveBattleInfo info(5, 6);
@@ -22,4 +26,6 @@ TEST(OffensiveBattleInfoTest, TargetTankPositionSetGetClear) {
 TEST(OffensiveBattleInfoTest, DefaultTargetTankPositionIsNullopt) {
     OffensiveBattleInfo info(2, 2);
     EXPECT_FALSE(info.getTargetTankPosition().has_value());
-} 
+}
+
+} // namespace Algorithm_098765432_123456789 
