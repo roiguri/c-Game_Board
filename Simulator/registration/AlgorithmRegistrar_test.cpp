@@ -12,8 +12,7 @@ protected:
     
     void TearDown() override {
         AlgorithmRegistrar::getAlgorithmRegistrar().clear();
-    }
-    
+    }  
 };
 
 TEST_F(AlgorithmRegistrarTest, GetSingleton) {

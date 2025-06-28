@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "AlgorithmRegistrar.h"
+#include "registration/AlgorithmRegistrar.h"
 #include "common/PlayerRegistration.h"
 #include "common/TankAlgorithmRegistration.h"
 #include "test/mocks/MockFactories.h"

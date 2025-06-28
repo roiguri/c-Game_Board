@@ -3,8 +3,8 @@
 #include <iostream>
 #include <sstream>
 
-#include "Simulator/file_loader.h"
-#include "Simulator/file_satellite_view.h"
+#include "file_loader.h"
+#include "file_satellite_view.h"
 
 std::vector<std::string> FileLoader::loadBoardFile(
     const std::string& filePath,

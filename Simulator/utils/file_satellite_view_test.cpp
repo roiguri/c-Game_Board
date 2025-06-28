@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "Simulator/file_satellite_view.h"
+#include "file_satellite_view.h"
 
 #include <vector>
 #include <string>

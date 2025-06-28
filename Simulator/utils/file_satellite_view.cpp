@@ -1,4 +1,4 @@
-#include "Simulator/file_satellite_view.h"
+#include "file_satellite_view.h"
 
 FileSatelliteView::FileSatelliteView(const std::vector<std::string>& boardData, size_t rows, size_t cols)
     : m_boardData(boardData), m_rows(rows), m_cols(cols) {
