@@ -9,7 +9,7 @@
         "testStrategy": "Unit tests with mock .so files, test loading valid/invalid libraries, verify registration triggering, test cleanup and error handling. Create test .so files with known exports to validate dynamic loading functionality.",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -28,7 +28,7 @@
               1
             ],
             "details": "Create wrapper methods that safely handle dlopen() for loading shared libraries and dlclose() for unloading them. Include proper platform-specific handling (dlopen on Unix/Linux, LoadLibrary on Windows if needed).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -39,7 +39,7 @@
               1
             ],
             "details": "Create vector-based storage to maintain references to loaded libraries, implement methods to add/remove library entries, and provide functionality to query loaded library status.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -51,7 +51,7 @@
               3
             ],
             "details": "Implement robust error handling for dlopen/dlclose failures, validate library paths and names, handle duplicate loading attempts, and provide meaningful error messages using dlerror() or platform equivalents.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -61,8 +61,8 @@
             "dependencies": [
               4
             ],
-            "details": "Modify or extend existing REGISTER macros to work with the LibraryManager, ensure proper symbol resolution from loaded libraries, and maintain compatibility with current TankAlgorithmFactory and PlayerFactory registration mechanisms.",
-            "status": "pending",
+            "details": "Modify or extend existing REGISTER macros to work with the LibraryManager, ensure proper symbol resolution from loaded libraries, and maintain compatibility with current TankAlgorithmFactory and PlayerFactory registration mechanisms.\n<info added on 2025-06-29T07:46:00.637Z>\nThe integration should be moved to the Simulator layer (SimpleGameRunner or main.cpp) rather than being implemented within LibraryManager itself. LibraryManager should remain a focused utility for library loading/unloading operations (dlopen/dlclose). The complete integration workflow including createAlgorithmFactoryEntry → loadLibrary → validateLastRegistration should be orchestrated at the Simulator level where the main executable can coordinate between LibraryManager utilities and the existing factory registration systems.\n</info added on 2025-06-29T07:46:00.637Z>",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -73,7 +73,7 @@
               5
             ],
             "details": "Develop unit tests covering successful library loading/unloading, error conditions, library tracking, integration with registration system, and create mock/test shared libraries for testing purposes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           }
         ]
@@ -81,56 +81,56 @@
       {
         "id": 2,
         "title": "Implement Simple Game Runner",
-        "description": "Create SimpleGameRunner class to execute single games using dynamically loaded GameManager and algorithm implementations",
-        "details": "Implement SimpleGameRunner with static method runSingleGame() that takes map file path, GameManager name, and two algorithm names. Use existing FileLoader::loadBoardWithSatelliteView() for map loading, retrieve factories from existing registrar system (GameManagerRegistrar::getFactory(), TankAlgorithmRegistrar::getFactory()). Create Player instances using algorithm factories, instantiate GameManager using factory, and call run() method. Implement GameResult struct to capture game outcomes including winner, turn count, and any error states. Add printGameResult() method for console output formatting.",
-        "testStrategy": "Integration tests with real .so files, verify game execution with different map configurations, test error handling for missing factories, validate game result capture and formatting. Mock registrar responses for isolated testing.",
-        "priority": "high",
+        "description": "Create GameRunner class to execute single games using dynamically loaded GameManager and algorithm implementations",
+        "status": "done",
         "dependencies": [
           1
         ],
-        "status": "pending",
+        "priority": "high",
+        "details": "Implement GameRunner with static method runSingleGame() that takes map file path, GameManager name, and two algorithm names. Use existing FileLoader::loadBoardWithSatelliteView() for map loading, retrieve factories from existing registrar system (GameManagerRegistrar::getFactory(), TankAlgorithmRegistrar::getFactory()). Create Player instances using algorithm factories, instantiate GameManager using factory, and call run() method. Implement GameResult struct to capture game outcomes including winner, turn count, and any error states. Add printGameResult() method for console output formatting.",
+        "testStrategy": "Integration tests with real .so files, verify game execution with different map configurations, test error handling for missing factories, validate game result capture and formatting. Mock registrar responses for isolated testing.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Create SimpleGameRunner class with runSingleGame static method",
-            "description": "Implement a new SimpleGameRunner class that provides a static runSingleGame method to execute single game instances with simplified interface",
+            "title": "Create GameRunner class with runSingleGame static method",
+            "description": "Implement a new GameRunner class that provides a static runSingleGame method to execute single game instances with simplified interface",
+            "status": "done",
             "dependencies": [],
-            "details": "Create SimpleGameRunner class in appropriate namespace. Implement static runSingleGame method that takes game parameters and coordinates game execution. Method should handle basic game setup and coordination between components.",
-            "status": "pending",
+            "details": "Create GameRunner class in appropriate namespace. Implement static runSingleGame method that takes game parameters and coordinates game execution. Method should handle basic game setup and coordination between components.",
             "testStrategy": ""
           },
           {
             "id": 2,
             "title": "Implement GameResult struct and result capture logic",
             "description": "Design and implement GameResult data structure to capture game outcomes and implement logic to collect and store game results",
+            "status": "done",
             "dependencies": [],
             "details": "Define GameResult struct with fields for winner, game duration, final scores, and other relevant metrics. Implement result capture mechanisms that collect data during game execution and populate the GameResult structure.",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 3,
             "title": "Integrate with FileLoader and existing registrar systems",
-            "description": "Connect SimpleGameRunner with FileLoader for input processing and integrate with existing player/algorithm registrar systems",
+            "description": "Connect GameRunner with FileLoader for input processing and integrate with existing player/algorithm registrar systems",
+            "status": "done",
             "dependencies": [
               1,
               2
             ],
-            "details": "Integrate SimpleGameRunner with FileLoader to handle input file processing. Connect with existing PlayerFactory and TankAlgorithmFactory registrar systems. Ensure proper initialization and coordination between all components.",
-            "status": "pending",
+            "details": "Integrate GameRunner with FileLoader to handle input file processing. Connect with existing PlayerFactory and TankAlgorithmFactory registrar systems. Ensure proper initialization and coordination between all components.",
             "testStrategy": ""
           },
           {
             "id": 4,
             "title": "Add error handling and result formatting methods",
             "description": "Implement comprehensive error handling throughout the game execution pipeline and add methods for formatting and presenting game results",
+            "status": "done",
             "dependencies": [
               1,
               2,
               3
             ],
             "details": "Add try-catch blocks and error handling for file loading, game initialization, and execution phases. Implement result formatting methods for different output formats (console, file). Add validation for input parameters and graceful failure handling.",
-            "status": "pending",
             "testStrategy": ""
           }
         ]
@@ -477,7 +477,7 @@
     ],
     "metadata": {
       "created": "2025-06-28T15:19:46.197Z",
-      "updated": "2025-06-29T07:26:28.053Z",
+      "updated": "2025-06-29T08:24:18.179Z",
       "description": "Tasks for simulator context"
     }
   }
