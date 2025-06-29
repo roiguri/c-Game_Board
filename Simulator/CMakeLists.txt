@@ -38,6 +38,9 @@ target_include_directories(Simulator_lib PRIVATE
     "${CMAKE_SOURCE_DIR}/third_party"
 )
 
+# Link dl library for dynamic loading functionality
+target_link_libraries(Simulator_lib PRIVATE dl)
+
 # Create alias target for convenience (using custom target since ALIAS doesn't work with custom targets)
 add_custom_target(simulator DEPENDS Simulator_lib)
 
