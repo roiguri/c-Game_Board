@@ -262,7 +262,7 @@
         "dependencies": [
           4
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -477,7 +477,7 @@
     ],
     "metadata": {
       "created": "2025-06-28T15:19:46.197Z",
-      "updated": "2025-07-03T11:46:07.755Z",
+      "updated": "2025-07-03T12:11:14.075Z",
       "description": "Tasks for simulator context"
     }
   }
