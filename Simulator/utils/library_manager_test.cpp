@@ -3,8 +3,6 @@
 #include <filesystem>
 #include <fstream>
 
-using namespace Simulator_098765432_123456789;
-
 class LibraryManagerTest : public ::testing::Test {
 protected:
     void SetUp() override {

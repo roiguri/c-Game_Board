@@ -5,8 +5,6 @@
 #include <vector>
 #include <optional>
 
-namespace Simulator_098765432_123456789 {
-
 class CommandLineParser {
 public:
     enum class Mode {
@@ -71,5 +69,3 @@ private:
     bool isParameterSupported(const std::string& paramName) const;
     std::vector<std::string> getSupportedParameters(Mode mode) const;
 };
-
-} // namespace Simulator_098765432_123456789

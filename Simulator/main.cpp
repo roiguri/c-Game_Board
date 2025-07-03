@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
     const std::string algo2Lib = argv[4];
     
     // Get LibraryManager instance
-    Simulator_098765432_123456789::LibraryManager& libManager = Simulator_098765432_123456789::LibraryManager::getInstance();
+    LibraryManager& libManager = LibraryManager::getInstance();
     
     // Get registrars 
     GameManagerRegistrar& gmRegistrar = GameManagerRegistrar::getGameManagerRegistrar();

@@ -4,8 +4,6 @@
 #include <string>
 #include <memory>
 
-namespace Simulator_098765432_123456789 {
-
 class LibraryManager {
 public:
     static LibraryManager& getInstance();
@@ -32,5 +30,3 @@ private:
     void clearError();
     void setError(const std::string& error);
 };
-
-} // namespace Simulator_098765432_123456789

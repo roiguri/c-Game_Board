@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <filesystem>
 
-namespace Simulator_098765432_123456789 {
-
 LibraryManager& LibraryManager::getInstance() {
     static LibraryManager instance;
     return instance;
@@ -85,5 +83,3 @@ void LibraryManager::clearError() {
 void LibraryManager::setError(const std::string& error) {
     m_lastError = error;
 }
-
-} // namespace Simulator_098765432_123456789

@@ -4,7 +4,6 @@
 #include <fstream>
 #include "command_line_parser.h"
 
-using namespace Simulator_098765432_123456789;
 using ::testing::ElementsAre;
 using ::testing::IsEmpty;
 using ::testing::UnorderedElementsAre;

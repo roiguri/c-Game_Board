@@ -3,8 +3,6 @@
 #include <filesystem>
 #include <sstream>
 
-namespace Simulator_098765432_123456789 {
-
 CommandLineParser::CommandLineParser() 
     : m_mode(Mode::Unknown), m_verbose(false), m_hasBasicFlag(false), m_hasComparativeFlag(false), m_hasCompetitionFlag(false) {
 }
@@ -313,5 +311,3 @@ std::vector<std::string> CommandLineParser::getSupportedParameters(Mode mode) co
             return {};
     }
 }
-
-} // namespace Simulator_098765432_123456789
