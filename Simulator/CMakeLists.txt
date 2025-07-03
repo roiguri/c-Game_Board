@@ -8,9 +8,10 @@ project(Simulator)
 file(GLOB_RECURSE SIMULATOR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 file(GLOB_RECURSE SIMULATOR_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
-# Remove test files from library sources
+# Remove test files and main.cpp from library sources
 file(GLOB_RECURSE TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*_test.cpp")
 list(REMOVE_ITEM SIMULATOR_SOURCES ${TEST_SOURCES})
+list(REMOVE_ITEM SIMULATOR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
 
 # Create Simulator static library
 add_library(Simulator_lib STATIC ${SIMULATOR_SOURCES})
