@@ -49,6 +49,11 @@ bool LibraryManager::loadLibrary(const std::string& path) {
 void LibraryManager::unloadAllLibraries() {
     clearError();
     
+    // Check if libraries are already unloaded
+    if (m_handles.empty()) {
+        return;
+    }
+    
     // Unload libraries in reverse order
     for (auto it = m_handles.rbegin(); it != m_handles.rend(); ++it) {
         if (*it) {

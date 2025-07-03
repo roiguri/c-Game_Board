@@ -36,7 +36,7 @@ public:
             "##########"
         };
         
-        boardInfo.satelliteView = std::make_unique<FileSatelliteView>(board);
+        boardInfo.satelliteView = std::make_unique<FileSatelliteView>(board, boardInfo.rows, boardInfo.cols);
         return boardInfo;
     }
     
@@ -89,7 +89,7 @@ public:
             board.push_back(row);
         }
         
-        boardInfo.satelliteView = std::make_unique<FileSatelliteView>(board);
+        boardInfo.satelliteView = std::make_unique<FileSatelliteView>(board, boardInfo.rows, boardInfo.cols);
         return boardInfo;
     }
 };

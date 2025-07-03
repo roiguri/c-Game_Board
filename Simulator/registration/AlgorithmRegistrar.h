@@ -52,6 +52,8 @@ private:
     static AlgorithmRegistrar registrar;
 
 public:
+    ~AlgorithmRegistrar();
+    
     static AlgorithmRegistrar& getAlgorithmRegistrar();
     
     void createAlgorithmFactoryEntry(const std::string& name);

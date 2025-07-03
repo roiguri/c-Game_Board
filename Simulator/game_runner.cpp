@@ -66,8 +66,8 @@ GameResult GameRunner::runSingleGame(
     }
     
     // 4. Create players using algorithm factories
-    auto player1 = algo1It->getPlayerFactory()(1, 0, 0, maxSteps, numShells);
-    auto player2 = algo2It->getPlayerFactory()(2, 0, 0, maxSteps, numShells);
+    auto player1 = algo1It->getPlayerFactory()(1, mapWidth, mapHeight, maxSteps, numShells);
+    auto player2 = algo2It->getPlayerFactory()(2, mapWidth, mapHeight, maxSteps, numShells);
     
     // 5. Create GameManager
     auto gameManager = gameManagerEntry->create(verbose);

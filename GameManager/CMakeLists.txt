@@ -15,7 +15,6 @@ list(REMOVE_ITEM GAMEMANAGER_SOURCES ${TEST_SOURCES})
 # Create GameManager shared library with specific naming
 add_library(GameManager_098765432_123456789 SHARED 
     ${GAMEMANAGER_SOURCES}
-    ${USERCOMMON_SOURCES}  # Include UserCommon sources from parent
 )
 
 # Set library properties - .so file goes to GameManager/ directory
@@ -35,17 +34,12 @@ if(NOT ENABLE_TESTING)
     )
 endif()
 
-# Include directories for GameManager library
-target_include_directories(GameManager_098765432_123456789 PUBLIC
-    "${CMAKE_CURRENT_SOURCE_DIR}"
-    "${CMAKE_SOURCE_DIR}/common"
-    "${CMAKE_SOURCE_DIR}"
-)
+# Link UserCommon library
+target_link_libraries(GameManager_098765432_123456789 PRIVATE UserCommon)
 
-# Private include directories (for internal compilation)
+# Include directories for GameManager library  
 target_include_directories(GameManager_098765432_123456789 PRIVATE
-    "${CMAKE_SOURCE_DIR}/UserCommon"
-    "${CMAKE_SOURCE_DIR}/third_party"
+    "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
 # Create alias target for convenience (using custom target since ALIAS doesn't work with custom targets)
@@ -66,24 +60,27 @@ if(ENABLE_TESTING)
     # Test include directories
     target_include_directories(GameManager_tests PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}"
-        "${CMAKE_SOURCE_DIR}/common"
-        "${CMAKE_SOURCE_DIR}/UserCommon"
+        "${CMAKE_SOURCE_DIR}/Simulator"
     )
     
-    # Link test executable - include UserCommon sources directly for testing
+    # Link test executable with libraries and sources
     target_sources(GameManager_tests PRIVATE 
-        ${USERCOMMON_SOURCES}
+        ${GAMEMANAGER_SOURCES}
+        ../Simulator/registration/GameManagerRegistration.cpp
+        ../Simulator/registration/GameManagerRegistrar.cpp
     )
+    
     target_link_libraries(GameManager_tests PRIVATE
-        GameManager_098765432_123456789
+        UserCommon
         gtest
         gmock
         gtest_main
     )
     
-    # Register tests with CTest
+    # Register tests with CTest  
     include(GoogleTest)
-    gtest_discover_tests(GameManager_tests)
+    # gtest_discover_tests(GameManager_tests)  # Disabled due to discovery issues
+    add_test(NAME GameManager_tests COMMAND GameManager_tests)
     
     # Create alias for test target
     add_custom_target(gamemanager_tests DEPENDS GameManager_tests)

@@ -4,6 +4,10 @@
 // Static member definition
 GameManagerRegistrar GameManagerRegistrar::registrar;
 
+GameManagerRegistrar::~GameManagerRegistrar() {
+    clear();
+}
+
 // GameManagerEntry implementations
 GameManagerRegistrar::GameManagerEntry::GameManagerEntry(const std::string& name) : so_name(name) {}
 
