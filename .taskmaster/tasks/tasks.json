@@ -318,7 +318,7 @@
         "dependencies": [
           5
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -326,7 +326,7 @@
             "description": "Create directory scanning functionality to dynamically load algorithms and maps from their respective directories",
             "dependencies": [],
             "details": "Implement file system traversal to discover available algorithms and maps. Create loading mechanisms that can instantiate algorithm objects and parse map files. Handle error cases for invalid or corrupted files. Ensure proper validation of loaded content.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -337,7 +337,7 @@
               1
             ],
             "details": "Implement algorithm pairing generation that creates all unique combinations of algorithms. Handle edge cases like single algorithm scenarios. Ensure proper pairing validation and prevent duplicate matchups. Create data structures to manage pairing queues.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -348,7 +348,7 @@
               2
             ],
             "details": "Implement the 3-1-0 scoring system where wins award 3 points, ties award 1 point, and losses award 0 points. Create game result evaluation logic to determine outcomes. Handle tie-breaking scenarios and edge cases in scoring calculation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -359,7 +359,7 @@
               3
             ],
             "details": "Implement score accumulation across all matches for each algorithm. Create ranking algorithms that sort participants by total score. Handle tie-breaking mechanisms for equal scores. Maintain running totals and final standings calculation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -370,7 +370,7 @@
               4
             ],
             "details": "Create formatted output displays showing match results, standings, and statistics. Implement file generation for tournament reports in multiple formats. Include detailed match logs, final rankings, and summary statistics. Ensure output is human-readable and properly structured.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           }
         ]
@@ -477,7 +477,7 @@
     ],
     "metadata": {
       "created": "2025-06-28T15:19:46.197Z",
-      "updated": "2025-07-03T14:17:49.468Z",
+      "updated": "2025-07-03T14:39:09.552Z",
       "description": "Tasks for simulator context"
     }
   }
