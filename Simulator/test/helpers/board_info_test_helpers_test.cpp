@@ -40,9 +40,9 @@ TEST_F(BoardInfoTestHelpersTest, CreateCustomBoardInfo) {
     
     // Test board structure
     EXPECT_EQ(boardInfo.satelliteView->getObjectAt(0, 0), '#'); // Top-left corner
-    EXPECT_EQ(boardInfo.satelliteView->getObjectAt(0, 7), '#'); // Top-right corner
-    EXPECT_EQ(boardInfo.satelliteView->getObjectAt(4, 0), '#'); // Bottom-left corner
-    EXPECT_EQ(boardInfo.satelliteView->getObjectAt(4, 7), '#'); // Bottom-right corner
+    EXPECT_EQ(boardInfo.satelliteView->getObjectAt(7, 0), '#'); // Top-right corner
+    EXPECT_EQ(boardInfo.satelliteView->getObjectAt(0, 4), '#'); // Bottom-left corner
+    EXPECT_EQ(boardInfo.satelliteView->getObjectAt(7, 4), '#'); // Bottom-right corner
     EXPECT_EQ(boardInfo.satelliteView->getObjectAt(1, 1), '1'); // Player 1
-    EXPECT_EQ(boardInfo.satelliteView->getObjectAt(1, 6), '2'); // Player 2
+    EXPECT_EQ(boardInfo.satelliteView->getObjectAt(6, 1), '2'); // Player 2
 }
