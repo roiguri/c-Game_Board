@@ -71,5 +71,5 @@ public:
     bool empty() const { return algorithms.empty(); }
 
     // For testing purposes
-    void clear() { algorithms.clear(); }
+    void clear();
 };

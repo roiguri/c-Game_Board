@@ -6,10 +6,12 @@
 #include <filesystem>
 #include <chrono>
 #include <unordered_map>
+#include "base_game_mode.h"
 #include "game_runner.h"
 #include "utils/file_loader.h"
+#include "common/GameResult.h"
 
-class CompetitiveRunner {
+class CompetitiveRunner : public BaseGameMode {
 public:
     CompetitiveRunner();
     ~CompetitiveRunner();
@@ -36,19 +38,25 @@ public:
         int losses = 0;
     };
 
-    struct CompetitiveParameters {
+    struct CompetitiveParameters : public BaseParameters {
         std::string gameMapsFolder;
         std::string gameManagerLib;
         std::string algorithmsFolder;
-        bool verbose = true;
+        
+        CompetitiveParameters() : BaseParameters() {}
     };
 
     /**
      * Run competitive tournament with multiple algorithms and maps
+     * Uses the base class template method for execution flow
      * @param params Competitive parameters
-     * @return Vector of final algorithm scores sorted by performance
+     * @return Reference to final algorithm scores sorted by performance
      */
-    std::vector<AlgorithmScore> runCompetition(const CompetitiveParameters& params);
+    const std::vector<AlgorithmScore>& runCompetition(const CompetitiveParameters& params) {
+        // Execute using base class template method, then return reference to results
+        BaseGameMode::execute(params);
+        return m_finalScores;
+    }
 
     /**
      * Get list of discovered algorithm libraries
@@ -62,20 +70,17 @@ public:
      */
     const std::vector<MapInfo>& getDiscoveredMaps() const;
 
-private:
-    /**
-     * Enumerate all .so files in the specified directory
-     * @param directory Directory to scan
-     * @return Vector of .so file paths
-     */
-    std::vector<std::string> enumerateAlgorithmFiles(const std::string& directory);
+protected:
+    // Override abstract methods from BaseGameMode
+    bool loadLibraries(const BaseParameters& params) override;
+    bool loadMap(const std::string& mapFile) override;
+    GameResult executeGameLogic(const BaseParameters& params) override;
+    void displayResults(const GameResult& result) override;
+    
+    // Override cleanup for CompetitiveRunner-specific cleanup
+    void cleanup() override;
 
-    /**
-     * Enumerate all map files in the specified directory
-     * @param directory Directory to scan
-     * @return Vector of map file paths
-     */
-    std::vector<std::string> enumerateMapFiles(const std::string& directory);
+private:
 
     /**
      * Load and validate algorithm from .so file
@@ -89,7 +94,7 @@ private:
      * @param mapPath Path to map file
      * @return MapInfo with load result
      */
-    MapInfo loadMap(const std::string& mapPath);
+    MapInfo loadMapFile(const std::string& mapPath);
 
     /**
      * Generate algorithm pairings for given map index using competition formula
@@ -140,16 +145,12 @@ private:
         const CompetitiveParameters& params
     );
 
-    /**
-     * Generate timestamp for output filename
-     * @return Timestamp string
-     */
-    std::string generateTimestamp() const;
-
-    /**
-     * Clean up loaded libraries and registrars
-     */
-    void cleanup();
+    // Helper methods specific to CompetitiveRunner
+    bool loadLibrariesImpl(const CompetitiveParameters& params);
+    bool loadMapsImpl(const CompetitiveParameters& params);
+    
+    // Store parameters for later use in displayResults
+    std::unique_ptr<CompetitiveParameters> m_currentParams;
 
     /**
      * Sort algorithms by score (descending order)
@@ -162,4 +163,5 @@ private:
     std::vector<MapInfo> m_discoveredMaps;
     std::vector<FileLoader::BoardInfo> m_loadedMaps;
     std::string m_gameManagerName;
+    std::vector<AlgorithmScore> m_finalScores;
 };

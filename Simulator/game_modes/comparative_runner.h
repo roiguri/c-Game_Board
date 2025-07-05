@@ -5,10 +5,12 @@
 #include <memory>
 #include <filesystem>
 #include <chrono>
+#include "base_game_mode.h"
 #include "game_runner.h"
 #include "utils/file_loader.h"
+#include "common/GameResult.h"
 
-class ComparativeRunner {
+class ComparativeRunner : public BaseGameMode {
 public:
     ComparativeRunner();
     ~ComparativeRunner();
@@ -37,20 +39,25 @@ public:
         ComparativeResult& operator=(ComparativeResult&&) = default;
     };
 
-    struct ComparativeParameters {
+    struct ComparativeParameters : public BaseParameters {
         std::string gameManagersFolder;
-        std::string mapFile;
         std::string algorithm1Lib;
         std::string algorithm2Lib;
-        bool verbose = true;
+        
+        ComparativeParameters() : BaseParameters() {}
     };
 
     /**
      * Run comparative analysis with multiple GameManagers
+     * Uses the base class template method for execution flow
      * @param params Comparative parameters
-     * @return Vector of results from all GameManagers
+     * @return Reference to results vector (avoid copying move-only results)
      */
-    std::vector<ComparativeResult> runComparative(const ComparativeParameters& params);
+    const std::vector<ComparativeResult>& runComparative(const ComparativeParameters& params) {
+        // Execute using base class template method, then return reference to our specific results
+        BaseGameMode::execute(params);
+        return m_results;
+    }
 
     /**
      * Get list of discovered GameManager libraries
@@ -58,13 +65,17 @@ public:
      */
     const std::vector<GameManagerInfo>& getDiscoveredGameManagers() const;
 
+protected:
+    // Override abstract methods from BaseGameMode
+    bool loadLibraries(const BaseParameters& params) override;
+    bool loadMap(const std::string& mapFile) override;
+    GameResult executeGameLogic(const BaseParameters& params) override;
+    void displayResults(const GameResult& result) override;
+    
+    // Override cleanup for ComparativeRunner-specific cleanup
+    void cleanup() override;
+
 private:
-    /**
-     * Enumerate all .so files in the specified directory
-     * @param directory Directory to scan
-     * @return Vector of .so file paths
-     */
-    std::vector<std::string> enumerateSoFiles(const std::string& directory);
 
     /**
      * Load and validate GameManager from .so file
@@ -93,16 +104,11 @@ private:
      */
     void generateOutput(const std::vector<ComparativeResult>& results, const std::string& outputPath, const ComparativeParameters& params);
 
-    /**
-     * Generate timestamp for output filename
-     * @return Timestamp string
-     */
-    std::string generateTimestamp() const;
-
-    /**
-     * Clean up loaded libraries and registrars
-     */
-    void cleanup();
+    // Helper methods specific to ComparativeRunner
+    bool loadLibrariesImpl(const ComparativeParameters& params);
+    
+    // Store parameters for later use in displayResults
+    std::unique_ptr<ComparativeParameters> m_currentParams;
 
     /**
      * Group GameManagers by identical game outcomes
@@ -128,6 +134,8 @@ private:
      */
     std::string gameStateToString(const SatelliteView& gameState, int rows, int cols);
 
-    std::vector<GameManagerInfo> m_discoveredGameManagers;
+    // ComparativeRunner-specific data members
     FileLoader::BoardInfo m_boardInfo;
+    std::vector<GameManagerInfo> m_discoveredGameManagers;
+    std::vector<ComparativeResult> m_results;
 };

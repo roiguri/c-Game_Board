@@ -1,4 +1,5 @@
 #include "AlgorithmRegistrar.h"
+#include <iostream>
 
 AlgorithmRegistrar AlgorithmRegistrar::registrar;
 
@@ -44,4 +45,8 @@ void AlgorithmRegistrar::removeLast() {
     if (!algorithms.empty()) {
         algorithms.pop_back();
     }
+}
+
+void AlgorithmRegistrar::clear() {
+    algorithms.clear();
 }

@@ -1,5 +1,6 @@
 #include "GameManagerRegistrar.h"
 #include <cassert>
+#include <iostream>
 
 // Static member definition
 GameManagerRegistrar GameManagerRegistrar::registrar;

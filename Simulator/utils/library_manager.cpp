@@ -2,6 +2,9 @@
 #include <dlfcn.h>
 #include <algorithm>
 #include <filesystem>
+#include "../registration/GameManagerRegistrar.h"
+#include "../registration/AlgorithmRegistrar.h"
+#include <iostream>
 
 LibraryManager& LibraryManager::getInstance() {
     static LibraryManager instance;
@@ -72,6 +75,18 @@ std::string LibraryManager::getLastError() const {
 }
 
 LibraryManager::~LibraryManager() {
+    // Explicitly clear registrars before unloading libraries to avoid static destruction order issues
+    try {
+        // Clear both registrars to ensure their factory objects are destroyed while libraries are still loaded
+        GameManagerRegistrar& gmRegistrar = GameManagerRegistrar::getGameManagerRegistrar();
+        AlgorithmRegistrar& algoRegistrar = AlgorithmRegistrar::getAlgorithmRegistrar();
+        
+        gmRegistrar.clear();
+        algoRegistrar.clear();
+    } catch (...) {
+        // Continue with library unload even if registrar clearing fails
+    }
+    
     unloadAllLibraries();
 }
 

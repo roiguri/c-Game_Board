@@ -6,143 +6,172 @@
 #include <sstream>
 #include <algorithm>
 #include <map>
+#include <memory>
 #include "utils/library_manager.h"
 #include "registration/GameManagerRegistrar.h"
 #include "registration/AlgorithmRegistrar.h"
 
-ComparativeRunner::ComparativeRunner() = default;
-
-ComparativeRunner::~ComparativeRunner() {
-    cleanup();
+ComparativeRunner::ComparativeRunner() : BaseGameMode() {
 }
 
-std::vector<ComparativeRunner::ComparativeResult> ComparativeRunner::runComparative(const ComparativeParameters& params) {
-    std::vector<ComparativeResult> results;
-    
-    try {
-        // Load map file
-        if (params.verbose) {
-            std::cout << "Loading map file: " << params.mapFile << std::endl;
-        }
-        
-        m_boardInfo = FileLoader::loadBoardWithSatelliteView(params.mapFile);
-        if (!m_boardInfo.satelliteView) {
-            std::cerr << "Error: Failed to load map file: " << params.mapFile << std::endl;
-            return results;
-        }
-        
-        // Enumerate .so files in GameManagers folder
-        if (params.verbose) {
-            std::cout << "Enumerating GameManager libraries in: " << params.gameManagersFolder << std::endl;
-        }
-        
-        std::vector<std::string> soFiles = enumerateSoFiles(params.gameManagersFolder);
-        if (soFiles.empty()) {
-            std::cerr << "No .so files found in directory: " << params.gameManagersFolder << std::endl;
-            return results;
-        }
-        
-        if (params.verbose) {
-            std::cout << "Found " << soFiles.size() << " .so files" << std::endl;
-        }
-        
-        // Load and validate each GameManager
-        for (const auto& soPath : soFiles) {
-            GameManagerInfo info = loadGameManager(soPath);
-            m_discoveredGameManagers.push_back(info);
-            
-            if (params.verbose) {
-                if (info.loaded) {
-                    std::cout << "Successfully loaded GameManager: " << info.name << std::endl;
-                } else {
-                    std::cout << "Failed to load GameManager from: " << info.path 
-                              << " (Error: " << info.error << ")" << std::endl;
-                }
-            }
-        }
-        
-        // Execute games with each successfully loaded GameManager
-        for (const auto& info : m_discoveredGameManagers) {
-            if (info.loaded) {
-                if (params.verbose) {
-                    std::cout << "Executing game with GameManager: " << info.name << std::endl;
-                }
-                
-                ComparativeResult result = executeWithGameManager(info.name, params, m_boardInfo);
-                results.push_back(std::move(result));
-                
-                if (params.verbose) {
-                    std::cout << "Game completed in " << result.executionTime.count() << "ms" << std::endl;
-                }
-            }
-        }
-        
-        // Generate output file
-        if (!results.empty()) {
-            std::string outputPath = "comparative_results_" + generateTimestamp() + ".txt";
-            generateOutput(results, outputPath, params);
-            
-            if (params.verbose) {
-                std::cout << "Results written to: " << outputPath << std::endl;
-            }
-        }
-        
-    } catch (const std::exception& e) {
-        std::cerr << "Exception during comparative execution: " << e.what() << std::endl;
-        cleanup();
-        return results;
-    } catch (...) {
-        std::cerr << "Unknown exception during comparative execution" << std::endl;
-        cleanup();
-        return results;
+ComparativeRunner::~ComparativeRunner() {
+    // Base class destructor will handle cleanup
+}
+
+bool ComparativeRunner::loadLibraries(const BaseParameters& params) {
+    // Cast to derived parameter type
+    const ComparativeParameters* comparativeParams = dynamic_cast<const ComparativeParameters*>(&params);
+    if (!comparativeParams) {
+        handleError("Invalid parameter type for ComparativeRunner");
+        return false;
     }
     
-    return results;
+    // Store parameters for later use
+    m_currentParams = std::make_unique<ComparativeParameters>(*comparativeParams);
+    
+    return loadLibrariesImpl(*comparativeParams);
+}
+
+bool ComparativeRunner::loadLibrariesImpl(const ComparativeParameters& params) {
+    // Enumerate .so files in GameManagers folder
+    
+    std::vector<std::string> soFiles = enumerateFiles(params.gameManagersFolder, ".so");
+    if (soFiles.empty()) {
+        handleError("No .so files found in directory: " + params.gameManagersFolder);
+        return false;
+    }
+    
+    // Found .so files
+    
+    // Load and validate each GameManager (just store paths for now)
+    for (const auto& soPath : soFiles) {
+        GameManagerInfo info;
+        info.path = soPath;
+        info.loaded = true; // We'll load per run
+        info.name = soPath;
+        m_discoveredGameManagers.push_back(info);
+    }
+
+    // Load and register both algorithms ONCE
+    LibraryManager& libManager = LibraryManager::getInstance();
+    AlgorithmRegistrar& algoRegistrar = AlgorithmRegistrar::getAlgorithmRegistrar();
+    algoRegistrar.clear();
+    
+    // Algorithm 1
+    algoRegistrar.createAlgorithmFactoryEntry(params.algorithm1Lib);
+    if (!libManager.loadLibrary(params.algorithm1Lib)) {
+        handleError("Failed to load Algorithm 1: " + libManager.getLastError());
+        algoRegistrar.removeLast();
+        return false;
+    }
+    try {
+        algoRegistrar.validateLastRegistration();
+        // Algorithm 1 registration successful
+    } catch (const BadRegistrationException& e) {
+        handleError("Algorithm 1 registration failed: " + std::string(e.what()));
+        return false;
+    }
+    // Algorithm 2 (if different)
+    if (params.algorithm2Lib != params.algorithm1Lib) {
+        algoRegistrar.createAlgorithmFactoryEntry(params.algorithm2Lib);
+        if (!libManager.loadLibrary(params.algorithm2Lib)) {
+            handleError("Failed to load Algorithm 2: " + libManager.getLastError());
+            algoRegistrar.removeLast();
+            return false;
+        }
+        try {
+            algoRegistrar.validateLastRegistration();
+            // Algorithm 2 registration successful
+        } catch (const BadRegistrationException& e) {
+            handleError("Algorithm 2 registration failed: " + std::string(e.what()));
+            return false;
+        }
+    } else {
+        // Algorithm 2 is the same as Algorithm 1
+    }
+    return true;
+}
+
+bool ComparativeRunner::loadMap(const std::string& mapFile) {
+    try {
+        // Validate map file parameter
+        if (mapFile.empty()) {
+            handleError("Map file parameter is empty");
+            return false;
+        }
+        
+        if (m_boardInfo.satelliteView) {
+            // Map already loaded
+            return true;
+        }
+        
+        // Loading map file
+        m_boardInfo = FileLoader::loadBoardWithSatelliteView(mapFile);
+        if (!m_boardInfo.satelliteView) {
+            handleError("Failed to load map file: " + mapFile);
+            return false;
+        }
+        return true;
+    } catch (const std::exception& e) {
+        handleError("Exception during map loading: " + std::string(e.what()));
+        return false;
+    }
+}
+
+GameResult ComparativeRunner::executeGameLogic(const BaseParameters& params) {
+    const ComparativeParameters* comparativeParams = dynamic_cast<const ComparativeParameters*>(&params);
+    if (!comparativeParams) {
+        handleError("Invalid parameter type for ComparativeRunner");
+        return createErrorResult();
+    }
+    
+    m_results.clear();
+    
+    // Execute games with each successfully loaded GameManager
+    for (const auto& info : m_discoveredGameManagers) {
+        if (info.loaded) {
+            // Executing game with GameManager
+            
+            ComparativeResult result = executeWithGameManager(info.name, *comparativeParams, m_boardInfo);
+            m_results.push_back(std::move(result));
+        }
+    }
+    
+    // Return a summary result - we'll handle the detailed output in displayResults
+    if (!m_results.empty()) {
+        // Use the first successful result as the summary
+        for (const auto& result : m_results) {
+            if (result.success) {
+                // Can't copy GameResult due to unique_ptr, so create a simple success indicator
+                GameResult summary;
+                summary.winner = result.gameResult.winner;
+                summary.rounds = result.gameResult.rounds;
+                summary.reason = result.gameResult.reason;
+                summary.remaining_tanks = result.gameResult.remaining_tanks;
+                // Don't copy gameState (unique_ptr)
+                return summary;
+            }
+        }
+    }
+    
+    return createErrorResult();
+}
+
+void ComparativeRunner::displayResults(const GameResult& /* result */) {
+    // Generate output file with all results
+    if (!m_results.empty() && m_currentParams) {
+        std::string outputPath = "comparative_results_" + generateTimestamp() + ".txt";
+        generateOutput(m_results, outputPath, *m_currentParams);
+        
+        // Results written to file
+    }
 }
 
 const std::vector<ComparativeRunner::GameManagerInfo>& ComparativeRunner::getDiscoveredGameManagers() const {
     return m_discoveredGameManagers;
 }
 
-std::vector<std::string> ComparativeRunner::enumerateSoFiles(const std::string& directory) {
-    std::vector<std::string> soFiles;
-    
-    try {
-        // Check if directory exists
-        if (!std::filesystem::exists(directory)) {
-            std::cerr << "Directory does not exist: " << directory << std::endl;
-            return soFiles;
-        }
-        
-        if (!std::filesystem::is_directory(directory)) {
-            std::cerr << "Path is not a directory: " << directory << std::endl;
-            return soFiles;
-        }
-        
-        // Iterate through directory entries
-        for (const auto& entry : std::filesystem::directory_iterator(directory)) {
-            if (entry.is_regular_file()) {
-                std::string filename = entry.path().filename().string();
-                std::string extension = entry.path().extension().string();
-                
-                // Check for .so extension
-                if (extension == ".so") {
-                    soFiles.push_back(entry.path().string());
-                }
-            }
-        }
-        
-        // Sort files for consistent ordering
-        std::sort(soFiles.begin(), soFiles.end());
-        
-    } catch (const std::filesystem::filesystem_error& e) {
-        std::cerr << "Filesystem error while enumerating .so files: " << e.what() << std::endl;
-    } catch (const std::exception& e) {
-        std::cerr << "Exception while enumerating .so files: " << e.what() << std::endl;
-    }
-    
-    return soFiles;
-}
+// Remove enumerateSoFiles - using base class enumerateFiles method
 
 ComparativeRunner::GameManagerInfo ComparativeRunner::loadGameManager(const std::string& soPath) {
     GameManagerInfo info;
@@ -169,7 +198,6 @@ ComparativeRunner::GameManagerInfo ComparativeRunner::loadGameManager(const std:
             gmRegistrar.validateLastRegistration();
         } catch (const GameManagerRegistrar::BadGameManagerRegistrationException& e) {
             info.error = "GameManager registration failed for " + e.name;
-            cleanup();
             return info;
         }
         
@@ -180,13 +208,11 @@ ComparativeRunner::GameManagerInfo ComparativeRunner::loadGameManager(const std:
             info.loaded = true;
         } else {
             info.error = "No GameManager registered after loading";
-            cleanup();
             return info;
         }
         
     } catch (const std::exception& e) {
         info.error = "Exception during GameManager loading: " + std::string(e.what());
-        cleanup();
         return info;
     }
     
@@ -197,73 +223,37 @@ ComparativeRunner::ComparativeResult ComparativeRunner::executeWithGameManager(
     const std::string& gameManagerName,
     const ComparativeParameters& params,
     const FileLoader::BoardInfo& boardInfo) {
-    
     ComparativeResult result;
     result.gameManagerName = gameManagerName;
     result.success = false;
     result.executionTime = std::chrono::milliseconds(0);
-    
+
+    // Clear and load GameManager registrar for this run
+    GameManagerRegistrar& gmRegistrar = GameManagerRegistrar::getGameManagerRegistrar();
+    gmRegistrar.clear();
+    gmRegistrar.createGameManagerEntry(gameManagerName);
+    LibraryManager& libManager = LibraryManager::getInstance();
+    if (!libManager.loadLibrary(gameManagerName)) {
+        result.error = "Failed to load GameManager: " + libManager.getLastError();
+        gmRegistrar.removeLast();
+        return result;
+    }
     try {
-        // Load algorithm libraries
-        LibraryManager& libManager = LibraryManager::getInstance();
-        AlgorithmRegistrar& algoRegistrar = AlgorithmRegistrar::getAlgorithmRegistrar();
-        
-        // Load Algorithm 1
-        algoRegistrar.createAlgorithmFactoryEntry(params.algorithm1Lib);
-        if (!libManager.loadLibrary(params.algorithm1Lib)) {
-            result.error = "Failed to load Algorithm 1: " + libManager.getLastError();
-            algoRegistrar.removeLast();
-            return result;
-        }
-        
-        try {
-            algoRegistrar.validateLastRegistration();
-        } catch (const BadRegistrationException& e) {
-            result.error = "Algorithm 1 registration failed: " + std::string(e.what());
-            cleanup();
-            return result;
-        }
-        
-        // Load Algorithm 2 (if different)
-        if (params.algorithm2Lib != params.algorithm1Lib) {
-            algoRegistrar.createAlgorithmFactoryEntry(params.algorithm2Lib);
-            if (!libManager.loadLibrary(params.algorithm2Lib)) {
-                result.error = "Failed to load Algorithm 2: " + libManager.getLastError();
-                algoRegistrar.removeLast();
-                cleanup();
-                return result;
-            }
-            
-            try {
-                algoRegistrar.validateLastRegistration();
-            } catch (const BadRegistrationException& e) {
-                result.error = "Algorithm 2 registration failed: " + std::string(e.what());
-                cleanup();
-                return result;
-            }
-        }
-        
-        // Get algorithm names
-        std::string algorithm1Name, algorithm2Name;
-        if (algoRegistrar.size() > 0) {
-            auto algoIter = algoRegistrar.begin();
-            algorithm1Name = algoIter->getName();
-            
-            if (algoRegistrar.size() > 1) {
-                ++algoIter;
-                algorithm2Name = algoIter->getName();
-            } else {
-                algorithm2Name = algorithm1Name;
-            }
-        } else {
-            result.error = "No algorithms registered";
-            cleanup();
-            return result;
-        }
-        
-        // Execute game with timing
+        gmRegistrar.validateLastRegistration();
+        // GameManager registration successful
+    } catch (const GameManagerRegistrar::BadGameManagerRegistrationException& e) {
+        result.error = "GameManager registration failed: " + std::string(e.name);
+        return result;
+    }
+
+    // Use algorithm file paths as names
+    std::string algorithm1Name = params.algorithm1Lib;
+    std::string algorithm2Name = params.algorithm2Lib;
+    // Algorithm names configured
+
+    // Execute game with timing
+    try {
         auto startTime = std::chrono::high_resolution_clock::now();
-        
         result.gameResult = GameRunner::runSingleGame(
             boardInfo,
             gameManagerName,
@@ -271,32 +261,25 @@ ComparativeRunner::ComparativeResult ComparativeRunner::executeWithGameManager(
             algorithm2Name,
             false  // Not verbose for comparative mode
         );
-        
         auto endTime = std::chrono::high_resolution_clock::now();
         result.executionTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
         result.success = true;
-        
         // Store map dimensions for game state string conversion
         result.mapRows = boardInfo.rows;
         result.mapCols = boardInfo.cols;
-        
+        // Game completed with GameManager
         // Validate dimensions are properly populated
         if (result.mapRows <= 0 || result.mapCols <= 0) {
             result.error = "Invalid map dimensions: rows=" + std::to_string(result.mapRows) + ", cols=" + std::to_string(result.mapCols);
             result.success = false;
-            cleanup();
             return result;
         }
-        
-        // Clean up for next iteration
-        cleanup();
-        
     } catch (const std::exception& e) {
         result.error = "Exception during game execution: " + std::string(e.what());
         result.success = false;
-        cleanup();
     }
-    
+    // Only clear GameManager registrar, do not touch algorithms or unload libraries
+    gmRegistrar.clear();
     return result;
 }
 
@@ -339,23 +322,23 @@ void ComparativeRunner::generateOutput(const std::vector<ComparativeResult>& res
     }
 }
 
-std::string ComparativeRunner::generateTimestamp() const {
-    auto now = std::chrono::system_clock::now();
-    auto time_t = std::chrono::system_clock::to_time_t(now);
-    
-    std::stringstream ss;
-    ss << std::put_time(std::localtime(&time_t), "%Y%m%d_%H%M%S");
-    return ss.str();
-}
+// Remove custom generateTimestamp - using base class method
 
 void ComparativeRunner::cleanup() {
     GameManagerRegistrar& gmRegistrar = GameManagerRegistrar::getGameManagerRegistrar();
     AlgorithmRegistrar& algoRegistrar = AlgorithmRegistrar::getAlgorithmRegistrar();
-    LibraryManager& libManager = LibraryManager::getInstance();
-    
     gmRegistrar.clear();
     algoRegistrar.clear();
-    libManager.unloadAllLibraries();
+    // Commented out to prevent segmentation fault - LibraryManager singleton handles cleanup at program exit
+    // m_libraryManager.unloadAllLibraries();
+    
+    // Clean up board info
+    m_boardInfo.satelliteView.reset();
+    
+    m_discoveredGameManagers.clear();
+    m_results.clear();
+    m_currentParams.reset();
+    BaseGameMode::cleanup();
 }
 
 std::vector<std::pair<std::vector<std::string>, const ComparativeRunner::ComparativeResult*>> ComparativeRunner::groupResultsByOutcome(const std::vector<ComparativeResult>& results) {

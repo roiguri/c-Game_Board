@@ -1,0 +1,88 @@
+# Test Scenarios for Game Mode Testing
+# Using compiled_libraries directory
+
+# ============================================================================
+# BASIC MODE TESTS
+# ============================================================================
+
+# Basic Mode: Real Game Manager with Different Algorithm Combinations
+# ----------------------------------------------------------------
+
+# Test 1: Real Game Manager - DoNothing vs AlwaysMoveForward
+cd /home/roiguri/projects/uni/advanced_programming/c-Game_Board/build
+./bin/tanks_game game_map=../examples/input_a.txt game_manager=../test_libraries/compiled_libraries/game_managers/libTestGameManager_Real_098765432_123456789.so algorithm1=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_DoNothing_098765432_123456789.so algorithm2=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_AlwaysMoveForward_098765432_123456789.so -basic -verbose
+
+# Test 2: Real Game Manager - AlwaysShoot vs DoNothing
+./bin/tanks_game game_map=../examples/input_a.txt game_manager=../test_libraries/compiled_libraries/game_managers/libTestGameManager_Real_098765432_123456789.so algorithm1=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_AlwaysShoot_098765432_123456789.so algorithm2=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_DoNothing_098765432_123456789.so -basic -verbose
+
+# Test 3: Real Game Manager - AlwaysMoveForward vs AlwaysShoot
+./bin/tanks_game game_map=../examples/input_a.txt game_manager=../test_libraries/compiled_libraries/game_managers/libTestGameManager_Real_098765432_123456789.so algorithm1=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_AlwaysMoveForward_098765432_123456789.so algorithm2=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_AlwaysShoot_098765432_123456789.so -basic -verbose
+
+# Test 4: Real Game Manager - Basic vs Offensive
+./bin/tanks_game game_map=../examples/input_a.txt game_manager=../test_libraries/compiled_libraries/game_managers/libTestGameManager_Real_098765432_123456789.so algorithm1=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_Basic_098765432_123456789.so algorithm2=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_Offensive_098765432_123456789.so -basic -verbose
+
+# Test 5: Real Game Manager - Basic vs DoNothing
+./bin/tanks_game game_map=../examples/input_a.txt game_manager=../test_libraries/compiled_libraries/game_managers/libTestGameManager_Real_098765432_123456789.so algorithm1=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_Basic_098765432_123456789.so algorithm2=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_DoNothing_098765432_123456789.so -basic -verbose
+
+# Test 6: Real Game Manager - Offensive vs AlwaysShoot
+./bin/tanks_game game_map=../examples/input_a.txt game_manager=../test_libraries/compiled_libraries/game_managers/libTestGameManager_Real_098765432_123456789.so algorithm1=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_Offensive_098765432_123456789.so algorithm2=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_AlwaysShoot_098765432_123456789.so -basic -verbose
+
+# ============================================================================
+# COMPARATIVE MODE TESTS
+# ============================================================================
+
+# Comparative Mode: Different Game Managers with Basic + Offensive Algorithms
+# --------------------------------------------------------------------------
+
+# Test 7: Predictable Game Manager - Basic vs Offensive
+./bin/tanks_game game_map=../examples/input_a.txt game_managers_folder=../test_libraries/compiled_libraries/game_managers/ algorithm1=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_Basic_098765432_123456789.so algorithm2=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_Offensive_098765432_123456789.so -comparative -verbose
+
+# Test 8: AlwaysTie Game Manager - Basic vs Offensive
+./bin/tanks_game game_map=../examples/input_a.txt game_managers_folder=../test_libraries/compiled_libraries/game_managers/ algorithm1=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_Basic_098765432_123456789.so algorithm2=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_Offensive_098765432_123456789.so -comparative -verbose
+
+# Test 9: Real Game Manager - Basic vs Offensive (Comparative Mode)
+./bin/tanks_game game_map=../examples/input_a.txt game_managers_folder=../test_libraries/compiled_libraries/game_managers/ algorithm1=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_Basic_098765432_123456789.so algorithm2=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_Offensive_098765432_123456789.so -comparative -verbose
+
+# ============================================================================
+# COMPETITION MODE TESTS
+# ============================================================================
+
+# Competition Mode: Real Game Manager with Algorithm Directory
+# -----------------------------------------------------------
+
+# Test 10: Real Game Manager - Algorithm Directory (all algorithms compete)
+./bin/tanks_game game_maps_folder=../examples/ game_manager=../test_libraries/compiled_libraries/game_managers/libTestGameManager_Real_098765432_123456789.so algorithms_folder=../test_libraries/compiled_libraries/algorithms/ -competition -verbose
+
+# Test 11: Real Game Manager - Algorithm Directory with different map
+./bin/tanks_game game_maps_folder=../examples/ game_manager=../test_libraries/compiled_libraries/game_managers/libTestGameManager_Real_098765432_123456789.so algorithms_folder=../test_libraries/compiled_libraries/algorithms/ -competition -verbose
+
+# ============================================================================
+# ADDITIONAL COMPARATIVE TESTS
+# ============================================================================
+
+# Test 12: Predictable Game Manager - DoNothing vs AlwaysMoveForward (Comparative)
+./bin/tanks_game game_map=../examples/input_a.txt game_managers_folder=../test_libraries/compiled_libraries/game_managers/ algorithm1=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_DoNothing_098765432_123456789.so algorithm2=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_AlwaysMoveForward_098765432_123456789.so -comparative -verbose
+
+# Test 13: AlwaysTie Game Manager - AlwaysShoot vs AlwaysMoveForward (Comparative)
+./bin/tanks_game game_map=../examples/input_a.txt game_managers_folder=../test_libraries/compiled_libraries/game_managers/ algorithm1=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_AlwaysShoot_098765432_123456789.so algorithm2=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_AlwaysMoveForward_098765432_123456789.so -comparative -verbose
+
+# ============================================================================
+# EXPECTED BEHAVIORS
+# ============================================================================
+
+# Game Manager Behaviors:
+# - RealGameManager: Full game simulation with actual game logic
+# - PredictableGameManager: Always returns player 1 wins
+# - AlwaysTieGameManager: Always results in ties (winner = 0)
+
+# Algorithm Behaviors:
+# - DoNothing: Always requests battle info (ActionRequest::GetBattleInfo)
+# - AlwaysMoveForward: Always moves forward (ActionRequest::MoveForward)
+# - AlwaysShoot: Always shoots shells (ActionRequest::Shoot)
+# - Basic: Standard tank behavior (complex algorithm)
+# - Offensive: Aggressive tank behavior (complex algorithm)
+
+# Test Mode Behaviors:
+# - Basic Mode: Single game between two algorithms
+# - Comparative Mode: Detailed comparison between two algorithms
+# - Competition Mode: Tournament between all algorithms in directory

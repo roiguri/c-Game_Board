@@ -10,6 +10,8 @@
 #include "registration/AlgorithmRegistrar.h"
 #include "utils/command_line_parser.h"
 #include "game_modes/basic_game_mode.h"
+#include "game_modes/comparative_runner.h"
+#include "game_modes/competitive_runner.h"
 
 void printUsage(const char* programName) {
     CommandLineParser parser;
@@ -32,17 +34,58 @@ int executeBasicMode(const CommandLineParser& parser) {
         return 1; // Game execution failed
     }
     
-    // TODO: consider removing this
-    std::cout << "Game execution completed successfully." << std::endl;
+    // Game execution completed successfully
     return 0;
 }
 
-int executeComparativeMode(const CommandLineParser& /* parser */) {
-    throw std::runtime_error("Comparative mode is not yet implemented");
+int executeComparativeMode(const CommandLineParser& parser) {
+    ComparativeRunner runner;
+    
+    ComparativeRunner::ComparativeParameters params;
+    
+    params.mapFile = parser.getGameMap();
+    params.gameManagersFolder = parser.getGameManagersFolder();
+    params.algorithm1Lib = parser.getAlgorithm1();
+    params.algorithm2Lib = parser.getAlgorithm2();
+    params.verbose = parser.isVerbose();
+    
+    // Optional: num_threads parameter
+    auto numThreads = parser.getNumThreads();
+    if (numThreads.has_value()) {
+        // TODO: Implement threading support in ComparativeRunner
+        std::cout << "Note: Threading support not yet implemented, using single thread." << std::endl;
+    }
+    
+    const auto& results = runner.runComparative(params);
+    
+    if (results.empty()) {
+        return 1; // Comparative execution failed
+    }    
+    return 0;
 }
 
-int executeCompetitionMode(const CommandLineParser& /* parser */) {
-    throw std::runtime_error("Competition mode is not yet implemented");
+int executeCompetitionMode(const CommandLineParser& parser) {
+    CompetitiveRunner runner;
+    CompetitiveRunner::CompetitiveParameters params;
+    
+    params.gameMapsFolder = parser.getGameMapsFolder();
+    params.gameManagerLib = parser.getGameManager();
+    params.algorithmsFolder = parser.getAlgorithmsFolder();
+    params.verbose = parser.isVerbose();
+    
+    // Optional: num_threads parameter
+    auto numThreads = parser.getNumThreads();
+    if (numThreads.has_value()) {
+        // TODO: Implement threading support in CompetitiveRunner
+        std::cout << "Note: Threading support not yet implemented, using single thread." << std::endl;
+    }
+    
+    const auto& scores = runner.runCompetition(params);
+    
+    if (scores.empty()) {
+        return 1; // Competition execution failed
+    }    
+    return 0;
 }
 
 int main(int argc, char* argv[]) {
@@ -74,19 +117,25 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
+    int result = 0;
     switch (parseResult.mode) {
         case CommandLineParser::Mode::Basic:
-            return executeBasicMode(parser);
+            result = executeBasicMode(parser);
+            break;
             
         case CommandLineParser::Mode::Comparative:
-            return executeComparativeMode(parser);
+            result = executeComparativeMode(parser);
+            break;
             
         case CommandLineParser::Mode::Competition:
-            return executeCompetitionMode(parser);
+            result = executeCompetitionMode(parser);
+            break;
             
         default:
             std::cerr << "Error: Unknown mode detected" << std::endl;
             printUsage(argv[0]);
             return 1;
     }
+    // Execution completed
+    return result;
 }
