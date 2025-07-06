@@ -27,9 +27,10 @@ protected:
 TEST_F(FileLoaderTest, LoadBoardFile_NonexistentFile) {
     const std::string nonExistentFile = "this_file_does_not_exist.txt";
     int rows, cols, maxSteps, numShells;
+    std::string mapName;
     std::stringstream cerr_buffer;
     std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
-    std::vector<std::string> result = FileLoader::loadBoardFile(nonExistentFile, rows, cols, maxSteps, numShells);
+    std::vector<std::string> result = FileLoader::loadBoardFile(nonExistentFile, rows, cols, maxSteps, numShells, mapName);
     std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
     std::string errorOutput = cerr_buffer.str();
@@ -39,9 +40,10 @@ TEST_F(FileLoaderTest, LoadBoardFile_NonexistentFile) {
 TEST_F(FileLoaderTest, LoadBoardFile_EmptyFile) {
     createTestFile({});
     int rows, cols, maxSteps, numShells;
+    std::string mapName;
     std::stringstream cerr_buffer;
     std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells);
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
     std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
     std::string errorOutput = cerr_buffer.str();
@@ -63,7 +65,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_ValidFile) {
     };
     createTestFile(content);
     int rows, cols, maxSteps, numShells;
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells);
+    std::string mapName;
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
     EXPECT_EQ(rows, 5);
     EXPECT_EQ(cols, 5);
     EXPECT_EQ(maxSteps, 1000);
@@ -88,9 +91,10 @@ TEST_F(FileLoaderTest, LoadBoardFile_InvalidRows) {
         "#####"
     });
     int rows, cols, maxSteps, numShells;
+    std::string mapName;
     std::stringstream cerr_buffer;
     std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells);
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
     std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
     std::string errorOutput = cerr_buffer.str();
@@ -110,9 +114,10 @@ TEST_F(FileLoaderTest, LoadBoardFile_MissingHeaderLine) {
         "#####"
     });
     int rows, cols, maxSteps, numShells;
+    std::string mapName;
     std::stringstream cerr_buffer;
     std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells);
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
     std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
     std::string errorOutput = cerr_buffer.str();
@@ -133,7 +138,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_ExtraWhitespace) {
         "#####"
     });
     int rows, cols, maxSteps, numShells;
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells);
+    std::string mapName;
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
     EXPECT_EQ(rows, 10);
     EXPECT_EQ(cols, 8);
     EXPECT_EQ(maxSteps, 2000);
@@ -150,7 +156,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_OnlyHeaders) {
         "Cols = 5"
     });
     int rows, cols, maxSteps, numShells;
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells);
+    std::string mapName;
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
     EXPECT_EQ(rows, 5);
     EXPECT_EQ(cols, 5);
     EXPECT_EQ(maxSteps, 1000);
@@ -173,7 +180,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_TrailingWhitespace) {
     };
     createTestFile(content);
     int rows, cols, maxSteps, numShells;
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells);
+    std::string mapName;
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
     EXPECT_EQ(rows, 5);
     EXPECT_EQ(cols, 5);
     EXPECT_EQ(maxSteps, 1000);
@@ -197,7 +205,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_LeadingWhitespace) {
     };
     createTestFile(content);
     int rows, cols, maxSteps, numShells;
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells);
+    std::string mapName;
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
     EXPECT_EQ(rows, 5);
     EXPECT_EQ(cols, 5);
     EXPECT_EQ(maxSteps, 1000);

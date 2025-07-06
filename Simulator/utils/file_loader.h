@@ -25,6 +25,7 @@ public:
         int cols; 
         int maxSteps;
         int numShells;
+        std::string mapName;
         std::unique_ptr<SatelliteView> satelliteView;
     };
     
@@ -59,7 +60,8 @@ public:
         int& rows,
         int& cols,
         int& maxSteps,
-        int& numShells
+        int& numShells,
+        std::string& mapName
     );
 
 private:

@@ -72,12 +72,14 @@ GameResult GameRunner::runSingleGame(
     // 5. Create GameManager
     auto gameManager = gameManagerEntry->create(verbose);
     
-    // 6. Execute game
+    // 6. Execute game using map name from board file
     GameResult result = gameManager->run(
         mapWidth, mapHeight,
         satelliteView,
+        boardInfo.mapName,
         maxSteps, numShells,
-        *player1, *player2,
+        *player1, algorithm1Name,
+        *player2, algorithm2Name,
         algo1It->getTankAlgorithmFactory(),
         algo2It->getTankAlgorithmFactory()
     );

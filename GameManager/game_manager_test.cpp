@@ -1419,8 +1419,10 @@ TEST_F(GameManagerTest, Run_DoesNotExceedMaximumSteps_Integration) {
     GameResult result = manager->run(
         width, height,
         satelliteView,
+        "test_map",
         maxSteps, numShells,
-        *player1, *player2,
+        *player1, "TestPlayer1",
+        *player2, "TestPlayer2",
         mockFactoryDoNothing, mockFactoryDoNothing
     );
 
@@ -1462,8 +1464,10 @@ TEST_F(GameManagerTest, Run_TieAfter40StepsWithZeroShells_Integration) {
     GameResult result = manager->run(
         width, height,
         satelliteView,
+        "test_map",
         maxSteps, numShells,
-        *player1, *player2,
+        *player1, "TestPlayer1",
+        *player2, "TestPlayer2",
         mockFactoryShooter, mockFactoryShooter
     );
 
@@ -1502,8 +1506,10 @@ TEST_F(GameManagerTest, Run_VerboseFalse_NoFileOutput) {
     GameResult result = manager->run(
         width, height,
         satelliteView,
+        "test_map",
         maxSteps, numShells,
-        *player1, *player2,
+        *player1, "TestPlayer1",
+        *player2, "TestPlayer2",
         mockFactoryDoNothing, mockFactoryDoNothing
     );
     
@@ -1534,8 +1540,10 @@ TEST_F(GameManagerTest, Run_VerboseTrue_CreatesFileOutput) {
     GameResult result = manager->run(
         width, height,
         satelliteView,
+        "test_map",
         maxSteps, numShells,
-        *player1, *player2,
+        *player1, "TestPlayer1",
+        *player2, "TestPlayer2",
         mockFactoryDoNothing, mockFactoryDoNothing
     );
     

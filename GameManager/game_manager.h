@@ -80,8 +80,10 @@ public:
     GameResult run(
         size_t map_width, size_t map_height,
         const SatelliteView& map, // <= assume it is a snapshot, NOT updated
+        string map_name,
         size_t max_steps, size_t num_shells,
-        Player& player1, Player& player2,
+        Player& player1, string name1,
+        Player& player2, string name2,
         TankAlgorithmFactory player1_tank_algo_factory,
         TankAlgorithmFactory player2_tank_algo_factory) override;
 
@@ -126,6 +128,11 @@ private:
     // Verbose mode flag
     bool m_verbose;
 
+    // Names for output file generation
+    std::string m_mapName;
+    std::string m_player1Name;
+    std::string m_player2Name;
+
     // Current game state
     GameBoard m_currentBoard;
     std::vector<Tank> m_currentTanks;
@@ -168,7 +175,7 @@ private:
     void removeDestroyedShells();
 
     // Save the game results to an output file (only when verbose=true)
-    bool saveResults(Player& player1, Player& player2);
+    bool saveResults();
 
     // Convert ActionRequest to string
     std::string actionToString(ActionRequest action);
@@ -178,6 +185,9 @@ private:
     
     // Clean filename to remove invalid characters for file system
     std::string cleanFilename(const std::string& name);
+
+    // Extract base name from full file path (remove directory path only)
+    std::string extractBaseName(const std::string& fullPath);
 
     // Read character grid from SatelliteView and convert to vector<string> format
     std::vector<std::string> readSatelliteView(const SatelliteView& satellite_view, 

@@ -11,7 +11,8 @@ std::vector<std::string> FileLoader::loadBoardFile(
     int& rows,
     int& cols,
     int& maxSteps,
-    int& numShells
+    int& numShells,
+    std::string& mapName
 ) {
     std::ifstream inputFile(filePath);
     if (!inputFile.is_open()) {
@@ -31,7 +32,10 @@ std::vector<std::string> FileLoader::loadBoardFile(
         return {};
     }
 
-    // 1. Map name/description (can be ignored)
+    // 1. Extract map name from first line and clean it
+    mapName = lines[0];
+    // Replace spaces with underscores
+    std::replace(mapName.begin(), mapName.end(), ' ', '_');
     // 2. MaxSteps = <NUM>
     if (!parseKeyValue(lines[1], "MaxSteps", maxSteps)) {
         std::cerr << "Error: Invalid or missing MaxSteps line: '" << lines[1] << "'" << std::endl;
@@ -77,7 +81,7 @@ bool FileLoader::parseKeyValue(const std::string& line, const std::string& key, 
 FileLoader::BoardInfo FileLoader::loadBoardWithSatelliteView(const std::string& filePath) {
     BoardInfo info{};
     
-    std::vector<std::string> boardData = loadBoardFile(filePath, info.rows, info.cols, info.maxSteps, info.numShells);
+    std::vector<std::string> boardData = loadBoardFile(filePath, info.rows, info.cols, info.maxSteps, info.numShells, info.mapName);
     
     if (!boardData.empty()) {
         info.satelliteView = std::make_unique<FileSatelliteView>(boardData, info.rows, info.cols);

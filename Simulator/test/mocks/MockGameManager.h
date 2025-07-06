@@ -8,8 +8,10 @@ public:
     MockGameManager(bool verbose) : verbose_(verbose) {}
     
     GameResult run(size_t, size_t, const SatelliteView&,
+                  string,
                   size_t, size_t,
-                  Player&, Player&,
+                  Player&, string,
+                  Player&, string,
                   TankAlgorithmFactory,
                   TankAlgorithmFactory) override {
         return GameResult{}; // Return dummy result

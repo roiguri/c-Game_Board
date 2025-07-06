@@ -30,7 +30,6 @@ public:
     using BaseGameMode::handleError;
     using BaseGameMode::createErrorResult;
     using BaseGameMode::writeToFile;
-    using BaseGameMode::m_boardInfo;
     using BaseGameMode::m_libraryManager;
 };
 

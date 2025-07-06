@@ -160,7 +160,7 @@ GameResult ComparativeRunner::executeGameLogic(const BaseParameters& params) {
 void ComparativeRunner::displayResults(const GameResult& /* result */) {
     // Generate output file with all results
     if (!m_results.empty() && m_currentParams) {
-        std::string outputPath = "comparative_results_" + generateTimestamp() + ".txt";
+        std::string outputPath = m_currentParams->gameManagersFolder + "/comparative_results_" + generateTimestamp() + ".txt";
         generateOutput(m_results, outputPath, *m_currentParams);
         
         // Results written to file
@@ -259,7 +259,7 @@ ComparativeRunner::ComparativeResult ComparativeRunner::executeWithGameManager(
             gameManagerName,
             algorithm1Name,
             algorithm2Name,
-            false  // Not verbose for comparative mode
+            params.verbose
         );
         auto endTime = std::chrono::high_resolution_clock::now();
         result.executionTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);

@@ -80,10 +80,17 @@ bool GameManager::readBoard(const SatelliteView& satellite_view, size_t map_widt
 GameResult GameManager::run(
         size_t map_width, size_t map_height,
         const SatelliteView& map, // <= assume it is a snapshot, NOT updated
+        string map_name,
         size_t max_steps, size_t num_shells,
-        Player& player1, Player& player2,
+        Player& player1, string name1,
+        Player& player2, string name2,
         TankAlgorithmFactory player1_tank_algo_factory,
         TankAlgorithmFactory player2_tank_algo_factory) {
+
+    // Store names for output file generation
+    m_mapName = map_name;
+    m_player1Name = extractBaseName(name1);
+    m_player2Name = extractBaseName(name2);
 
     // Store references to the provided players
     m_players.push_back(PlayerWithId(1, player1));
@@ -165,17 +172,16 @@ GameResult GameManager::run(
     #endif
 
     if (m_verbose) {
-        saveResults(player1, player2);
+        saveResults();
     }
     
     // TODO: return by value?
     return std::move(m_finalGameResult);
 }
 
-bool GameManager::saveResults(Player& player1, Player& player2) {
-    // Extract concrete class names for player1 and player2
-    std::string player1Name = cleanFilename(typeid(player1).name());
-    std::string player2Name = cleanFilename(typeid(player2).name());
+bool GameManager::saveResults() {
+    std::string player1Name = cleanFilename(m_player1Name);
+    std::string player2Name = cleanFilename(m_player2Name);
     
     // Generate unique output file path
     std::string outputFilePath = generateOutputFilePath(player1Name, player2Name);
@@ -626,7 +632,8 @@ std::string GameManager::generateOutputFilePath(const std::string& player1Name, 
     oss << std::setw(NUM_DIGITS) << std::setfill('0') << size_t(ts.count() * NUM_DIGITS_P) % NUM_DIGITS_P;
     std::string uniqueId = oss.str();
     
-    return "game_" + player1Name + "_vs_" + player2Name + "_" + uniqueId + ".txt";
+    std::string cleanMapName = cleanFilename(m_mapName);
+    return "game_" + player1Name + "_vs_" + player2Name + "_" + cleanMapName + "_" + uniqueId + ".txt";
 }
 
 std::string GameManager::cleanFilename(const std::string& name) {
@@ -641,6 +648,13 @@ std::string GameManager::cleanFilename(const std::string& name) {
     }
     
     return cleaned;
+}
+
+std::string GameManager::extractBaseName(const std::string& fullPath) {
+    std::filesystem::path path(fullPath);
+    std::string fileName = path.filename().string();
+    
+    return cleanFilename(fileName);
 }
 
 std::vector<std::string> GameManager::readSatelliteView(const SatelliteView& satellite_view, 
