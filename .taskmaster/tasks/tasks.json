@@ -3,247 +3,482 @@
     "tasks": [
       {
         "id": 1,
-        "title": "Implement game manager registration functionality to allow dynamic registration and management of game managers in the system",
-        "description": "Create a comprehensive registration system that allows dynamic registration, validation, and management of game manager implementations within the simulation framework.",
-        "details": "Design and implement a GameManagerRegistry class that manages the lifecycle of game manager registration for the simulation system. The system should include: a registration API that accepts game manager identification (name, version, library file path) and validates implementation compatibility with AbstractGameManager interface, a registry storage mechanism that maintains active game manager lists with their library associations and metadata, integration with dynamic library loading to safely load and unload .so files containing game manager implementations, validation logic that ensures registered game managers properly implement the AbstractGameManager interface and have required methods, conflict resolution for duplicate registrations and version management, thread-safe access patterns for concurrent registration/deregistration operations, and integration points with the Simulator component for discovering and loading registered game managers. The registry should support both manual registration via API calls and automatic discovery of game managers in specified directories. Include proper error handling for invalid libraries, missing symbols, and incompatible interfaces.",
-        "testStrategy": "Test registration of valid game manager .so files with proper AbstractGameManager implementation. Verify rejection of invalid or malformed library files that don't implement the required interface. Confirm duplicate registration handling and version conflict resolution works correctly. Test integration with dynamic library loading and symbol resolution. Verify thread-safe concurrent access to the registry from multiple threads. Test automatic discovery functionality in specified directories. Confirm proper cleanup and resource management when unregistering game managers. Verify error handling for corrupted or incompatible library files. Test that registered game managers can be successfully instantiated and used by the Simulator component.",
-        "status": "pending",
-        "dependencies": [
-          3
-        ],
-        "priority": "medium",
-        "subtasks": []
+        "title": "Implement Dynamic Library Manager",
+        "description": "Create LibraryManager class to handle dynamic loading and unloading of .so files with automatic registration triggering",
+        "details": "Implement LibraryManager class using dlopen(), dlclose(), and dlerror() for POSIX systems. The class should provide methods: loadLibrary(path), unloadAllLibraries(), getLoadedLibraryNames(), and getLastError(). Use RTLD_LAZY | RTLD_GLOBAL flags for dlopen to ensure proper symbol resolution. Track loaded libraries in std::vector<void*> handles and std::vector<std::string> names for cleanup. Handle edge cases like duplicate loading, invalid paths, and missing symbols. Integrate with existing REGISTER_* macros system that triggers automatic registration upon library loading.",
+        "testStrategy": "Unit tests with mock .so files, test loading valid/invalid libraries, verify registration triggering, test cleanup and error handling. Create test .so files with known exports to validate dynamic loading functionality.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define LibraryManager class interface and structure",
+            "description": "Create the basic class structure with necessary headers, member variables for library tracking, and method signatures for dlopen/dlclose operations",
+            "dependencies": [],
+            "details": "Design the LibraryManager class with appropriate member variables (vectors for tracking libraries), method declarations for loading/unloading libraries, and necessary includes for dlopen/dlclose functionality. Consider cross-platform compatibility requirements.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement dlopen/dlclose wrapper methods",
+            "description": "Implement the core dynamic library loading and unloading functionality using dlopen and dlclose system calls",
+            "dependencies": [
+              1
+            ],
+            "details": "Create wrapper methods that safely handle dlopen() for loading shared libraries and dlclose() for unloading them. Include proper platform-specific handling (dlopen on Unix/Linux, LoadLibrary on Windows if needed).",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Add library tracking with vectors",
+            "description": "Implement data structures and methods to track loaded libraries using vector containers",
+            "dependencies": [
+              1
+            ],
+            "details": "Create vector-based storage to maintain references to loaded libraries, implement methods to add/remove library entries, and provide functionality to query loaded library status.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement error handling and validation",
+            "description": "Add comprehensive error handling for library loading failures and input validation",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Implement robust error handling for dlopen/dlclose failures, validate library paths and names, handle duplicate loading attempts, and provide meaningful error messages using dlerror() or platform equivalents.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Integrate with existing REGISTER macros",
+            "description": "Connect the LibraryManager with the current registration system used by algorithms and factories",
+            "dependencies": [
+              4
+            ],
+            "details": "Modify or extend existing REGISTER macros to work with the LibraryManager, ensure proper symbol resolution from loaded libraries, and maintain compatibility with current TankAlgorithmFactory and PlayerFactory registration mechanisms.\n<info added on 2025-06-29T07:46:00.637Z>\nThe integration should be moved to the Simulator layer (SimpleGameRunner or main.cpp) rather than being implemented within LibraryManager itself. LibraryManager should remain a focused utility for library loading/unloading operations (dlopen/dlclose). The complete integration workflow including createAlgorithmFactoryEntry → loadLibrary → validateLastRegistration should be orchestrated at the Simulator level where the main executable can coordinate between LibraryManager utilities and the existing factory registration systems.\n</info added on 2025-06-29T07:46:00.637Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Add comprehensive unit tests with mock libraries",
+            "description": "Create thorough test suite including mock shared libraries to validate LibraryManager functionality",
+            "dependencies": [
+              5
+            ],
+            "details": "Develop unit tests covering successful library loading/unloading, error conditions, library tracking, integration with registration system, and create mock/test shared libraries for testing purposes.",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
       },
       {
         "id": 2,
-        "title": "Refactor Algorithm component to single source file structure",
-        "description": "Consolidate multiple Algorithm source files into a unified structure to improve maintainability and reduce complexity while preserving all existing functionality.",
-        "details": "Analyze the current Algorithm component structure to identify multiple source files that can be consolidated. Create a single, well-organized source file that combines related functionality from separate files while maintaining clear separation of concerns within the unified structure. This includes: merging related classes and functions from multiple .cpp/.h file pairs into cohesive units, reorganizing the directory structure to reduce file proliferation, updating the CMakeLists.txt or makefile to reflect the new simplified build structure, ensuring all algorithms (BasicPlayer, OffensivePlayer, tank algorithms) remain functional, maintaining proper namespace isolation, and updating any internal includes or dependencies. Preserve the existing public interfaces and factory patterns while simplifying the internal implementation structure. Consider grouping related algorithms together logically rather than having separate files for each minor variation.",
-        "testStrategy": "Verify all existing Algorithm tests pass without modification after refactoring. Confirm that PlayerFactory and TankAlgorithmFactory continue to work correctly with the consolidated structure. Test that all player types (BasicPlayer, OffensivePlayer) and their corresponding tank algorithms function identically to before refactoring. Verify the build system compiles successfully with fewer source files. Run integration tests to ensure GameManager can still load and use all algorithm types. Check that the public API interfaces remain unchanged and backward compatible.",
-        "status": "pending",
-        "dependencies": [],
-        "priority": "medium",
-        "subtasks": []
-      },
-      {
-        "id": 3,
-        "title": "Implement Player Registration System",
-        "description": "Create a comprehensive registration system that allows players to register their tank algorithms and participate in competitive games with proper validation and management.",
-        "details": "Design and implement a PlayerRegistration class that manages the lifecycle of player registration for competitive games. The system should include: a registration API that accepts player identification (name, team, algorithm file path) and validates algorithm compatibility, a registry storage mechanism that maintains active player lists with their algorithm associations, integration with the existing PlayerFactory to dynamically load registered algorithms, validation logic that ensures algorithm .so files are valid and implement required interfaces, conflict resolution for duplicate player names or algorithm conflicts, and registration status tracking (pending, active, rejected). The system should support both file-based and in-memory registration depending on game mode. Implement proper error handling for invalid algorithms, missing files, or registration conflicts. The registration system should integrate with the Simulator's competitive mode to automatically discover and register players from specified directories, while also supporting manual registration through API calls.",
-        "testStrategy": "Test registration of valid tank algorithms with proper interface implementation. Verify rejection of invalid or malformed algorithm files. Confirm duplicate registration handling and conflict resolution. Test integration with PlayerFactory for dynamic algorithm loading. Verify registration persistence across game sessions when using file-based storage. Test automatic discovery and registration in competitive mode. Confirm proper error messages for various failure scenarios including missing files, invalid algorithms, and registration conflicts.",
-        "status": "pending",
-        "dependencies": [
-          2
-        ],
-        "priority": "medium",
-        "subtasks": []
-      },
-      {
-        "id": 4,
-        "title": "Create Simulator Project Structure and Core Components",
-        "description": "Establish the Simulator project with proper directory structure, build system, command-line interface, and core simulation orchestration logic.",
-        "details": "Create the Simulator/ directory with proper makefile for building the main executable. Implement command-line argument parsing for both comparative and competitive modes with proper validation and error handling. Design the core Simulator class that can orchestrate multiple game instances, manage dynamic library loading (.so files), and coordinate threading. Implement file discovery utilities for finding game managers, algorithms, and maps in specified directories. Set up the foundation for result collection and output file generation with timestamped naming. Ensure the executable follows the naming convention simulator_<submitter_ids>.",
-        "testStrategy": "Verify command-line parsing works correctly for both modes with all required and optional arguments. Test error handling for missing arguments, invalid file paths, and non-existent directories. Confirm the simulator executable builds successfully and has the correct naming convention. Test file discovery functions with sample directories. Validate that the basic simulator structure can be instantiated and initialized without crashes.",
-        "status": "pending",
-        "dependencies": [],
-        "priority": "medium",
-        "subtasks": []
-      },
-      {
-        "id": 5,
-        "title": "Refactor Input Validation from GameManager to Simulator",
-        "description": "Move input validation and error handling logic from GameManager to Simulator to centralize error handling and improve separation of concerns.",
-        "details": "Extract all input validation logic currently in GameManager that handles command-line arguments, file path validation, and parameter checking. Move this logic to the Simulator class where it belongs according to the new architecture. This includes: validating game map files exist and are readable, checking that algorithm .so files are valid and loadable, verifying GameManager .so files are accessible, validating numeric parameters (num_threads, max_steps, num_shells), and ensuring directory paths are valid and contain expected files. Update GameManager to focus solely on game execution logic, removing any command-line or file system validation. Implement proper error propagation from Simulator to provide meaningful error messages to users. Ensure all validation happens before any dynamic library loading or game execution begins.",
-        "testStrategy": "Test that invalid file paths are caught by Simulator before GameManager execution. Verify that malformed .so files are detected at Simulator level. Confirm that GameManager no longer performs input validation and focuses only on game logic. Test error messages are clear and helpful when validation fails. Ensure that valid inputs still work correctly after the refactoring.",
-        "status": "pending",
-        "dependencies": [
-          3
-        ],
-        "priority": "medium",
-        "subtasks": []
-      }
-    ],
-    "metadata": {
-      "created": "2025-06-26T09:35:35.122Z",
-      "updated": "2025-06-28T11:06:48.790Z",
-      "description": "Tasks for master context"
-    }
-  },
-  "GameManager": {
-    "tasks": [],
-    "metadata": {
-      "created": "2025-06-26T15:20:47.254Z",
-      "updated": "2025-06-26T19:01:39.004Z",
-      "description": "Tag created on 6/26/2025"
-    }
-  },
-  "build": {
-    "tasks": [
-      {
-        "id": 2,
-        "title": "Add Bonus Features to Build System with Tests",
-        "description": "Integrate all UserCommon bonus feature directories into the CMake build configuration and create comprehensive test binaries for bonus features.",
-        "details": "1. Scan UserCommon directory structure to identify all bonus feature subdirectories and their source files\n2. Update CMakeLists.txt to include bonus feature directories in the build configuration\n3. Create individual test executables for each bonus feature using the existing test framework patterns\n4. Configure CMake to compile bonus feature source files with proper include paths and dependencies\n5. Add bonus feature test targets to the main build system with appropriate compiler flags\n6. Ensure bonus features link correctly with core UserCommon libraries and dependencies\n7. Update build scripts to handle bonus feature compilation alongside main project components\n8. Configure test discovery so bonus feature tests are included in the complete test suite\n9. Verify that bonus features don't break existing build configurations or introduce conflicts\n10. Document the bonus feature build process and any special requirements",
-        "testStrategy": "1. Verify all bonus feature directories are detected and included in CMake configuration\n2. Compile the entire project including bonus features without warnings or errors\n3. Execute all bonus feature test binaries individually to ensure they run successfully\n4. Run the complete test suite including bonus features with 100% pass rate\n5. Test build system with and without bonus features enabled to ensure flexibility\n6. Verify bonus feature tests integrate properly with existing test infrastructure\n7. Check that bonus feature compilation doesn't increase build time excessively\n8. Validate that bonus features can be built on different platforms if applicable\n9. Ensure clean builds work correctly with bonus features included\n10. Test that bonus feature removal doesn't break the main build system",
-        "status": "pending",
+        "title": "Implement Simple Game Runner",
+        "description": "Create GameRunner class to execute single games using dynamically loaded GameManager and algorithm implementations",
+        "status": "done",
         "dependencies": [
           1
         ],
-        "priority": "medium",
-        "subtasks": []
-      }
-    ],
-    "metadata": {
-      "created": "2025-06-26T17:42:23.385Z",
-      "updated": "2025-06-26T21:51:27.652Z",
-      "description": "Tasks for build context"
-    }
-  },
-  "gamemanager-registration": {
-    "tasks": [
-      {
-        "id": 1,
-        "title": "Create GameManagerRegistrar Header File",
-        "description": "Create the GameManagerRegistrar class header with singleton pattern and dynamic loading support",
-        "details": "Implement GameManagerRegistrar.h in simulator/ directory with:\n- GameManagerEntry struct containing so_name, factory, and utility methods\n- Static singleton instance and getter method\n- Methods for creating entries, adding factories, and validation\n- BadGameManagerRegistrationException for error handling\n- Iterator support and findByName functionality\n- Factory pattern integration with AbstractGameManager",
-        "testStrategy": "Unit tests for singleton access, entry creation, factory assignment, validation logic, and exception handling scenarios",
         "priority": "high",
-        "dependencies": [],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 2,
-        "title": "Implement GameManagerRegistrar Source File",
-        "description": "Create the implementation file for GameManagerRegistrar with singleton initialization",
-        "details": "Implement GameManagerRegistrar.cpp with:\n- Static registrar instance definition\n- getGameManagerRegistrar() method implementation\n- Ensure proper singleton pattern implementation following existing AlgorithmRegistrar pattern",
-        "testStrategy": "Verify singleton behavior, ensure same instance returned across calls, test thread safety if applicable",
-        "priority": "high",
-        "dependencies": [
-          1
-        ],
-        "status": "done",
-        "subtasks": []
+        "details": "Implement GameRunner with static method runSingleGame() that takes map file path, GameManager name, and two algorithm names. Use existing FileLoader::loadBoardWithSatelliteView() for map loading, retrieve factories from existing registrar system (GameManagerRegistrar::getFactory(), TankAlgorithmRegistrar::getFactory()). Create Player instances using algorithm factories, instantiate GameManager using factory, and call run() method. Implement GameResult struct to capture game outcomes including winner, turn count, and any error states. Add printGameResult() method for console output formatting.",
+        "testStrategy": "Integration tests with real .so files, verify game execution with different map configurations, test error handling for missing factories, validate game result capture and formatting. Mock registrar responses for isolated testing.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create GameRunner class with runSingleGame static method",
+            "description": "Implement a new GameRunner class that provides a static runSingleGame method to execute single game instances with simplified interface",
+            "status": "done",
+            "dependencies": [],
+            "details": "Create GameRunner class in appropriate namespace. Implement static runSingleGame method that takes game parameters and coordinates game execution. Method should handle basic game setup and coordination between components.",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement GameResult struct and result capture logic",
+            "description": "Design and implement GameResult data structure to capture game outcomes and implement logic to collect and store game results",
+            "status": "done",
+            "dependencies": [],
+            "details": "Define GameResult struct with fields for winner, game duration, final scores, and other relevant metrics. Implement result capture mechanisms that collect data during game execution and populate the GameResult structure.",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Integrate with FileLoader and existing registrar systems",
+            "description": "Connect GameRunner with FileLoader for input processing and integrate with existing player/algorithm registrar systems",
+            "status": "done",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Integrate GameRunner with FileLoader to handle input file processing. Connect with existing PlayerFactory and TankAlgorithmFactory registrar systems. Ensure proper initialization and coordination between all components.",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Add error handling and result formatting methods",
+            "description": "Implement comprehensive error handling throughout the game execution pipeline and add methods for formatting and presenting game results",
+            "status": "done",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Add try-catch blocks and error handling for file loading, game initialization, and execution phases. Implement result formatting methods for different output formats (console, file). Add validation for input parameters and graceful failure handling.",
+            "testStrategy": ""
+          }
+        ]
       },
       {
         "id": 3,
-        "title": "Implement GameManagerRegistration Source",
-        "description": "Create GameManagerRegistration.cpp to handle factory registration during dynamic loading",
-        "details": "Implement GameManagerRegistration.cpp with:\n- Constructor taking GameManagerFactory parameter\n- Integration with GameManagerRegistrar to add factory to last entry\n- Follow existing registration pattern from algorithm system\n- Ensure proper factory moving semantics",
-        "testStrategy": "Test factory registration process, verify factory is properly added to registrar, test with mock factories",
+        "title": "Create Basic Main Entry Point",
+        "description": "Implement basic main.cpp for Phase 1 MVP that loads .so files and executes single games",
+        "details": "Create main.cpp that accepts 4 command line arguments: map_file, gamemanager.so, algo1.so, algo2.so. Implement basic argument validation and usage message. Instantiate LibraryManager, load the three .so files in sequence, then call SimpleGameRunner::runSingleGame() with hardcoded factory names. Add basic error handling with informative messages for library loading failures and game execution errors. Ensure proper cleanup by calling LibraryManager::unloadAllLibraries() before exit.",
+        "testStrategy": "End-to-end testing with real .so files and map files, verify argument validation, test with missing/invalid files, validate proper error messages and exit codes. Test cleanup behavior on both success and failure paths.",
         "priority": "high",
         "dependencies": [
           1,
           2
         ],
         "status": "done",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement command line argument parsing and validation",
+            "description": "Parse and validate command line arguments for game mode selection, file paths, and configuration options",
+            "dependencies": [],
+            "details": "Implement argument parsing for different game modes (standard input file, generate-only, run-generated), validate file paths and accessibility, handle optional flags like --config_path, --enable_logging, --log_level, and provide appropriate error messages for invalid arguments",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Create main execution flow with LibraryManager and SimpleGameRunner integration",
+            "description": "Implement the core execution logic that coordinates LibraryManager and SimpleGameRunner based on parsed arguments",
+            "dependencies": [
+              1
+            ],
+            "details": "Create the main execution flow that uses LibraryManager to load appropriate libraries, initializes SimpleGameRunner with the correct configuration, handles different execution modes (file-based, generate-only, run-generated), and ensures proper resource management throughout the execution lifecycle",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Add comprehensive error handling and cleanup logic",
+            "description": "Implement robust error handling throughout the application lifecycle and ensure proper resource cleanup",
+            "dependencies": [
+              2
+            ],
+            "details": "Add try-catch blocks for all major operations, implement proper error reporting with meaningful messages, ensure graceful shutdown on errors, handle edge cases like missing files or invalid configurations, implement proper cleanup of resources including library unloading and temporary file cleanup",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
       },
       {
         "id": 4,
-        "title": "Create Unit Tests for GameManagerRegistrar",
-        "description": "Implement comprehensive unit tests for the GameManagerRegistrar functionality",
-        "details": "Create GameManagerRegistrarTest.cpp with:\n- MockGameManager class for testing\n- Test fixture with proper setup/teardown\n- Tests for createGameManagerEntry, addGameManagerFactoryToLastEntry\n- Validation tests including failure scenarios\n- findByName functionality tests\n- GameManager instance creation tests\n- Exception handling verification",
-        "testStrategy": "Use GoogleTest framework, mock objects for isolation, cover all public methods and error conditions",
+        "title": "Implement Command Line Parser",
+        "description": "Create robust CommandLineParser class to handle both comparative and competition mode arguments with proper validation",
+        "details": "Implement CommandLineParser class supporting two modes: basic game execution and advanced modes (comparative/competition). For basic mode: map_file, gamemanager.so, algo1.so, algo2.so, optional --verbose flag. For comparative mode: -comparative flag with key=value parameters (game_map, game_managers_folder, algorithm1, algorithm2, optional num_threads). For competition mode: -competition flag with parameters (game_maps_folder, game_manager, algorithms_folder, optional num_threads). Use std::map<std::string, std::string> for parameter storage. Implement validation for file/folder existence, parameter completeness, and mode conflicts.",
+        "testStrategy": "Unit tests for argument parsing with various valid/invalid combinations, test parameter validation, verify mode detection, test edge cases like missing parameters and invalid paths. Mock filesystem operations for isolated testing.",
         "priority": "medium",
         "dependencies": [
-          1,
-          2,
           3
         ],
-        "status": "in-progress",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design CommandLineParser class structure and parameter storage",
+            "description": "Design the overall architecture of the CommandLineParser class, define data structures for storing parsed parameters, and establish the interface for different parsing modes",
+            "dependencies": [],
+            "details": "Create class definition with member variables for storing parsed arguments, design enum for different modes (basic, comparative, competition), define data structures for parameter storage, and establish public interface methods for parsing and accessing parameters",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement basic mode argument parsing",
+            "description": "Implement parsing logic for basic game mode arguments including input file validation and simple command line options",
+            "dependencies": [
+              1
+            ],
+            "details": "Parse basic arguments like input file path, validate file existence and accessibility, handle simple flags and options, implement error handling for missing or invalid basic arguments",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Add comparative mode parsing with key=value parameters",
+            "description": "Implement parsing logic for comparative mode with key=value parameter pairs and handle complex parameter combinations",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Parse key=value pairs for comparative mode, validate parameter names and values, handle multiple algorithm configurations, implement parameter conflict detection and resolution",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement competition mode parsing",
+            "description": "Add parsing support for competition mode arguments including tournament configurations and multi-player setups",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Parse competition-specific arguments, handle tournament bracket configurations, validate player count and algorithm assignments, implement competition parameter validation",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Add comprehensive validation and error reporting",
+            "description": "Implement robust validation for all parsed parameters and provide detailed error messages for invalid configurations",
+            "dependencies": [
+              2,
+              3,
+              4
+            ],
+            "details": "Add file system validation for all file paths, implement cross-parameter validation, create detailed error messages with suggestions, add help text generation, implement parameter conflict resolution",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
       },
       {
         "id": 5,
-        "title": "Integrate Dynamic Loading in Simulator",
-        "description": "Add GameManager dynamic loading functionality to the Simulator class",
-        "details": "Implement in Simulator class:\n- loadGameManagers method with dlopen/dlclose handling\n- Path parsing to extract GameManager names\n- Proper handle management with RAII cleanup\n- Error handling for failed loads\n- Registration validation after loading\n- loadedGameManagerHandles vector for cleanup tracking",
-        "testStrategy": "Test with mock .so files, verify proper cleanup, test error scenarios with invalid files, validate registration process",
-        "priority": "high",
+        "title": "Implement Comparative Mode Runner",
+        "description": "Create ComparativeRunner class for sequential execution of comparative mode with multiple GameManagers",
+        "details": "Implement ComparativeRunner class with runComparative() method that loads all .so files from game_managers_folder, executes the same game with each GameManager, and generates comparative results. Use std::filesystem to enumerate .so files in directory. For each GameManager, run the game with specified algorithms and collect results including winner, turn count, and execution time. Group results by identical outcomes and count occurrences. Generate output file named 'comparative_results_<timestamp>.txt' with formatted results showing GameManager performance comparison. Handle GameManager loading failures gracefully and continue with available ones.",
+        "testStrategy": "Integration tests with multiple GameManager .so files, verify result grouping logic, test output file generation and formatting, validate timestamp generation, test handling of GameManager failures and empty directories.",
+        "priority": "medium",
         "dependencies": [
-          1,
-          2,
-          3
+          4
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement directory enumeration and .so file loading",
+            "description": "Create functionality to scan directories for .so files and dynamically load GameManager implementations",
+            "dependencies": [],
+            "details": "Implement directory traversal to find all .so files, use dlopen/dlsym to load GameManager factories, handle loading errors gracefully, and maintain a registry of successfully loaded GameManagers with their metadata",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Create game execution loop for multiple GameManagers",
+            "description": "Implement the core loop that runs each loaded GameManager against test scenarios",
+            "dependencies": [
+              1
+            ],
+            "details": "Create execution framework that iterates through loaded GameManagers, runs each against predefined test cases, captures execution results including timing and success/failure status, and handles GameManager-specific errors without crashing the entire process",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement result collection and grouping logic",
+            "description": "Create data structures and logic to collect, organize, and analyze results from multiple GameManager executions",
+            "dependencies": [
+              2
+            ],
+            "details": "Design result collection structures to store execution outcomes, performance metrics, and error information. Implement grouping logic to organize results by GameManager, test case, and execution status. Add statistical analysis for performance comparisons",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Add output file generation with timestamp and formatting",
+            "description": "Implement formatted output generation for collected results with proper timestamps and readable formatting",
+            "dependencies": [
+              3
+            ],
+            "details": "Create output formatters for different file types (text, JSON, CSV), add timestamp generation for unique filenames, implement summary statistics and detailed result reporting, and ensure proper file handling with error recovery",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
       },
       {
         "id": 6,
-        "title": "Implement GameManager Selection and Execution",
-        "description": "Add functionality to select and run specific GameManager implementations by name",
-        "details": "Implement runWithGameManager method:\n- GameManager lookup by name using registrar.findByName\n- Error handling for non-existent GameManagers\n- GameManager instantiation with verbose parameter\n- Game execution with proper parameter passing\n- Result processing and return handling\n- Integration with existing game flow",
-        "testStrategy": "Test GameManager selection, verify proper instantiation, test error cases with invalid names, validate game execution flow",
-        "priority": "high",
+        "title": "Implement Competition Mode Runner",
+        "description": "Create CompetitiveRunner class for tournament execution with algorithm pairing and scoring system",
+        "details": "Implement CompetitiveRunner class with runCompetition() method that loads algorithms from folder and maps from folder, then executes all pairwise algorithm combinations on all maps. Implement pairing logic: each algorithm plays against every other algorithm on every map. Use scoring system: 3 points for win, 1 point for tie, 0 points for loss. Aggregate scores across all games and rank algorithms by total points. Generate output file 'competition_<timestamp>.txt' with rankings table showing algorithm name, total points, wins, ties, losses. Handle edge cases like single algorithm (no games), algorithm loading failures, and invalid maps.",
+        "testStrategy": "Unit tests for pairing logic, scoring system, and ranking calculation. Integration tests with multiple algorithms and maps, verify complete tournament execution, test output formatting, validate edge case handling.",
+        "priority": "medium",
         "dependencies": [
           5
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement algorithm and map loading from directories",
+            "description": "Create directory scanning functionality to dynamically load algorithms and maps from their respective directories",
+            "dependencies": [],
+            "details": "Implement file system traversal to discover available algorithms and maps. Create loading mechanisms that can instantiate algorithm objects and parse map files. Handle error cases for invalid or corrupted files. Ensure proper validation of loaded content.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Create pairing logic for all algorithm combinations",
+            "description": "Develop combinatorial logic to generate all possible pairings between loaded algorithms",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement algorithm pairing generation that creates all unique combinations of algorithms. Handle edge cases like single algorithm scenarios. Ensure proper pairing validation and prevent duplicate matchups. Create data structures to manage pairing queues.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement scoring system (3/1/0 points)",
+            "description": "Create the tournament scoring mechanism with win/tie/loss point allocation",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement the 3-1-0 scoring system where wins award 3 points, ties award 1 point, and losses award 0 points. Create game result evaluation logic to determine outcomes. Handle tie-breaking scenarios and edge cases in scoring calculation.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Add score aggregation and ranking logic",
+            "description": "Develop comprehensive scoring aggregation and algorithm ranking system",
+            "dependencies": [
+              3
+            ],
+            "details": "Implement score accumulation across all matches for each algorithm. Create ranking algorithms that sort participants by total score. Handle tie-breaking mechanisms for equal scores. Maintain running totals and final standings calculation.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Create tournament output formatting and file generation",
+            "description": "Implement comprehensive tournament results output with formatted displays and file generation",
+            "dependencies": [
+              4
+            ],
+            "details": "Create formatted output displays showing match results, standings, and statistics. Implement file generation for tournament reports in multiple formats. Include detailed match logs, final rankings, and summary statistics. Ensure output is human-readable and properly structured.",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
       },
       {
         "id": 7,
-        "title": "Add Path Extraction Utility",
-        "description": "Implement utility function to extract GameManager names from file paths",
-        "details": "Implement extractNameFromPath helper method:\n- Handle various path formats with/without directories\n- Remove file extensions (.so)\n- Extract base filename for GameManager identification\n- Robust string parsing with edge case handling\n- Support for different path separators",
-        "testStrategy": "Test with various path formats, edge cases with no extension, paths with multiple dots, Unix/Windows path separators",
+        "title": "Add Multi-threading Support",
+        "description": "Implement ThreadPool class and integrate parallel execution into both comparative and competition modes",
+        "details": "Implement ThreadPool class using std::thread, std::queue, std::mutex, and std::condition_variable. Support configurable thread count with default to std::thread::hardware_concurrency(). Create task queue system for game execution jobs. Modify ComparativeRunner and CompetitiveRunner to use ThreadPool for parallel game execution. Ensure thread safety for result collection using std::mutex. Add num_threads parameter support to CommandLineParser. Implement proper thread cleanup and join operations. Consider load balancing for uneven workloads.",
+        "testStrategy": "Unit tests for ThreadPool functionality, test task queuing and execution, verify thread safety with concurrent result collection, performance tests comparing sequential vs parallel execution, test various thread counts including edge cases (0, 1, excessive counts).",
         "priority": "medium",
         "dependencies": [
-          5
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 8,
-        "title": "Implement Error Handling and Logging",
-        "description": "Add comprehensive error handling and logging for GameManager registration system",
-        "details": "Implement robust error handling:\n- Detailed error messages for dlopen failures\n- Registration validation error reporting\n- BadGameManagerRegistrationException handling with context\n- Cleanup on registration failures\n- Verbose logging options for debugging\n- Console output for successful/failed loads",
-        "testStrategy": "Test error scenarios, verify proper cleanup on failures, validate error message quality, test logging output",
-        "priority": "medium",
-        "dependencies": [
-          5,
           6
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement ThreadPool class with queue and synchronization primitives",
+            "description": "Create a ThreadPool class that manages a fixed number of worker threads with proper synchronization using mutexes, condition variables, and thread-safe queue operations",
+            "dependencies": [],
+            "details": "Implement ThreadPool with configurable thread count, work queue using std::queue with mutex protection, condition variables for thread coordination, proper thread lifecycle management, and graceful shutdown mechanisms",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Create thread-safe task queuing system",
+            "description": "Develop a thread-safe task queuing mechanism that can handle function objects and lambda expressions for parallel execution",
+            "dependencies": [
+              1
+            ],
+            "details": "Design task wrapper interface, implement thread-safe enqueue/dequeue operations, handle task parameters and return values, provide future/promise pattern for result retrieval, and ensure proper exception handling in task execution",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Modify ComparativeRunner for parallel execution",
+            "description": "Update ComparativeRunner to utilize the ThreadPool for parallel algorithm execution while maintaining result integrity",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Refactor sequential algorithm execution to parallel, implement proper task distribution across threads, ensure algorithm isolation and state management, maintain timing accuracy for performance measurements, and handle concurrent access to shared resources",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Update CompetitiveRunner with thread safety",
+            "description": "Enhance CompetitiveRunner to support concurrent algorithm execution with proper synchronization and resource protection",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Add thread safety to competitive algorithm execution, implement proper synchronization for shared game state, ensure thread-safe access to algorithm instances, handle concurrent logging and output operations, and maintain deterministic execution order when required",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Add thread-safe result collection mechanisms",
+            "description": "Implement thread-safe mechanisms for collecting and aggregating results from parallel algorithm executions",
+            "dependencies": [
+              2,
+              3,
+              4
+            ],
+            "details": "Design thread-safe result aggregation system, implement concurrent data structure for result collection, ensure proper synchronization for result updates, handle result ordering and correlation with original tasks, and provide thread-safe access to performance metrics and statistics",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement proper thread cleanup and resource management",
+            "description": "Ensure proper cleanup of threads and resources when simulation completes or encounters errors",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "details": "Implement graceful thread shutdown procedures, ensure proper destruction of ThreadPool and associated resources, handle exception propagation from worker threads, implement timeout mechanisms for long-running tasks, ensure no resource leaks or dangling threads, and provide proper error recovery mechanisms",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
       },
       {
-        "id": 9,
-        "title": "Add RAII Cleanup and Resource Management",
-        "description": "Implement proper resource cleanup and memory management for dynamic loading",
-        "details": "Implement Simulator destructor and cleanup:\n- Clear registrar before closing handles\n- Proper dlclose for all loaded handles\n- Exception-safe cleanup procedures\n- Handle management with RAII principles\n- Memory leak prevention\n- Order-dependent cleanup sequence",
-        "testStrategy": "Test destructor execution, verify no memory leaks with valgrind, test exception safety during cleanup",
-        "priority": "high",
+        "id": 8,
+        "title": "Production Polish and Error Handling",
+        "description": "Implement comprehensive error handling, output formatting compliance, and production-ready quality assurance",
+        "details": "Create ErrorHandler class for centralized error management with detailed error codes and messages. Implement OutputGenerator class ensuring exact compliance with assignment output format specifications. Add comprehensive logging system with configurable levels (debug, info, warning, error). Implement input validation for all file paths, ensuring proper file permissions and format validation. Add memory management checks and resource cleanup verification. Implement timeout handling for long-running games. Add configuration file support for default parameters. Create comprehensive documentation and usage examples.",
+        "testStrategy": "End-to-end integration tests covering all modes and edge cases, stress testing with large numbers of games and threads, memory leak detection with valgrind, performance benchmarking, format compliance validation against specification, error injection testing for robustness verification.",
+        "priority": "low",
         "dependencies": [
-          5,
-          8
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 10,
-        "title": "Integration Testing and Documentation",
-        "description": "Create integration tests and document the GameManager registration system",
-        "details": "Complete system integration:\n- End-to-end tests with actual .so file loading\n- Integration with existing test framework\n- Performance testing with multiple GameManagers\n- Documentation of registration process\n- Usage examples and best practices\n- Comparison with AlgorithmRegistrar for consistency",
-        "testStrategy": "Full system tests, performance benchmarks, documentation review, API consistency validation",
-        "priority": "medium",
-        "dependencies": [
-          6,
-          7,
-          8,
-          9
+          7
         ],
         "status": "pending",
         "subtasks": []
       }
     ],
     "metadata": {
-      "created": "2025-06-28T11:12:11.837Z",
-      "updated": "2025-06-28T11:53:39.562Z",
-      "description": "Tasks for gamemanager-registration context"
+      "created": "2025-06-28T15:19:46.197Z",
+      "updated": "2025-07-03T14:39:09.552Z",
+      "description": "Tasks for simulator context"
     }
   }
 }

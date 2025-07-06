@@ -1,6 +1,11 @@
 #include "AlgorithmRegistrar.h"
+#include <iostream>
 
 AlgorithmRegistrar AlgorithmRegistrar::registrar;
+
+AlgorithmRegistrar::~AlgorithmRegistrar() {
+    clear();
+}
 
 AlgorithmRegistrar& AlgorithmRegistrar::getAlgorithmRegistrar() {
     return registrar;
@@ -40,4 +45,8 @@ void AlgorithmRegistrar::removeLast() {
     if (!algorithms.empty()) {
         algorithms.pop_back();
     }
+}
+
+void AlgorithmRegistrar::clear() {
+    algorithms.clear();
 }

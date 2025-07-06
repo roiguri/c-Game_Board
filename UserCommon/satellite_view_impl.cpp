@@ -18,53 +18,84 @@ SatelliteViewImpl::SatelliteViewImpl(const GameBoard& board,
     const std::vector<Tank>& tanks,
     const std::vector<Shell>& shells,
     const Point& currentTankPos)
-    : m_board(board), m_tanks(tanks), m_shells(shells), m_currentTankPos(currentTankPos), m_hasCurrentTank(true) {}
+    : m_width(board.getWidth()), m_height(board.getHeight()) {
+    populateBoardData(board, tanks, shells, currentTankPos, true);
+}
 
 SatelliteViewImpl::SatelliteViewImpl(const GameBoard& board,
     const std::vector<Tank>& tanks,
     const std::vector<Shell>& shells)
-    : m_board(board), m_tanks(tanks), m_shells(shells), m_currentTankPos(-1, -1), m_hasCurrentTank(false) {}
+    : m_width(board.getWidth()), m_height(board.getHeight()) {
+    populateBoardData(board, tanks, shells, Point(-1, -1), false);
+}
 
 char SatelliteViewImpl::getObjectAt(size_t x, size_t y) const {
-    // Cast as board uses int for coordinates (for wrapping calculations)
-    int x_int = static_cast<int>(x);
-    int y_int = static_cast<int>(y);
-    if (x >= m_board.getWidth() || y >= m_board.getHeight()) {
+    if (x >= m_width || y >= m_height) {
         return OUT_OF_BOARD_CHAR;
     }
-    // Mark the current tank position with '%' only if we have a current tank
-    if (m_hasCurrentTank && m_currentTankPos.getX() == x_int && m_currentTankPos.getY() == y_int) {
-        return CURRENT_TANK_CHAR;
-    }
-    // Check for tank at (x, y)
-    for (const auto& tank : m_tanks) {
-        if (tank.isDestroyed()) continue;
-        if (tank.getPosition().getX() == x_int && tank.getPosition().getY() == y_int) {
-            int playerId = tank.getPlayerId();
-            if (playerId >= 1 && playerId <= 9) {
-                return TANK_CHARS[playerId - 1];
-            } else {
-                return EMPTY_CHAR; // fallback for unexpected playerId
+    return m_boardData[y][x];
+}
+
+void SatelliteViewImpl::populateBoardData(const GameBoard& board,
+                                          const std::vector<Tank>& tanks,
+                                          const std::vector<Shell>& shells,
+                                          const Point& currentTankPos,
+                                          bool hasCurrentTank) {
+    // Initialize board data with correct dimensions
+    m_boardData.resize(m_height, std::vector<char>(m_width, EMPTY_CHAR));
+    
+    // First, populate the board with walls and mines
+    for (size_t y = 0; y < m_height; ++y) {
+        for (size_t x = 0; x < m_width; ++x) {
+            GameBoard::CellType cellType = board.getCellType(x, y);
+            switch (cellType) {
+                case GameBoard::CellType::Wall:
+                    m_boardData[y][x] = WALL_CHAR;
+                    break;
+                case GameBoard::CellType::Mine:
+                    m_boardData[y][x] = MINE_CHAR;
+                    break;
+                case GameBoard::CellType::Empty:
+                default:
+                    m_boardData[y][x] = EMPTY_CHAR;
+                    break;
             }
         }
     }
-    // Check for shell at (x, y)
-    for (const auto& shell : m_shells) {
+    
+    // Then, place shells (shells appear on top of board cells)
+    for (const auto& shell : shells) {
         if (shell.isDestroyed()) continue;
-        if (shell.getPosition().getX() == x_int && shell.getPosition().getY() == y_int) {
-            return SHELL_CHAR;
+        int shell_x = shell.getPosition().getX();
+        int shell_y = shell.getPosition().getY();
+        if (shell_x >= 0 && shell_x < static_cast<int>(m_width) && 
+            shell_y >= 0 && shell_y < static_cast<int>(m_height)) {
+            m_boardData[shell_y][shell_x] = SHELL_CHAR;
         }
     }
-    // Check for wall or mine
-    GameBoard::CellType cellType = m_board.getCellType(x, y);
-    switch (cellType) {
-        case GameBoard::CellType::Wall:
-            return WALL_CHAR;
-        case GameBoard::CellType::Mine:
-            return MINE_CHAR;
-        case GameBoard::CellType::Empty:
-        default:
-            return EMPTY_CHAR;
+    
+    // Finally, place tanks (tanks appear on top of shells)
+    for (const auto& tank : tanks) {
+        if (tank.isDestroyed()) continue;
+        int tank_x = tank.getPosition().getX();
+        int tank_y = tank.getPosition().getY();
+        if (tank_x >= 0 && tank_x < static_cast<int>(m_width) && 
+            tank_y >= 0 && tank_y < static_cast<int>(m_height)) {
+            int playerId = tank.getPlayerId();
+            if (playerId >= 1 && playerId <= 9) {
+                m_boardData[tank_y][tank_x] = TANK_CHARS[playerId - 1];
+            }
+        }
+    }
+    
+    // Mark the current tank position with '%' only if we have a current tank
+    if (hasCurrentTank) {
+        int current_x = currentTankPos.getX();
+        int current_y = currentTankPos.getY();
+        if (current_x >= 0 && current_x < static_cast<int>(m_width) && 
+            current_y >= 0 && current_y < static_cast<int>(m_height)) {
+            m_boardData[current_y][current_x] = CURRENT_TANK_CHAR;
+        }
     }
 }
 

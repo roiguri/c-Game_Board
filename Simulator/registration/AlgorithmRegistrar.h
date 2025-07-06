@@ -52,6 +52,8 @@ private:
     static AlgorithmRegistrar registrar;
 
 public:
+    ~AlgorithmRegistrar();
+    
     static AlgorithmRegistrar& getAlgorithmRegistrar();
     
     void createAlgorithmFactoryEntry(const std::string& name);
@@ -69,5 +71,5 @@ public:
     bool empty() const { return algorithms.empty(); }
 
     // For testing purposes
-    void clear() { algorithms.clear(); }
+    void clear();
 };

@@ -74,5 +74,4 @@ std::optional<Point> Player_098765432_123456789_A::selectNewTarget(const std::ve
 
 // Registration at global scope
 using namespace Algorithm_098765432_123456789;
-// TODO: uncomment after registration completes
-// REGISTER_PLAYER(Player_098765432_123456789_A); // TODO: Implement registration system 
+REGISTER_PLAYER(Player_098765432_123456789_A);

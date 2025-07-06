@@ -50,11 +50,23 @@ public:
     char getObjectAt(size_t x, size_t y) const override;
 
 private:
-    const GameBoard& m_board;
-    const std::vector<Tank>& m_tanks;
-    const std::vector<Shell>& m_shells;
-    Point m_currentTankPos;
-    bool m_hasCurrentTank; // Whether to mark current tank with '%'
+    /**
+     * @brief Populates the board data structure from game state
+     * @param board Reference to the game board
+     * @param tanks Reference to a vector of tanks (const)
+     * @param shells Reference to a vector of shells (const)
+     * @param currentTankPos The position of the current tank (optional)
+     * @param hasCurrentTank Whether to mark current tank with '%'
+     */
+    void populateBoardData(const GameBoard& board,
+                          const std::vector<Tank>& tanks,
+                          const std::vector<Shell>& shells,
+                          const Point& currentTankPos,
+                          bool hasCurrentTank);
+
+    std::vector<std::vector<char>> m_boardData; // Owns the game state data
+    size_t m_width;
+    size_t m_height;
 };
 
 } // namespace UserCommon_098765432_123456789 

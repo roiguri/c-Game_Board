@@ -665,3 +665,7 @@ std::vector<std::string> GameManager::readSatelliteView(const SatelliteView& sat
 }
 
 } // namespace GameManager_098765432_123456789
+
+// TODO: change game manager class name
+using namespace GameManager_098765432_123456789;
+REGISTER_GAME_MANAGER(GameManager);

@@ -7,6 +7,8 @@
 
 class GameManagerRegistrar {
 public:
+    ~GameManagerRegistrar();
+    
     struct GameManagerEntry {
         std::string so_name;
         GameManagerFactory factory;
