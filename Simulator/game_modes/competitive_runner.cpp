@@ -179,10 +179,6 @@ GameResult CompetitiveRunner::executeGameLogic(const BaseParameters& params) {
     
     // Create ThreadPool based on parameters
     size_t numThreads = competitiveParams->numThreads;
-    if (numThreads == 0) {
-        numThreads = std::thread::hardware_concurrency();
-        if (numThreads == 0) numThreads = 1;
-    }
 
     ThreadPool threadPool(numThreads);
     std::vector<std::future<void>> futures;

@@ -44,7 +44,7 @@ public:
         std::string gameMapsFolder;
         std::string gameManagerLib;
         std::string algorithmsFolder;
-        size_t numThreads = std::thread::hardware_concurrency();
+        size_t numThreads = 1;
         
         CompetitiveParameters() : BaseParameters() {}
     };

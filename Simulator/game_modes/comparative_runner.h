@@ -45,7 +45,7 @@ public:
         std::string gameManagersFolder;
         std::string algorithm1Lib;
         std::string algorithm2Lib;
-        size_t numThreads = std::thread::hardware_concurrency();
+        size_t numThreads = 1;
         
         ComparativeParameters() : BaseParameters() {}
     };

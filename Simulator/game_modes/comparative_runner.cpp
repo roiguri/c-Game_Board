@@ -130,10 +130,6 @@ GameResult ComparativeRunner::executeGameLogic(const BaseParameters& params) {
     
     // Create ThreadPool based on parameters
     size_t numThreads = comparativeParams->numThreads;
-    if (numThreads == 0) {
-        numThreads = std::thread::hardware_concurrency();
-        if (numThreads == 0) numThreads = 1;
-    }
 
     ThreadPool threadPool(numThreads);
     std::vector<std::future<ComparativeResult>> futures;

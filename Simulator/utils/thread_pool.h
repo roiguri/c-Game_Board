@@ -13,7 +13,7 @@
 
 class ThreadPool {
 public:
-    explicit ThreadPool(size_t numThreads = std::thread::hardware_concurrency());
+    explicit ThreadPool(size_t numThreads = 1);
     ~ThreadPool();
 
     ThreadPool(const ThreadPool&) = delete;
