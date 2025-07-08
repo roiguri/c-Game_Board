@@ -2,7 +2,6 @@
 
 #include "AbstractGameManager.h"
 
-// TODO: basic stub - requires full implementation.
 struct GameManagerRegistration {
     GameManagerRegistration(GameManagerFactory);
 };

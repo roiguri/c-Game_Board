@@ -2,7 +2,6 @@
 
 #include "Player.h"
 
-// TODO: basic stub - requires full implementation.
 struct PlayerRegistration {
     PlayerRegistration(PlayerFactory);
 };

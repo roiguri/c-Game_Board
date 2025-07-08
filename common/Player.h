@@ -6,7 +6,6 @@
 #include "SatelliteView.h"
 #include "TankAlgorithm.h"
 
-// TODO: update cpp files accordingly.
 class Player {  
 public:
     virtual ~Player() {}  
