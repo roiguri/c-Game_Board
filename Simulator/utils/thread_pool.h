@@ -29,6 +29,7 @@ public:
     void shutdown();
     size_t getNumThreads() const;
     size_t getQueueSize() const;
+    bool isSingleThreaded() const;
 
 private:
     std::vector<std::thread> m_workers;
@@ -55,6 +56,15 @@ auto ThreadPool::enqueue(F&& func, Args&&... args)
     );
     
     std::future<ReturnType> result = task->get_future();
+    
+    // If single-threaded, execute immediately on main thread
+    if (isSingleThreaded()) {
+        if (m_stop) {
+            throw std::runtime_error("Cannot enqueue task on stopped ThreadPool");
+        }
+        (*task)();
+        return result;
+    }
     
     {
         std::unique_lock<std::mutex> lock(m_queueMutex);

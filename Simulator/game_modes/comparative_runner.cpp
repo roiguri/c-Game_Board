@@ -134,7 +134,7 @@ GameResult ComparativeRunner::executeGameLogic(const BaseParameters& params) {
         numThreads = std::thread::hardware_concurrency();
         if (numThreads == 0) numThreads = 1;
     }
-    
+
     ThreadPool threadPool(numThreads);
     std::vector<std::future<ComparativeResult>> futures;
     

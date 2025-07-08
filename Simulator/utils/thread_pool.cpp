@@ -9,6 +9,13 @@ ThreadPool::ThreadPool(size_t numThreads) : m_stop(false) {
         }
     }
     
+    // If numThreads is 1, use single-threaded execution (main thread only)
+    // Otherwise, create numThreads worker threads (total = numThreads + main thread)
+    if (numThreads == 1) {
+        // Single-threaded mode: no worker threads, execute on main thread
+        return;
+    }
+    
     m_workers.reserve(numThreads);
     
     for (size_t i = 0; i < numThreads; ++i) {
@@ -38,6 +45,11 @@ void ThreadPool::shutdown() {
 }
 
 void ThreadPool::waitForAll() {
+    // In single-threaded mode, all tasks are executed immediately
+    if (isSingleThreaded()) {
+        return;
+    }
+    
     std::unique_lock<std::mutex> lock(m_finishedMutex);
     m_finishedCondition.wait(lock, [this] {
         return m_activeTasks == 0;
@@ -51,6 +63,10 @@ size_t ThreadPool::getNumThreads() const {
 size_t ThreadPool::getQueueSize() const {
     std::unique_lock<std::mutex> lock(m_queueMutex);
     return m_tasks.size();
+}
+
+bool ThreadPool::isSingleThreaded() const {
+    return m_workers.empty();
 }
 
 void ThreadPool::workerThread() {

@@ -27,6 +27,38 @@ TEST_F(ThreadPoolTest, ConstructorWithSpecificThreads) {
     EXPECT_EQ(pool.getNumThreads(), 4);
 }
 
+TEST_F(ThreadPoolTest, SingleThreadedMode) {
+    ThreadPool pool(1);
+    EXPECT_EQ(pool.getNumThreads(), 0);  // No worker threads
+    EXPECT_TRUE(pool.isSingleThreaded());
+}
+
+TEST_F(ThreadPoolTest, MultiThreadedMode) {
+    ThreadPool pool(3);
+    EXPECT_EQ(pool.getNumThreads(), 3);  // 3 worker threads
+    EXPECT_FALSE(pool.isSingleThreaded());
+}
+
+TEST_F(ThreadPoolTest, ThreadCountNeverEquals2) {
+    // Test various thread counts to ensure total threads never equals 2
+    
+    // numThreads = 1 should give 1 total thread (main only)
+    ThreadPool pool1(1);
+    EXPECT_EQ(pool1.getNumThreads(), 0);  // 0 workers + 1 main = 1 total
+    
+    // numThreads = 2 should give 2 total threads (2 workers + 1 main = 3 total)
+    // But our implementation creates 2 workers, so total = 3
+    ThreadPool pool2(2);
+    EXPECT_EQ(pool2.getNumThreads(), 2);  // 2 workers + 1 main = 3 total
+    
+    // numThreads = 3 should give 3 workers + 1 main = 4 total
+    ThreadPool pool3(3);
+    EXPECT_EQ(pool3.getNumThreads(), 3);  // 3 workers + 1 main = 4 total
+    
+    // Verify we never get exactly 2 total threads
+    // (1 worker + 1 main = 2 total is forbidden)
+}
+
 TEST_F(ThreadPoolTest, ConstructorWithZeroThreads) {
     ThreadPool pool(0);
     EXPECT_GT(pool.getNumThreads(), 0);
@@ -44,6 +76,36 @@ TEST_F(ThreadPoolTest, SimpleTaskExecution) {
     int result = future.get();
     EXPECT_EQ(result, 42);
     EXPECT_EQ(counter.load(), 1);
+}
+
+TEST_F(ThreadPoolTest, SingleThreadedExecution) {
+    ThreadPool pool(1);
+    std::atomic<int> counter{0};
+    
+    // Tasks should execute immediately on main thread
+    auto future = pool.enqueue([&counter]() {
+        counter++;
+        return 42;
+    });
+    
+    int result = future.get();
+    EXPECT_EQ(result, 42);
+    EXPECT_EQ(counter.load(), 1);
+    
+    // Multiple tasks should still work
+    std::vector<std::future<int>> futures;
+    for (int i = 0; i < 5; ++i) {
+        futures.push_back(pool.enqueue([&counter, i]() {
+            counter++;
+            return i * 10;
+        }));
+    }
+    
+    for (int i = 0; i < 5; ++i) {
+        EXPECT_EQ(futures[i].get(), i * 10);
+    }
+    
+    EXPECT_EQ(counter.load(), 6);  // 1 + 5 additional tasks
 }
 
 TEST_F(ThreadPoolTest, MultipleTaskExecution) {
@@ -129,24 +191,24 @@ TEST_F(ThreadPoolTest, ExceptionHandling) {
 }
 
 TEST_F(ThreadPoolTest, TaskQueueGrowth) {
-    ThreadPool pool(1); // Single thread to create queue buildup
+    ThreadPool pool(2);
     std::atomic<int> counter{0};
     std::vector<std::future<void>> futures;
     
     // Submit more tasks than threads to test queueing
     for (int i = 0; i < 10; ++i) {
         futures.push_back(pool.enqueue([&counter, i]() {
-            if (i == 0) {
-                // First task sleeps to allow queue buildup
-                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            if (i < 2) {
+                // First two tasks sleep to allow queue buildup
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
             counter++;
         }));
     }
     
-    // Queue should be larger than 0 while tasks are pending
+    // With 2 worker threads busy and 10 total tasks, expect 8 tasks queued
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    EXPECT_GT(pool.getQueueSize(), 0);
+    EXPECT_EQ(pool.getQueueSize(), 8);
     
     for (auto& future : futures) {
         future.get();

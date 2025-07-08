@@ -183,7 +183,7 @@ GameResult CompetitiveRunner::executeGameLogic(const BaseParameters& params) {
         numThreads = std::thread::hardware_concurrency();
         if (numThreads == 0) numThreads = 1;
     }
-    
+
     ThreadPool threadPool(numThreads);
     std::vector<std::future<void>> futures;
     std::unordered_map<int, AlgorithmScore> scores;
