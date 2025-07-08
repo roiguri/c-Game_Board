@@ -5,9 +5,11 @@
 #include <memory>
 #include <filesystem>
 #include <chrono>
+#include <mutex>
 #include "base_game_mode.h"
 #include "game_runner.h"
 #include "utils/file_loader.h"
+#include "utils/thread_pool.h"
 #include "common/GameResult.h"
 
 class ComparativeRunner : public BaseGameMode {
@@ -43,6 +45,7 @@ public:
         std::string gameManagersFolder;
         std::string algorithm1Lib;
         std::string algorithm2Lib;
+        size_t numThreads = std::thread::hardware_concurrency();
         
         ComparativeParameters() : BaseParameters() {}
     };
@@ -138,4 +141,8 @@ private:
     FileLoader::BoardInfo m_boardInfo;
     std::vector<GameManagerInfo> m_discoveredGameManagers;
     std::vector<ComparativeResult> m_results;
+    
+    // Thread-safety for parallel execution
+    std::mutex m_resultsMutex;
+    std::mutex m_gameManagerMutex;
 };

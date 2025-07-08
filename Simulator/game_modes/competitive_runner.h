@@ -6,9 +6,11 @@
 #include <filesystem>
 #include <chrono>
 #include <unordered_map>
+#include <mutex>
 #include "base_game_mode.h"
 #include "game_runner.h"
 #include "utils/file_loader.h"
+#include "utils/thread_pool.h"
 #include "common/GameResult.h"
 
 class CompetitiveRunner : public BaseGameMode {
@@ -42,6 +44,7 @@ public:
         std::string gameMapsFolder;
         std::string gameManagerLib;
         std::string algorithmsFolder;
+        size_t numThreads = std::thread::hardware_concurrency();
         
         CompetitiveParameters() : BaseParameters() {}
     };
@@ -164,4 +167,7 @@ private:
     std::vector<FileLoader::BoardInfo> m_loadedMaps;
     std::string m_gameManagerName;
     std::vector<AlgorithmScore> m_finalScores;
+    
+    // Thread-safety for parallel execution
+    std::mutex m_scoresMutex;
 };

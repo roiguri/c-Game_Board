@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <map>
 #include <memory>
+#include <future>
 #include "utils/library_manager.h"
 #include "registration/GameManagerRegistrar.h"
 #include "registration/AlgorithmRegistrar.h"
@@ -127,13 +128,45 @@ GameResult ComparativeRunner::executeGameLogic(const BaseParameters& params) {
     
     m_results.clear();
     
-    // Execute games with each successfully loaded GameManager
+    // Create ThreadPool based on parameters
+    size_t numThreads = comparativeParams->numThreads;
+    if (numThreads == 0) {
+        numThreads = std::thread::hardware_concurrency();
+        if (numThreads == 0) numThreads = 1;
+    }
+    
+    ThreadPool threadPool(numThreads);
+    std::vector<std::future<ComparativeResult>> futures;
+    
+    // Pre-load all GameManagers to avoid concurrent loading issues
+    std::vector<std::string> validGameManagers;
     for (const auto& info : m_discoveredGameManagers) {
         if (info.loaded) {
-            // Executing game with GameManager
-            
-            ComparativeResult result = executeWithGameManager(info.name, *comparativeParams, m_boardInfo);
+            validGameManagers.push_back(info.name);
+        }
+    }
+
+    // Submit tasks to thread pool for parallel execution
+    for (const auto& gameManagerName : validGameManagers) {
+        auto future = threadPool.enqueue([this, gameManagerName, comparativeParams]() {
+            return executeWithGameManager(gameManagerName, *comparativeParams, m_boardInfo);
+        });
+        futures.push_back(std::move(future));
+    }
+    
+    // Collect results from all threads
+    for (auto& future : futures) {
+        try {
+            ComparativeResult result = future.get();
+            std::lock_guard<std::mutex> lock(m_resultsMutex);
             m_results.push_back(std::move(result));
+        } catch (const std::exception& e) {
+            // Handle individual task failure
+            ComparativeResult errorResult;
+            errorResult.success = false;
+            errorResult.error = "Thread execution failed: " + std::string(e.what());
+            std::lock_guard<std::mutex> lock(m_resultsMutex);
+            m_results.push_back(std::move(errorResult));
         }
     }
     
@@ -228,32 +261,37 @@ ComparativeRunner::ComparativeResult ComparativeRunner::executeWithGameManager(
     result.success = false;
     result.executionTime = std::chrono::milliseconds(0);
 
-    // Clear and load GameManager registrar for this run
-    GameManagerRegistrar& gmRegistrar = GameManagerRegistrar::getGameManagerRegistrar();
-    gmRegistrar.clear();
-    gmRegistrar.createGameManagerEntry(gameManagerName);
-    LibraryManager& libManager = LibraryManager::getInstance();
-    if (!libManager.loadLibrary(gameManagerName)) {
-        result.error = "Failed to load GameManager: " + libManager.getLastError();
-        gmRegistrar.removeLast();
-        return result;
-    }
-    try {
-        gmRegistrar.validateLastRegistration();
-        // GameManager registration successful
-    } catch (const GameManagerRegistrar::BadGameManagerRegistrationException& e) {
-        result.error = "GameManager registration failed: " + std::string(e.name);
-        return result;
-    }
-
     // Use algorithm file paths as names
     std::string algorithm1Name = params.algorithm1Lib;
     std::string algorithm2Name = params.algorithm2Lib;
-    // Algorithm names configured
-
-    // Execute game with timing
+    
+    // Execute game with timing (GameRunner handles GameManager loading internally)
     try {
         auto startTime = std::chrono::high_resolution_clock::now();
+        
+        // Synchronize only the GameManager loading/registration part
+        {
+            std::lock_guard<std::mutex> gmLock(m_gameManagerMutex);
+            
+            // Clear and load GameManager registrar for this run
+            GameManagerRegistrar& gmRegistrar = GameManagerRegistrar::getGameManagerRegistrar();
+            gmRegistrar.clear();
+            gmRegistrar.createGameManagerEntry(gameManagerName);
+            LibraryManager& libManager = LibraryManager::getInstance();
+            if (!libManager.loadLibrary(gameManagerName)) {
+                result.error = "Failed to load GameManager: " + libManager.getLastError();
+                gmRegistrar.removeLast();
+                return result;
+            }
+            try {
+                gmRegistrar.validateLastRegistration();
+                // GameManager registration successful
+            } catch (const GameManagerRegistrar::BadGameManagerRegistrationException& e) {
+                result.error = "GameManager registration failed: " + std::string(e.name);
+                return result;
+            }
+        } // Release lock before game execution
+        
         result.gameResult = GameRunner::runSingleGame(
             boardInfo,
             gameManagerName,
@@ -278,8 +316,13 @@ ComparativeRunner::ComparativeResult ComparativeRunner::executeWithGameManager(
         result.error = "Exception during game execution: " + std::string(e.what());
         result.success = false;
     }
-    // Only clear GameManager registrar, do not touch algorithms or unload libraries
-    gmRegistrar.clear();
+    
+    // Synchronize GameManager cleanup
+    {
+        std::lock_guard<std::mutex> gmLock(m_gameManagerMutex);
+        GameManagerRegistrar& gmRegistrar = GameManagerRegistrar::getGameManagerRegistrar();
+        gmRegistrar.clear();
+    }
     return result;
 }
 

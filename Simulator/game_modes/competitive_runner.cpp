@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <set>
 #include <memory>
+#include <future>
 #include <dlfcn.h>
 #include "utils/library_manager.h"
 #include "registration/GameManagerRegistrar.h"
@@ -176,24 +177,46 @@ GameResult CompetitiveRunner::executeGameLogic(const BaseParameters& params) {
     
     m_finalScores.clear();
     
-    // Execute tournament
+    // Create ThreadPool based on parameters
+    size_t numThreads = competitiveParams->numThreads;
+    if (numThreads == 0) {
+        numThreads = std::thread::hardware_concurrency();
+        if (numThreads == 0) numThreads = 1;
+    }
+    
+    ThreadPool threadPool(numThreads);
+    std::vector<std::future<void>> futures;
     std::unordered_map<int, AlgorithmScore> scores;
     int numAlgorithms = static_cast<int>(m_discoveredAlgorithms.size());
     
-    // For each map, generate pairings and execute matches
+    // For each map, generate pairings and submit parallel tasks
     for (int mapIndex = 0; mapIndex < static_cast<int>(m_discoveredMaps.size()); ++mapIndex) {
         auto pairings = generatePairings(numAlgorithms, mapIndex);
         
         for (const auto& pairing : pairings) {
-            try {
-                auto result = executeMatch(pairing.first, pairing.second, mapIndex, *competitiveParams);                
-                updateScores(pairing.first, pairing.second, result, scores);
-            } catch (const std::exception& e) {
-                std::string error = "Error executing match between algorithms " + 
-                                  std::to_string(pairing.first) + " and " + std::to_string(pairing.second) + 
-                                  " on map " + std::to_string(mapIndex) + ": " + e.what();
-                handleError(error);
-            }
+            // Submit each match as a parallel task
+            auto future = threadPool.enqueue([this, pairing, mapIndex, competitiveParams, &scores]() {
+                try {
+                    auto result = executeMatch(pairing.first, pairing.second, mapIndex, *competitiveParams);
+                    std::lock_guard<std::mutex> lock(m_scoresMutex);
+                    updateScores(pairing.first, pairing.second, result, scores);
+                } catch (const std::exception& e) {
+                    std::string error = "Error executing match between algorithms " + 
+                                      std::to_string(pairing.first) + " and " + std::to_string(pairing.second) + 
+                                      " on map " + std::to_string(mapIndex) + ": " + e.what();
+                    handleError(error);
+                }
+            });
+            futures.push_back(std::move(future));
+        }
+    }
+    
+    // Wait for all matches to complete
+    for (auto& future : futures) {
+        try {
+            future.get();
+        } catch (const std::exception& e) {
+            handleError("Thread execution failed: " + std::string(e.what()));
         }
     }
     

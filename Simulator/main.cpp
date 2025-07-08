@@ -52,8 +52,7 @@ int executeComparativeMode(const CommandLineParser& parser) {
     // Optional: num_threads parameter
     auto numThreads = parser.getNumThreads();
     if (numThreads.has_value()) {
-        // TODO: Implement threading support in ComparativeRunner
-        std::cout << "Note: Threading support not yet implemented, using single thread." << std::endl;
+        params.numThreads = numThreads.value();
     }
     
     const auto& results = runner.runComparative(params);
@@ -76,8 +75,7 @@ int executeCompetitionMode(const CommandLineParser& parser) {
     // Optional: num_threads parameter
     auto numThreads = parser.getNumThreads();
     if (numThreads.has_value()) {
-        // TODO: Implement threading support in CompetitiveRunner
-        std::cout << "Note: Threading support not yet implemented, using single thread." << std::endl;
+        params.numThreads = numThreads.value();
     }
     
     const auto& scores = runner.runCompetition(params);

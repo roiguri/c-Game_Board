@@ -23,8 +23,8 @@ set_target_properties(Simulator_lib PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build/Simulator"
 )
 
-# Link UserCommon library and dl for dynamic loading
-target_link_libraries(Simulator_lib PRIVATE UserCommon dl)
+# Link UserCommon library, dl for dynamic loading, and pthread for threading
+target_link_libraries(Simulator_lib PRIVATE UserCommon dl pthread)
 
 # Include directories for Simulator library
 target_include_directories(Simulator_lib PUBLIC
@@ -50,7 +50,7 @@ set_target_properties(tanks_game PROPERTIES
 )
 
 # Link main executable with Simulator library and enable dynamic symbol export
-target_link_libraries(tanks_game PRIVATE Simulator_lib)
+target_link_libraries(tanks_game PRIVATE Simulator_lib pthread)
 target_link_options(tanks_game PRIVATE -rdynamic)
 
 # Create alias target for convenience (using custom target since ALIAS doesn't work with custom targets)
@@ -74,6 +74,7 @@ if(ENABLE_TESTING)
         gtest
         gmock
         gtest_main
+        pthread
     )
     
     # Register tests with CTest
