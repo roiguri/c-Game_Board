@@ -86,3 +86,62 @@ cd /home/roiguri/projects/uni/advanced_programming/c-Game_Board/build
 # - Basic Mode: Single game between two algorithms
 # - Comparative Mode: Detailed comparison between two algorithms
 # - Competition Mode: Tournament between all algorithms in directory
+
+# ============================================================================
+# THREADING PERFORMANCE TESTS
+# ============================================================================
+
+# Comprehensive Threading Performance Script
+# ------------------------------------------
+# For comprehensive threading performance testing, use the dedicated script:
+# 
+# Run from project root:
+# cd /home/roiguri/projects/uni/advanced_programming/c-Game_Board
+# ./test_libraries/threading_performance_tests.sh
+#
+# This script includes:
+# - Competition mode tests (1, 2, 4, 8 threads)
+# - Comparative mode tests (1, 4 threads)  
+# - Threading behavior validation tests
+# - Performance timing and analysis
+#
+# Manual Threading Test Examples:
+# -------------------------------
+
+# Test 14: Quick Competition Mode - Single Thread vs Multi-Thread
+cd /home/roiguri/projects/uni/advanced_programming/c-Game_Board/build
+
+# Single thread (default)
+time ./bin/tanks_game game_maps_folder=../test_libraries/compiled_libraries/game_maps game_manager=../test_libraries/compiled_libraries/game_managers/libTestGameManager_Real_098765432_123456789.so algorithms_folder=../test_libraries/compiled_libraries/algorithms/ -competition -verbose
+
+# Four threads
+time ./bin/tanks_game game_maps_folder=../test_libraries/compiled_libraries/game_maps game_manager=../test_libraries/compiled_libraries/game_managers/libTestGameManager_Real_098765432_123456789.so algorithms_folder=../test_libraries/compiled_libraries/algorithms/ num_threads=4 -competition -verbose
+
+# Test 15: Quick Comparative Mode - Single Thread vs Multi-Thread
+
+# Single thread (default)
+time ./bin/tanks_game game_map=../examples/input_a.txt game_managers_folder=../test_libraries/compiled_libraries/game_managers/ algorithm1=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_Basic_098765432_123456789.so algorithm2=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_Offensive_098765432_123456789.so -comparative -verbose
+
+# Four threads  
+time ./bin/tanks_game game_map=../examples/input_a.txt game_managers_folder=../test_libraries/compiled_libraries/game_managers/ algorithm1=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_Basic_098765432_123456789.so algorithm2=../test_libraries/compiled_libraries/algorithms/libTestAlgorithm_Offensive_098765432_123456789.so num_threads=4 -comparative -verbose
+
+# ============================================================================
+# THREADING PERFORMANCE ANALYSIS
+# ============================================================================
+
+# Threading Implementation Validation
+# -----------------------------------
+# The threading implementation should meet these requirements:
+#
+# 1. Missing num_threads argument → 1 total thread (main only)
+# 2. num_threads=1 → 1 total thread (main only)  
+# 3. num_threads=2 → 3 total threads (2 workers + 1 main)
+# 4. num_threads=4 → 5 total threads (4 workers + 1 main)
+# 5. num_threads=8 → 9 total threads (8 workers + 1 main)
+# 6. Total threads never equals 2 (requirement compliance)
+#
+# Expected Performance Results:
+# - Single-threaded: Baseline execution time
+# - Multi-threaded: Faster execution time for CPU-intensive operations
+# - Performance scaling: More threads → better performance (up to hardware limit)
+# - Behavior validation: Missing argument defaults to single thread
