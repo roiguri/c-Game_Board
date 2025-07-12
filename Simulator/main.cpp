@@ -91,7 +91,6 @@ int main(int argc, char* argv[]) {
     CommandLineParser parser;
     CommandLineParser::ParseResult parseResult = parser.parse(argc, argv);
     
-    // TODO: consider moving to cli parser
     if (!parseResult.success) {
         std::cerr << "Error: " << parseResult.errorMessage << std::endl;
         

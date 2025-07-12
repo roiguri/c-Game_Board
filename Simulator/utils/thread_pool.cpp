@@ -3,10 +3,7 @@
 
 ThreadPool::ThreadPool(size_t numThreads) : m_stop(false) {
     if (numThreads == 0) {
-        numThreads = std::thread::hardware_concurrency();
-        if (numThreads == 0) {
-            numThreads = 1;
-        }
+        numThreads = 1;
     }
     
     // If numThreads is 1, use single-threaded execution (main thread only)
