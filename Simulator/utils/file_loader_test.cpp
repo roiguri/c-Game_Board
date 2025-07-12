@@ -224,7 +224,7 @@ TEST_F(FileLoaderTest, LoadBoardWithSatelliteView_ValidFile) {
         "Rows = 3",
         "Cols = 3",
         "###",
-        "# #",
+        "#1#",
         "###"
     };
     createTestFile(content);
@@ -242,7 +242,7 @@ TEST_F(FileLoaderTest, LoadBoardWithSatelliteView_ValidFile) {
     
     // Test SatelliteView functionality
     EXPECT_EQ(boardInfo.satelliteView->getObjectAt(0, 0), '#');
-    EXPECT_EQ(boardInfo.satelliteView->getObjectAt(1, 1), ' ');
+    EXPECT_EQ(boardInfo.satelliteView->getObjectAt(1, 1), '1');  // Now has tank
     EXPECT_EQ(boardInfo.satelliteView->getObjectAt(2, 2), '#');
 }
 
@@ -311,4 +311,79 @@ TEST_F(FileLoaderTest, LoadBoardWithSatelliteView_ComplexBoard) {
     // Test out of bounds access
     EXPECT_EQ(boardInfo.satelliteView->getObjectAt(5, 2), '&');  // x out of bounds
     EXPECT_EQ(boardInfo.satelliteView->getObjectAt(2, 4), '&');  // y out of bounds
+}
+
+// Tests for BoardInfo validation interface
+TEST_F(FileLoaderTest, BoardInfoValidation_ValidBoard) {
+    std::vector<std::string> content = {
+        "MapName",
+        "MaxSteps = 1000", 
+        "NumShells = 20",
+        "Rows = 3",
+        "Cols = 3",
+        "###",
+        "#1#",
+        "###"
+    };
+    createTestFile(content);
+    
+    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView(tempFileName);
+    
+    // Valid board should pass validation
+    EXPECT_TRUE(boardInfo.isValid());
+    EXPECT_EQ(boardInfo.getErrorReason(), "");
+    EXPECT_TRUE(boardInfo.getWarnings().empty());
+}
+
+TEST_F(FileLoaderTest, BoardInfoValidation_InvalidBoard) {
+    std::vector<std::string> content = {
+        "MapName",
+        "MaxSteps = 1000",
+        "NumShells = 20", 
+        "Rows = 3",
+        "Cols = 3",
+        "###",
+        "#@#",  // No tanks
+        "###"
+    };
+    createTestFile(content);
+    
+    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView(tempFileName);
+    
+    // Invalid board (no tanks) should fail validation
+    EXPECT_FALSE(boardInfo.isValid());
+    EXPECT_TRUE(boardInfo.getErrorReason().find("tank") != std::string::npos);
+    EXPECT_TRUE(boardInfo.getWarnings().empty());
+}
+
+TEST_F(FileLoaderTest, BoardInfoValidation_BoardWithWarnings) {
+    std::vector<std::string> content = {
+        "MapName",
+        "MaxSteps = 1000",
+        "NumShells = 20",
+        "Rows = 3", 
+        "Cols = 3",
+        "#1&",  // Invalid character '&'
+        "###",
+        "###"
+    };
+    createTestFile(content);
+    
+    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView(tempFileName);
+    
+    // Board should be valid but have warnings
+    EXPECT_TRUE(boardInfo.isValid());
+    EXPECT_EQ(boardInfo.getErrorReason(), "");
+    EXPECT_FALSE(boardInfo.getWarnings().empty());
+    EXPECT_TRUE(boardInfo.getWarnings()[0].find("Invalid character") != std::string::npos);
+}
+
+TEST_F(FileLoaderTest, BoardInfoValidation_NullSatelliteView) {
+    // Test the case where satelliteView is null (file load failed)
+    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView("nonexistent_file.txt");
+    
+    // Should return appropriate fallback values
+    EXPECT_FALSE(boardInfo.isValid());
+    EXPECT_EQ(boardInfo.getErrorReason(), "Failed to load board file");
+    EXPECT_TRUE(boardInfo.getWarnings().empty());
 }

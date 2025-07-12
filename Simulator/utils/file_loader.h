@@ -27,6 +27,11 @@ public:
         int numShells;
         std::string mapName;
         std::unique_ptr<SatelliteView> satelliteView;
+
+        // Validation interface methods
+        bool isValid() const;
+        std::string getErrorReason() const;
+        std::vector<std::string> getWarnings() const;
     };
     
     /**

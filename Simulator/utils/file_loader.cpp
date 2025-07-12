@@ -89,3 +89,34 @@ FileLoader::BoardInfo FileLoader::loadBoardWithSatelliteView(const std::string& 
     
     return info;
 }
+
+// BoardInfo validation interface implementations
+bool FileLoader::BoardInfo::isValid() const {
+    if (!satelliteView) {
+        return false;  // No satellite view means failed to load
+    }
+    
+    // Cast to FileSatelliteView to access validation methods
+    FileSatelliteView* fileSatelliteView = static_cast<FileSatelliteView*>(satelliteView.get());
+    return fileSatelliteView->isValid();
+}
+
+std::string FileLoader::BoardInfo::getErrorReason() const {
+    if (!satelliteView) {
+        return "Failed to load board file";  // Fallback error message
+    }
+    
+    // Cast to FileSatelliteView to access validation methods
+    FileSatelliteView* fileSatelliteView = static_cast<FileSatelliteView*>(satelliteView.get());
+    return fileSatelliteView->getErrorReason();
+}
+
+std::vector<std::string> FileLoader::BoardInfo::getWarnings() const {
+    if (!satelliteView) {
+        return {};  // No warnings if no satellite view
+    }
+    
+    // Cast to FileSatelliteView to access validation methods
+    FileSatelliteView* fileSatelliteView = static_cast<FileSatelliteView*>(satelliteView.get());
+    return fileSatelliteView->getWarnings();
+}
