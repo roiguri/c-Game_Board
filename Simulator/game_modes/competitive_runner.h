@@ -11,6 +11,7 @@
 #include "game_runner.h"
 #include "utils/file_loader.h"
 #include "utils/thread_pool.h"
+#include "utils/error_collector.h"
 #include "common/GameResult.h"
 
 class CompetitiveRunner : public BaseGameMode {
@@ -86,13 +87,6 @@ protected:
 private:
 
     /**
-     * Load and validate algorithm from .so file
-     * @param soPath Path to .so file
-     * @return AlgorithmInfo with load result
-     */
-    AlgorithmInfo loadAlgorithm(const std::string& soPath);
-
-    /**
      * Load and validate map from file
      * @param mapPath Path to map file
      * @return MapInfo with load result
@@ -152,6 +146,13 @@ private:
     bool loadLibrariesImpl(const CompetitiveParameters& params);
     bool loadMapsImpl(const CompetitiveParameters& params);
     
+    /**
+     * Extract map name from file path for error reporting
+     * @param filePath Full path to map file
+     * @return Map name (filename without path)
+     */
+    std::string extractMapName(const std::string& filePath);
+    
     // Store parameters for later use in displayResults
     std::unique_ptr<CompetitiveParameters> m_currentParams;
 
@@ -167,6 +168,7 @@ private:
     std::vector<FileLoader::BoardInfo> m_loadedMaps;
     std::string m_gameManagerName;
     std::vector<AlgorithmScore> m_finalScores;
+    ErrorCollector m_errorCollector;
     
     // Thread-safety for parallel execution
     std::mutex m_scoresMutex;

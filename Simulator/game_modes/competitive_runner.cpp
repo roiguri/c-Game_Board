@@ -132,6 +132,7 @@ bool CompetitiveRunner::loadMap(const std::string& /* mapFile */) {
 
 bool CompetitiveRunner::loadMapsImpl(const CompetitiveParameters& params) {
     try {
+        // TODO: print usage and exit
         // Load maps from folder
         std::vector<std::string> mapFiles = enumerateFiles(params.gameMapsFolder, ".txt");
         if (mapFiles.empty()) {
@@ -150,12 +151,23 @@ bool CompetitiveRunner::loadMapsImpl(const CompetitiveParameters& params) {
                 if (boardInfo.satelliteView) {
                     m_loadedMaps.push_back(std::move(boardInfo));
                 }
-            } else if (params.verbose) {
-                std::cout << "Warning: Failed to load map " << file << ": " << info.error << std::endl;
             }
         }
         
+        // Check if we have any valid maps for tournament execution
         if (m_discoveredMaps.empty()) {
+            // Create error file before graceful exit
+            if (m_errorCollector.hasErrors()) {
+                m_errorCollector.saveToFile();
+            }
+            
+            // TODO: consider usage message
+            // Graceful exit with usage message
+            std::cout << "Error: No valid maps found for tournament execution." << std::endl;
+            std::cout << "Usage: " << std::endl;
+            std::cout << "  Ensure maps folder contains valid .txt map files" << std::endl;
+            std::cout << "  Maps must contain at least one tank for each player" << std::endl;
+            std::cout << "  Check input_errors.txt for detailed validation errors" << std::endl;
             handleError("No valid maps found");
             return false;
         }
@@ -168,11 +180,12 @@ bool CompetitiveRunner::loadMapsImpl(const CompetitiveParameters& params) {
     }
 }
 
+// TODO: consider storing parameters safely instead of passing as arguments in all methods
 GameResult CompetitiveRunner::executeGameLogic(const BaseParameters& params) {
     const CompetitiveParameters* competitiveParams = dynamic_cast<const CompetitiveParameters*>(&params);
-    if (!competitiveParams) {
-        handleError("Invalid parameter type for CompetitiveRunner");
-        return createErrorResult();
+    
+    if (m_errorCollector.hasErrors()) {
+        m_errorCollector.saveToFile();
     }
     
     m_finalScores.clear();
@@ -243,21 +256,37 @@ CompetitiveRunner::MapInfo CompetitiveRunner::loadMapFile(const std::string& map
     info.name = std::filesystem::path(mapPath).stem().string();
     info.loaded = false;
     
-    try {
-        // Try to load the map using FileLoader to validate it
-        auto boardInfo = FileLoader::loadBoardWithSatelliteView(mapPath);
-        
-        // Basic validation - check if map has valid dimensions and content
-        if (!boardInfo.satelliteView || boardInfo.rows == 0 || boardInfo.cols == 0) {
-            info.error = "Invalid map format: empty or zero dimensions";
-            return info;
-        }
-        
-        info.loaded = true;
-    } catch (const std::exception& e) {
-        info.error = std::string("Failed to load map: ") + e.what();
-    }
+    // Load map using FileSatelliteView validation
+    auto boardInfo = FileLoader::loadBoardWithSatelliteView(mapPath);
     
+    if (!boardInfo.satelliteView) {
+        // File loading failed
+        std::string error = "Failed to load map file";
+        info.error = error;
+        m_errorCollector.addMapError(boardInfo.mapName.empty() ? extractMapName(mapPath) : boardInfo.mapName, error);
+        return info;
+    }
+
+    // Check validation status using new validation interface
+    if (!boardInfo.isValid()) {
+        // Invalid map - exclude from tournament
+        std::string error = boardInfo.getErrorReason();
+        info.error = error;
+        m_errorCollector.addMapError(boardInfo.mapName, error);
+        return info;
+    }
+
+    // Valid map - check for warnings
+    auto warnings = boardInfo.getWarnings();
+    if (!warnings.empty()) {
+        // Valid map with warnings - include in tournament but log warnings
+        for (const auto& warning : warnings) {
+            m_errorCollector.addMapWarning(boardInfo.mapName, warning);
+        }
+    }
+
+    // Map is valid and can be used in tournament
+    info.loaded = true;
     return info;
 }
 
@@ -468,4 +497,8 @@ std::vector<CompetitiveRunner::AlgorithmScore> CompetitiveRunner::sortByScore(co
         });
     
     return sortedScores;
+}
+
+std::string CompetitiveRunner::extractMapName(const std::string& filePath) {
+    return std::filesystem::path(filePath).filename().string();
 }

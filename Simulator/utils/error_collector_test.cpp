@@ -24,6 +24,9 @@ TEST_F(ErrorCollectorTest, ConstructorInitializesEmpty) {
     ErrorCollector collector;
     
     EXPECT_FALSE(collector.hasErrors());
+    EXPECT_FALSE(collector.hasMapErrors());
+    EXPECT_FALSE(collector.hasMapWarnings());
+    EXPECT_EQ(collector.getErrorCount(), 0);
     EXPECT_TRUE(collector.getAllErrors().empty());
 }
 
@@ -35,7 +38,7 @@ TEST_F(ErrorCollectorTest, AddMapWarningsStoresErrors) {
     
     EXPECT_TRUE(collector.hasErrors());
     EXPECT_EQ(collector.getAllErrors().size(), 1);
-    EXPECT_EQ(collector.getAllErrors()[0], "Map 'test.txt': Row 2 is shorter than expected");
+    EXPECT_EQ(collector.getAllErrors()[0], "[Warning] Map 'test.txt': Row 2 is shorter than expected");
 }
 
 TEST_F(ErrorCollectorTest, AddMultipleMapWarnings) {
@@ -51,9 +54,9 @@ TEST_F(ErrorCollectorTest, AddMultipleMapWarnings) {
     EXPECT_EQ(collector.getAllErrors().size(), 3);
     
     // Check that warnings are stored in order
-    EXPECT_EQ(collector.getAllErrors()[0], "Map 'map1.txt': Invalid character at position (2,3)");
-    EXPECT_EQ(collector.getAllErrors()[1], "Map 'map1.txt': Column too short");
-    EXPECT_EQ(collector.getAllErrors()[2], "Map 'map2.txt': Row count mismatch");
+    EXPECT_EQ(collector.getAllErrors()[0], "[Warning] Map 'map1.txt': Invalid character at position (2,3)");
+    EXPECT_EQ(collector.getAllErrors()[1], "[Warning] Map 'map1.txt': Column too short");
+    EXPECT_EQ(collector.getAllErrors()[2], "[Warning] Map 'map2.txt': Row count mismatch");
 }
 
 TEST_F(ErrorCollectorTest, SaveToFileWithNoErrors) {
@@ -86,8 +89,8 @@ TEST_F(ErrorCollectorTest, SaveToFileWithErrors) {
     std::getline(file, line1);
     std::getline(file, line2);
     
-    EXPECT_EQ(line1, "Map 'test.txt': Row 1 has invalid character");
-    EXPECT_EQ(line2, "Map 'another.txt': Dimension mismatch");
+    EXPECT_EQ(line1, "[Warning] Map 'test.txt': Row 1 has invalid character");
+    EXPECT_EQ(line2, "[Warning] Map 'another.txt': Dimension mismatch");
     
     file.close();
 }
@@ -116,7 +119,7 @@ TEST_F(ErrorCollectorTest, FormatMapWarningWithSpecialCharacters) {
     collector.addMapWarnings("file with spaces.txt", warnings);
     
     EXPECT_TRUE(collector.hasErrors());
-    EXPECT_EQ(collector.getAllErrors()[0], "Map 'file with spaces.txt': Warning with 'quotes' and \"double quotes\"");
+    EXPECT_EQ(collector.getAllErrors()[0], "[Warning] Map 'file with spaces.txt': Warning with 'quotes' and \"double quotes\"");
 }
 
 TEST_F(ErrorCollectorTest, FormatMapWarningWithEmptyStrings) {
@@ -130,8 +133,8 @@ TEST_F(ErrorCollectorTest, FormatMapWarningWithEmptyStrings) {
     
     EXPECT_TRUE(collector.hasErrors());
     EXPECT_EQ(collector.getAllErrors().size(), 2);
-    EXPECT_EQ(collector.getAllErrors()[0], "Map '': Empty filename warning");
-    EXPECT_EQ(collector.getAllErrors()[1], "Map 'test.txt': ");
+    EXPECT_EQ(collector.getAllErrors()[0], "[Warning] Map '': Empty filename warning");
+    EXPECT_EQ(collector.getAllErrors()[1], "[Warning] Map 'test.txt': ");
 }
 
 TEST_F(ErrorCollectorTest, SaveToFilePreservesOrder) {
@@ -161,9 +164,9 @@ TEST_F(ErrorCollectorTest, SaveToFilePreservesOrder) {
     file.close();
     
     ASSERT_EQ(lines.size(), 3);
-    EXPECT_EQ(lines[0], "Map 'first.txt': First warning");
-    EXPECT_EQ(lines[1], "Map 'second.txt': Second warning");
-    EXPECT_EQ(lines[2], "Map 'third.txt': Third warning");
+    EXPECT_EQ(lines[0], "[Warning] Map 'first.txt': First warning");
+    EXPECT_EQ(lines[1], "[Warning] Map 'second.txt': Second warning");
+    EXPECT_EQ(lines[2], "[Warning] Map 'third.txt': Third warning");
 }
 
 TEST_F(ErrorCollectorTest, GetAllErrorsReturnsConstReference) {
@@ -176,5 +179,87 @@ TEST_F(ErrorCollectorTest, GetAllErrorsReturnsConstReference) {
     // Verify it's the same reference (not a copy)
     EXPECT_EQ(&errors, &collector.getAllErrors());
     EXPECT_EQ(errors.size(), 1);
-    EXPECT_EQ(errors[0], "Map 'test.txt': Some warning");
+    EXPECT_EQ(errors[0], "[Warning] Map 'test.txt': Some warning");
+}
+
+// New tests for error/warning distinction
+
+TEST_F(ErrorCollectorTest, AddMapErrorStoresError) {
+    ErrorCollector collector;
+    
+    collector.addMapError("broken.txt", "No tanks found on the board");
+    
+    EXPECT_TRUE(collector.hasErrors());
+    EXPECT_TRUE(collector.hasMapErrors());
+    EXPECT_FALSE(collector.hasMapWarnings());
+    EXPECT_EQ(collector.getErrorCount(), 1);
+    EXPECT_EQ(collector.getAllErrors().size(), 1);
+    EXPECT_EQ(collector.getAllErrors()[0], "[Error] Map 'broken.txt': No tanks found on the board");
+}
+
+TEST_F(ErrorCollectorTest, AddMapWarningStoresWarning) {
+    ErrorCollector collector;
+    
+    collector.addMapWarning("messy.txt", "Row 2 shorter than expected width. Filled with empty spaces.");
+    
+    EXPECT_TRUE(collector.hasErrors());
+    EXPECT_FALSE(collector.hasMapErrors());
+    EXPECT_TRUE(collector.hasMapWarnings());
+    EXPECT_EQ(collector.getErrorCount(), 0);
+    EXPECT_EQ(collector.getAllErrors().size(), 1);
+    EXPECT_EQ(collector.getAllErrors()[0], "[Warning] Map 'messy.txt': Row 2 shorter than expected width. Filled with empty spaces.");
+}
+
+TEST_F(ErrorCollectorTest, MixedErrorsAndWarnings) {
+    ErrorCollector collector;
+    
+    collector.addMapError("broken.txt", "Failed to load map file");
+    collector.addMapWarning("messy.txt", "Invalid character found");
+    collector.addMapError("corrupt.txt", "No tanks found");
+    collector.addMapWarning("warning.txt", "Row too short");
+    
+    EXPECT_TRUE(collector.hasErrors());
+    EXPECT_TRUE(collector.hasMapErrors());
+    EXPECT_TRUE(collector.hasMapWarnings());
+    EXPECT_EQ(collector.getErrorCount(), 2);
+    EXPECT_EQ(collector.getAllErrors().size(), 4);
+    
+    // Check order preservation
+    EXPECT_EQ(collector.getAllErrors()[0], "[Error] Map 'broken.txt': Failed to load map file");
+    EXPECT_EQ(collector.getAllErrors()[1], "[Warning] Map 'messy.txt': Invalid character found");
+    EXPECT_EQ(collector.getAllErrors()[2], "[Error] Map 'corrupt.txt': No tanks found");
+    EXPECT_EQ(collector.getAllErrors()[3], "[Warning] Map 'warning.txt': Row too short");
+}
+
+TEST_F(ErrorCollectorTest, ClearResetsCounters) {
+    ErrorCollector collector;
+    
+    collector.addMapError("error.txt", "Some error");
+    collector.addMapWarning("warning.txt", "Some warning");
+    
+    EXPECT_TRUE(collector.hasErrors());
+    EXPECT_TRUE(collector.hasMapErrors());
+    EXPECT_TRUE(collector.hasMapWarnings());
+    EXPECT_EQ(collector.getErrorCount(), 1);
+    
+    collector.clear();
+    
+    EXPECT_FALSE(collector.hasErrors());
+    EXPECT_FALSE(collector.hasMapErrors());
+    EXPECT_FALSE(collector.hasMapWarnings());
+    EXPECT_EQ(collector.getErrorCount(), 0);
+    EXPECT_TRUE(collector.getAllErrors().empty());
+}
+
+TEST_F(ErrorCollectorTest, ErrorCountWithMultipleWarnings) {
+    ErrorCollector collector;
+    
+    std::vector<std::string> warnings = {"Warning 1", "Warning 2", "Warning 3"};
+    collector.addMapWarnings("test.txt", warnings);
+    
+    EXPECT_TRUE(collector.hasErrors());
+    EXPECT_FALSE(collector.hasMapErrors());
+    EXPECT_TRUE(collector.hasMapWarnings());
+    EXPECT_EQ(collector.getErrorCount(), 0);  // No fatal errors
+    EXPECT_EQ(collector.getAllErrors().size(), 3);  // But 3 warnings
 }

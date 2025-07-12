@@ -6,6 +6,7 @@
 #include "file_loader.h"
 #include "file_satellite_view.h"
 
+// TODO: move errors to error collector
 std::vector<std::string> FileLoader::loadBoardFile(
     const std::string& filePath,
     int& rows,
