@@ -18,8 +18,8 @@ protected:
 
 TEST_F(ThreadPoolTest, ConstructorWithDefaultThreads) {
     ThreadPool pool;
-    EXPECT_GT(pool.getNumThreads(), 0);
-    EXPECT_LE(pool.getNumThreads(), std::thread::hardware_concurrency());
+    EXPECT_EQ(pool.getNumThreads(), 0);  // Default is single-threaded (0 worker threads)
+    EXPECT_TRUE(pool.isSingleThreaded());
 }
 
 TEST_F(ThreadPoolTest, ConstructorWithSpecificThreads) {
@@ -61,7 +61,8 @@ TEST_F(ThreadPoolTest, ThreadCountNeverEquals2) {
 
 TEST_F(ThreadPoolTest, ConstructorWithZeroThreads) {
     ThreadPool pool(0);
-    EXPECT_GT(pool.getNumThreads(), 0);
+    EXPECT_EQ(pool.getNumThreads(), 0);  // 0 threads becomes single-threaded (0 worker threads)
+    EXPECT_TRUE(pool.isSingleThreaded());
 }
 
 TEST_F(ThreadPoolTest, SimpleTaskExecution) {

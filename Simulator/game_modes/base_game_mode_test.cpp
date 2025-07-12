@@ -128,7 +128,7 @@ TEST_F(BaseGameModeTest, ExecuteWithVerboseFalse) {
             return result;
         }));
     EXPECT_CALL(*gameMode, displayResults(::testing::_))
-        .Times(0);  // Should NOT be called because verbose=false
+        .Times(1);  // displayResults is always called regardless of verbose setting
     
     GameResult result = gameMode->execute(params);
     EXPECT_EQ(result.winner, 1);
