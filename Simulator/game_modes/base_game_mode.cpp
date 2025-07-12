@@ -31,11 +31,7 @@ GameResult BaseGameMode::execute(const BaseParameters& params) {
         // Execute game logic (subclass responsibility)
         result = executeGameLogic(params);
         
-        // Display results if requested (subclass responsibility)
-        if (params.verbose) {
-            displayResults(result);
-        }
-        
+        displayResults(result);
     } catch (const std::exception& e) {
         handleError("Exception during execution: " + std::string(e.what()));
         result = createErrorResult();

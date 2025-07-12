@@ -10,6 +10,7 @@
 #include "game_runner.h"
 #include "utils/file_loader.h"
 #include "utils/thread_pool.h"
+#include "utils/error_collector.h"
 #include "common/GameResult.h"
 
 class ComparativeRunner : public BaseGameMode {
@@ -141,6 +142,7 @@ private:
     FileLoader::BoardInfo m_boardInfo;
     std::vector<GameManagerInfo> m_discoveredGameManagers;
     std::vector<ComparativeResult> m_results;
+    ErrorCollector m_errorCollector;
     
     // Thread-safety for parallel execution
     std::mutex m_resultsMutex;

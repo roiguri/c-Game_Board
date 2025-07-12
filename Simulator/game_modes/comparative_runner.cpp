@@ -8,6 +8,7 @@
 #include <map>
 #include <memory>
 #include <future>
+#include <filesystem>
 #include "utils/library_manager.h"
 #include "registration/GameManagerRegistrar.h"
 #include "registration/AlgorithmRegistrar.h"
@@ -94,29 +95,27 @@ bool ComparativeRunner::loadLibrariesImpl(const ComparativeParameters& params) {
 }
 
 bool ComparativeRunner::loadMap(const std::string& mapFile) {
-    try {
-        // Validate map file parameter
-        if (mapFile.empty()) {
-            handleError("Map file parameter is empty");
-            return false;
-        }
-        
-        if (m_boardInfo.satelliteView) {
-            // Map already loaded
-            return true;
-        }
-        
-        // Loading map file
-        m_boardInfo = FileLoader::loadBoardWithSatelliteView(mapFile);
-        if (!m_boardInfo.satelliteView) {
-            handleError("Failed to load map file: " + mapFile);
-            return false;
-        }
-        return true;
-    } catch (const std::exception& e) {
-        handleError("Exception during map loading: " + std::string(e.what()));
+    m_boardInfo = FileLoader::loadBoardWithSatelliteView(mapFile);
+    
+    if (!m_boardInfo.satelliteView) {
+        handleError("Failed to load map file: " + mapFile);
         return false;
     }
+
+    // Check validation status using new validation interface
+    if (!m_boardInfo.isValid()) {
+        // Early exit on invalid maps - print error and exit immediately without creating error file
+        handleError("Board validation failed: " + m_boardInfo.getErrorReason());
+        return false;
+    }
+
+    // Handle warnings (board is valid but has issues) - collect for later error file creation
+    auto warnings = m_boardInfo.getWarnings();
+    if (!warnings.empty()) {
+        m_errorCollector.addMapWarnings(m_boardInfo.mapName, warnings);
+    }
+
+    return true;
 }
 
 GameResult ComparativeRunner::executeGameLogic(const BaseParameters& params) {
@@ -127,6 +126,14 @@ GameResult ComparativeRunner::executeGameLogic(const BaseParameters& params) {
     }
     
     m_results.clear();
+    
+    // Save collected errors to file before starting game execution
+    if (m_errorCollector.hasErrors()) {
+        if (!m_errorCollector.saveToFile()) {
+            // Log warning but continue - don't crash if error file creation fails
+            std::cerr << "Warning: Could not save warnings to input_errors.txt file, continuing without it" << std::endl;
+        }
+    }
     
     // Create ThreadPool based on parameters
     size_t numThreads = comparativeParams->numThreads;
@@ -166,7 +173,7 @@ GameResult ComparativeRunner::executeGameLogic(const BaseParameters& params) {
         }
     }
     
-    // Return a summary result - we'll handle the detailed output in displayResults
+    // Return a summary result
     if (!m_results.empty()) {
         // Use the first successful result as the summary
         for (const auto& result : m_results) {
