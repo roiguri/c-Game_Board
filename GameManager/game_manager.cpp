@@ -174,8 +174,6 @@ GameResult GameManager::run(
     if (m_verbose) {
         saveResults();
     }
-    
-    // TODO: return by value?
     return std::move(m_finalGameResult);
 }
 
@@ -568,6 +566,7 @@ void GameManager::createTanks(const std::vector<std::pair<int, Point>>& tankPosi
     LOG_INFO("Tanks created");
 }
 
+// TODO: move to Simulator
 bool GameManager::saveErrorsToFile(
   const std::vector<std::string>& errors
 ) const {

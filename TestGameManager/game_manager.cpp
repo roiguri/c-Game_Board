@@ -68,7 +68,6 @@ bool TestGameManager::readBoard(const SatelliteView& satellite_view, size_t map_
         return false;
     }
     
-    // TODO: consider support for multi-player games
     m_isClassic2PlayerGame = true;
     
     createTanks(tankPositions);
@@ -91,7 +90,6 @@ GameResult TestGameManager::run(
     m_players.push_back(PlayerWithId(1, player1));
     m_players.push_back(PlayerWithId(2, player2));
     
-    // TODO: figure out when (and if) we have unrecoverable errors
     // Initialize game using readBoard method
     if (!readBoard(map, map_width, map_height, max_steps, num_shells, player1_tank_algo_factory, player2_tank_algo_factory)) {
         // Return error result if board initialization failed
@@ -170,7 +168,6 @@ GameResult TestGameManager::run(
         saveResults(player1, player2);
     }
     
-    // TODO: return by value?
     return std::move(m_finalGameResult);
 }
 
@@ -390,7 +387,7 @@ void TestGameManager::moveShellsOnce() {
 }
 
 bool TestGameManager::checkGameOver() {
-    std::set<int> playerIds; // TODO: move this to a class member
+    std::set<int> playerIds;
     // Count alive tanks per player
     std::unordered_map<int, int> playersAlive;
     for (const auto& tank : m_tanks) {
@@ -418,7 +415,6 @@ bool TestGameManager::checkGameOver() {
             remainingTanks[playerId - 1] = tankCount; // Convert to 0-based index
         }
     }
-    // TODO: verify current step is correct in GameResult
     // Check win conditions
     if (playersWithTanks == 1) {
         m_gameResult = "Player " + std::to_string(winningPlayer) + " won with " + std::to_string(winningPlayerTanks) + " tanks still alive";

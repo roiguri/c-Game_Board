@@ -96,7 +96,6 @@ public:
     };
 
 private:
-    // TODO: consider removing this struct
     // Player structure with ID
     struct PlayerWithId {
         int playerId;
@@ -111,7 +110,7 @@ private:
     // Game state tracking
     int m_currentStep;
     bool m_gameOver;
-    bool m_isClassic2PlayerGame; // TODO: consider removing id multiplayer not implmented
+    bool m_isClassic2PlayerGame;
     int m_remaining_steps;
     int m_maximum_steps;
     std::string m_gameResult;
