@@ -21,10 +21,10 @@ public:
      * @brief Structure containing all board information loaded from file
      */
     struct BoardInfo {
-        int rows;
-        int cols; 
-        int maxSteps;
-        int numShells;
+        size_t rows;
+        size_t cols; 
+        size_t maxSteps;
+        size_t numShells;
         std::string mapName;
         std::unique_ptr<SatelliteView> satelliteView;
 
@@ -62,14 +62,14 @@ public:
      */
     static std::vector<std::string> loadBoardFile(
         const std::string& filePath,
-        int& rows,
-        int& cols,
-        int& maxSteps,
-        int& numShells,
+        size_t& rows,
+        size_t& cols,
+        size_t& maxSteps,
+        size_t& numShells,
         std::string& mapName
     );
 
 private:
     // Parse a line of the form "Key = Value" (spaces around '=' allowed)
-    static bool parseKeyValue(const std::string& line, const std::string& key, int& value);
+    static bool parseKeyValue(const std::string& line, const std::string& key, size_t& value);
 };

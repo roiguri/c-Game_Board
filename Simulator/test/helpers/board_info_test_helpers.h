@@ -62,7 +62,7 @@ public:
      * @param numShells Number of shells
      * @return BoardInfo with specified parameters
      */
-    static FileLoader::BoardInfo createCustomBoardInfo(int rows, int cols, int maxSteps, int numShells) {
+    static FileLoader::BoardInfo createCustomBoardInfo(size_t rows, size_t cols, size_t maxSteps, size_t numShells) {
         FileLoader::BoardInfo boardInfo;
         boardInfo.rows = rows;
         boardInfo.cols = cols;
@@ -71,7 +71,7 @@ public:
         
         // Create board with specified dimensions
         std::vector<std::string> board;
-        for (int i = 0; i < rows; ++i) {
+        for (size_t i = 0; i < rows; ++i) {
             std::string row(cols, ' ');
             if (i == 0 || i == rows - 1) {
                 // Top and bottom walls

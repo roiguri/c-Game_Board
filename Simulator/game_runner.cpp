@@ -16,11 +16,10 @@ GameResult GameRunner::runSingleGame(
         throw std::runtime_error("Invalid board info: null satellite view");
     }
     
-    // TODO: cosider replacing board info to ints
-    size_t mapWidth = static_cast<size_t>(boardInfo.cols);
-    size_t mapHeight = static_cast<size_t>(boardInfo.rows);
-    size_t maxSteps = static_cast<size_t>(boardInfo.maxSteps);
-    size_t numShells = static_cast<size_t>(boardInfo.numShells);
+    size_t mapWidth = boardInfo.cols;
+    size_t mapHeight = boardInfo.rows;
+    size_t maxSteps = boardInfo.maxSteps;
+    size_t numShells = boardInfo.numShells;
     auto& satelliteView = *boardInfo.satelliteView;
     
     // 2. Get GameManager factory from registrar

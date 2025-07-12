@@ -26,7 +26,7 @@ protected:
 
 TEST_F(FileLoaderTest, LoadBoardFile_NonexistentFile) {
     const std::string nonExistentFile = "this_file_does_not_exist.txt";
-    int rows, cols, maxSteps, numShells;
+    size_t rows, cols, maxSteps, numShells;
     std::string mapName;
     std::stringstream cerr_buffer;
     std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
@@ -39,7 +39,7 @@ TEST_F(FileLoaderTest, LoadBoardFile_NonexistentFile) {
 
 TEST_F(FileLoaderTest, LoadBoardFile_EmptyFile) {
     createTestFile({});
-    int rows, cols, maxSteps, numShells;
+    size_t rows, cols, maxSteps, numShells;
     std::string mapName;
     std::stringstream cerr_buffer;
     std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
@@ -64,7 +64,7 @@ TEST_F(FileLoaderTest, LoadBoardFile_ValidFile) {
         "#####"
     };
     createTestFile(content);
-    int rows, cols, maxSteps, numShells;
+    size_t rows, cols, maxSteps, numShells;
     std::string mapName;
     std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
     EXPECT_EQ(rows, 5);
@@ -90,7 +90,7 @@ TEST_F(FileLoaderTest, LoadBoardFile_InvalidRows) {
         "# @ #",
         "#####"
     });
-    int rows, cols, maxSteps, numShells;
+    size_t rows, cols, maxSteps, numShells;
     std::string mapName;
     std::stringstream cerr_buffer;
     std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
@@ -113,7 +113,7 @@ TEST_F(FileLoaderTest, LoadBoardFile_MissingHeaderLine) {
         "# @ #",
         "#####"
     });
-    int rows, cols, maxSteps, numShells;
+    size_t rows, cols, maxSteps, numShells;
     std::string mapName;
     std::stringstream cerr_buffer;
     std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
@@ -137,7 +137,7 @@ TEST_F(FileLoaderTest, LoadBoardFile_ExtraWhitespace) {
         "# @ #",
         "#####"
     });
-    int rows, cols, maxSteps, numShells;
+    size_t rows, cols, maxSteps, numShells;
     std::string mapName;
     std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
     EXPECT_EQ(rows, 10);
@@ -155,7 +155,7 @@ TEST_F(FileLoaderTest, LoadBoardFile_OnlyHeaders) {
         "Rows = 5",
         "Cols = 5"
     });
-    int rows, cols, maxSteps, numShells;
+    size_t rows, cols, maxSteps, numShells;
     std::string mapName;
     std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
     EXPECT_EQ(rows, 5);
@@ -179,7 +179,7 @@ TEST_F(FileLoaderTest, LoadBoardFile_TrailingWhitespace) {
         "#####"
     };
     createTestFile(content);
-    int rows, cols, maxSteps, numShells;
+    size_t rows, cols, maxSteps, numShells;
     std::string mapName;
     std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
     EXPECT_EQ(rows, 5);
@@ -204,7 +204,7 @@ TEST_F(FileLoaderTest, LoadBoardFile_LeadingWhitespace) {
         "#####"
     };
     createTestFile(content);
-    int rows, cols, maxSteps, numShells;
+    size_t rows, cols, maxSteps, numShells;
     std::string mapName;
     std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
     EXPECT_EQ(rows, 5);
@@ -213,6 +213,78 @@ TEST_F(FileLoaderTest, LoadBoardFile_LeadingWhitespace) {
     EXPECT_EQ(numShells, 20);
     EXPECT_EQ(result[0], " ####");
     EXPECT_EQ(result[1], "     ");
+}
+
+TEST_F(FileLoaderTest, LoadBoardFile_NegativeMaxSteps) {
+    createTestFile({
+        "MapName",
+        "MaxSteps = -500",  // Invalid negative
+        "NumShells = 20",
+        "Rows = 5",
+        "Cols = 5",
+        "#####",
+        "#1 2#",
+        "#   #",
+        "# @ #",
+        "#####"
+    });
+    size_t rows, cols, maxSteps, numShells;
+    std::string mapName;
+    std::stringstream cerr_buffer;
+    std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
+    std::cerr.rdbuf(old_cerr);
+    EXPECT_TRUE(result.empty());
+    std::string errorOutput = cerr_buffer.str();
+    EXPECT_TRUE(errorOutput.find("Invalid or missing MaxSteps line") != std::string::npos);
+}
+
+TEST_F(FileLoaderTest, LoadBoardFile_NegativeNumShells) {
+    createTestFile({
+        "MapName",
+        "MaxSteps = 1000",
+        "NumShells = -10",  // Invalid negative
+        "Rows = 5",
+        "Cols = 5",
+        "#####",
+        "#1 2#",
+        "#   #",
+        "# @ #",
+        "#####"
+    });
+    size_t rows, cols, maxSteps, numShells;
+    std::string mapName;
+    std::stringstream cerr_buffer;
+    std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
+    std::cerr.rdbuf(old_cerr);
+    EXPECT_TRUE(result.empty());
+    std::string errorOutput = cerr_buffer.str();
+    EXPECT_TRUE(errorOutput.find("Invalid or missing NumShells line") != std::string::npos);
+}
+
+TEST_F(FileLoaderTest, LoadBoardFile_NegativeCols) {
+    createTestFile({
+        "MapName",
+        "MaxSteps = 1000",
+        "NumShells = 20",
+        "Rows = 5",
+        "Cols = -5",  // Invalid negative
+        "#####",
+        "#1 2#",
+        "#   #",
+        "# @ #",
+        "#####"
+    });
+    size_t rows, cols, maxSteps, numShells;
+    std::string mapName;
+    std::stringstream cerr_buffer;
+    std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
+    std::cerr.rdbuf(old_cerr);
+    EXPECT_TRUE(result.empty());
+    std::string errorOutput = cerr_buffer.str();
+    EXPECT_TRUE(errorOutput.find("Invalid or missing Cols line") != std::string::npos);
 }
 
 // Tests for loadBoardWithSatelliteView method
