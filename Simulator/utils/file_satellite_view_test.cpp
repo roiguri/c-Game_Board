@@ -118,7 +118,7 @@ TEST_F(FileSatelliteViewTest, AllValidCharacters) {
     EXPECT_EQ(satelliteView.getObjectAt(1, 3), '8');  // Tank 8
     EXPECT_EQ(satelliteView.getObjectAt(2, 3), '9');  // Tank 9
     EXPECT_EQ(satelliteView.getObjectAt(0, 4), ' ');  // Empty
-    EXPECT_EQ(satelliteView.getObjectAt(1, 4), '%');  // Current tank
+    EXPECT_EQ(satelliteView.getObjectAt(1, 4), ' ');  // '%' -> converted to ' ' (invalid in initial board)
     EXPECT_EQ(satelliteView.getObjectAt(2, 4), ' ');  // '&' inside board -> converted to ' '
 }
 
@@ -171,4 +171,39 @@ TEST_F(FileSatelliteViewTest, BoardDimensionsVsStringLength) {
     // Truly out of bounds - beyond board dimensions
     EXPECT_EQ(satelliteView.getObjectAt(4, 0), '&');  // x beyond board width
     EXPECT_EQ(satelliteView.getObjectAt(0, 3), '&');  // y beyond board height
+}
+
+// Test validation infrastructure
+TEST_F(FileSatelliteViewTest, ValidationDefaultState) {
+    FileSatelliteView satelliteView(boardData, rows, cols);
+    
+    // By default, validation should be in valid state
+    EXPECT_TRUE(satelliteView.isValid());
+    EXPECT_EQ(satelliteView.getErrorReason(), "");
+    EXPECT_TRUE(satelliteView.getWarnings().empty());
+}
+
+TEST_F(FileSatelliteViewTest, ValidationEmptyBoard) {
+    std::vector<std::string> emptyBoard;
+    FileSatelliteView satelliteView(emptyBoard, 0, 0);
+    
+    // Empty board should still be valid by default (no validation processing yet)
+    EXPECT_TRUE(satelliteView.isValid());
+    EXPECT_EQ(satelliteView.getErrorReason(), "");
+    EXPECT_TRUE(satelliteView.getWarnings().empty());
+}
+
+TEST_F(FileSatelliteViewTest, ValidationWithVariousBoards) {
+    std::vector<std::string> complexBoard = {
+        "#1@*",
+        "2 3#",
+        "456&",  // Contains invalid character
+        "789 "
+    };
+    FileSatelliteView satelliteView(complexBoard, 4, 4);
+    
+    // Should maintain valid state (validation processing not implemented yet)
+    EXPECT_TRUE(satelliteView.isValid());
+    EXPECT_EQ(satelliteView.getErrorReason(), "");
+    EXPECT_TRUE(satelliteView.getWarnings().empty());
 }
