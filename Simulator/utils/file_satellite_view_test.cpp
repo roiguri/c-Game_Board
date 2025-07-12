@@ -7,10 +7,10 @@
 class FileSatelliteViewTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        // Create a simple 3x3 board
+        // Create a simple 3x3 board with at least one tank
         boardData = {
             "###",
-            "# #", 
+            "#1#", 
             "###"
         };
         rows = 3;
@@ -31,8 +31,8 @@ TEST_F(FileSatelliteViewTest, BasicConstruction) {
     EXPECT_EQ(satelliteView.getObjectAt(0, 2), '#');
     EXPECT_EQ(satelliteView.getObjectAt(2, 2), '#');
     
-    // Test center position
-    EXPECT_EQ(satelliteView.getObjectAt(1, 1), ' ');
+    // Test center position (now has tank '1')
+    EXPECT_EQ(satelliteView.getObjectAt(1, 1), '1');
 }
 
 TEST_F(FileSatelliteViewTest, OutOfBoundsAccess) {
@@ -55,7 +55,7 @@ TEST_F(FileSatelliteViewTest, EmptyBoard) {
 
 TEST_F(FileSatelliteViewTest, VariableLengthRows) {
     std::vector<std::string> variableBoard = {
-        "##",
+        "#1",
         "#",
         "###"
     };
@@ -177,7 +177,7 @@ TEST_F(FileSatelliteViewTest, BoardDimensionsVsStringLength) {
 TEST_F(FileSatelliteViewTest, ValidationDefaultState) {
     FileSatelliteView satelliteView(boardData, rows, cols);
     
-    // By default, validation should be in valid state
+    // Default board with tank should be valid
     EXPECT_TRUE(satelliteView.isValid());
     EXPECT_EQ(satelliteView.getErrorReason(), "");
     EXPECT_TRUE(satelliteView.getWarnings().empty());
@@ -187,9 +187,9 @@ TEST_F(FileSatelliteViewTest, ValidationEmptyBoard) {
     std::vector<std::string> emptyBoard;
     FileSatelliteView satelliteView(emptyBoard, 0, 0);
     
-    // Empty board should still be valid by default (no validation processing yet)
-    EXPECT_TRUE(satelliteView.isValid());
-    EXPECT_EQ(satelliteView.getErrorReason(), "");
+    // Empty board should be invalid due to zero dimensions
+    EXPECT_FALSE(satelliteView.isValid());
+    EXPECT_TRUE(satelliteView.getErrorReason().find("dimensions") != std::string::npos);
     EXPECT_TRUE(satelliteView.getWarnings().empty());
 }
 
@@ -202,8 +202,145 @@ TEST_F(FileSatelliteViewTest, ValidationWithVariousBoards) {
     };
     FileSatelliteView satelliteView(complexBoard, 4, 4);
     
-    // Should maintain valid state (validation processing not implemented yet)
+    // Should be valid but have warnings for invalid character
     EXPECT_TRUE(satelliteView.isValid());
     EXPECT_EQ(satelliteView.getErrorReason(), "");
+    EXPECT_FALSE(satelliteView.getWarnings().empty());
+    EXPECT_EQ(satelliteView.getWarnings().size(), 1);
+    EXPECT_TRUE(satelliteView.getWarnings()[0].find("Invalid character '&'") != std::string::npos);
+}
+
+// Test critical error: no tanks
+TEST_F(FileSatelliteViewTest, ValidationNoTanksError) {
+    std::vector<std::string> noTanksBoard = {
+        "###",
+        "#@#",
+        "###"
+    };
+    FileSatelliteView satelliteView(noTanksBoard, 3, 3);
+    
+    // Should be invalid due to no tanks
+    EXPECT_FALSE(satelliteView.isValid());
+    EXPECT_TRUE(satelliteView.getErrorReason().find("tank") != std::string::npos);
     EXPECT_TRUE(satelliteView.getWarnings().empty());
+}
+
+// Test critical error: zero dimensions
+TEST_F(FileSatelliteViewTest, ValidationZeroDimensionsError) {
+    std::vector<std::string> anyBoard = {"#1#"};
+    FileSatelliteView satelliteView(anyBoard, 0, 3);
+    
+    // Should be invalid due to zero dimensions
+    EXPECT_FALSE(satelliteView.isValid());
+    EXPECT_TRUE(satelliteView.getErrorReason().find("dimensions") != std::string::npos);
+    EXPECT_TRUE(satelliteView.getWarnings().empty());
+}
+
+// Test recovery: short rows
+TEST_F(FileSatelliteViewTest, ValidationShortRowsRecovery) {
+    std::vector<std::string> shortRowsBoard = {
+        "#1#",
+        "#",     // Short row
+        "###"
+    };
+    FileSatelliteView satelliteView(shortRowsBoard, 3, 3);
+    
+    // Should be valid with warnings
+    EXPECT_TRUE(satelliteView.isValid());
+    EXPECT_EQ(satelliteView.getErrorReason(), "");
+    EXPECT_FALSE(satelliteView.getWarnings().empty());
+    EXPECT_TRUE(satelliteView.getWarnings()[0].find("shorter than expected") != std::string::npos);
+    
+    // Verify padding worked
+    EXPECT_EQ(satelliteView.getObjectAt(0, 1), '#');
+    EXPECT_EQ(satelliteView.getObjectAt(1, 1), ' ');  // Padded
+    EXPECT_EQ(satelliteView.getObjectAt(2, 1), ' ');  // Padded
+}
+
+// Test recovery: missing rows
+TEST_F(FileSatelliteViewTest, ValidationMissingRowsRecovery) {
+    std::vector<std::string> missingRowsBoard = {
+        "#1#"
+        // Missing second and third rows
+    };
+    FileSatelliteView satelliteView(missingRowsBoard, 3, 3);
+    
+    // Should be valid with warnings
+    EXPECT_TRUE(satelliteView.isValid());
+    EXPECT_EQ(satelliteView.getErrorReason(), "");
+    EXPECT_FALSE(satelliteView.getWarnings().empty());
+    EXPECT_TRUE(satelliteView.getWarnings()[0].find("fewer rows") != std::string::npos);
+    
+    // Verify missing rows are filled with empty spaces
+    EXPECT_EQ(satelliteView.getObjectAt(0, 0), '#');
+    EXPECT_EQ(satelliteView.getObjectAt(1, 0), '1');
+    EXPECT_EQ(satelliteView.getObjectAt(0, 1), ' ');  // Missing row
+    EXPECT_EQ(satelliteView.getObjectAt(0, 2), ' ');  // Missing row
+}
+
+// Test recovery: extra rows
+TEST_F(FileSatelliteViewTest, ValidationExtraRowsRecovery) {
+    std::vector<std::string> extraRowsBoard = {
+        "#1#",
+        "###",
+        "###",
+        "###"  // Extra row
+    };
+    FileSatelliteView satelliteView(extraRowsBoard, 3, 3);
+    
+    // Should be valid with warnings
+    EXPECT_TRUE(satelliteView.isValid());
+    EXPECT_EQ(satelliteView.getErrorReason(), "");
+    EXPECT_FALSE(satelliteView.getWarnings().empty());
+    EXPECT_TRUE(satelliteView.getWarnings()[0].find("more rows") != std::string::npos);
+    
+    // Extra row should be ignored
+    EXPECT_EQ(satelliteView.getObjectAt(0, 2), '#');  // Last valid row
+}
+
+// Test recovery: long rows
+TEST_F(FileSatelliteViewTest, ValidationLongRowsRecovery) {
+    std::vector<std::string> longRowsBoard = {
+        "#1#",
+        "##2##",  // Too long
+        "###"
+    };
+    FileSatelliteView satelliteView(longRowsBoard, 3, 3);
+    
+    // Should be valid with warnings
+    EXPECT_TRUE(satelliteView.isValid());
+    EXPECT_EQ(satelliteView.getErrorReason(), "");
+    EXPECT_FALSE(satelliteView.getWarnings().empty());
+    EXPECT_TRUE(satelliteView.getWarnings()[0].find("longer than expected") != std::string::npos);
+    
+    // Extra characters should be ignored
+    EXPECT_EQ(satelliteView.getObjectAt(0, 1), '#');
+    EXPECT_EQ(satelliteView.getObjectAt(1, 1), '#');
+    EXPECT_EQ(satelliteView.getObjectAt(2, 1), '2');  // Extra characters ignored
+}
+
+// Test recovery: multiple invalid characters
+TEST_F(FileSatelliteViewTest, ValidationMultipleInvalidCharacters) {
+    std::vector<std::string> invalidCharsBoard = {
+        "#1A",
+        "B2C",
+        "3#D"
+    };
+    FileSatelliteView satelliteView(invalidCharsBoard, 3, 3);
+    
+    // Should be valid with multiple warnings
+    EXPECT_TRUE(satelliteView.isValid());
+    EXPECT_EQ(satelliteView.getErrorReason(), "");
+    EXPECT_EQ(satelliteView.getWarnings().size(), 4);  // A, B, C, D invalid
+    
+    // Invalid characters should be replaced with spaces
+    EXPECT_EQ(satelliteView.getObjectAt(0, 0), '#');
+    EXPECT_EQ(satelliteView.getObjectAt(1, 0), '1');
+    EXPECT_EQ(satelliteView.getObjectAt(2, 0), ' ');  // A -> ' '
+    EXPECT_EQ(satelliteView.getObjectAt(0, 1), ' ');  // B -> ' '
+    EXPECT_EQ(satelliteView.getObjectAt(1, 1), '2');
+    EXPECT_EQ(satelliteView.getObjectAt(2, 1), ' ');  // C -> ' '
+    EXPECT_EQ(satelliteView.getObjectAt(0, 2), '3');
+    EXPECT_EQ(satelliteView.getObjectAt(1, 2), '#');
+    EXPECT_EQ(satelliteView.getObjectAt(2, 2), ' ');  // D -> ' '
 }

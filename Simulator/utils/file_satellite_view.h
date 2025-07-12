@@ -19,7 +19,7 @@ public:
     const std::vector<std::string>& getWarnings() const;
 
 private:
-    std::vector<std::string> m_boardData;
+    std::vector<std::string> m_processedBoard;
     size_t m_rows;
     size_t m_cols;
 
@@ -31,4 +31,5 @@ private:
     // Helper methods for validation state management
     void setError(const std::string& errorMessage);
     void addWarning(const std::string& warningMessage);
+    void initializeAndRecoverBoard(const std::vector<std::string>& rawBoardData);
 };
