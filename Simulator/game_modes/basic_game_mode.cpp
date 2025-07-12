@@ -111,23 +111,26 @@ bool BasicGameMode::loadLibrariesImpl(const GameParameters& params) {
 }
 
 bool BasicGameMode::loadMap(const std::string& mapFile) {
-    try {
-        // Validate map file parameter
-        if (mapFile.empty()) {
-            handleError("Map file parameter is empty");
-            return false;
-        }
-        
-        m_boardInfo = FileLoader::loadBoardWithSatelliteView(mapFile);
-        if (!m_boardInfo.satelliteView) {
-            handleError("Failed to load map file: " + mapFile);
-            return false;
-        }
-        return true;
-    } catch (const std::exception& e) {
-        handleError("Exception during map loading: " + std::string(e.what()));
+    m_boardInfo = FileLoader::loadBoardWithSatelliteView(mapFile);
+    
+    if (!m_boardInfo.satelliteView) {
+        handleError("Failed to load map file: " + mapFile);
         return false;
     }
+
+    if (!m_boardInfo.isValid()) {
+        handleError("Board validation failed: " + m_boardInfo.getErrorReason());
+        return false;
+    }
+
+    auto warnings = m_boardInfo.getWarnings();
+    if (!warnings.empty()) {
+        if (!saveErrorsToFile(warnings)) {
+            std::cerr << "Warning: Could not save warnings to input_errors.txt file, continuing without it" << std::endl;
+        }
+    }
+
+    return true;
 }
 
 GameResult BasicGameMode::executeGameLogic(const BaseParameters& params) {

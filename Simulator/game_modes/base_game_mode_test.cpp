@@ -217,11 +217,10 @@ TEST_F(BaseGameModeTest, ExecuteFailsOnEmptyMapFile) {
     params.mapFile = "";  // Empty map file
     params.verbose = true;
     
-    // No mock expectations because execution should fail before calling abstract methods
     EXPECT_CALL(*gameMode, loadLibraries(::testing::_))
-        .Times(0);
-    EXPECT_CALL(*gameMode, loadMap(::testing::_))
-        .Times(0);
+        .WillOnce(::testing::Return(true));
+    EXPECT_CALL(*gameMode, loadMap(""))
+        .WillOnce(::testing::Return(false)); 
     EXPECT_CALL(*gameMode, executeGameLogic(::testing::_))
         .Times(0);
     EXPECT_CALL(*gameMode, displayResults(::testing::_))

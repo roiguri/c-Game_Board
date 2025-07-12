@@ -2,6 +2,7 @@
 #include "utils/file_enumerator.h"
 #include "utils/output_generator.h"
 #include <iostream>
+#include <fstream>
 #include <stdexcept>
 
 BaseGameMode::BaseGameMode() 
@@ -24,7 +25,6 @@ GameResult BaseGameMode::execute(const BaseParameters& params) {
         
         // Load map (subclass responsibility)
         if (!loadMap(params.mapFile)) {
-            handleError("Failed to load map: " + params.mapFile);
             return createErrorResult();
         }
         
@@ -98,4 +98,24 @@ GameResult BaseGameMode::createErrorResult() const {
 
 bool BaseGameMode::writeToFile(const std::string& filePath, const std::string& content, bool fallbackToConsole) const {
     return OutputGenerator::writeToFile(filePath, content, fallbackToConsole);
+}
+
+bool BaseGameMode::saveErrorsToFile(const std::vector<std::string>& errors) {
+    if (errors.empty()) {
+        // No errors to report
+        return true;
+    }
+    
+    std::ofstream errorFile("input_errors.txt");
+    if (!errorFile.is_open()) {
+        std::cerr << "Error: Could not create input_errors.txt file" << std::endl;
+        return false;
+    }
+    
+    for (const auto& error : errors) {
+        errorFile << error << std::endl;
+    }
+    
+    errorFile.close();
+    return true;
 }
