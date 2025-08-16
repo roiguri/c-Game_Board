@@ -268,6 +268,13 @@ For each test scenario, verify:
     game_managers_folder=../test_libraries/common/game_managers \
     algorithm1=../test_libraries/common/algorithms/libTestAlgorithm_Basic_098765432_123456789.so \
     algorithm2=../test_libraries/common/algorithms/libTestAlgorithm_Offensive_098765432_123456789.so
+
+# Scenario 6 - Map Error - invalid map
+./bin/tanks_game -comparative \
+    game_map=../test_libraries/common/invalid/not_enough_maps/invalid_map.txt \
+    game_managers_folder=../test_libraries/common/game_managers \
+    algorithm1=../test_libraries/common/algorithms/libTestAlgorithm_Basic_098765432_123456789.so \
+    algorithm2=../test_libraries/common/algorithms/libTestAlgorithm_Offensive_098765432_123456789.so
 ```
 
 ### Competitive Mode Tests

@@ -17,8 +17,6 @@ GameBoard::GameBoard(size_t width, size_t height) : m_width(width), m_height(hei
 bool GameBoard::initialize(const std::vector<std::string>& boardLines, 
   std::vector<std::pair<int, Point>>& tankPositions) {
   if (boardLines.empty()) {
-      std::cerr << "Error: Input board is empty. Cannot initialize game." 
-        << std::endl;
       return false;
   }
   m_wallHealth.clear();
@@ -100,7 +98,6 @@ bool GameBoard::initialize(const std::vector<std::string>& boardLines,
   }
   
   if (tankPositions.empty()) {
-      std::cerr << "Error: No tanks found on the board." << std::endl;
       return false;
   }
   return true;

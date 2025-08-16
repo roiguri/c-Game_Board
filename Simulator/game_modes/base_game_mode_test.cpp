@@ -27,7 +27,6 @@ public:
     using BaseGameMode::generateTimestamp;
     using BaseGameMode::enumerateFiles;
     using BaseGameMode::validateLibrary;
-    using BaseGameMode::handleError;
     using BaseGameMode::createErrorResult;
     using BaseGameMode::writeToFile;
     using BaseGameMode::m_libraryManager;

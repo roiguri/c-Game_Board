@@ -19,7 +19,6 @@ GameResult BaseGameMode::execute(const BaseParameters& params) {
     try {
         // Load libraries (subclass responsibility)
         if (!loadLibraries(params)) {
-            handleError("Failed to load required libraries");
             return createErrorResult();
         }
         
@@ -33,10 +32,8 @@ GameResult BaseGameMode::execute(const BaseParameters& params) {
         
         displayResults(result);
     } catch (const std::exception& e) {
-        handleError("Exception during execution: " + std::string(e.what()));
-        result = createErrorResult();
-    } catch (...) {
-        handleError("Unknown exception during execution");
+        // Should not happen
+        std::cout << "Error: Unexpected exception during execution: " + std::string(e.what()) << std::endl;
         result = createErrorResult();
     }
     
@@ -44,7 +41,7 @@ GameResult BaseGameMode::execute(const BaseParameters& params) {
 }
 
 void BaseGameMode::cleanup() {
-    // Base cleanup is empty - subclasses handle their own cleanup
+    // Subclasses handle their own cleanup
 }
 
 std::string BaseGameMode::generateTimestamp(bool includeMilliseconds) const {
@@ -57,9 +54,6 @@ std::vector<std::string> BaseGameMode::enumerateFiles(const std::string& directo
     } else if (extension == ".txt") {
         return FileEnumerator::enumerateMapFiles(directory);
     } else {
-        // For other extensions, we'd need to implement a generic method
-        // For now, return empty vector and set error
-        const_cast<BaseGameMode*>(this)->handleError("Unsupported file extension: " + extension);
         return {};
     }
 }
@@ -73,12 +67,6 @@ LibraryValidator::LibraryInfo BaseGameMode::validateLibrary(const std::string& l
         LibraryValidator::LibraryInfo info(libraryPath);
         info.error = "Unknown library type: " + type;
         return info;
-    }
-}
-
-void BaseGameMode::handleError(const std::string& error) {
-    if (!error.empty()) {
-        std::cerr << "BaseGameMode Error: " << error << std::endl;
     }
 }
 

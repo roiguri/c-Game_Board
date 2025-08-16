@@ -49,6 +49,7 @@ bool GameManager::readBoard(const SatelliteView& satellite_view, size_t map_widt
     std::vector<std::string> boardLines = 
       readSatelliteView(satellite_view, map_width, map_height);
     if (boardLines.empty()) {
+        // Should not happen
         return false;
     }
 
@@ -59,7 +60,7 @@ bool GameManager::readBoard(const SatelliteView& satellite_view, size_t map_widt
 
     std::vector<std::pair<int, Point>> tankPositions;
     if (!m_board.initialize(boardLines, tankPositions)) {
-        // Unrecoverable error in board initialization
+        // Should not happen
         return false;
     }
     
@@ -91,10 +92,9 @@ GameResult GameManager::run(
     m_players.push_back(PlayerWithId(1, player1));
     m_players.push_back(PlayerWithId(2, player2));
     
-    // TODO: figure out when (and if) we have unrecoverable errors
     // Initialize game using readBoard method
     if (!readBoard(map, map_width, map_height, max_steps, num_shells, player1_tank_algo_factory, player2_tank_algo_factory)) {
-        // Return error result if board initialization failed
+        // Return error result if board initialization failed - should not happen
         GameResult errorResult;
         errorResult.winner = 0; // tie
         errorResult.reason = GameResult::Reason::ALL_TANKS_DEAD;
@@ -181,8 +181,8 @@ bool GameManager::saveResults() {
     
     std::ofstream outputFile(outputFilePath);
     if (!outputFile.is_open()) {
-        std::cerr << "Error: Could not open output file " << 
-            outputFilePath << std::endl;
+        std::cerr << "Warning: Could not open output file " << 
+            outputFilePath << " for saving results, continuing without it" << std::endl;
         return false;
     }
     for (const auto& logEntry : m_gameLog) {

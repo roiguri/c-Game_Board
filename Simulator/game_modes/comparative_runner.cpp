@@ -24,7 +24,8 @@ bool ComparativeRunner::loadLibraries(const BaseParameters& params) {
     // Cast to derived parameter type
     const ComparativeParameters* comparativeParams = dynamic_cast<const ComparativeParameters*>(&params);
     if (!comparativeParams) {
-        handleError("Invalid parameter type for ComparativeRunner");
+        // Should not happen
+        std::cout << "Error: Unexpected exception during library loading" << std::endl;
         return false;
     }
     
@@ -39,8 +40,14 @@ bool ComparativeRunner::loadLibrariesImpl(const ComparativeParameters& params) {
     
     std::vector<std::string> soFiles = enumerateFiles(params.gameManagersFolder, ".so");
     if (soFiles.empty()) {
-        handleError("No .so files found in directory: " + params.gameManagersFolder);
-        return false;
+      // Print usage and exit - insufficient GameManagers for comparative mode
+      std::cout << "Error: Comparative mode requires at least 2 working GameManager libraries." << std::endl;
+      std::cout << "Found 0 .so files in given game_managers_folder" << std::endl;
+      std::cout << "Usage:" << std::endl;
+      std::cout << "  Place at least 2 valid GameManager .so files in the game_managers_folder" << std::endl;
+      std::cout << "  Check input_errors.txt for detailed loading errors" << std::endl;
+      
+      return false;
     }
     
     // Load and validate each GameManager, collecting errors for failed ones
@@ -127,14 +134,18 @@ bool ComparativeRunner::loadMap(const std::string& mapFile) {
     m_boardInfo = FileLoader::loadBoardWithSatelliteView(mapFile);
     
     if (!m_boardInfo.satelliteView) {
-        handleError("Failed to load map file: " + mapFile);
+        std::cout << "Error: Failed to load map file: " + mapFile << std::endl;
+        std::cout << "Usage:" << std::endl;
+        std::cout << "  Ensure map file contains valid .txt map file" << std::endl;
         return false;
     }
 
     // Check validation status using new validation interface
     if (!m_boardInfo.isValid()) {
         // Early exit on invalid maps - print error and exit immediately without creating error file
-        handleError("Board validation failed: " + m_boardInfo.getErrorReason());
+        std::cout << "Error: Board validation failed: " + m_boardInfo.getErrorReason() << std::endl;
+        std::cout << "Usage:" << std::endl;
+        std::cout << "  Ensure map file contains valid .txt map file" << std::endl;
         return false;
     }
 
@@ -150,7 +161,8 @@ bool ComparativeRunner::loadMap(const std::string& mapFile) {
 GameResult ComparativeRunner::executeGameLogic(const BaseParameters& params) {
     const ComparativeParameters* comparativeParams = dynamic_cast<const ComparativeParameters*>(&params);
     if (!comparativeParams) {
-        handleError("Invalid parameter type for ComparativeRunner");
+        // Should not happen
+        std::cout << "Error: Unexpected exception during game execution" << std::endl;
         return createErrorResult();
     }
     
@@ -190,7 +202,7 @@ GameResult ComparativeRunner::executeGameLogic(const BaseParameters& params) {
             // Handle individual task failure
             ComparativeResult errorResult;
             errorResult.success = false;
-            errorResult.error = "Thread execution failed: " + std::string(e.what());
+            errorResult.error = "Error: Unexpected exception during thread execution: " + std::string(e.what());
             std::lock_guard<std::mutex> lock(m_resultsMutex);
             m_results.push_back(std::move(errorResult));
         }
@@ -201,13 +213,11 @@ GameResult ComparativeRunner::executeGameLogic(const BaseParameters& params) {
         // Use the first successful result as the summary
         for (const auto& result : m_results) {
             if (result.success) {
-                // Can't copy GameResult due to unique_ptr, so create a simple success indicator
                 GameResult summary;
                 summary.winner = result.gameResult.winner;
                 summary.rounds = result.gameResult.rounds;
                 summary.reason = result.gameResult.reason;
                 summary.remaining_tanks = result.gameResult.remaining_tanks;
-                // Don't copy gameState (unique_ptr)
                 return summary;
             }
         }
@@ -221,16 +231,12 @@ void ComparativeRunner::displayResults(const GameResult& /* result */) {
     if (!m_results.empty() && m_currentParams) {
         std::string outputPath = m_currentParams->gameManagersFolder + "/comparative_results_" + generateTimestamp() + ".txt";
         generateOutput(m_results, outputPath, *m_currentParams);
-        
-        // Results written to file
     }
 }
 
 const std::vector<ComparativeRunner::GameManagerInfo>& ComparativeRunner::getDiscoveredGameManagers() const {
     return m_discoveredGameManagers;
 }
-
-// Remove enumerateSoFiles - using base class enumerateFiles method
 
 ComparativeRunner::GameManagerInfo ComparativeRunner::loadGameManager(const std::string& soPath) {
     GameManagerInfo info;

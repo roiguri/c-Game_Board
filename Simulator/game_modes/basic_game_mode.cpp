@@ -15,7 +15,6 @@ bool BasicGameMode::loadLibraries(const BaseParameters& params) {
     // Cast to derived parameter type
     const GameParameters* gameParams = dynamic_cast<const GameParameters*>(&params);
     if (!gameParams) {
-        handleError("Invalid parameter type for BasicGameMode");
         return false;
     }
     
@@ -31,7 +30,6 @@ bool BasicGameMode::loadLibrariesImpl(const GameParameters& params) {
         // Load GameManager library
         gmRegistrar.createGameManagerEntry(params.gameManagerLib);
         if (!libManager.loadLibrary(params.gameManagerLib)) {
-            handleError("Error loading GameManager library: " + libManager.getLastError());
             gmRegistrar.removeLast();
             return false;
         }
@@ -39,14 +37,12 @@ bool BasicGameMode::loadLibrariesImpl(const GameParameters& params) {
         try {
             gmRegistrar.validateLastRegistration();
         } catch (const GameManagerRegistrar::BadGameManagerRegistrationException& e) {
-            handleError("GameManager registration failed for " + std::string(e.name));
             return false;
         }
         
         // Load Algorithm 1 library
         algoRegistrar.createAlgorithmFactoryEntry(params.algorithm1Lib);
         if (!libManager.loadLibrary(params.algorithm1Lib)) {
-            handleError("Error loading Algorithm 1 library: " + libManager.getLastError());
             algoRegistrar.removeLast();
             return false;
         }
@@ -54,7 +50,6 @@ bool BasicGameMode::loadLibrariesImpl(const GameParameters& params) {
         try {
             algoRegistrar.validateLastRegistration();
         } catch (const BadRegistrationException& e) {
-            handleError("Algorithm registration failed: " + std::string(e.what()));
             return false;
         }
         
@@ -62,7 +57,6 @@ bool BasicGameMode::loadLibrariesImpl(const GameParameters& params) {
         if (params.algorithm2Lib != params.algorithm1Lib) {
             algoRegistrar.createAlgorithmFactoryEntry(params.algorithm2Lib);
             if (!libManager.loadLibrary(params.algorithm2Lib)) {
-                handleError("Error loading Algorithm 2 library: " + libManager.getLastError());
                 algoRegistrar.removeLast();
                 return false;
             }
@@ -70,7 +64,6 @@ bool BasicGameMode::loadLibrariesImpl(const GameParameters& params) {
             try {
                 algoRegistrar.validateLastRegistration();
             } catch (const BadRegistrationException& e) {
-                handleError("Algorithm registration failed: " + std::string(e.what()));
                 return false;
             }
         } else {
@@ -79,12 +72,10 @@ bool BasicGameMode::loadLibrariesImpl(const GameParameters& params) {
         
         // Validate registrations
         if (gmRegistrar.count() == 0) {
-            handleError("No GameManager registered after loading libraries");
             return false;
         }
         
         if (algoRegistrar.size() == 0) {
-            handleError("No algorithms registered after loading libraries");
             return false;
         }
         
@@ -105,7 +96,6 @@ bool BasicGameMode::loadLibrariesImpl(const GameParameters& params) {
         return true;
         
     } catch (const std::exception& e) {
-        handleError("Exception during library loading: " + std::string(e.what()));
         return false;
     }
 }
@@ -114,12 +104,10 @@ bool BasicGameMode::loadMap(const std::string& mapFile) {
     m_boardInfo = FileLoader::loadBoardWithSatelliteView(mapFile);
     
     if (!m_boardInfo.satelliteView) {
-        handleError("Failed to load map file: " + mapFile);
         return false;
     }
 
     if (!m_boardInfo.isValid()) {
-        handleError("Board validation failed: " + m_boardInfo.getErrorReason());
         return false;
     }
 
@@ -136,7 +124,6 @@ bool BasicGameMode::loadMap(const std::string& mapFile) {
 GameResult BasicGameMode::executeGameLogic(const BaseParameters& params) {
     const GameParameters* gameParams = dynamic_cast<const GameParameters*>(&params);
     if (!gameParams) {
-        handleError("Invalid parameter type for BasicGameMode");
         return createErrorResult();
     }
     

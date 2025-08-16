@@ -154,15 +154,6 @@ protected:
     LibraryValidator::LibraryInfo validateLibrary(const std::string& libraryPath, const std::string& type) const;
 
     /**
-     * @brief Handle error with consistent logging and cleanup
-     * 
-     * Provides consistent error handling across all game modes.
-     * 
-     * @param error Error message to log
-     */
-    void handleError(const std::string& error);
-
-    /**
      * @brief Create a standardized error result
      * 
      * Creates a GameResult indicating failure with consistent format.

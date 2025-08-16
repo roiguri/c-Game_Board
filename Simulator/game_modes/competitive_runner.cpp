@@ -24,7 +24,8 @@ bool CompetitiveRunner::loadLibraries(const BaseParameters& params) {
     // Cast to derived parameter type
     const CompetitiveParameters* competitiveParams = dynamic_cast<const CompetitiveParameters*>(&params);
     if (!competitiveParams) {
-        handleError("Invalid parameter type for CompetitiveRunner");
+        // Should not happen
+        std::cout << "Error: Unexpected exception during library loading" << std::endl;
         return false;
     }
     
@@ -133,41 +134,33 @@ bool CompetitiveRunner::loadLibrariesImpl(const CompetitiveParameters& params) {
         return true;
         
     } catch (const std::exception& e) {
-        handleError("Exception during library loading: " + std::string(e.what()));
+        // Should not happen
+        std::cout << "Error: Unexpected exception during library loading: " + std::string(e.what()) << std::endl;
         return false;
     }
 }
 
 bool CompetitiveRunner::loadMap(const std::string& /* mapFile */) {
-    // For competitive mode, mapFile parameter is not used - we load all maps from folder
-    // Validate that we have the required parameters
-    if (!m_currentParams) {
-        handleError("CompetitiveParameters not initialized");
-        return false;
-    }
-    
-    if (m_currentParams->gameMapsFolder.empty()) {
-        handleError("Game maps folder parameter is empty");
-        return false;
-    }
-    
+    // For competitive mode, mapFile parameter is not used    
     return loadMapsImpl(*m_currentParams);
 }
 
 bool CompetitiveRunner::loadMapsImpl(const CompetitiveParameters& params) {
     try {
-        // TODO: print usage and exit
         // Load maps from folder
         std::vector<std::string> mapFiles = enumerateFiles(params.gameMapsFolder, ".txt");
         if (mapFiles.empty()) {
-            handleError("No maps found in " + params.gameMapsFolder);
+            std::cout << "Error: No maps found in " + params.gameMapsFolder << std::endl;
+            std::cout << "Usage - Game map requirements:" << std::endl;
+            std::cout << "  Map must contain 5 header lines" << std::endl;
+            std::cout << "  Map must contain at least one tank for each player" << std::endl;
             return false;
         }
         
         m_discoveredMaps.clear();
         m_loadedMaps.clear();
         for (const auto& file : mapFiles) {
-            auto info = loadMapFile(file); // Use renamed method to avoid recursion
+            auto info = loadMapFile(file);
             if (info.loaded) {
                 m_discoveredMaps.push_back(std::move(info));
                 // Also load the actual map data for game execution
@@ -179,13 +172,7 @@ bool CompetitiveRunner::loadMapsImpl(const CompetitiveParameters& params) {
         }
         
         // Check if we have any valid maps for tournament execution
-        if (m_discoveredMaps.empty()) {
-            // Create error file before graceful exit
-            if (m_errorCollector.hasErrors()) {
-                m_errorCollector.saveToFile();
-            }
-            
-            // Graceful exit with usage message
+        if (m_discoveredMaps.empty()) {            
             std::cout << "Error: No valid maps found for tournament execution." << std::endl;
             std::cout << "Usage - Game map requirements:" << std::endl;
             std::cout << "  Map must contain 5 header lines" << std::endl;
@@ -196,8 +183,9 @@ bool CompetitiveRunner::loadMapsImpl(const CompetitiveParameters& params) {
         return true;
         
     } catch (const std::exception& e) {
-        handleError("Exception during map loading: " + std::string(e.what()));
-        return false;
+      // Should not happen
+      std::cout << "Error: Unexpected exception during map loading: " + std::string(e.what()) << std::endl;
+      return false;
     }
 }
 
@@ -234,10 +222,7 @@ GameResult CompetitiveRunner::executeGameLogic(const BaseParameters& params) {
                     std::lock_guard<std::mutex> lock(m_scoresMutex);
                     updateScores(pairing.first, pairing.second, result, scores);
                 } catch (const std::exception& e) {
-                    std::string error = "Error executing match between algorithms " + 
-                                      std::to_string(pairing.first) + " and " + std::to_string(pairing.second) + 
-                                      " on map " + std::to_string(mapIndex) + ": " + e.what();
-                    handleError(error);
+                    std::cout << "Error: Unexpected exception during match execution: " << e.what() << std::endl;
                 }
             });
             futures.push_back(std::move(future));
@@ -249,7 +234,7 @@ GameResult CompetitiveRunner::executeGameLogic(const BaseParameters& params) {
         try {
             future.get();
         } catch (const std::exception& e) {
-            handleError("Thread execution failed: " + std::string(e.what()));
+            std::cout << "Error: Unexpected exception during thread execution: " << e.what() << std::endl;
         }
     }
     
@@ -401,7 +386,7 @@ GameResult CompetitiveRunner::executeMatch(int algorithm1Index, int algorithm2In
         // Get algorithm names from the pre-registered algorithms
         std::string algorithm1Name, algorithm2Name;
         if (algoRegistrar.size() < 2) {
-            handleError("Not enough algorithms registered for competition");
+            // Should not happen (validated on load)
             return result;
         }
         
@@ -424,7 +409,7 @@ GameResult CompetitiveRunner::executeMatch(int algorithm1Index, int algorithm2In
         }
         
         if (!found1 || !found2) {
-            handleError("Could not find registered algorithms for match");
+            // Should not happen (validated on load)
             return result;
         }
         
@@ -435,12 +420,10 @@ GameResult CompetitiveRunner::executeMatch(int algorithm1Index, int algorithm2In
             algorithm1Name,
             algorithm2Name,
             params.verbose
-        );
-        
-        // Clean up for next iteration - but don't call full cleanup during execution
-        
+        );        
     } catch (const std::exception& e) {
-        handleError("Exception during match execution: " + std::string(e.what()));
+        // Should not happen
+        std::cout << "Error: Unexpected exception during match execution: " << e.what() << std::endl;
         return result;
     }
     
@@ -484,7 +467,7 @@ void CompetitiveRunner::generateOutput(const std::vector<AlgorithmScore>& scores
     
     // If file cannot be opened, fall back to console output
     if (!outFile.is_open()) {
-        std::cerr << "Error: Cannot create output file " << outputPath << ". Writing to console instead." << std::endl;
+        std::cerr << "Warning: Cannot create output file " << outputPath << ". Writing to console instead." << std::endl;
         output = &std::cout;
     }
     
