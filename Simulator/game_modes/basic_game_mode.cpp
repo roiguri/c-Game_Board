@@ -113,7 +113,9 @@ bool BasicGameMode::loadMap(const std::string& mapFile) {
 
     auto warnings = m_boardInfo.getWarnings();
     if (!warnings.empty()) {
-        if (!saveErrorsToFile(warnings)) {
+        ErrorCollector errorCollector;
+        errorCollector.addMapWarnings(mapFile, warnings);
+        if (!errorCollector.saveToFile()) {
             std::cerr << "Warning: Could not save warnings to input_errors.txt file, continuing without it" << std::endl;
         }
     }

@@ -92,7 +92,6 @@ int main(int argc, char* argv[]) {
     CommandLineParser::ParseResult parseResult = parser.parse(argc, argv);
     
     if (!parseResult.success) {
-        // TODO: consider removing error printed - print usage only
         std::cerr << "Error: " << parseResult.errorMessage << std::endl;
         
         if (!parseResult.missingParams.empty()) {

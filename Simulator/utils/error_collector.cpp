@@ -55,7 +55,7 @@ bool ErrorCollector::saveToFile() const {
     
     std::ofstream errorFile("input_errors.txt");
     if (!errorFile.is_open()) {
-        std::cerr << "Error: Could not create input_errors.txt file" << std::endl;
+        std::cerr << "Warning: Could not create input_errors.txt file" << std::endl;
         return false;
     }
     

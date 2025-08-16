@@ -83,23 +83,3 @@ GameResult BaseGameMode::createErrorResult() const {
 bool BaseGameMode::writeToFile(const std::string& filePath, const std::string& content, bool fallbackToConsole) const {
     return OutputGenerator::writeToFile(filePath, content, fallbackToConsole);
 }
-
-bool BaseGameMode::saveErrorsToFile(const std::vector<std::string>& errors) {
-    if (errors.empty()) {
-        // No errors to report
-        return true;
-    }
-    
-    std::ofstream errorFile("input_errors.txt");
-    if (!errorFile.is_open()) {
-        std::cerr << "Error: Could not create input_errors.txt file" << std::endl;
-        return false;
-    }
-    
-    for (const auto& error : errors) {
-        errorFile << error << std::endl;
-    }
-    
-    errorFile.close();
-    return true;
-}

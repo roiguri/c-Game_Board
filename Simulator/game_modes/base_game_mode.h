@@ -7,6 +7,7 @@
 #include "utils/file_loader.h"
 #include "utils/library_manager.h"
 #include "utils/library_validator.h"
+#include "utils/error_collector.h"
 
 /**
  * @brief Abstract base class for all game mode implementations
@@ -173,17 +174,6 @@ protected:
      * @return True if content was written successfully
      */
     bool writeToFile(const std::string& filePath, const std::string& content, bool fallbackToConsole = true) const;
-
-    /**
-     * @brief Save validation warnings/errors to input_errors.txt file
-     * 
-     * Creates input_errors.txt file with one error per line. If file creation
-     * fails, the error is logged but execution continues without crashing.
-     * 
-     * @param errors Vector of error/warning messages to save
-     * @return True if file was created successfully, false otherwise
-     */
-    bool saveErrorsToFile(const std::vector<std::string>& errors);
 
     // Protected member variables accessible to subclasses
 
