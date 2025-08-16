@@ -168,9 +168,6 @@ private:
     // Get initial direction for a player based on player ID
     Direction getInitialDirection(int playerId);
 
-    // Save recoverable errors to input_errors.txt file
-    bool saveErrorsToFile(const std::vector<std::string>& errors) const;
-
     // Remove any destroyed shells from the game
     void removeDestroyedShells();
 

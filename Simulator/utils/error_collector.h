@@ -62,10 +62,27 @@ public:
      */
     void addMapWarnings(const std::string& mapName, const std::vector<std::string>& warnings);
 
-    // Future extension points for other error types
-    // void addLibraryError(const std::string& error);
-    // void addAlgorithmError(const std::string& error);
-    // void addConfigurationError(const std::string& error);
+    /**
+     * @brief Add a GameManager loading error
+     * 
+     * Adds an error for GameManager libraries that failed to load or register.
+     * These errors are logged as input errors when enough GameManagers are still loaded.
+     * 
+     * @param gameManagerPath Path to the GameManager .so file that failed
+     * @param error Description of the loading/registration failure
+     */
+    void addGameManagerError(const std::string& gameManagerPath, const std::string& error);
+
+    /**
+     * @brief Add an Algorithm loading error
+     * 
+     * Adds an error for Algorithm libraries that failed to load or register.
+     * These errors are logged as input errors when enough algorithms are still loaded.
+     * 
+     * @param algorithmPath Path to the Algorithm .so file that failed
+     * @param error Description of the loading/registration failure
+     */
+    void addAlgorithmError(const std::string& algorithmPath, const std::string& error);
 
     /**
      * @brief Check if any errors or warnings have been collected
@@ -94,6 +111,20 @@ public:
      * @return Number of fatal errors that exclude maps from execution
      */
     size_t getErrorCount() const;
+
+    /**
+     * @brief Get count of GameManager loading errors
+     * 
+     * @return Number of GameManager libraries that failed to load
+     */
+    size_t getGameManagerErrorCount() const;
+
+    /**
+     * @brief Get count of Algorithm loading errors
+     * 
+     * @return Number of Algorithm libraries that failed to load
+     */
+    size_t getAlgorithmErrorCount() const;
 
     /**
      * @brief Get all collected errors
@@ -150,6 +181,36 @@ private:
     std::string formatMapWarning(const std::string& mapName, const std::string& warning) const;
 
     /**
+     * @brief Format a GameManager error with standardized prefix
+     * 
+     * Creates a standardized format for GameManager loading errors.
+     * 
+     * @param gameManagerPath Path to the GameManager file
+     * @param error Error description
+     * @return Formatted error string
+     */
+    std::string formatGameManagerError(const std::string& gameManagerPath, const std::string& error) const;
+
+    /**
+     * @brief Format an Algorithm error with standardized prefix
+     * 
+     * Creates a standardized format for Algorithm loading errors.
+     * 
+     * @param algorithmPath Path to the Algorithm file
+     * @param error Error description
+     * @return Formatted error string
+     */
+    std::string formatAlgorithmError(const std::string& algorithmPath, const std::string& error) const;
+
+    /**
+     * @brief Extract filename from full path for error formatting
+     * 
+     * @param filePath Full path to file
+     * @return Filename without path
+     */
+    std::string extractFilename(const std::string& filePath) const;
+
+    /**
      * @brief Collection of all errors and warnings
      * 
      * Stores all collected errors and warnings in the order they were added.
@@ -165,4 +226,18 @@ private:
      * error/warning distinction without requiring separate storage vectors.
      */
     size_t m_errorCount;
+    
+    /**
+     * @brief Count of GameManager loading errors
+     * 
+     * Tracks the number of GameManager libraries that failed to load or register.
+     */
+    size_t m_gameManagerErrorCount;
+    
+    /**
+     * @brief Count of Algorithm loading errors
+     * 
+     * Tracks the number of Algorithm libraries that failed to load or register.
+     */
+    size_t m_algorithmErrorCount;
 };

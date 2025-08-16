@@ -15,7 +15,6 @@ GameBoard::GameBoard(size_t width, size_t height) : m_width(width), m_height(hei
 }
 
 bool GameBoard::initialize(const std::vector<std::string>& boardLines, 
-  std::vector<std::string>& errors,
   std::vector<std::pair<int, Point>>& tankPositions) {
   if (boardLines.empty()) {
       std::cerr << "Error: Input board is empty. Cannot initialize game." 
@@ -32,19 +31,10 @@ bool GameBoard::initialize(const std::vector<std::string>& boardLines,
   
   for (size_t y = 0; y < m_height; ++y) {
       if (y >= boardLines.size()) {
-          errors.push_back("Missing row " + std::to_string(y) + 
-            ". Filled with empty spaces.");
           continue;
       }
       
       const std::string& line = boardLines[y];
-      
-      if (line.length() < m_width) {
-          errors.push_back(
-            "Row " + std::to_string(y) + " is shorter than expected width. " +
-            "Missing positions filled with empty spaces."
-          );
-      }
       
       for (size_t x = 0; x < m_width; ++x) {
           if (x >= line.length()) {
@@ -102,30 +92,13 @@ bool GameBoard::initialize(const std::vector<std::string>& boardLines,
                   cellType = CellType::Empty;
                   break;
               default:
-                  errors.push_back(
-                    "Unrecognized character '" + std::string(1, currentChar) 
-                      + "' at position (" + std::to_string(x) + "," 
-                      + std::to_string(y) + "). Treated as empty space."
-                  );
                   cellType = CellType::Empty;
                   break;
           }
           setCellType(x, y, cellType);
       }
-      
-      if (line.length() > m_width) {
-          errors.push_back(
-            "Row " + std::to_string(y) 
-            + " is longer than expected width. Extra characters ignored."
-          );
-      }
   }
   
-  if (boardLines.size() > m_height) {
-      errors.push_back(
-        "Input has more rows than expected height. Extra rows ignored."
-      );
-  }
   if (tankPositions.empty()) {
       std::cerr << "Error: No tanks found on the board." << std::endl;
       return false;

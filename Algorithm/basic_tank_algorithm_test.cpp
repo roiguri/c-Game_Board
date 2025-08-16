@@ -43,9 +43,8 @@ protected:
     }
     static GameBoard makeBoard(const std::vector<std::string>& lines) {
         GameBoard board(lines[0].size(), lines.size());
-        std::vector<std::string> errors;
         std::vector<std::pair<int, Point>> tankPositions;
-        board.initialize(lines, errors, tankPositions);
+        board.initialize(lines, tankPositions);
         return board;
     }
     static BattleInfoImpl makeBattleInfo(const GameBoard& board, const std::vector<Point>& enemyTanks, const std::vector<Point>& friendlyTanks, const std::vector<Point>& shells) {

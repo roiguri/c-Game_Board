@@ -90,12 +90,12 @@ private:
 
     /**
      * Execute game with specific GameManager
-     * @param gameManagerName Name of GameManager to use
+     * @param gameManagerInfo GameManager info containing path and name
      * @param params Game parameters
      * @return ComparativeResult with execution outcome
      */
     ComparativeResult executeWithGameManager(
-        const std::string& gameManagerName,
+        const GameManagerInfo& gameManagerInfo,
         const ComparativeParameters& params,
         const FileLoader::BoardInfo& boardInfo
     );

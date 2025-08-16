@@ -53,14 +53,11 @@ public:
      * identifies tank positions, and validates board constraints.
      * 
      * @param boardLines Vector of strings representing board rows
-     * @param errors Reference to collect recoverable errors during 
-     *  initialization
      * @param tankPositions Reference to store detected tank positions
      * @return true if initialization succeeded with valid game state, 
      *  false otherwise
      */
     bool initialize(const std::vector<std::string>& boardLines, 
-      std::vector<std::string>& errors,
       std::vector<std::pair<int, Point>>& tankPositions);
     
     /**

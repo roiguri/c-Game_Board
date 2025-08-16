@@ -42,7 +42,12 @@ bool CompetitiveRunner::loadLibrariesImpl(const CompetitiveParameters& params) {
     try {
         gmRegistrar.createGameManagerEntry(params.gameManagerLib);
         if (!libManager.loadLibrary(params.gameManagerLib)) {
-            handleError("Failed to load GameManager: " + libManager.getLastError());
+            // For competitive mode, GameManager is required - exit with usage if it fails
+            std::cout << "Error: Competitive mode requires the GameManager to load successfully." << std::endl;
+            std::cout << "Failed to load GameManager: " + libManager.getLastError() << std::endl;
+            std::cout << "Usage:" << std::endl;
+            std::cout << "  Ensure game_manager= points to a valid GameManager .so file" << std::endl;
+            
             gmRegistrar.removeLast();
             return false;
         }
@@ -50,7 +55,11 @@ bool CompetitiveRunner::loadLibrariesImpl(const CompetitiveParameters& params) {
         try {
             gmRegistrar.validateLastRegistration();
         } catch (const GameManagerRegistrar::BadGameManagerRegistrationException& e) {
-            handleError("GameManager registration failed: " + std::string(e.name));
+            std::cout << "Error: Competitive mode requires the GameManager to register successfully." << std::endl;
+            std::cout << "GameManager registration failed: " + std::string(e.name) << std::endl;
+            std::cout << "Usage:" << std::endl;
+            std::cout << "  Ensure game_manager= points to a valid GameManager .so file" << std::endl;
+            
             return false;
         }
         
@@ -59,14 +68,22 @@ bool CompetitiveRunner::loadLibrariesImpl(const CompetitiveParameters& params) {
             auto gmEntry = gmRegistrar.begin();
             m_gameManagerName = gmEntry->name();
         } else {
-            handleError("No GameManager registered after loading");
+            std::cout << "Error: Competitive mode requires a valid GameManager to be registered." << std::endl;
+            std::cout << "Usage:" << std::endl;
+            std::cout << "  Ensure game_manager= points to a valid GameManager .so file" << std::endl;
+            
             return false;
         }
         
         // Load algorithms from folder
         std::vector<std::string> algorithmFiles = enumerateFiles(params.algorithmsFolder, ".so");
         if (algorithmFiles.size() < 2) {
-            handleError("Need at least 2 algorithms for competition. Found " + std::to_string(algorithmFiles.size()));
+            std::cout << "Error: Competitive mode requires at least 2 working Algorithm libraries." << std::endl;
+            std::cout << "Found " << algorithmFiles.size() << " working algorithm(s) out of " << algorithmFiles.size() << " total." << std::endl;
+            std::cout << "Usage:" << std::endl;
+            std::cout << "  Place at least 2 valid Algorithm .so files in the algorithms_folder" << std::endl;
+            std::cout << "  Check input_errors.txt for detailed loading errors" << std::endl;
+            
             return false;
         }
         
@@ -78,7 +95,8 @@ bool CompetitiveRunner::loadLibrariesImpl(const CompetitiveParameters& params) {
             // Create algorithm entry and load library
             algoRegistrar.createAlgorithmFactoryEntry(file);
             if (!libManager.loadLibrary(file)) {
-                handleError("Failed to load algorithm: " + libManager.getLastError());
+                // Collect algorithm loading error instead of exiting immediately
+                m_errorCollector.addAlgorithmError(file, "Failed to load: " + libManager.getLastError());
                 algoRegistrar.removeLast();
                 continue;
             }
@@ -94,15 +112,21 @@ bool CompetitiveRunner::loadLibrariesImpl(const CompetitiveParameters& params) {
                 m_discoveredAlgorithms.push_back(std::move(info));
                 
             } catch (const BadRegistrationException& e) {
-                if (params.verbose) {
-                    std::cout << "Warning: Algorithm registration failed for " << file << ": " << e.what() << std::endl;
-                }
+                // Collect algorithm registration error instead of just warning
+                m_errorCollector.addAlgorithmError(file, "Registration failed: " + std::string(e.what()));
                 algoRegistrar.removeLast();
             }
         }
         
+        // Check minimum requirements for competitive mode: need at least 2 algorithms
         if (m_discoveredAlgorithms.size() < 2) {
-            handleError("Need at least 2 valid algorithms for competition");
+            // Print usage and exit - insufficient algorithms for competitive mode
+            std::cout << "Error: Competitive mode requires at least 2 working Algorithm libraries." << std::endl;
+            std::cout << "Found " << m_discoveredAlgorithms.size() << " working algorithm(s) out of " << algorithmFiles.size() << " total." << std::endl;
+            std::cout << "Usage:" << std::endl;
+            std::cout << "  Place at least 2 valid Algorithm .so files in the algorithms_folder" << std::endl;
+            std::cout << "  Check input_errors.txt for detailed loading errors" << std::endl;
+            
             return false;
         }
         
@@ -161,14 +185,11 @@ bool CompetitiveRunner::loadMapsImpl(const CompetitiveParameters& params) {
                 m_errorCollector.saveToFile();
             }
             
-            // TODO: consider usage message
             // Graceful exit with usage message
             std::cout << "Error: No valid maps found for tournament execution." << std::endl;
-            std::cout << "Usage: " << std::endl;
-            std::cout << "  Ensure maps folder contains valid .txt map files" << std::endl;
-            std::cout << "  Maps must contain at least one tank for each player" << std::endl;
-            std::cout << "  Check input_errors.txt for detailed validation errors" << std::endl;
-            handleError("No valid maps found");
+            std::cout << "Usage - Game map requirements:" << std::endl;
+            std::cout << "  Map must contain 5 header lines" << std::endl;
+            std::cout << "  Map must contain at least one tank for each player" << std::endl;
             return false;
         }
         
@@ -185,7 +206,10 @@ GameResult CompetitiveRunner::executeGameLogic(const BaseParameters& params) {
     const CompetitiveParameters* competitiveParams = dynamic_cast<const CompetitiveParameters*>(&params);
     
     if (m_errorCollector.hasErrors()) {
-        m_errorCollector.saveToFile();
+      if (!m_errorCollector.saveToFile()) {
+        // Log warning but continue - don't crash if error file creation fails
+        std::cerr << "Warning: Could not save warnings to input_errors.txt file, continuing without it" << std::endl;
+      }
     }
     
     m_finalScores.clear();

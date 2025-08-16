@@ -43,15 +43,28 @@ bool ComparativeRunner::loadLibrariesImpl(const ComparativeParameters& params) {
         return false;
     }
     
-    // Found .so files
-    
-    // Load and validate each GameManager (just store paths for now)
+    // Load and validate each GameManager, collecting errors for failed ones
+    m_discoveredGameManagers.clear();
     for (const auto& soPath : soFiles) {
-        GameManagerInfo info;
-        info.path = soPath;
-        info.loaded = true; // We'll load per run
-        info.name = soPath;
-        m_discoveredGameManagers.push_back(info);
+        GameManagerInfo info = loadGameManager(soPath);
+        if (info.loaded) {
+            m_discoveredGameManagers.push_back(info);
+        } else {
+            // Collect GameManager loading error instead of failing immediately
+            m_errorCollector.addGameManagerError(soPath, info.error);
+        }
+    }
+    
+    // Check minimum requirements for comparative mode: need at least 2 GameManagers
+    if (m_discoveredGameManagers.size() < 2) {
+        // Print usage and exit - insufficient GameManagers for comparative mode
+        std::cout << "Error: Comparative mode requires at least 2 working GameManager libraries." << std::endl;
+        std::cout << "Found " << m_discoveredGameManagers.size() << " working GameManager(s) out of " << soFiles.size() << " total." << std::endl;
+        std::cout << "Usage:" << std::endl;
+        std::cout << "  Place at least 2 valid GameManager .so files in the game_managers_folder" << std::endl;
+        std::cout << "  Check input_errors.txt for detailed loading errors" << std::endl;
+        
+        return false;
     }
 
     // Load and register both algorithms ONCE
@@ -62,33 +75,49 @@ bool ComparativeRunner::loadLibrariesImpl(const ComparativeParameters& params) {
     // Algorithm 1
     algoRegistrar.createAlgorithmFactoryEntry(params.algorithm1Lib);
     if (!libManager.loadLibrary(params.algorithm1Lib)) {
-        handleError("Failed to load Algorithm 1: " + libManager.getLastError());
+        // For comparative mode, both algorithms are required - exit with usage if either fails
+        std::cout << "Error: Comparative mode requires both algorithms to load successfully." << std::endl;
+        std::cout << "Failed to load Algorithm 1: " + libManager.getLastError() << std::endl;
+        std::cout << "Usage:" << std::endl;
+        std::cout << "  Ensure both algorithm1= and algorithm2= point to valid Algorithm .so files" << std::endl;
+        
         algoRegistrar.removeLast();
         return false;
     }
     try {
         algoRegistrar.validateLastRegistration();
-        // Algorithm 1 registration successful
     } catch (const BadRegistrationException& e) {
-        handleError("Algorithm 1 registration failed: " + std::string(e.what()));
+        std::cout << "Error: Comparative mode requires both algorithms to register successfully." << std::endl;
+        std::cout << "Algorithm 1 registration failed: " + std::string(e.what()) << std::endl;
+        std::cout << "Usage:" << std::endl;
+        std::cout << "  Ensure both algorithm1= and algorithm2= point to valid Algorithm .so files" << std::endl;
+        
         return false;
     }
+    
     // Algorithm 2 (if different)
     if (params.algorithm2Lib != params.algorithm1Lib) {
         algoRegistrar.createAlgorithmFactoryEntry(params.algorithm2Lib);
         if (!libManager.loadLibrary(params.algorithm2Lib)) {
-            handleError("Failed to load Algorithm 2: " + libManager.getLastError());
+            std::cout << "Error: Comparative mode requires both algorithms to load successfully." << std::endl;
+            std::cout << "Failed to load Algorithm 2: " + libManager.getLastError() << std::endl;
+            std::cout << "Usage:" << std::endl;
+            std::cout << "  Ensure both algorithm1= and algorithm2= point to valid Algorithm .so files" << std::endl;
             algoRegistrar.removeLast();
             return false;
         }
         try {
             algoRegistrar.validateLastRegistration();
-            // Algorithm 2 registration successful
         } catch (const BadRegistrationException& e) {
-            handleError("Algorithm 2 registration failed: " + std::string(e.what()));
+            std::cout << "Error: Comparative mode requires both algorithms to register successfully." << std::endl;
+            std::cout << "Algorithm 2 registration failed: " + std::string(e.what()) << std::endl;
+            std::cout << "Usage:" << std::endl;
+            std::cout << "  Ensure both algorithm1= and algorithm2= point to valid Algorithm .so files" << std::endl;
+            
             return false;
         }
     } else {
+        // TODO: check how the comparative mode works if both algorithms are the same
         // Algorithm 2 is the same as Algorithm 1
     }
     return true;
@@ -141,20 +170,14 @@ GameResult ComparativeRunner::executeGameLogic(const BaseParameters& params) {
     ThreadPool threadPool(numThreads);
     std::vector<std::future<ComparativeResult>> futures;
     
-    // Pre-load all GameManagers to avoid concurrent loading issues
-    std::vector<std::string> validGameManagers;
+    // Submit tasks to thread pool for parallel execution using loaded GameManager info
     for (const auto& info : m_discoveredGameManagers) {
         if (info.loaded) {
-            validGameManagers.push_back(info.name);
+            auto future = threadPool.enqueue([this, info, comparativeParams]() {
+                return executeWithGameManager(info, *comparativeParams, m_boardInfo);
+            });
+            futures.push_back(std::move(future));
         }
-    }
-
-    // Submit tasks to thread pool for parallel execution
-    for (const auto& gameManagerName : validGameManagers) {
-        auto future = threadPool.enqueue([this, gameManagerName, comparativeParams]() {
-            return executeWithGameManager(gameManagerName, *comparativeParams, m_boardInfo);
-        });
-        futures.push_back(std::move(future));
     }
     
     // Collect results from all threads
@@ -239,8 +262,9 @@ ComparativeRunner::GameManagerInfo ComparativeRunner::loadGameManager(const std:
         
         // Get GameManager name
         if (gmRegistrar.count() > 0) {
-            auto gmEntry = gmRegistrar.begin();
-            info.name = gmEntry->name();
+            auto lastEntry = gmRegistrar.begin();
+            std::advance(lastEntry, gmRegistrar.count() - 1);
+            info.name = lastEntry->name();
             info.loaded = true;
         } else {
             info.error = "No GameManager registered after loading";
@@ -256,11 +280,11 @@ ComparativeRunner::GameManagerInfo ComparativeRunner::loadGameManager(const std:
 }
 
 ComparativeRunner::ComparativeResult ComparativeRunner::executeWithGameManager(
-    const std::string& gameManagerName,
+    const GameManagerInfo& gameManagerInfo,
     const ComparativeParameters& params,
     const FileLoader::BoardInfo& boardInfo) {
     ComparativeResult result;
-    result.gameManagerName = gameManagerName;
+    result.gameManagerName = gameManagerInfo.name;
     result.success = false;
     result.executionTime = std::chrono::milliseconds(0);
 
@@ -272,36 +296,14 @@ ComparativeRunner::ComparativeResult ComparativeRunner::executeWithGameManager(
     try {
         auto startTime = std::chrono::high_resolution_clock::now();
         
-        // Synchronize only the GameManager loading/registration part
-        {
-            std::lock_guard<std::mutex> gmLock(m_gameManagerMutex);
-            
-            // Clear and load GameManager registrar for this run
-            GameManagerRegistrar& gmRegistrar = GameManagerRegistrar::getGameManagerRegistrar();
-            gmRegistrar.clear();
-            gmRegistrar.createGameManagerEntry(gameManagerName);
-            LibraryManager& libManager = LibraryManager::getInstance();
-            if (!libManager.loadLibrary(gameManagerName)) {
-                result.error = "Failed to load GameManager: " + libManager.getLastError();
-                gmRegistrar.removeLast();
-                return result;
-            }
-            try {
-                gmRegistrar.validateLastRegistration();
-                // GameManager registration successful
-            } catch (const GameManagerRegistrar::BadGameManagerRegistrationException& e) {
-                result.error = "GameManager registration failed: " + std::string(e.name);
-                return result;
-            }
-        } // Release lock before game execution
-        
         result.gameResult = GameRunner::runSingleGame(
             boardInfo,
-            gameManagerName,
+            gameManagerInfo.name,
             algorithm1Name,
             algorithm2Name,
             params.verbose
         );
+        
         auto endTime = std::chrono::high_resolution_clock::now();
         result.executionTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
         result.success = true;
@@ -318,13 +320,6 @@ ComparativeRunner::ComparativeResult ComparativeRunner::executeWithGameManager(
     } catch (const std::exception& e) {
         result.error = "Exception during game execution: " + std::string(e.what());
         result.success = false;
-    }
-    
-    // Synchronize GameManager cleanup
-    {
-        std::lock_guard<std::mutex> gmLock(m_gameManagerMutex);
-        GameManagerRegistrar& gmRegistrar = GameManagerRegistrar::getGameManagerRegistrar();
-        gmRegistrar.clear();
     }
     return result;
 }
@@ -367,8 +362,6 @@ void ComparativeRunner::generateOutput(const std::vector<ComparativeResult>& res
         outFile.close();
     }
 }
-
-// Remove custom generateTimestamp - using base class method
 
 void ComparativeRunner::cleanup() {
     GameManagerRegistrar& gmRegistrar = GameManagerRegistrar::getGameManagerRegistrar();

@@ -2,8 +2,8 @@
 #include <fstream>
 #include <iostream>
 
-ErrorCollector::ErrorCollector() : m_errorCount(0) {
-    // Initialize error count to zero, m_errors vector is initialized by default
+ErrorCollector::ErrorCollector() : m_errorCount(0), m_gameManagerErrorCount(0), m_algorithmErrorCount(0) {
+    // Initialize error counts to zero, m_errors vector is initialized by default
 }
 
 ErrorCollector::~ErrorCollector() {
@@ -70,6 +70,8 @@ bool ErrorCollector::saveToFile() const {
 void ErrorCollector::clear() {
     m_errors.clear();
     m_errorCount = 0;
+    m_gameManagerErrorCount = 0;
+    m_algorithmErrorCount = 0;
 }
 
 std::string ErrorCollector::formatMapError(const std::string& mapName, const std::string& error) const {
@@ -78,4 +80,41 @@ std::string ErrorCollector::formatMapError(const std::string& mapName, const std
 
 std::string ErrorCollector::formatMapWarning(const std::string& mapName, const std::string& warning) const {
     return "[Warning] Map '" + mapName + "': " + warning;
+}
+
+void ErrorCollector::addGameManagerError(const std::string& gameManagerPath, const std::string& error) {
+    std::string formattedError = formatGameManagerError(gameManagerPath, error);
+    m_errors.push_back(formattedError);
+    m_gameManagerErrorCount++;
+}
+
+void ErrorCollector::addAlgorithmError(const std::string& algorithmPath, const std::string& error) {
+    std::string formattedError = formatAlgorithmError(algorithmPath, error);
+    m_errors.push_back(formattedError);
+    m_algorithmErrorCount++;
+}
+
+size_t ErrorCollector::getGameManagerErrorCount() const {
+    return m_gameManagerErrorCount;
+}
+
+size_t ErrorCollector::getAlgorithmErrorCount() const {
+    return m_algorithmErrorCount;
+}
+
+std::string ErrorCollector::formatGameManagerError(const std::string& gameManagerPath, const std::string& error) const {
+    return "[Error] GameManager '" + extractFilename(gameManagerPath) + "': " + error;
+}
+
+std::string ErrorCollector::formatAlgorithmError(const std::string& algorithmPath, const std::string& error) const {
+    return "[Error] Algorithm '" + extractFilename(algorithmPath) + "': " + error;
+}
+
+// TODO: test that filename extraction works
+std::string ErrorCollector::extractFilename(const std::string& filePath) const {
+    size_t lastSlash = filePath.find_last_of("/\\");
+    if (lastSlash != std::string::npos) {
+        return filePath.substr(lastSlash + 1);
+    }
+    return filePath;
 }

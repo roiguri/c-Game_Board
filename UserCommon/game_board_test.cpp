@@ -26,8 +26,7 @@ protected:
     void createBoardWithContent(const std::vector<std::string>& content,
                                 std::vector<std::pair<int, Point>>& tankPositions) {
         board = GameBoard(content[0].length(), content.size());
-        std::vector<std::string> errors;
-        board.initialize(content, errors, tankPositions);
+        board.initialize(content, tankPositions);
     }
 };
 
@@ -53,14 +52,13 @@ TEST_F(GameBoardTest, Constructor_ParameterizedCreatesCorrectSize) {
 // Initialize Tests
 TEST_F(GameBoardTest, Initialize_EmptyBoardLines) {
   std::vector<std::string> emptyLines;
-  std::vector<std::string> errors;
   
   // Redirect cerr to capture output
   std::stringstream cerr_buffer;
   std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
   std::vector<std::pair<int, Point>> tankPositions;
   
-  EXPECT_FALSE(board.initialize(emptyLines, errors, tankPositions));
+  EXPECT_FALSE(board.initialize(emptyLines, tankPositions));
   
   // Restore cerr
   std::cerr.rdbuf(old_cerr);
@@ -78,14 +76,13 @@ TEST_F(GameBoardTest, Initialize_MissingTank1) {
       "# @ #",
       "#####"
   };
-  std::vector<std::string> errors;
   
   // Redirect cerr to capture output
   std::stringstream cerr_buffer;
   std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
   std::vector<std::pair<int, Point>> tankPositions;
   EXPECT_NO_THROW({
-    board.initialize(boardLines, errors, tankPositions);
+    board.initialize(boardLines, tankPositions);
   });
   // Restore cerr
   std::cerr.rdbuf(old_cerr);
@@ -99,14 +96,13 @@ TEST_F(GameBoardTest, Initialize_MissingTank2) {
       "# @ #",
       "#####"
   };
-  std::vector<std::string> errors;
   
   // Redirect cerr to capture output
   std::stringstream cerr_buffer;
   std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
   std::vector<std::pair<int, Point>> tankPositions;
   EXPECT_NO_THROW({
-    board.initialize(boardLines, errors, tankPositions);
+    board.initialize(boardLines, tankPositions);
   });
   // Restore cerr
   std::cerr.rdbuf(old_cerr);
@@ -120,11 +116,10 @@ TEST_F(GameBoardTest, Initialize_MultipleTanks) {
       "# @ #",
       "#####"
   };
-  std::vector<std::string> errors;
   
   // Add tankPositions map
   std::vector<std::pair<int, Point>> tankPositions;
-  EXPECT_TRUE(board.initialize(boardLines, errors, tankPositions));
+  EXPECT_TRUE(board.initialize(boardLines, tankPositions));
   
   Point tank1Pos = tankPositions[0].second;
   Point tank2Pos = tankPositions[1].second;
@@ -151,11 +146,10 @@ TEST_F(GameBoardTest, Initialize_ValidBoardLines) {
       "# @ #",
       "#####"
   };
-  std::vector<std::string> errors;
   
   // Add tankPositions map
   std::vector<std::pair<int, Point>> tankPositions;
-  EXPECT_TRUE(board.initialize(boardLines, errors, tankPositions));
+  EXPECT_TRUE(board.initialize(boardLines, tankPositions));
   
   // Check specific cells
   EXPECT_EQ(board.getCellType(0, 0), GameBoard::CellType::Wall);
@@ -167,8 +161,7 @@ TEST_F(GameBoardTest, Initialize_ValidBoardLines) {
   // Check wall health
   EXPECT_EQ(board.getWallHealth(Point(0, 0)), GameBoard::WALL_STARTING_HEALTH);
   
-  // Expect no errors
-  EXPECT_TRUE(errors.empty());
+  // No error validation needed - handled by Simulator
 }
 
 TEST_F(GameBoardTest, Initialize_IncompleteRows) {
@@ -177,11 +170,10 @@ TEST_F(GameBoardTest, Initialize_IncompleteRows) {
       "#1 2#",
       "#   #"
   };
-  std::vector<std::string> errors;
   
   // Add tankPositions map
   std::vector<std::pair<int, Point>> tankPositions;
-  EXPECT_TRUE(board.initialize(boardLines, errors, tankPositions));
+  EXPECT_TRUE(board.initialize(boardLines, tankPositions));
   
   // Check specific cells
   EXPECT_EQ(board.getCellType(0, 0), GameBoard::CellType::Wall);
@@ -192,16 +184,7 @@ TEST_F(GameBoardTest, Initialize_IncompleteRows) {
   EXPECT_EQ(board.getCellType(0, 3), GameBoard::CellType::Empty);
   EXPECT_EQ(board.getCellType(0, 4), GameBoard::CellType::Empty);
   
-  EXPECT_EQ(errors.size(), 2);
-  
-  // Check for errors about missing rows
-  int missingRowErrorCount = 0;
-  for (const auto& error : errors) {
-      if (error.find("Missing row") != std::string::npos) {
-          missingRowErrorCount++;
-      }
-  }
-  EXPECT_EQ(missingRowErrorCount, 2);
+  // Error collection now handled by Simulator
 }
 
 TEST_F(GameBoardTest, Initialize_IncompleteColumns) {
@@ -212,11 +195,10 @@ TEST_F(GameBoardTest, Initialize_IncompleteColumns) {
       "## ",
       "###"      
   };
-  std::vector<std::string> errors;
   
   // Add tankPositions map  
   std::vector<std::pair<int, Point>> tankPositions;
-  EXPECT_TRUE(board.initialize(boardLines, errors, tankPositions));
+  EXPECT_TRUE(board.initialize(boardLines, tankPositions));
   
   // Check cells that are defined
   EXPECT_EQ(board.getCellType(0, 0), GameBoard::CellType::Wall);
@@ -230,11 +212,11 @@ TEST_F(GameBoardTest, Initialize_IncompleteColumns) {
   EXPECT_EQ(board.getCellType(4, 4), GameBoard::CellType::Empty);
   
   // Check the error count
-  EXPECT_EQ(errors.size(), 5);
+  // Error collection now handled by Simulator\n  // EXPECT_EQ(errors.size(), 5);
   
   // Check for errors about shorter lines
   int shortRowErrorCount = 0;
-  for (const auto& error : errors) {
+  // for (const auto& error : errors) {
       if (error.find("shorter than expected width") != std::string::npos) {
           shortRowErrorCount++;
       }
@@ -252,11 +234,10 @@ TEST_F(GameBoardTest, Initialize_ExtraRows) {
       "XXXXX",  
       "XXXXX"  
   };
-  std::vector<std::string> errors;
   
   // Add tankPositions map
   std::vector<std::pair<int, Point>> tankPositions;
-  EXPECT_TRUE(board.initialize(boardLines, errors, tankPositions));
+  EXPECT_TRUE(board.initialize(boardLines, tankPositions));
   
   // Check valid cells are correct
   EXPECT_EQ(board.getCellType(0, 0), GameBoard::CellType::Wall);
@@ -265,10 +246,10 @@ TEST_F(GameBoardTest, Initialize_ExtraRows) {
   EXPECT_EQ(board.getCellType(2, 3), GameBoard::CellType::Mine);
   
   // Check the error count
-  EXPECT_EQ(errors.size(), 1);
+  // Error collection now handled by Simulator\n  // EXPECT_EQ(errors.size(), 1);
   
   // Verify the error message
-  EXPECT_EQ(errors[0], "Input has more rows than expected height. Extra rows ignored.");
+  // EXPECT_EQ(errors[0], "Input has more rows than expected height. Extra rows ignored.");
 }
 
 TEST_F(GameBoardTest, Initialize_ExtraColumns) {
@@ -279,11 +260,10 @@ TEST_F(GameBoardTest, Initialize_ExtraColumns) {
       "# @ #", 
       "#####" 
   };
-  std::vector<std::string> errors;
   
   // Add tankPositions map
   std::vector<std::pair<int, Point>> tankPositions;
-  EXPECT_TRUE(board.initialize(boardLines, errors, tankPositions));
+  EXPECT_TRUE(board.initialize(boardLines, tankPositions));
   
   // Check valid cells are correct
   EXPECT_EQ(board.getCellType(0, 0), GameBoard::CellType::Wall);
@@ -292,11 +272,11 @@ TEST_F(GameBoardTest, Initialize_ExtraColumns) {
   EXPECT_EQ(board.getCellType(2, 3), GameBoard::CellType::Mine);
   
   // Check the error count
-  EXPECT_EQ(errors.size(), 3);
+  // Error collection now handled by Simulator\n  // EXPECT_EQ(errors.size(), 3);
   
   // Verify the error messages
   int extraColErrorCount = 0;
-  for (const auto& error : errors) {
+  // for (const auto& error : errors) {
       if (error.find("longer than expected width") != std::string::npos) {
           extraColErrorCount++;
       }
@@ -312,15 +292,14 @@ TEST_F(GameBoardTest, Initialize_UnrecognizedCharacters) {
       "# @ #",
       "#####"
   };
-  std::vector<std::string> errors;
   
   // Add tankPositions map
   std::vector<std::pair<int, Point>> tankPositions;
-  EXPECT_TRUE(board.initialize(boardLines, errors, tankPositions));
+  EXPECT_TRUE(board.initialize(boardLines, tankPositions));
   
   // Check if the error about unrecognized character is reported
   bool foundUnrecognizedCharError = false;
-  for (const auto& error : errors) {
+  // for (const auto& error : errors) {
       if (error.find("Unrecognized character 'X'") != std::string::npos) {
           foundUnrecognizedCharError = true;
           break;
@@ -340,7 +319,6 @@ TEST_F(GameBoardTest, Initialize_NoTanksReturnsFalse) {
       "#   #",
       "#####"
   };
-  std::vector<std::string> errors;
   std::vector<std::pair<int, Point>> tankPositions;
   
   // Redirect cerr to capture the error output
@@ -348,7 +326,7 @@ TEST_F(GameBoardTest, Initialize_NoTanksReturnsFalse) {
   std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
   
   // Should return false because no tanks are present
-  EXPECT_FALSE(board.initialize(boardLines, errors, tankPositions));
+  EXPECT_FALSE(board.initialize(boardLines, tankPositions));
   
   // Restore cerr
   std::cerr.rdbuf(old_cerr);

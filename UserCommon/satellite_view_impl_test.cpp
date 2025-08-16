@@ -17,9 +17,8 @@ TEST(SatelliteViewImplTest, BasicBoardView) {
         "2 *"
     };
     GameBoard board(3, 3);
-    std::vector<std::string> errors;
     std::vector<std::pair<int, Point>> tankPositions;
-    board.initialize(boardLines, errors, tankPositions);
+    board.initialize(boardLines, tankPositions);
 
     // Create tanks
     std::vector<Tank> tanks = {
@@ -58,9 +57,8 @@ TEST(SatelliteViewImplTest, OutOfRangeCoordinates) {
         "   "
     };
     GameBoard board(3, 3);
-    std::vector<std::string> errors;
     std::vector<std::pair<int, Point>> tankPositions;
-    board.initialize(boardLines, errors, tankPositions);
+    board.initialize(boardLines, tankPositions);
     std::vector<Tank> tanks;
     std::vector<Shell> shells;
     Point currentTankPos(1, 1);
@@ -79,9 +77,8 @@ TEST(SatelliteViewImplTest, ShellOverMineReturnsShell) {
         "   "
     };
     GameBoard board(3, 3);
-    std::vector<std::string> errors;
     std::vector<std::pair<int, Point>> tankPositions;
-    board.initialize(boardLines, errors, tankPositions);
+    board.initialize(boardLines, tankPositions);
     std::vector<Tank> tanks;
     // Place a shell at (1,0) where there is a mine
     std::vector<Shell> shells = {
@@ -100,9 +97,8 @@ TEST(SatelliteViewImplTest, IgnoresDestroyedTanksAndShells) {
         "   "
     };
     GameBoard board(3, 3);
-    std::vector<std::string> errors;
     std::vector<std::pair<int, Point>> tankPositions;
-    board.initialize(boardLines, errors, tankPositions);
+    board.initialize(boardLines, tankPositions);
     std::vector<Tank> tanks = {
         Tank(1, Point(1, 1), Direction::Right),
         Tank(2, Point(2, 2), Direction::Left)
@@ -131,9 +127,8 @@ TEST(SatelliteViewImplTest, DestroyedShellOverMineReturnsMine) {
         "   "
     };
     GameBoard board(3, 3);
-    std::vector<std::string> errors;
     std::vector<std::pair<int, Point>> tankPositions;
-    board.initialize(boardLines, errors, tankPositions);
+    board.initialize(boardLines, tankPositions);
     std::vector<Tank> tanks;
     std::vector<Shell> shells = {
         Shell(1, Point(0, 0), Direction::Down)

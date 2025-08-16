@@ -56,15 +56,10 @@ bool GameManager::readBoard(const SatelliteView& satellite_view, size_t map_widt
     Tank::setInitialShells(num_shells);
 
     m_board = GameBoard(map_width, map_height);
-    std::vector<std::string> errors;
 
     std::vector<std::pair<int, Point>> tankPositions;
-    if (!m_board.initialize(boardLines, errors, tankPositions)) {
+    if (!m_board.initialize(boardLines, tankPositions)) {
         // Unrecoverable error in board initialization
-        return false;
-    }
-    if (!saveErrorsToFile(errors)) {
-        std::cerr << "Error: Could not save errors to file" << std::endl;
         return false;
     }
     
@@ -564,29 +559,6 @@ void GameManager::createTanks(const std::vector<std::pair<int, Point>>& tankPosi
         m_tanks.emplace_back(playerId, position, dir);
     }
     LOG_INFO("Tanks created");
-}
-
-// TODO: move to Simulator
-bool GameManager::saveErrorsToFile(
-  const std::vector<std::string>& errors
-) const {
-  if (errors.empty()) {
-      // No errors to report
-      return true;
-  }
-  
-  std::ofstream errorFile("input_errors.txt");
-  if (!errorFile.is_open()) {
-      std::cerr << "Error: Could not create input_errors.txt file" << std::endl;
-      return false;
-  }
-  
-  for (const auto& error : errors) {
-      errorFile << error << std::endl;
-  }
-  
-  errorFile.close();
-  return true;
 }
 
 void GameManager::removeDestroyedShells() {
