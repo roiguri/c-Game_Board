@@ -52,9 +52,14 @@ if(ENABLE_TESTING)
     # Create test executable
     add_executable(GameManager_tests ${TEST_SOURCES})
     
-    # Test executable properties
+    # Disable registration macros for test build to prevent segmentation fault
+    target_compile_definitions(GameManager_tests PRIVATE 
+        DISABLE_STATIC_REGISTRATION=1
+    )
+    
+    # Test executable properties - use common tests directory
     set_target_properties(GameManager_tests PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build/GameManager"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_TESTS_OUTPUT_DIRECTORY}"
     )
     
     # Test include directories
@@ -79,7 +84,7 @@ if(ENABLE_TESTING)
     
     # Register tests with CTest  
     include(GoogleTest)
-    # gtest_discover_tests(GameManager_tests)  # Disabled due to discovery issues
+    gtest_discover_tests(GameManager_tests)
     add_test(NAME GameManager_tests COMMAND GameManager_tests)
     
     # Create alias for test target

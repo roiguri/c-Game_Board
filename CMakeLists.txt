@@ -18,6 +18,9 @@ option(ENABLE_VISUALIZATION "Enable visualization features" OFF)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
 
+# Create a common tests directory for all test executables
+set(CMAKE_TESTS_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/tests")
+
 # TODO: make this conditional - only download if not already downloaded
 # Download and configure Google Test for all projects
 include(FetchContent)
@@ -76,6 +79,11 @@ if(ENABLE_TESTING)
     # Create usercommon_tests executable
     add_executable(usercommon_tests ${USERCOMMON_TEST_SOURCES})
     
+    # Set test executable output directory
+    set_target_properties(usercommon_tests PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_TESTS_OUTPUT_DIRECTORY}"
+    )
+    
     # Link UserCommon library and Google Test
     target_link_libraries(usercommon_tests PRIVATE 
         UserCommon 
@@ -83,7 +91,9 @@ if(ENABLE_TESTING)
         gtest_main
     )
     
-    # Add to CTest
+    # Add to CTest with test discovery
+    include(GoogleTest)
+    gtest_discover_tests(usercommon_tests)
     add_test(NAME UserCommonTests COMMAND usercommon_tests)
 endif()
 

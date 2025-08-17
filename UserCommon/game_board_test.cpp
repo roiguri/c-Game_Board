@@ -183,8 +183,6 @@ TEST_F(GameBoardTest, Initialize_IncompleteRows) {
   // Check that missing rows are filled with empty cells
   EXPECT_EQ(board.getCellType(0, 3), GameBoard::CellType::Empty);
   EXPECT_EQ(board.getCellType(0, 4), GameBoard::CellType::Empty);
-  
-  // Error collection now handled by Simulator
 }
 
 TEST_F(GameBoardTest, Initialize_IncompleteColumns) {
@@ -210,18 +208,6 @@ TEST_F(GameBoardTest, Initialize_IncompleteColumns) {
   EXPECT_EQ(board.getCellType(4, 0), GameBoard::CellType::Empty);
   EXPECT_EQ(board.getCellType(3, 4), GameBoard::CellType::Empty);
   EXPECT_EQ(board.getCellType(4, 4), GameBoard::CellType::Empty);
-  
-  // Check the error count
-  // Error collection now handled by Simulator\n  // EXPECT_EQ(errors.size(), 5);
-  
-  // Check for errors about shorter lines
-  int shortRowErrorCount = 0;
-  // for (const auto& error : errors) {
-      if (error.find("shorter than expected width") != std::string::npos) {
-          shortRowErrorCount++;
-      }
-  }
-  EXPECT_EQ(shortRowErrorCount, 5);
 }
 
 TEST_F(GameBoardTest, Initialize_ExtraRows) {
@@ -244,12 +230,6 @@ TEST_F(GameBoardTest, Initialize_ExtraRows) {
   EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Empty);
   EXPECT_EQ(board.getCellType(3, 1), GameBoard::CellType::Empty);
   EXPECT_EQ(board.getCellType(2, 3), GameBoard::CellType::Mine);
-  
-  // Check the error count
-  // Error collection now handled by Simulator\n  // EXPECT_EQ(errors.size(), 1);
-  
-  // Verify the error message
-  // EXPECT_EQ(errors[0], "Input has more rows than expected height. Extra rows ignored.");
 }
 
 TEST_F(GameBoardTest, Initialize_ExtraColumns) {
@@ -270,18 +250,6 @@ TEST_F(GameBoardTest, Initialize_ExtraColumns) {
   EXPECT_EQ(board.getCellType(1, 1), GameBoard::CellType::Empty);
   EXPECT_EQ(board.getCellType(3, 1), GameBoard::CellType::Empty);
   EXPECT_EQ(board.getCellType(2, 3), GameBoard::CellType::Mine);
-  
-  // Check the error count
-  // Error collection now handled by Simulator\n  // EXPECT_EQ(errors.size(), 3);
-  
-  // Verify the error messages
-  int extraColErrorCount = 0;
-  // for (const auto& error : errors) {
-      if (error.find("longer than expected width") != std::string::npos) {
-          extraColErrorCount++;
-      }
-  }
-  EXPECT_EQ(extraColErrorCount, 3);
 }
 
 TEST_F(GameBoardTest, Initialize_UnrecognizedCharacters) {
@@ -296,16 +264,6 @@ TEST_F(GameBoardTest, Initialize_UnrecognizedCharacters) {
   // Add tankPositions map
   std::vector<std::pair<int, Point>> tankPositions;
   EXPECT_TRUE(board.initialize(boardLines, tankPositions));
-  
-  // Check if the error about unrecognized character is reported
-  bool foundUnrecognizedCharError = false;
-  // for (const auto& error : errors) {
-      if (error.find("Unrecognized character 'X'") != std::string::npos) {
-          foundUnrecognizedCharError = true;
-          break;
-      }
-  }
-  EXPECT_TRUE(foundUnrecognizedCharError);
   
   // The unrecognized character should be treated as empty
   EXPECT_EQ(board.getCellType(2, 1), GameBoard::CellType::Empty);

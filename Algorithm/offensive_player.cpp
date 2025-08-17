@@ -72,6 +72,8 @@ std::optional<Point> Player_098765432_123456789_A::selectNewTarget(const std::ve
 
 } // namespace Algorithm_098765432_123456789
 
-// Registration at global scope
+// Registration at global scope (disabled for testing)
+#ifndef DISABLE_STATIC_REGISTRATION
 using namespace Algorithm_098765432_123456789;
 REGISTER_PLAYER(Player_098765432_123456789_A);
+#endif

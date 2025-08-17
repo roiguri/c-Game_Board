@@ -35,9 +35,8 @@ protected:
     // Helper to create a board from string lines
     GameBoard makeBoard(const std::vector<std::string>& lines) {
         GameBoard board(lines[0].size(), lines.size());
-        std::vector<std::string> errors;
         std::vector<std::pair<int, Point>> tankPositions;
-        board.initialize(lines, errors, tankPositions);
+        board.initialize(lines, tankPositions);
         return board;
     }
     // Helper to create and inject battle info with a custom board and target

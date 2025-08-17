@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "file_loader.h"
+#include "error_collector.h"
 #include <fstream>
 #include <cstdio>
 
@@ -30,7 +31,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_NonexistentFile) {
     std::string mapName;
     std::stringstream cerr_buffer;
     std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
-    std::vector<std::string> result = FileLoader::loadBoardFile(nonExistentFile, rows, cols, maxSteps, numShells, mapName);
+    ErrorCollector errorCollector;
+    std::vector<std::string> result = FileLoader::loadBoardFile(nonExistentFile, rows, cols, maxSteps, numShells, mapName, errorCollector);
     std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
     std::string errorOutput = cerr_buffer.str();
@@ -43,7 +45,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_EmptyFile) {
     std::string mapName;
     std::stringstream cerr_buffer;
     std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
+    ErrorCollector errorCollector;
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
     std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
     std::string errorOutput = cerr_buffer.str();
@@ -66,7 +69,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_ValidFile) {
     createTestFile(content);
     size_t rows, cols, maxSteps, numShells;
     std::string mapName;
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
+    ErrorCollector errorCollector;
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
     EXPECT_EQ(rows, 5);
     EXPECT_EQ(cols, 5);
     EXPECT_EQ(maxSteps, 1000);
@@ -94,7 +98,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_InvalidRows) {
     std::string mapName;
     std::stringstream cerr_buffer;
     std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
+    ErrorCollector errorCollector;
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
     std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
     std::string errorOutput = cerr_buffer.str();
@@ -117,7 +122,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_MissingHeaderLine) {
     std::string mapName;
     std::stringstream cerr_buffer;
     std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
+    ErrorCollector errorCollector;
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
     std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
     std::string errorOutput = cerr_buffer.str();
@@ -139,7 +145,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_ExtraWhitespace) {
     });
     size_t rows, cols, maxSteps, numShells;
     std::string mapName;
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
+    ErrorCollector errorCollector;
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
     EXPECT_EQ(rows, 10);
     EXPECT_EQ(cols, 8);
     EXPECT_EQ(maxSteps, 2000);
@@ -157,7 +164,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_OnlyHeaders) {
     });
     size_t rows, cols, maxSteps, numShells;
     std::string mapName;
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
+    ErrorCollector errorCollector;
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
     EXPECT_EQ(rows, 5);
     EXPECT_EQ(cols, 5);
     EXPECT_EQ(maxSteps, 1000);
@@ -181,7 +189,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_TrailingWhitespace) {
     createTestFile(content);
     size_t rows, cols, maxSteps, numShells;
     std::string mapName;
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
+    ErrorCollector errorCollector;
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
     EXPECT_EQ(rows, 5);
     EXPECT_EQ(cols, 5);
     EXPECT_EQ(maxSteps, 1000);
@@ -206,7 +215,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_LeadingWhitespace) {
     createTestFile(content);
     size_t rows, cols, maxSteps, numShells;
     std::string mapName;
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
+    ErrorCollector errorCollector;
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
     EXPECT_EQ(rows, 5);
     EXPECT_EQ(cols, 5);
     EXPECT_EQ(maxSteps, 1000);
@@ -232,7 +242,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_NegativeMaxSteps) {
     std::string mapName;
     std::stringstream cerr_buffer;
     std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
+    ErrorCollector errorCollector;
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
     std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
     std::string errorOutput = cerr_buffer.str();
@@ -256,7 +267,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_NegativeNumShells) {
     std::string mapName;
     std::stringstream cerr_buffer;
     std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
+    ErrorCollector errorCollector;
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
     std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
     std::string errorOutput = cerr_buffer.str();
@@ -280,7 +292,8 @@ TEST_F(FileLoaderTest, LoadBoardFile_NegativeCols) {
     std::string mapName;
     std::stringstream cerr_buffer;
     std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
-    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName);
+    ErrorCollector errorCollector;
+    std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
     std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
     std::string errorOutput = cerr_buffer.str();
@@ -301,7 +314,8 @@ TEST_F(FileLoaderTest, LoadBoardWithSatelliteView_ValidFile) {
     };
     createTestFile(content);
     
-    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView(tempFileName);
+    ErrorCollector errorCollector;
+    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView(tempFileName, errorCollector);
     
     // Verify parsed values
     EXPECT_EQ(boardInfo.rows, 3);
@@ -319,7 +333,8 @@ TEST_F(FileLoaderTest, LoadBoardWithSatelliteView_ValidFile) {
 }
 
 TEST_F(FileLoaderTest, LoadBoardWithSatelliteView_NonexistentFile) {
-    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView("nonexistent_file.txt");
+    ErrorCollector errorCollector;
+    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView("nonexistent_file.txt", errorCollector);
     
     // Should have default/zero values
     EXPECT_EQ(boardInfo.rows, 0);
@@ -335,7 +350,8 @@ TEST_F(FileLoaderTest, LoadBoardWithSatelliteView_EmptyFile) {
     std::vector<std::string> content = {};
     createTestFile(content);
     
-    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView(tempFileName);
+    ErrorCollector errorCollector;
+    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView(tempFileName, errorCollector);
     
     // Should have default/zero values
     EXPECT_EQ(boardInfo.rows, 0);
@@ -361,7 +377,8 @@ TEST_F(FileLoaderTest, LoadBoardWithSatelliteView_ComplexBoard) {
     };
     createTestFile(content);
     
-    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView(tempFileName);
+    ErrorCollector errorCollector;
+    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView(tempFileName, errorCollector);
     
     // Verify parsed values
     EXPECT_EQ(boardInfo.rows, 4);
@@ -399,7 +416,8 @@ TEST_F(FileLoaderTest, BoardInfoValidation_ValidBoard) {
     };
     createTestFile(content);
     
-    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView(tempFileName);
+    ErrorCollector errorCollector;
+    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView(tempFileName, errorCollector);
     
     // Valid board should pass validation
     EXPECT_TRUE(boardInfo.isValid());
@@ -420,7 +438,8 @@ TEST_F(FileLoaderTest, BoardInfoValidation_InvalidBoard) {
     };
     createTestFile(content);
     
-    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView(tempFileName);
+    ErrorCollector errorCollector;
+    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView(tempFileName, errorCollector);
     
     // Invalid board (no tanks) should fail validation
     EXPECT_FALSE(boardInfo.isValid());
@@ -441,7 +460,8 @@ TEST_F(FileLoaderTest, BoardInfoValidation_BoardWithWarnings) {
     };
     createTestFile(content);
     
-    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView(tempFileName);
+    ErrorCollector errorCollector;
+    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView(tempFileName, errorCollector);
     
     // Board should be valid but have warnings
     EXPECT_TRUE(boardInfo.isValid());
@@ -452,7 +472,8 @@ TEST_F(FileLoaderTest, BoardInfoValidation_BoardWithWarnings) {
 
 TEST_F(FileLoaderTest, BoardInfoValidation_NullSatelliteView) {
     // Test the case where satelliteView is null (file load failed)
-    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView("nonexistent_file.txt");
+    ErrorCollector errorCollector;
+    FileLoader::BoardInfo boardInfo = FileLoader::loadBoardWithSatelliteView("nonexistent_file.txt", errorCollector);
     
     // Should return appropriate fallback values
     EXPECT_FALSE(boardInfo.isValid());

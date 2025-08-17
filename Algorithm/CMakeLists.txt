@@ -30,11 +30,14 @@ if(ENABLE_TESTING)
     # Create Algorithm test executable with all sources
     add_executable(algorithm_tests ${ALGORITHM_TEST_SOURCES} ${ALGORITHM_SOURCES})
     
-    # Add Simulator registration sources for tests
-    target_sources(algorithm_tests PRIVATE
-        ../Simulator/registration/PlayerRegistration.cpp
-        ../Simulator/registration/TankAlgorithmRegistration.cpp
-        ../Simulator/registration/AlgorithmRegistrar.cpp
+    # Disable registration macros for test build to prevent BadRegistrationException
+    target_compile_definitions(algorithm_tests PRIVATE 
+        DISABLE_STATIC_REGISTRATION=1
+    )
+    
+    # Set test executable output directory
+    set_target_properties(algorithm_tests PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_TESTS_OUTPUT_DIRECTORY}"
     )
     
     # Link libraries and Google Test
@@ -51,6 +54,8 @@ if(ENABLE_TESTING)
         "${CMAKE_CURRENT_SOURCE_DIR}/../Simulator"
     )
     
-    # Add to CTest
+    # Add to CTest with test discovery
+    include(GoogleTest)
+    gtest_discover_tests(algorithm_tests)
     add_test(NAME AlgorithmTests COMMAND algorithm_tests)
 endif()

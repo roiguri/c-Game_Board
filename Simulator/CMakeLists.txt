@@ -63,9 +63,9 @@ if(ENABLE_TESTING)
     # Create test executable
     add_executable(Simulator_tests ${TEST_SOURCES})
     
-    # Test executable properties
+    # Test executable properties - use common tests directory
     set_target_properties(Simulator_tests PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build/Simulator"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_TESTS_OUTPUT_DIRECTORY}"
     )
     
     # Link test executable with libraries
@@ -79,7 +79,7 @@ if(ENABLE_TESTING)
     
     # Register tests with CTest
     include(GoogleTest)
-    # gtest_discover_tests(Simulator_tests)  # Disabled due to main() conflict
+    gtest_discover_tests(Simulator_tests)
     add_test(NAME Simulator_tests COMMAND Simulator_tests)
     
     # Create alias for test target
