@@ -77,7 +77,7 @@ public:
      * @brief Add tank at specified position
      */
     void addTank(size_t x, size_t y, int playerId) {
-        if (playerId >= 1 && playerId <= 9) {
+        if (playerId >= 1 && playerId <= 2) {
             setObjectAt(x, y, '0' + playerId);
         }
     }

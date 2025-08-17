@@ -23,7 +23,6 @@ using namespace UserCommon_098765432_123456789;
 GameManager::GameManager(bool verbose)
     : m_currentStep(0),
       m_gameOver(false),
-      m_isClassic2PlayerGame(false),
       m_remaining_steps(DEFAULT_NO_SHELLS_STEPS),
       m_maximum_steps(100),
       m_verbose(verbose) {
@@ -63,9 +62,6 @@ bool GameManager::readBoard(const SatelliteView& satellite_view, size_t map_widt
         // Should not happen
         return false;
     }
-    
-    // TODO: consider support for multi-player games
-    m_isClassic2PlayerGame = true;
     
     createTanks(tankPositions);
     createTankAlgorithms(player1_factory, player2_factory);
@@ -423,44 +419,25 @@ bool GameManager::checkGameOver() {
         return true;
     }
     if (playersWithTanks == 0) {
-        if (m_isClassic2PlayerGame) {
-            m_gameResult = "Tie, both players have zero tanks";
-        } else {
-            m_gameResult = "Tie, all players have zero tanks";
-        }
+        m_gameResult = "Tie, both players have zero tanks";
         populateGameResult(0, GameResult::ALL_TANKS_DEAD, remainingTanks);
         return true;
     }
     if (m_remaining_steps <= 0) {
-        if (m_isClassic2PlayerGame) {
-            m_gameResult = "Tie, both players have zero shells for " + std::to_string(DEFAULT_NO_SHELLS_STEPS) + " steps";
-        } else {
-            m_gameResult = "Tie, all players have zero shells for " + std::to_string(DEFAULT_NO_SHELLS_STEPS) + " steps";
-        }
+        m_gameResult = "Tie, both players have zero shells for " + std::to_string(DEFAULT_NO_SHELLS_STEPS) + " steps";
         populateGameResult(0, GameResult::ZERO_SHELLS, remainingTanks);
         return true;
     }
     if (m_currentStep >= m_maximum_steps) {
-        if (m_isClassic2PlayerGame) {
-            // Preserve original 2-player format
-            int player1Tanks = 0, player2Tanks = 0;
-            for (const auto& [playerId, tankCount] : playersAlive) {
-                if (playerId == 1) player1Tanks = tankCount;
-                else if (playerId == 2) player2Tanks = tankCount;
-            }
-            m_gameResult = "Tie, reached max steps = " + std::to_string(m_maximum_steps) + 
-                          ", player 1 has " + std::to_string(player1Tanks) + 
-                          " tanks, player 2 has " + std::to_string(player2Tanks) + " tanks";
-        } else {
-            // Multi-player format
-            std::string resultStr = "Tie, reached max steps = " + std::to_string(m_maximum_steps);
-            for (const auto& [playerId, tankCount] : playersAlive) {
-                if (tankCount > 0) {
-                    resultStr += ", player " + std::to_string(playerId) + " has " + std::to_string(tankCount) + " tanks";
-                }
-            }
-            m_gameResult = resultStr;
+        // 2-player format
+        int player1Tanks = 0, player2Tanks = 0;
+        for (const auto& [playerId, tankCount] : playersAlive) {
+            if (playerId == 1) player1Tanks = tankCount;
+            else if (playerId == 2) player2Tanks = tankCount;
         }
+        m_gameResult = "Tie, reached max steps = " + std::to_string(m_maximum_steps) + 
+                      ", player 1 has " + std::to_string(player1Tanks) + 
+                      " tanks, player 2 has " + std::to_string(player2Tanks) + " tanks";
         populateGameResult(0, GameResult::MAX_STEPS, remainingTanks);
         return true;
     }
@@ -533,20 +510,11 @@ std::string GameManager::actionToString(ActionRequest action) {
 }
 
 Direction GameManager::getInitialDirection(int playerId) {
-    const Direction directions[] = {
-        Direction::Left,        // Player 1
-        Direction::Right,       // Player 2  
-        Direction::Up,          // Player 3
-        Direction::Down,        // Player 4
-        Direction::DownLeft,   // Player 5
-        Direction::DownRight,   // Player 6
-        Direction::UpLeft,   // Player 7
-        Direction::UpRight,   // Player 8
-        Direction::Left         // Player 9 (wrap around)
-    };
-    
-    if (playerId >= 1 && playerId <= 9) {
-        return directions[playerId - 1];
+    // Only support 2 players
+    if (playerId == 1) {
+        return Direction::Left;
+    } else if (playerId == 2) {
+        return Direction::Right;
     }
     return Direction::Left; // Default fallback
 }
@@ -577,15 +545,12 @@ void GameManager::createTankAlgorithms(TankAlgorithmFactory player1_factory, Tan
         int playerId = tank.getPlayerId();
         int tankIndex = playerTankCounts[playerId]++;
         
-        // Use the appropriate factory based on player ID
+        // Use the appropriate factory based on player ID (1 or 2)
         std::unique_ptr<TankAlgorithm> algo;
         if (playerId == 1) {
             algo = player1_factory(playerId, tankIndex);
-        } else if (playerId == 2) {
-            algo = player2_factory(playerId, tankIndex);
         } else {
-            LOG_ERROR("Invalid player ID: " + std::to_string(playerId));
-            continue;
+            algo = player2_factory(playerId, tankIndex);
         }
         
         m_tankControllers.push_back(TankWithAlgorithm{tank, std::move(algo)});

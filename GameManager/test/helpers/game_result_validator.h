@@ -243,7 +243,7 @@ public:
      */
     static void validateGameStateTank(const GameResult& result, const Point& position, int playerId) {
         ASSERT_GE(playerId, 1) << "Player ID must be >= 1";
-        ASSERT_LE(playerId, 9) << "Player ID must be <= 9";
+        ASSERT_LE(playerId, 2) << "Player ID must be <= 2";
         char expectedTank = '0' + playerId;
         validateGameStateObjectAt(result, position, expectedTank);
     }

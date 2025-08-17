@@ -132,20 +132,11 @@ public:
      * @brief Get initial direction for a player ID (matches GameManager logic)
      */
     static Direction getInitialDirection(int playerId) {
-        const Direction directions[] = {
-            Direction::Left,        // Player 1
-            Direction::Right,       // Player 2  
-            Direction::Up,          // Player 3
-            Direction::Down,        // Player 4
-            Direction::DownLeft,    // Player 5
-            Direction::DownRight,   // Player 6
-            Direction::UpLeft,      // Player 7
-            Direction::UpRight,     // Player 8
-            Direction::Left         // Player 9 (wrap around)
-        };
-        
-        if (playerId >= 1 && playerId <= 9) {
-            return directions[playerId - 1];
+        // Only support 2 players
+        if (playerId == 1) {
+            return Direction::Left;
+        } else if (playerId == 2) {
+            return Direction::Right;
         }
         return Direction::Left; // Default fallback
     }

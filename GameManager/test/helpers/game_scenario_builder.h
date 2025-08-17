@@ -209,11 +209,11 @@ public:
         // Create satellite view
         auto satelliteView = MockSatelliteView::createEmpty(m_width, m_height);
 
-        // Add tanks (assign player IDs automatically)
+        // Add tanks (assign player IDs automatically, only support 2 players)
         int playerId = 1;
         for (const auto& pos : m_tankPositions) {
             satelliteView.addTank(static_cast<size_t>(pos.getX()), static_cast<size_t>(pos.getY()), playerId);
-            playerId = (playerId % 9) + 1; // Cycle through player IDs 1-9
+            playerId = (playerId % 2) + 1; // Cycle through player IDs 1-2
         }
 
         // Add walls

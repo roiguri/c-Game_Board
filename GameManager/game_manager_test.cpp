@@ -49,12 +49,6 @@ protected:
     std::string& GetGameResult() {
         return manager->m_gameResult;
     }
-    bool GetIsClassic2PlayerGame() {
-        return manager->m_isClassic2PlayerGame;
-    }
-    void SetIsClassic2PlayerGame(bool value) {
-        manager->m_isClassic2PlayerGame = value;
-    }
     int GetCurrentStep() {
         return manager->m_currentStep;
     }
@@ -205,92 +199,6 @@ TEST_F(GameManagerTest, ReadSatelliteViewZeroDimensions) {
     EXPECT_EQ(result.size(), 0);
 }
 
-// TEST_F(GameManagerTest, IsClassic2PlayerGame_DetectionTests) {
-//     // Test 1: Classic 2-player game (players 1 and 2 only)
-//     {
-//         // Create a simple board with only players 1 and 2
-//         std::string boardContent = R"(Test Board
-// MaxSteps = 100
-// NumShells = 10
-// Rows = 3
-// Cols = 3
-// 1 2
-   
-//    )";
-        
-//         GameManager testManager(playerFactory, algoFactory);
-//         EXPECT_TRUE(CallReadBoardFromContent(testManager, boardContent));
-//         EXPECT_TRUE(GetIsClassic2PlayerGame(testManager));
-//     }
-    
-//     // Test 2: Multi-player game (players 1, 2, and 3)
-//     {
-//         std::string boardContent = R"(Multi Player Board
-// MaxSteps = 100
-// NumShells = 10
-// Rows = 3
-// Cols = 3
-// 1 2
-// 3  
-//    )";
-        
-//         GameManager testManager(playerFactory, algoFactory);
-//         EXPECT_TRUE(CallReadBoardFromContent(testManager, boardContent));
-//         EXPECT_FALSE(GetIsClassic2PlayerGame(testManager));
-//     }
-    
-//     // Test 3: Only player 1 (should be false)
-//     {
-//         std::string boardContent = R"(Single Player Board
-// MaxSteps = 100
-// NumShells = 10
-// Rows = 3
-// Cols = 3
-// 1  
-   
-//    )";
-        
-//         GameManager testManager(playerFactory, algoFactory);
-//         EXPECT_TRUE(CallReadBoardFromContent(testManager, boardContent));
-//         EXPECT_FALSE(GetIsClassic2PlayerGame(testManager));
-//     }
-    
-//     // Test 4: Players 2 and 3 (missing player 1, should be false)
-//     {
-//         std::string boardContent = R"(No Player 1 Board
-// MaxSteps = 100
-// NumShells = 10
-// Rows = 3
-// Cols = 3
-// 2 3
-   
-//    )";
-        
-//         GameManager testManager(playerFactory, algoFactory);
-//         EXPECT_TRUE(CallReadBoardFromContent(testManager, boardContent));
-//         EXPECT_FALSE(GetIsClassic2PlayerGame(testManager));
-//     }
-    
-//     // Test 5: 9-player game (should be false)
-//     {
-//         std::string boardContent = R"(Max Players Board
-// MaxSteps = 100
-// NumShells = 10
-// Rows = 3
-// Cols = 9
-// 123456789)";
-        
-//         GameManager testManager(playerFactory, algoFactory);
-//         EXPECT_TRUE(CallReadBoardFromContent(testManager, boardContent));
-//         EXPECT_FALSE(GetIsClassic2PlayerGame(testManager));
-//     }
-    
-//     // Test 6: Default initialization (should be false)
-//     {
-//         GameManager testManager(playerFactory, algoFactory);
-//         EXPECT_FALSE(GetIsClassic2PlayerGame(testManager));
-//     }
-// }
 
 // ===================================================================== //
 // Constructor and Basic Setup
@@ -888,7 +796,6 @@ TEST_F(GameManagerTest, CheckGameOver_TieZeroTanks) {
     std::vector<std::pair<int, Point>> positions = { {1, Point(0,0)}, {2, Point(1,0)} };
     CreateTanks(positions);
     CreateTankAlgorithms();
-    SetIsClassic2PlayerGame(true); // Set for test environment
     
     // Destroy all tanks using utilities
     auto& tanks = GetTanks();
@@ -909,7 +816,6 @@ TEST_F(GameManagerTest, CheckGameOver_TieMaxSteps) {
     std::vector<std::pair<int, Point>> positions = { {1, Point(0,0)}, {2, Point(1,0)} };
     CreateTanks(positions);
     CreateTankAlgorithms();
-    SetIsClassic2PlayerGame(true); // Set for test environment
     SetMaxSteps(5);
     SetCurrentStep(5);
     
@@ -941,7 +847,6 @@ TEST_F(GameManagerTest, CheckGameOver_TieZeroShellsForExactly40Steps) {
     std::vector<std::pair<int, Point>> positions = { {1, Point(0,0)}, {2, Point(1,0)} };
     CreateTanks(positions);
     CreateTankAlgorithms();
-    SetIsClassic2PlayerGame(true); // Set for test environment
     
     // Drain all shells from tanks using utilities
     auto& tanks = GetTanks();

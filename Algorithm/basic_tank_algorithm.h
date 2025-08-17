@@ -74,7 +74,7 @@ protected:
 
     /**
      * @brief Get initial direction for a player based on player ID
-     * @param playerId The player ID (1-9)
+     * @param playerId The player ID (1 or 2)
      * @return Direction The initial direction for that player
      */
     static Direction getInitialDirection(int playerId);
