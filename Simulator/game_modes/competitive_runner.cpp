@@ -164,7 +164,7 @@ bool CompetitiveRunner::loadMapsImpl(const CompetitiveParameters& params) {
             if (info.loaded) {
                 m_discoveredMaps.push_back(std::move(info));
                 // Also load the actual map data for game execution
-                auto boardInfo = FileLoader::loadBoardWithSatelliteView(file);
+                auto boardInfo = FileLoader::loadBoardWithSatelliteView(file, m_errorCollector);
                 if (boardInfo.satelliteView) {
                     m_loadedMaps.push_back(std::move(boardInfo));
                 }
@@ -266,13 +266,11 @@ CompetitiveRunner::MapInfo CompetitiveRunner::loadMapFile(const std::string& map
     info.loaded = false;
     
     // Load map using FileSatelliteView validation
-    auto boardInfo = FileLoader::loadBoardWithSatelliteView(mapPath);
+    auto boardInfo = FileLoader::loadBoardWithSatelliteView(mapPath, m_errorCollector);
     
     if (!boardInfo.satelliteView) {
-        // File loading failed
-        std::string error = "Failed to load map file";
-        info.error = error;
-        m_errorCollector.addMapError(boardInfo.mapName.empty() ? extractMapName(mapPath) : boardInfo.mapName, error);
+        // File loading failed - detailed error already added to ErrorCollector by FileLoader
+        info.error = "Failed to load map file";
         return info;
     }
 

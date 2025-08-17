@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "common/SatelliteView.h"
+#include "error_collector.h"
 
 class FileSatelliteView;
 
@@ -41,10 +42,11 @@ public:
      * and returns a BoardInfo struct containing all parsed data including a SatelliteView.
      * 
      * @param filePath Path to the board file to load
+     * @param errorCollector Reference to ErrorCollector for centralized error handling
      * @return BoardInfo struct with all parsed data and SatelliteView,
      *         or a BoardInfo with null satelliteView if loading failed
      */
-    static BoardInfo loadBoardWithSatelliteView(const std::string& filePath);
+    static BoardInfo loadBoardWithSatelliteView(const std::string& filePath, ErrorCollector& errorCollector);
 
     /**
      * @brief Load a board file and parse its contents according to assignment format
@@ -57,6 +59,8 @@ public:
      * @param cols Reference to store the parsed number of columns
      * @param maxSteps Reference to store the parsed max steps
      * @param numShells Reference to store the parsed number of shells per tank
+     * @param mapName Reference to store the parsed map name
+     * @param errorCollector Reference to ErrorCollector for centralized error handling
      * @return Vector of strings containing the board content (each string is a row),
      *         or an empty vector if loading failed due to file errors or invalid format
      */
@@ -66,7 +70,8 @@ public:
         size_t& cols,
         size_t& maxSteps,
         size_t& numShells,
-        std::string& mapName
+        std::string& mapName,
+        ErrorCollector& errorCollector
     );
 
 private:

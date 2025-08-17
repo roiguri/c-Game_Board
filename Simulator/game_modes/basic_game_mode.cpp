@@ -101,7 +101,8 @@ bool BasicGameMode::loadLibrariesImpl(const GameParameters& params) {
 }
 
 bool BasicGameMode::loadMap(const std::string& mapFile) {
-    m_boardInfo = FileLoader::loadBoardWithSatelliteView(mapFile);
+    ErrorCollector errorCollector;
+    m_boardInfo = FileLoader::loadBoardWithSatelliteView(mapFile, errorCollector);
     
     if (!m_boardInfo.satelliteView) {
         return false;
@@ -113,8 +114,11 @@ bool BasicGameMode::loadMap(const std::string& mapFile) {
 
     auto warnings = m_boardInfo.getWarnings();
     if (!warnings.empty()) {
-        ErrorCollector errorCollector;
         errorCollector.addMapWarnings(mapFile, warnings);
+    }
+
+    // Save any errors or warnings to file
+    if (errorCollector.hasErrors()) {
         if (!errorCollector.saveToFile()) {
             std::cerr << "Warning: Could not save warnings to input_errors.txt file, continuing without it" << std::endl;
         }

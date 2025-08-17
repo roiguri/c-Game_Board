@@ -131,7 +131,7 @@ bool ComparativeRunner::loadLibrariesImpl(const ComparativeParameters& params) {
 }
 
 bool ComparativeRunner::loadMap(const std::string& mapFile) {
-    m_boardInfo = FileLoader::loadBoardWithSatelliteView(mapFile);
+    m_boardInfo = FileLoader::loadBoardWithSatelliteView(mapFile, m_errorCollector);
     
     if (!m_boardInfo.satelliteView) {
         std::cout << "Error: Failed to load map file: " + mapFile << std::endl;

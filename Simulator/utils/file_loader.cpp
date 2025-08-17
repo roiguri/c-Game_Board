@@ -5,19 +5,27 @@
 
 #include "file_loader.h"
 #include "file_satellite_view.h"
+#include "error_collector.h"
 
-// TODO: move errors to error collector
 std::vector<std::string> FileLoader::loadBoardFile(
     const std::string& filePath,
     size_t& rows,
     size_t& cols,
     size_t& maxSteps,
     size_t& numShells,
-    std::string& mapName
+    std::string& mapName,
+    ErrorCollector& errorCollector
 ) {
+    // Extract filename for error reporting (before we have the map name)
+    std::string fileName = filePath;
+    size_t lastSlash = filePath.find_last_of("/\\");
+    if (lastSlash != std::string::npos) {
+        fileName = filePath.substr(lastSlash + 1);
+    }
+    
     std::ifstream inputFile(filePath);
     if (!inputFile.is_open()) {
-        std::cerr << "Error: Could not open file '" << filePath << "'" << std::endl;
+        errorCollector.addMapError(fileName, "Failed to load map: Could not open file '" + filePath + "'");
         return {};
     }
 
@@ -29,7 +37,7 @@ std::vector<std::string> FileLoader::loadBoardFile(
     inputFile.close();
 
     if (lines.size() < 5) {
-        std::cerr << "Error: File must have at least 5 header lines" << std::endl;
+        errorCollector.addMapError(fileName, "Failed to load map: File must have at least 5 header lines");
         return {};
     }
 
@@ -39,22 +47,22 @@ std::vector<std::string> FileLoader::loadBoardFile(
     std::replace(mapName.begin(), mapName.end(), ' ', '_');
     // 2. MaxSteps = <NUM>
     if (!parseKeyValue(lines[1], "MaxSteps", maxSteps)) {
-        std::cerr << "Error: Invalid or missing MaxSteps line: '" << lines[1] << "'" << std::endl;
+        errorCollector.addMapError(mapName, "Failed to load map: Invalid or missing MaxSteps line: '" + lines[1] + "'");
         return {};
     }
     // 3. NumShells = <NUM>
     if (!parseKeyValue(lines[2], "NumShells", numShells)) {
-        std::cerr << "Error: Invalid or missing NumShells line: '" << lines[2] << "'" << std::endl;
+        errorCollector.addMapError(mapName, "Failed to load map: Invalid or missing NumShells line: '" + lines[2] + "'");
         return {};
     }
     // 4. Rows = <NUM>
     if (!parseKeyValue(lines[3], "Rows", rows) || rows == 0) {
-        std::cerr << "Error: Invalid or missing Rows line: '" << lines[3] << "'" << std::endl;
+        errorCollector.addMapError(mapName, "Failed to load map: Invalid or missing Rows line: '" + lines[3] + "'");
         return {};
     }
     // 5. Cols = <NUM>
     if (!parseKeyValue(lines[4], "Cols", cols) || cols == 0) {
-        std::cerr << "Error: Invalid or missing Cols line: '" << lines[4] << "'" << std::endl;
+        errorCollector.addMapError(mapName, "Failed to load map: Invalid or missing Cols line: '" + lines[4] + "'");
         return {};
     }
 
@@ -86,10 +94,10 @@ bool FileLoader::parseKeyValue(const std::string& line, const std::string& key, 
     return true;
 }
 
-FileLoader::BoardInfo FileLoader::loadBoardWithSatelliteView(const std::string& filePath) {
+FileLoader::BoardInfo FileLoader::loadBoardWithSatelliteView(const std::string& filePath, ErrorCollector& errorCollector) {
     BoardInfo info{};
     
-    std::vector<std::string> boardData = loadBoardFile(filePath, info.rows, info.cols, info.maxSteps, info.numShells, info.mapName);
+    std::vector<std::string> boardData = loadBoardFile(filePath, info.rows, info.cols, info.maxSteps, info.numShells, info.mapName, errorCollector);
     
     if (!boardData.empty()) {
         info.satelliteView = std::make_unique<FileSatelliteView>(boardData, info.rows, info.cols);
