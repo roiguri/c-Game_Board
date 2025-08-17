@@ -29,28 +29,44 @@ TEST_F(FileLoaderTest, LoadBoardFile_NonexistentFile) {
     const std::string nonExistentFile = "this_file_does_not_exist.txt";
     size_t rows, cols, maxSteps, numShells;
     std::string mapName;
-    std::stringstream cerr_buffer;
-    std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
     ErrorCollector errorCollector;
     std::vector<std::string> result = FileLoader::loadBoardFile(nonExistentFile, rows, cols, maxSteps, numShells, mapName, errorCollector);
-    std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
-    std::string errorOutput = cerr_buffer.str();
-    EXPECT_TRUE(errorOutput.find("Could not open file") != std::string::npos);
+    EXPECT_TRUE(errorCollector.hasMapErrors());
+    EXPECT_GT(errorCollector.getErrorCount(), 0u);
+    
+    // Check that the error message contains the expected text
+    const auto& errors = errorCollector.getAllErrors();
+    bool foundExpectedError = false;
+    for (const auto& error : errors) {
+        if (error.find("Could not open file") != std::string::npos) {
+            foundExpectedError = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(foundExpectedError);
 }
 
 TEST_F(FileLoaderTest, LoadBoardFile_EmptyFile) {
     createTestFile({});
     size_t rows, cols, maxSteps, numShells;
     std::string mapName;
-    std::stringstream cerr_buffer;
-    std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
     ErrorCollector errorCollector;
     std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
-    std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
-    std::string errorOutput = cerr_buffer.str();
-    EXPECT_TRUE(errorOutput.find("File must have at least 5 header lines") != std::string::npos);
+    EXPECT_TRUE(errorCollector.hasMapErrors());
+    EXPECT_GT(errorCollector.getErrorCount(), 0u);
+    
+    // Check that the error message contains the expected text
+    const auto& errors = errorCollector.getAllErrors();
+    bool foundExpectedError = false;
+    for (const auto& error : errors) {
+        if (error.find("File must have at least 5 header lines") != std::string::npos) {
+            foundExpectedError = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(foundExpectedError);
 }
 
 TEST_F(FileLoaderTest, LoadBoardFile_ValidFile) {
@@ -96,14 +112,22 @@ TEST_F(FileLoaderTest, LoadBoardFile_InvalidRows) {
     });
     size_t rows, cols, maxSteps, numShells;
     std::string mapName;
-    std::stringstream cerr_buffer;
-    std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
     ErrorCollector errorCollector;
     std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
-    std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
-    std::string errorOutput = cerr_buffer.str();
-    EXPECT_TRUE(errorOutput.find("Invalid or missing Rows line") != std::string::npos);
+    EXPECT_TRUE(errorCollector.hasMapErrors());
+    EXPECT_GT(errorCollector.getErrorCount(), 0u);
+    
+    // Check that the error message contains the expected text
+    const auto& errors = errorCollector.getAllErrors();
+    bool foundExpectedError = false;
+    for (const auto& error : errors) {
+        if (error.find("Invalid or missing Rows line") != std::string::npos) {
+            foundExpectedError = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(foundExpectedError);
 }
 
 TEST_F(FileLoaderTest, LoadBoardFile_MissingHeaderLine) {
@@ -120,14 +144,22 @@ TEST_F(FileLoaderTest, LoadBoardFile_MissingHeaderLine) {
     });
     size_t rows, cols, maxSteps, numShells;
     std::string mapName;
-    std::stringstream cerr_buffer;
-    std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
     ErrorCollector errorCollector;
     std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
-    std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
-    std::string errorOutput = cerr_buffer.str();
-    EXPECT_TRUE(errorOutput.find("Error: Invalid or missing Rows line:") != std::string::npos);
+    EXPECT_TRUE(errorCollector.hasMapErrors());
+    EXPECT_GT(errorCollector.getErrorCount(), 0u);
+    
+    // Check that the error message contains the expected text
+    const auto& errors = errorCollector.getAllErrors();
+    bool foundExpectedError = false;
+    for (const auto& error : errors) {
+        if (error.find("Invalid or missing Rows line") != std::string::npos) {
+            foundExpectedError = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(foundExpectedError);
 }
 
 TEST_F(FileLoaderTest, LoadBoardFile_ExtraWhitespace) {
@@ -240,14 +272,22 @@ TEST_F(FileLoaderTest, LoadBoardFile_NegativeMaxSteps) {
     });
     size_t rows, cols, maxSteps, numShells;
     std::string mapName;
-    std::stringstream cerr_buffer;
-    std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
     ErrorCollector errorCollector;
     std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
-    std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
-    std::string errorOutput = cerr_buffer.str();
-    EXPECT_TRUE(errorOutput.find("Invalid or missing MaxSteps line") != std::string::npos);
+    EXPECT_TRUE(errorCollector.hasMapErrors());
+    EXPECT_GT(errorCollector.getErrorCount(), 0u);
+    
+    // Check that the error message contains the expected text
+    const auto& errors = errorCollector.getAllErrors();
+    bool foundExpectedError = false;
+    for (const auto& error : errors) {
+        if (error.find("Invalid or missing MaxSteps line") != std::string::npos) {
+            foundExpectedError = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(foundExpectedError);
 }
 
 TEST_F(FileLoaderTest, LoadBoardFile_NegativeNumShells) {
@@ -265,14 +305,22 @@ TEST_F(FileLoaderTest, LoadBoardFile_NegativeNumShells) {
     });
     size_t rows, cols, maxSteps, numShells;
     std::string mapName;
-    std::stringstream cerr_buffer;
-    std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
     ErrorCollector errorCollector;
     std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
-    std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
-    std::string errorOutput = cerr_buffer.str();
-    EXPECT_TRUE(errorOutput.find("Invalid or missing NumShells line") != std::string::npos);
+    EXPECT_TRUE(errorCollector.hasMapErrors());
+    EXPECT_GT(errorCollector.getErrorCount(), 0u);
+    
+    // Check that the error message contains the expected text
+    const auto& errors = errorCollector.getAllErrors();
+    bool foundExpectedError = false;
+    for (const auto& error : errors) {
+        if (error.find("Invalid or missing NumShells line") != std::string::npos) {
+            foundExpectedError = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(foundExpectedError);
 }
 
 TEST_F(FileLoaderTest, LoadBoardFile_NegativeCols) {
@@ -290,14 +338,22 @@ TEST_F(FileLoaderTest, LoadBoardFile_NegativeCols) {
     });
     size_t rows, cols, maxSteps, numShells;
     std::string mapName;
-    std::stringstream cerr_buffer;
-    std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
     ErrorCollector errorCollector;
     std::vector<std::string> result = FileLoader::loadBoardFile(tempFileName, rows, cols, maxSteps, numShells, mapName, errorCollector);
-    std::cerr.rdbuf(old_cerr);
     EXPECT_TRUE(result.empty());
-    std::string errorOutput = cerr_buffer.str();
-    EXPECT_TRUE(errorOutput.find("Invalid or missing Cols line") != std::string::npos);
+    EXPECT_TRUE(errorCollector.hasMapErrors());
+    EXPECT_GT(errorCollector.getErrorCount(), 0u);
+    
+    // Check that the error message contains the expected text
+    const auto& errors = errorCollector.getAllErrors();
+    bool foundExpectedError = false;
+    for (const auto& error : errors) {
+        if (error.find("Invalid or missing Cols line") != std::string::npos) {
+            foundExpectedError = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(foundExpectedError);
 }
 
 // Tests for loadBoardWithSatelliteView method
