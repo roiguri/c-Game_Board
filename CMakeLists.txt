@@ -39,14 +39,6 @@ file(GLOB_RECURSE USERCOMMON_TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommo
 # Remove test files from library sources
 list(REMOVE_ITEM USERCOMMON_SOURCES ${USERCOMMON_TEST_SOURCES})
 
-# Remove analysis sources as they depend on Algorithm components
-file(GLOB_RECURSE ANALYSIS_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon/bonus/analysis/*.cpp")
-list(REMOVE_ITEM USERCOMMON_SOURCES ${ANALYSIS_SOURCES})
-
-# Remove analysis test files that have namespace issues
-file(GLOB_RECURSE ANALYSIS_TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon/bonus/analysis/*_test.cpp")
-list(REMOVE_ITEM USERCOMMON_TEST_SOURCES ${ANALYSIS_TEST_SOURCES})
-
 # Remove visualization sources and tests (they have namespace issues)
 file(GLOB_RECURSE VIZ_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon/bonus/visualization/*.cpp")
 list(REMOVE_ITEM USERCOMMON_SOURCES ${VIZ_SOURCES})
