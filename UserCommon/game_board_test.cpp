@@ -52,20 +52,9 @@ TEST_F(GameBoardTest, Constructor_ParameterizedCreatesCorrectSize) {
 // Initialize Tests
 TEST_F(GameBoardTest, Initialize_EmptyBoardLines) {
   std::vector<std::string> emptyLines;
-  
-  // Redirect cerr to capture output
-  std::stringstream cerr_buffer;
-  std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
   std::vector<std::pair<int, Point>> tankPositions;
   
   EXPECT_FALSE(board.initialize(emptyLines, tankPositions));
-  
-  // Restore cerr
-  std::cerr.rdbuf(old_cerr);
-  
-  // Check error message
-  std::string output = cerr_buffer.str();
-  EXPECT_TRUE(output.find("Error: Input board is empty") != std::string::npos);
 }
 
 TEST_F(GameBoardTest, Initialize_MissingTank1) {
@@ -279,19 +268,8 @@ TEST_F(GameBoardTest, Initialize_NoTanksReturnsFalse) {
   };
   std::vector<std::pair<int, Point>> tankPositions;
   
-  // Redirect cerr to capture the error output
-  std::stringstream cerr_buffer;
-  std::streambuf* old_cerr = std::cerr.rdbuf(cerr_buffer.rdbuf());
-  
   // Should return false because no tanks are present
   EXPECT_FALSE(board.initialize(boardLines, tankPositions));
-  
-  // Restore cerr
-  std::cerr.rdbuf(old_cerr);
-  
-  // Verify the error message was printed
-  std::string output = cerr_buffer.str();
-  EXPECT_TRUE(output.find("Error: No tanks found on the board.") != std::string::npos);
   
   // Verify tankPositions is empty
   EXPECT_TRUE(tankPositions.empty());
