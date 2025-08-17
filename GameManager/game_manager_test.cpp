@@ -1463,16 +1463,17 @@ TEST_F(GameManagerTest, Run_VerboseTrue_CreatesFileOutput) {
     // Verify the filename format includes player class names and timestamp
     std::string filename = newFiles[0];
     
-    // Get the actual player class names using typeid (should match what GameManager uses)
-    std::string player1Name = typeid(*player1).name();
-    std::string player2Name = typeid(*player2).name();
+    // Use the same player names that are passed to GameManager::run()
+    std::string player1Name = "TestPlayer1";
+    std::string player2Name = "TestPlayer2";
     
     // Clean the names the same way GameManager does
     player1Name = FileTestHelper::cleanFilename(player1Name);
     player2Name = FileTestHelper::cleanFilename(player2Name);
     
-    // Verify filename format: game_[player1]_vs_[player2]_[timestamp].txt
-    std::string expectedPrefix = "game_" + player1Name + "_vs_" + player2Name + "_";
+    // Verify filename format: game_[player1]_vs_[player2]_[mapName]_[timestamp].txt
+    std::string expectedPrefix = "game_" + player1Name + "_vs_" + player2Name + "_" + FileTestHelper::cleanFilename("test_map") + "_";
+    
     EXPECT_TRUE(FileTestHelper::startsWith(filename, expectedPrefix)) << 
         "Expected filename to start with '" << expectedPrefix << "', but got: " << filename;
     EXPECT_TRUE(FileTestHelper::endsWith(filename, ".txt")) << 
