@@ -13,6 +13,7 @@ add_compile_options(-Wall -Wextra -Werror -pedantic -fPIC) # TODO: check if we n
 # Build configuration options
 option(ENABLE_TESTING "Build tests" ON)
 option(ENABLE_VISUALIZATION "Enable visualization features" OFF)
+option(ENABLE_UI "Build web UI server" OFF)
 
 # Set output directories - build artifacts to build/, libraries will be set per project
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
@@ -22,14 +23,36 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
 set(CMAKE_TESTS_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/tests")
 
 # TODO: make this conditional - only download if not already downloaded
-# Download and configure Google Test for all projects
+# Download and configure external dependencies
 include(FetchContent)
+
+# Google Test for testing
 FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
     GIT_TAG release-1.12.1
 )
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+# UI dependencies (only when ENABLE_UI is ON)
+if(ENABLE_UI)
+    # cpp-httplib for web server functionality
+    FetchContent_Declare(
+        httplib
+        GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
+        GIT_TAG v0.14.3
+    )
+    
+    # reproc for process management
+    FetchContent_Declare(
+        reproc
+        GIT_REPOSITORY https://github.com/DaanDeMeyer/reproc.git
+        GIT_TAG v14.2.1
+    )
+    
+    FetchContent_MakeAvailable(httplib reproc)
+endif()
+
 FetchContent_MakeAvailable(googletest)
 
 # Create UserCommon static library
@@ -94,11 +117,23 @@ add_subdirectory(Algorithm)
 add_subdirectory(GameManager)
 add_subdirectory(Simulator)
 
+# Add UI server subdirectory (only when ENABLE_UI is ON)
+if(ENABLE_UI)
+    add_subdirectory(ui_server)
+endif()
+
 # Global convenience targets
-add_custom_target(all_projects
-    DEPENDS Algorithm_098765432_123456789 gamemanager simulator
-    COMMENT "Building all project libraries and executables"
-)
+if(ENABLE_UI)
+    add_custom_target(all_projects
+        DEPENDS Algorithm_098765432_123456789 gamemanager simulator tank_simulator_ui
+        COMMENT "Building all project libraries and executables (including UI)"
+    )
+else()
+    add_custom_target(all_projects
+        DEPENDS Algorithm_098765432_123456789 gamemanager simulator
+        COMMENT "Building all project libraries and executables"
+    )
+endif()
 
 add_custom_target(all_tests
     DEPENDS algorithm_tests gamemanager_tests simulator_tests usercommon_tests

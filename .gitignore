@@ -40,6 +40,9 @@ CTestTestfile.cmake
 *.dylib
 *.dll
 
+# Exception: Allow example .so files for UI server
+!ui_server/examples/**/*.so
+
 # Compiled Static libraries
 *.lai
 *.la

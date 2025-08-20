@@ -1,3 +1,38 @@
+# Bonus for exercise 3:
+
+## Web-Based UI Server
+
+A self-contained web interface for the Tank Simulator providing browser-based configuration and real-time simulation execution.
+
+### Functionality
+- **Mode Support**: Basic, Comparative, and Competition simulation modes with custom result displays
+- **Real-Time Execution**: Live console output streaming
+- **Interactive Configuration**: Dynamic form controls with file path validation and configuration summary
+- **Professional Results Display**: Parsed results with leaderboards, and board visualization
+
+### Architecture
+- **Backend**: C++ HTTP server using cpp-httplib for REST API endpoints
+- **Process Management**: Simple popen()-based execution with output capture and error handling
+- **Frontend**: Vanilla HTML5/CSS3/JavaScript with modern design and responsive layout
+- **API Design**: RESTful endpoints for simulation control, output polling, and result retrieval
+- **Build Integration**: CMake-managed dependencies with optional UI compilation flag
+
+### Usage
+
+Build with UI enabled:
+```bash
+cd build
+cmake -DENABLE_UI=ON ..
+make tank_simulator_ui
+```
+
+Run the server:
+```bash
+./tank_simulator_ui
+```
+
+Access via browser: http://localhost:8080
+
 # Bonus for exercise 2:
 
 ## Multiple Player Support

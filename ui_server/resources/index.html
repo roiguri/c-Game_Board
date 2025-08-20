@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tank Simulator UI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-tab">
+                <h1>Tank Simulator</h1>
+            </div>
+        </header>
+
+        <main class="main">
+            <!-- Tab Navigation -->
+            <nav class="tab-navigation">
+                <button class="tab-button active" data-tab="configuration">🎛️ Configuration</button>
+                <button class="tab-button" data-tab="results">📊 Results</button>
+            </nav>
+
+            <!-- Configuration Tab -->
+            <section id="configurationTab" class="tab-panel active">
+                <div class="config-grid">
+                    <!-- Left Column: Configuration -->
+                    <div class="config-column">
+                        <h3>🎛️ Configuration</h3>
+
+                        <!-- Mode Selection -->
+                        <div class="form-group">
+                            <label class="form-label">Game Mode:</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="mode" value="basic" checked> Basic</label>
+                                <label class="radio-label"><input type="radio" name="mode" value="comparative"> Comparative</label>
+                                <label class="radio-label"><input type="radio" name="mode" value="competition"> Competition</label>
+                                <div class="mode-notice">
+                                    <small>💡 Switching modes will override current results</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Basic Mode -->
+                        <div id="basicConfig">
+                            <div class="form-group"><label for="gameMap">Game Map:</label><input type="text" id="gameMap" value="../ui_server/examples/game_maps/input_a.txt"></div>
+                            <div class="form-group"><label for="gameManager">Game Manager:</label><input type="text" id="gameManager" value="../ui_server/examples/game_managers/RealGameManager_098765432_123456789.so"></div>
+                            <div class="form-group"><label for="algorithm1">Algorithm 1:</label><input type="text" id="algorithm1" value="../ui_server/examples/algorithms/TestAlgorithm_098765432_123456789.so"></div>
+                            <div class="form-group"><label for="algorithm2">Algorithm 2:</label><input type="text" id="algorithm2" value="../ui_server/examples/algorithms/Offensive_Algorithm_098765432_123456789.so"></div>
+                        </div>
+
+                        <!-- Comparative Mode -->
+                        <div id="comparativeConfig" style="display: none;">
+                            <div class="form-group"><label for="compGameMap">Game Map:</label><input type="text" id="compGameMap" value="../ui_server/examples/game_maps/input_a.txt"></div>
+                            <div class="form-group"><label for="gameManagersFolder">GMs Folder:</label><input type="text" id="gameManagersFolder" value="../ui_server/examples/game_managers"></div>
+                            <div class="form-group"><label for="compAlgorithm1">Algorithm 1:</label><input type="text" id="compAlgorithm1" value="../ui_server/examples/algorithms/TestAlgorithm_098765432_123456789.so"></div>
+                            <div class="form-group"><label for="compAlgorithm2">Algorithm 2:</label><input type="text" id="compAlgorithm2" value="../ui_server/examples/algorithms/Offensive_Algorithm_098765432_123456789.so"></div>
+                            <div class="form-group"><label for="compNumThreads">Threads:</label><input type="number" id="compNumThreads" value="4" min="1"></div>
+                        </div>
+
+                        <div id="competitionConfig" style="display: none;">
+                            <div class="form-group"><label for="gameMapsFolder">Game Maps Folder:</label><input type="text" id="gameMapsFolder" value="../ui_server/examples/game_maps"></div>
+                            <div class="form-group"><label for="compGameManager">Game Manager:</label><input type="text" id="compGameManager" value="../ui_server/examples/game_managers/RealGameManager_098765432_123456789.so"></div>
+                            <div class="form-group"><label for="algorithmsFolder">Algorithms Folder:</label><input type="text" id="algorithmsFolder" value="../ui_server/examples/algorithms"></div>
+                            <div class="form-group"><label for="compCompNumThreads">Threads:</label><input type="number" id="compCompNumThreads" value="4" min="1"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="checkbox-label"><input type="checkbox" id="verbose" checked> Verbose Output</label>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Execution & Status -->
+                    <div class="config-column">
+                        <h3>🎮 Execution</h3>
+                        <div class="execution-buttons">
+                            <button id="startSimulation" class="btn btn-primary">🚀 Start</button>
+                            <button id="stopSimulation" class="btn btn-secondary" disabled>🛑 Stop</button>
+                        </div>
+
+                        <div id="status" class="status status-idle">
+                            <span class="status-icon">⚪</span>
+                            <span class="status-text">Ready</span>
+                        </div>
+
+                        <div id="configSummary" class="config-summary" style="display: none;">
+                            <h4>Terminal Command</h4>
+                            <pre id="configText"></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Tab -->
+            <section id="resultsTab" class="tab-panel">
+                <h2>📊 Results</h2>
+                <div class="results-container">
+                    <div class="results-controls">
+                        <button id="refreshResults" class="btn btn-small">🔄 Refresh</button>
+                        <div class="results-status" id="resultsStatus">
+                            <span class="status-icon">⚪</span>
+                            <span class="status-text">No results available</span>
+                        </div>
+                    </div>
+                    <div class="results-content">
+                        <div id="resultsDisplay" class="results-display">
+                            <p class="no-results">Run a simulation to view results here</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="output-panel">
+                <div class="output-header">
+                    <h2>📊 Simulation Output</h2>
+                    <button id="clearOutput" class="btn btn-small">🗑️ Clear</button>
+                </div>
+                <div class="output-container">
+                    <pre id="outputLog" class="output-log">Waiting for simulation to start...</pre>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>Tank Simulator UI - Real-time process execution and monitoring</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
