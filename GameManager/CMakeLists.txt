@@ -8,9 +8,10 @@ project(GameManager)
 file(GLOB_RECURSE GAMEMANAGER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 file(GLOB_RECURSE GAMEMANAGER_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
-# Remove test files from library sources
 file(GLOB_RECURSE TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*_test.cpp")
+file(GLOB_RECURSE TEST_DIR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test/*.cpp")
 list(REMOVE_ITEM GAMEMANAGER_SOURCES ${TEST_SOURCES})
+list(REMOVE_ITEM GAMEMANAGER_SOURCES ${TEST_DIR_SOURCES})
 
 # Create GameManager shared library with specific naming
 add_library(GameManager_318835816_211314471 SHARED 
@@ -65,14 +66,15 @@ if(ENABLE_TESTING)
     # Test include directories
     target_include_directories(GameManager_tests PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}"
-        "${CMAKE_SOURCE_DIR}/Simulator"
     )
     
-    # Link test executable with libraries and sources
+    # Collect test helper files that were excluded from main library
+    file(GLOB_RECURSE TEST_HELPER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test/*.cpp")
+    
+    # Link test executable with GameManager sources and test helpers
     target_sources(GameManager_tests PRIVATE 
         ${GAMEMANAGER_SOURCES}
-        ../Simulator/registration/GameManagerRegistration.cpp
-        ../Simulator/registration/GameManagerRegistrar.cpp
+        ${TEST_HELPER_SOURCES}
     )
     
     target_link_libraries(GameManager_tests PRIVATE

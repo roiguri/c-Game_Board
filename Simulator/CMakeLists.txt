@@ -8,9 +8,11 @@ project(Simulator)
 file(GLOB_RECURSE SIMULATOR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 file(GLOB_RECURSE SIMULATOR_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
-# Remove test files and main.cpp from library sources
+# Remove test files, main.cpp, and all test directory files from library sources
 file(GLOB_RECURSE TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*_test.cpp")
+file(GLOB_RECURSE TEST_DIR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test/*.cpp")
 list(REMOVE_ITEM SIMULATOR_SOURCES ${TEST_SOURCES})
+list(REMOVE_ITEM SIMULATOR_SOURCES ${TEST_DIR_SOURCES})
 list(REMOVE_ITEM SIMULATOR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
 
 # Create Simulator static library
@@ -60,8 +62,11 @@ add_custom_target(simulator DEPENDS Simulator_lib simulator_318835816_211314471)
 if(ENABLE_TESTING)
     enable_testing()
     
-    # Create test executable
-    add_executable(Simulator_tests ${TEST_SOURCES})
+    # Collect test helper files that were excluded from main library
+    file(GLOB_RECURSE TEST_HELPER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test/*.cpp")
+    
+    # Create test executable with test sources and helpers
+    add_executable(Simulator_tests ${TEST_SOURCES} ${TEST_HELPER_SOURCES})
     
     # Test executable properties - use common tests directory
     set_target_properties(Simulator_tests PROPERTIES

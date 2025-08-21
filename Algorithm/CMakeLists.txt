@@ -51,7 +51,6 @@ if(ENABLE_TESTING)
     
     target_include_directories(algorithm_tests PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../Simulator"
     )
     
     # Add to CTest with test discovery
