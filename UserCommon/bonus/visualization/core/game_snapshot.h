@@ -6,6 +6,10 @@
 #include "UserCommon/game_board.h"
 #include "UserCommon/objects/shell.h"
 #include "UserCommon/objects/tank.h"
+#include "UserCommon/utils/point.h"
+#include "UserCommon/utils/direction.h"
+
+namespace UserCommon_318835816_211314471 {
 
 /**
  * @brief Lightweight representation of Tank state for visualization
@@ -88,3 +92,5 @@ private:
     int m_countdown = -1;
     std::string m_message;
 };
+
+} // namespace UserCommon_318835816_211314471

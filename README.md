@@ -214,18 +214,34 @@ HTML-based game visualization with step-by-step replay capabilities.
 - **Player Statistics**: Remaining ammunition and active/destroyed tank status
 - **Action Descriptions**: Detailed explanations of each player's chosen actions
 
-**Usage:**
+**Compilation Requirements:**
 ```bash
-# Build with visualization
+# Build with visualization enabled
 cmake -DENABLE_VISUALIZATION=ON ..
 make
 
-# Run game (generates HTML visualization automatically)
-./simulator_318835816_211314471 <input_file.txt>
+# For web UI with visualization support
+cmake -DENABLE_UI=ON -DENABLE_VISUALIZATION=ON ..
+make tank_simulator_ui
+```
+
+**Usage:**
+```bash
+# Command-line usage (requires -verbose flag for visualization generation)
+./simulator_318835816_211314471 -basic \
+  game_map=<input_file.txt> \
+  game_manager=<game_manager.so> \
+  algorithm1=<algorithm1.so> \
+  algorithm2=<algorithm2.so> \
+  -verbose
 
 # Open the generated visualization file in browser
 # File: output_<input_file>_visualization.html
 ```
+
+**Important Notes:**
+- **Verbose Mode Required**: Visualization is only generated when the `-verbose` flag is used or verbose mode is enabled in the web UI
+- **Compilation Dependency**: Visualization features require `DENABLE_VISUALIZATION=ON` during build
 
 ### 3. Comprehensive Testing Framework
 

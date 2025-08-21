@@ -6,7 +6,7 @@ A self-contained web interface for the Tank Simulator providing browser-based co
 
 ### Functionality
 - **Mode Support**: Basic, Comparative, and Competition simulation modes with custom result displays
-- **Real-Time Execution**: Live console output streaming
+- **Real-Time Execution**: Live console output streaming with auto-scroll and manual controls
 - **Interactive Configuration**: Dynamic form controls with file path validation and configuration summary
 - **Professional Results Display**: Parsed results with leaderboards, and board visualization
 
@@ -32,3 +32,67 @@ Run the server:
 ```
 
 Access via browser: http://localhost:8080
+
+## Basic Mode Implementation
+
+The Basic Mode provides single-game execution with immediate feedback through the web interface:
+
+### Features
+- **Single Game Execution**: Run one simulation with specified game map, game manager, and two algorithms
+- **Real-Time Output**: Console output streams directly to the browser with live updates
+- **Error Handling**: Clear error messages for missing files or invalid configurations
+- **Direct Results**: Immediate game results displayed in the console output area
+
+## Unit Testing and Development Helpers
+
+### Comprehensive Testing Framework
+The project includes extensive unit testing using Google Test framework:
+
+### Component Coverage
+- **UserCommon Library**: Game board, tank, shell, and utility class tests
+- **Algorithm Testing**: Mock objects and test fixtures for algorithmic behavior validation
+- **Game Manager Testing**: Collision detection, game state management, and rule validation
+- **Simulator Testing**: End-to-end execution and integration testing
+
+### Test Helpers and Utilities
+- **Mock Factories**: Isolated testing environments for algorithms and game managers
+- **Scenario Builders**: Complex game state setup for reproducible test conditions
+- **Game Result Validators**: Automated verification of game outcomes and state consistency
+- **File Test Helpers**: Utility functions for test file management and validation
+
+### Build and Execution
+```bash
+# Build with testing enabled
+cmake -DENABLE_TESTING=ON ..
+make
+
+# Run specific test suites
+./tests/usercommon_tests
+./tests/algorithm_tests
+./tests/GameManager_tests
+./tests/Simulator_tests
+```
+
+## Visualization Integration
+
+### HTML Visualization Features
+When verbose mode is enabled and visualization is compiled, the system provides:
+
+- **Game Board Rendering**: Visual representation of the game state in HTML format
+- **Real-Time Updates**: Board state updates during simulation execution
+- **Interactive Display**: Clickable board elements for detailed inspection
+- **Move History**: Visual tracking of tank movements and actions
+
+### Compilation Requirements
+To enable visualization features:
+
+```bash
+cd build
+cmake -DENABLE_VISUALIZATION=ON ..
+make tank_simulator_ui
+```
+
+### Usage with Visualization
+1. Enable verbose mode in cmd flags
+2. Ensure visualization libraries are compiled (will be compiiled in game manager library when flag enabled)
+3. Run simulation - HTML visualization file will be generated in build directory

@@ -9,6 +9,8 @@
 #include "UserCommon/objects/tank.h"
 #include "UserCommon/bonus/visualization/core/visualizer_base.h"
 
+namespace UserCommon_318835816_211314471 {
+
 /**
  * @brief Manager class that coordinates multiple visualizers
  * 
@@ -99,3 +101,5 @@ private:
     std::vector<std::unique_ptr<VisualizerBase>> m_visualizers;
     bool m_liveVisualizationEnabled;
 };
+
+} // namespace UserCommon_318835816_211314471

@@ -43,6 +43,11 @@ target_include_directories(GameManager_318835816_211314471 PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+# Pass ENABLE_VISUALIZATION definition if visualization is enabled
+if(ENABLE_VISUALIZATION)
+    target_compile_definitions(GameManager_318835816_211314471 PRIVATE ENABLE_VISUALIZATION)
+endif()
+
 # Create alias target for convenience (using custom target since ALIAS doesn't work with custom targets)
 add_custom_target(gamemanager DEPENDS GameManager_318835816_211314471)
 
@@ -57,6 +62,11 @@ if(ENABLE_TESTING)
     target_compile_definitions(GameManager_tests PRIVATE 
         DISABLE_STATIC_REGISTRATION=1
     )
+    
+    # Pass ENABLE_VISUALIZATION definition if visualization is enabled
+    if(ENABLE_VISUALIZATION)
+        target_compile_definitions(GameManager_tests PRIVATE ENABLE_VISUALIZATION)
+    endif()
     
     # Test executable properties - use common tests directory
     set_target_properties(GameManager_tests PROPERTIES

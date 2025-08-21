@@ -6,6 +6,8 @@
 #include <fstream>
 #include <filesystem>
 
+using namespace UserCommon_318835816_211314471;
+
 class HTMLVisualizerTest : public ::testing::Test {
 protected:
     void SetUp() override {
@@ -52,9 +54,8 @@ protected:
             "#1#",
             "#2#"
         };
-        std::vector<std::string> errors;
         std::vector<std::pair<int, Point>> tankPositions;
-        board.initialize(boardLines, errors, tankPositions);
+        board.initialize(boardLines, tankPositions);
 
         // Damage one wall to test wall health
         board.damageWall(Point(0, 0));

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <limits.h>
@@ -8,8 +9,9 @@
 #include <windows.h>
 #endif
 
-#include "UserCommon/bonus/logger/logger.h"
 #include "UserCommon/bonus/visualization/visualizers/html_visualizer/html_visualizer.h"
+
+namespace UserCommon_318835816_211314471 {
 
 HTMLVisualizer::HTMLVisualizer(const std::string& templatePath) {
     if (!templatePath.empty()) {
@@ -18,8 +20,7 @@ HTMLVisualizer::HTMLVisualizer(const std::string& templatePath) {
         // Try to find templates directory
         m_templatePath = findTemplatesDirectory();
         if (m_templatePath.empty()) {
-            LOG_ERROR("HTMLVisualizer: Could not locate templates directory. "
-                      "HTML visualization may not work correctly.");
+            // Template directory not found - visualization may not work
         }
     }
 }
@@ -38,7 +39,6 @@ void HTMLVisualizer::clear() {
 
 bool HTMLVisualizer::generateOutput(const std::string& outputPath) {
     if (m_snapshots.empty()) {
-        LOG_ERROR("HTMLVisualizer: No snapshots to visualize");
         return false;
     }
     
@@ -48,7 +48,6 @@ bool HTMLVisualizer::generateOutput(const std::string& outputPath) {
     std::string jsTemplate = loadTemplate("visualizer.js");
     
     if (htmlTemplate.empty() || cssTemplate.empty() || jsTemplate.empty()) {
-        LOG_ERROR("HTMLVisualizer: Failed to load one or more templates");
         return false;
     }
     
@@ -84,17 +83,17 @@ bool HTMLVisualizer::generateOutput(const std::string& outputPath) {
     try {
         std::ofstream outputFile(outputFilePath);
         if (!outputFile.is_open()) {
-            LOG_ERROR("HTMLVisualizer: Failed to open file for writing: " + outputFilePath);
+            // Failed to open file for writing
             return false;
         }
         
         outputFile << htmlTemplate;
         outputFile.close();
         
-        LOG_INFO("HTMLVisualizer: Generated visualization at " + outputFilePath);
+        // Visualization generated successfully
         return true;
     } catch (const std::exception& e) {
-        LOG_ERROR("HTMLVisualizer: Error writing output file: " + std::string(e.what()));
+        // Error writing output file
         return false;
     }
 }
@@ -109,7 +108,7 @@ void HTMLVisualizer::displayCurrentState() {
 
 std::string HTMLVisualizer::loadTemplate(const std::string& templateName) const {
     if (m_templatePath.empty()) {
-        LOG_ERROR("HTMLVisualizer: Template path not set");
+        // Template path not set
         return "";
     }
     
@@ -118,7 +117,7 @@ std::string HTMLVisualizer::loadTemplate(const std::string& templateName) const 
     try {
         std::ifstream file(filePath);
         if (!file.is_open()) {
-            LOG_ERROR("HTMLVisualizer: Could not open template file: " + filePath.string());
+            // Could not open template file
             return "";
         }
         
@@ -126,7 +125,7 @@ std::string HTMLVisualizer::loadTemplate(const std::string& templateName) const 
         buffer << file.rdbuf();
         return buffer.str();
     } catch (const std::exception& e) {
-        LOG_ERROR("HTMLVisualizer: Error reading template file " + filePath.string() + ": " + e.what());
+        // Error reading template file
         return "";
     }
 }
@@ -306,6 +305,12 @@ std::filesystem::path HTMLVisualizer::findTemplatesDirectory() const {
     searchPaths.push_back(execDir / 
         "bonus/visualization/visualizers/html_visualizer/templates");
     
+    // Add more search paths relative to current directory
+    searchPaths.push_back(std::filesystem::current_path() / 
+        "../UserCommon/bonus/visualization/visualizers/html_visualizer/templates");
+    searchPaths.push_back(std::filesystem::current_path() / 
+        "UserCommon/bonus/visualization/visualizers/html_visualizer/templates");
+    
     // Check all search paths
     for (const auto& path : searchPaths) {
         if (std::filesystem::exists(path / "visualizer.html") &&
@@ -317,3 +322,5 @@ std::filesystem::path HTMLVisualizer::findTemplatesDirectory() const {
     
     return {};
 }
+
+} // namespace UserCommon_318835816_211314471

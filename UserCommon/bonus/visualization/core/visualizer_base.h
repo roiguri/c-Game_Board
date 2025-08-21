@@ -5,6 +5,8 @@
 
 #include "UserCommon/bonus/visualization/core/game_snapshot.h"
 
+namespace UserCommon_318835816_211314471 {
+
 /**
  * @brief Base interface for all visualizers
  * 
@@ -53,3 +55,5 @@ public:
      */
     virtual void displayCurrentState() = 0;
 };
+
+} // namespace UserCommon_318835816_211314471

@@ -3,6 +3,8 @@
 
 #include "UserCommon/bonus/visualization/core/game_snapshot.h"
 
+namespace UserCommon_318835816_211314471 {
+
 TankState::TankState(const Tank& tank) 
     : playerId(tank.getPlayerId()),
       position(tank.getPosition()),
@@ -141,3 +143,5 @@ std::string GameSnapshot::toJson() const {
     
     return json.str();
 }
+
+} // namespace UserCommon_318835816_211314471

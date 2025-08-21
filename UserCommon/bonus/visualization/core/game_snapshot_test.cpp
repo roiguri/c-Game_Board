@@ -4,6 +4,8 @@
 #include "UserCommon/objects/tank.h"
 #include "UserCommon/objects/shell.h"
 
+using namespace UserCommon_318835816_211314471;
+
 class GameSnapshotTest : public ::testing::Test {
 protected:
     void SetUp() override {
@@ -18,9 +20,8 @@ protected:
             "#####"
         };
         
-        std::vector<std::string> errors;
         std::vector<std::pair<int, Point>> tankPositions;
-        board.initialize(boardData, errors, tankPositions);
+        board.initialize(boardData, tankPositions);
 
         // Damage one wall to test wall health
         board.damageWall(Point(0, 1));

@@ -62,11 +62,19 @@ file(GLOB_RECURSE USERCOMMON_TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommo
 # Remove test files from library sources
 list(REMOVE_ITEM USERCOMMON_SOURCES ${USERCOMMON_TEST_SOURCES})
 
-# Remove visualization sources and tests (they have namespace issues)
+# Handle visualization sources conditionally
 file(GLOB_RECURSE VIZ_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon/bonus/visualization/*.cpp")
-list(REMOVE_ITEM USERCOMMON_SOURCES ${VIZ_SOURCES})
 file(GLOB_RECURSE VIZ_TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon/bonus/visualization/*_test.cpp")
-list(REMOVE_ITEM USERCOMMON_TEST_SOURCES ${VIZ_TEST_SOURCES})
+
+# Remove visualization sources when visualization is disabled
+if(NOT ENABLE_VISUALIZATION)
+    list(REMOVE_ITEM USERCOMMON_SOURCES ${VIZ_SOURCES})
+endif()
+
+# Remove visualization tests when either testing or visualization is disabled
+if(NOT ENABLE_TESTING OR NOT ENABLE_VISUALIZATION)
+    list(REMOVE_ITEM USERCOMMON_TEST_SOURCES ${VIZ_TEST_SOURCES})
+endif()
 
 # Remove ui_server sources (they have their own build target)
 file(GLOB_RECURSE UI_SERVER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon/bonus/ui_server/*.cpp")
@@ -90,6 +98,11 @@ target_include_directories(UserCommon PUBLIC
 target_include_directories(UserCommon PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/third_party"
 )
+
+# Add preprocessor definition for visualization when enabled
+if(ENABLE_VISUALIZATION)
+    target_compile_definitions(UserCommon PUBLIC ENABLE_VISUALIZATION)
+endif()
 
 # Create UserCommon test executable
 if(ENABLE_TESTING)

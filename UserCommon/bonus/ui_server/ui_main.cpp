@@ -14,6 +14,8 @@
 
 using json = nlohmann::json;
 
+namespace UserCommon_318835816_211314471 {
+
 // Configuration validation and command building utilities
 class ConfigurationValidator {
 public:
@@ -688,6 +690,8 @@ public:
     }
 };
 
+} // namespace UserCommon_318835816_211314471
+
 int main(int argc, char* argv[]) {
     int port = 8080;
     
@@ -705,7 +709,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    TankSimulatorUIServer server(port);
+    UserCommon_318835816_211314471::TankSimulatorUIServer server(port);
     
     try {
         server.start();

@@ -13,6 +13,8 @@
 #include "UserCommon/bonus/visualization/core/visualization_manager.h"
 #include "UserCommon/bonus/visualization/visualizers/html_visualizer/html_visualizer.h"
 
+namespace UserCommon_318835816_211314471 {
+
 // Forward declarations for concrete visualizers
 // When implementing these classes, uncomment these lines
 // class HTMLVisualizer;
@@ -36,3 +38,5 @@ inline std::unique_ptr<VisualizationManager> createVisualizationManager(bool ena
     
     return manager;
 }
+
+} // namespace UserCommon_318835816_211314471

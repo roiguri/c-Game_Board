@@ -6,6 +6,8 @@
 
 #include "UserCommon/bonus/visualization/core/visualizer_base.h"
 
+namespace UserCommon_318835816_211314471 {
+
 /**
  * @brief HTML-based visualizer that generates an interactive web visualization
  * 
@@ -93,3 +95,5 @@ private:
      */
     std::filesystem::path findTemplatesDirectory() const;
 };
+
+} // namespace UserCommon_318835816_211314471
