@@ -141,7 +141,7 @@ GameResult GameManager::run(
     }
     
     m_gameLog.push_back(
-        "Game ended after " + std::to_string(m_currentStep) + " steps"
+        "Game ended after " + std::to_string(m_currentStep-1) + " steps"
     );
     m_gameLog.push_back("Result: " + m_gameResult);
     LOG_INFO("Game ended after " + std::to_string(m_currentStep) + " steps");
@@ -383,7 +383,7 @@ void GameManager::moveShellsOnce() {
 }
 
 bool GameManager::checkGameOver() {
-    std::set<int> playerIds; // TODO: move this to a class member
+    std::set<int> playerIds;
     // Count alive tanks per player
     std::unordered_map<int, int> playersAlive;
     for (const auto& tank : m_tanks) {
@@ -411,7 +411,7 @@ bool GameManager::checkGameOver() {
             remainingTanks[playerId - 1] = tankCount; // Convert to 0-based index
         }
     }
-    // TODO: verify current step is correct in GameResult
+
     // Check win conditions
     if (playersWithTanks == 1) {
         m_gameResult = "Player " + std::to_string(winningPlayer) + " won with " + std::to_string(winningPlayerTanks) + " tanks still alive";
