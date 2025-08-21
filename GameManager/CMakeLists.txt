@@ -13,13 +13,13 @@ file(GLOB_RECURSE TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*_test.cpp")
 list(REMOVE_ITEM GAMEMANAGER_SOURCES ${TEST_SOURCES})
 
 # Create GameManager shared library with specific naming
-add_library(GameManager_098765432_123456789 SHARED 
+add_library(GameManager_318835816_211314471 SHARED 
     ${GAMEMANAGER_SOURCES}
 )
 
 # Set library properties - .so file goes to GameManager/ directory
-set_target_properties(GameManager_098765432_123456789 PROPERTIES
-    OUTPUT_NAME "GameManager_098765432_123456789"
+set_target_properties(GameManager_318835816_211314471 PROPERTIES
+    OUTPUT_NAME "GameManager_318835816_211314471"
     PREFIX ""
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build/GameManager"
@@ -28,22 +28,22 @@ set_target_properties(GameManager_098765432_123456789 PROPERTIES
 
 # Only set hidden visibility if not building tests
 if(NOT ENABLE_TESTING)
-    set_target_properties(GameManager_098765432_123456789 PROPERTIES
+    set_target_properties(GameManager_318835816_211314471 PROPERTIES
         CXX_VISIBILITY_PRESET hidden
         VISIBILITY_INLINES_HIDDEN ON
     )
 endif()
 
 # Link UserCommon library
-target_link_libraries(GameManager_098765432_123456789 PRIVATE UserCommon)
+target_link_libraries(GameManager_318835816_211314471 PRIVATE UserCommon)
 
 # Include directories for GameManager library  
-target_include_directories(GameManager_098765432_123456789 PRIVATE
+target_include_directories(GameManager_318835816_211314471 PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
 # Create alias target for convenience (using custom target since ALIAS doesn't work with custom targets)
-add_custom_target(gamemanager DEPENDS GameManager_098765432_123456789)
+add_custom_target(gamemanager DEPENDS GameManager_318835816_211314471)
 
 # Testing configuration
 if(ENABLE_TESTING)

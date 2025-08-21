@@ -8,7 +8,7 @@
 #include "../mocks/scenario_mock_satellite_view.h"
 #include "../mocks/enhanced_mock_player.h"
 
-namespace GameManager_098765432_123456789 {
+namespace GameManager_318835816_211314471 {
 
 using namespace UserCommon_098765432_123456789;
 
@@ -291,4 +291,4 @@ private:
     std::function<void(TankAlgorithm&, SatelliteView&)> m_player2Behavior;
 };
 
-} // namespace GameManager_098765432_123456789 
+} // namespace GameManager_318835816_211314471 

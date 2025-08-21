@@ -8,7 +8,7 @@
 #include "objects/tank.h"
 #include "utils/midpoint.h"
 
-namespace GameManager_098765432_123456789 {
+namespace GameManager_318835816_211314471 {
 
 using namespace UserCommon_098765432_123456789;
 
@@ -94,4 +94,4 @@ private:
     friend class CollisionHandlerTest;
 };
 
-} // namespace GameManager_098765432_123456789
+} // namespace GameManager_318835816_211314471

@@ -47,7 +47,7 @@ target_include_directories(gamemanager_enhanced_tests PRIVATE
 
 # Link libraries
 target_link_libraries(gamemanager_enhanced_tests PRIVATE
-    GameManager_098765432_123456789
+    GameManager_318835816_211314471
     gtest
     gtest_main
     gmock

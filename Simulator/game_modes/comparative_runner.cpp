@@ -128,7 +128,6 @@ bool ComparativeRunner::loadLibrariesImpl(const ComparativeParameters& params) {
             return false;
         }
     } else {
-        // TODO: check how the comparative mode works if both algorithms are the same
         // Algorithm 2 is the same as Algorithm 1
     }
     return true;

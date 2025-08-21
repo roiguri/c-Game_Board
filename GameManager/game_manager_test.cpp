@@ -16,7 +16,7 @@
 #include <iostream>
 #include <typeinfo>
 
-namespace GameManager_098765432_123456789 { 
+namespace GameManager_318835816_211314471 { 
 
 using namespace UserCommon_098765432_123456789;
 
@@ -1493,4 +1493,4 @@ TEST_F(GameManagerTest, Run_VerboseTrue_CreatesFileOutput) {
     EXPECT_TRUE(hasContent) << "Expected file to have game log content";
 }
 
-} // namespace GameManager_098765432_123456789
+} // namespace GameManager_318835816_211314471

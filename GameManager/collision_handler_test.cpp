@@ -5,7 +5,7 @@
 #include "game_board.h"
 #include "utils/direction.h"
 
-namespace GameManager_098765432_123456789 {
+namespace GameManager_318835816_211314471 {
 
 using namespace UserCommon_098765432_123456789;
 
@@ -706,4 +706,4 @@ TEST_F(CollisionHandlerTest, DetectPathCrossings_NonAdjacentPaths_NoExplosion) {
   EXPECT_FALSE(tanks[1].isDestroyed());
 }
 
-} // namespace GameManager_098765432_123456789
+} // namespace GameManager_318835816_211314471

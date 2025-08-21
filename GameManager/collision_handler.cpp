@@ -2,7 +2,7 @@
 
 #include "collision_handler.h"
 
-namespace GameManager_098765432_123456789 {
+namespace GameManager_318835816_211314471 {
 
 using namespace UserCommon_098765432_123456789;
 
@@ -209,4 +209,4 @@ void CollisionHandler::markPathExplosionAt(const Point& from, const Point& to) {
     }
 }
 
-} // namespace GameManager_098765432_123456789
+} // namespace GameManager_318835816_211314471

@@ -16,7 +16,7 @@
 #include "bonus/logger/logger.h"
 #include "common/GameManagerRegistration.h"
 
-namespace GameManager_098765432_123456789 {
+namespace GameManager_318835816_211314471 {
 
 using namespace UserCommon_098765432_123456789;
 
@@ -614,9 +614,9 @@ std::vector<std::string> MyGameManager_318835816_211314471::readSatelliteView(co
     return boardLines;
 }
 
-} // namespace GameManager_098765432_123456789
+} // namespace GameManager_318835816_211314471
 
 #ifndef DISABLE_STATIC_REGISTRATION
-using namespace GameManager_098765432_123456789;
+using namespace GameManager_318835816_211314471;
 REGISTER_GAME_MANAGER(MyGameManager_318835816_211314471);
 #endif

@@ -7,7 +7,7 @@
 #include "common/ActionRequest.h"
 #include "common/BattleInfo.h"
 
-namespace GameManager_098765432_123456789 {
+namespace GameManager_318835816_211314471 {
 
 /**
  * @brief Enhanced mock algorithm with comprehensive state tracking and configurable behavior
@@ -149,4 +149,4 @@ private:
     int m_callCount;
 };
 
-} // namespace GameManager_098765432_123456789 
+} // namespace GameManager_318835816_211314471 

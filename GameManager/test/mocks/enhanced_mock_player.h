@@ -8,7 +8,7 @@
 #include "common/TankAlgorithm.h"
 #include "common/SatelliteView.h"
 
-namespace GameManager_098765432_123456789 {
+namespace GameManager_318835816_211314471 {
 
 /**
  * @brief Enhanced mock player with configurable behavior for comprehensive testing
@@ -81,4 +81,4 @@ private:
 
 
 
-} // namespace GameManager_098765432_123456789 
+} // namespace GameManager_318835816_211314471 

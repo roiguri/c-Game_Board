@@ -9,7 +9,7 @@
 #include "common/AbstractGameManager.h"
 #include "enhanced_mock_algorithm.h"
 
-namespace GameManager_098765432_123456789 {
+namespace GameManager_318835816_211314471 {
 
 /**
  * @brief Global registry for tracking factory calls and configured algorithms
@@ -158,4 +158,4 @@ public:
     }
 };
 
-} // namespace GameManager_098765432_123456789 
+} // namespace GameManager_318835816_211314471 

@@ -19,7 +19,7 @@
 #include "bonus/visualization/visualization.h"
 #endif
 
-namespace GameManager_098765432_123456789 {
+namespace GameManager_318835816_211314471 {
 
 using namespace UserCommon_098765432_123456789;
 
@@ -197,4 +197,4 @@ private:
     #endif
 };
 
-} // namespace GameManager_098765432_123456789
+} // namespace GameManager_318835816_211314471

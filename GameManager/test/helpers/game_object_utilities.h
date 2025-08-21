@@ -9,7 +9,7 @@
 #include "UserCommon/utils/point.h"
 #include "UserCommon/utils/direction.h"
 
-namespace GameManager_098765432_123456789 {
+namespace GameManager_318835816_211314471 {
 
 using namespace UserCommon_098765432_123456789;
 
@@ -271,4 +271,4 @@ private:
     GameObjectUtilities() = delete; // Static utility class only
 };
 
-} // namespace GameManager_098765432_123456789 
+} // namespace GameManager_318835816_211314471 

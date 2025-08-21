@@ -9,7 +9,7 @@
 #include "common/GameResult.h"
 #include "utils/point.h"
 
-namespace GameManager_098765432_123456789 {
+namespace GameManager_318835816_211314471 {
 
 using namespace UserCommon_098765432_123456789;
 
@@ -405,4 +405,4 @@ private:
 //
 // ... and so on for other validation methods
 
-} // namespace GameManager_098765432_123456789 
+} // namespace GameManager_318835816_211314471 

@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <fstream>
 
-namespace GameManager_098765432_123456789 {
+namespace GameManager_318835816_211314471 {
 
 FileTestHelper::FileTestHelper() {
     recordInitialFiles();
@@ -85,4 +85,4 @@ std::string FileTestHelper::cleanFilename(const std::string& name) {
     return cleaned;
 }
 
-} // namespace GameManager_098765432_123456789
+} // namespace GameManager_318835816_211314471

@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace GameManager_098765432_123456789 {
+namespace GameManager_318835816_211314471 {
 
 /**
  * @brief Helper class for managing file system operations in GameManager tests
@@ -68,4 +68,4 @@ private:
     std::set<std::string> m_initialFiles;
 };
 
-} // namespace GameManager_098765432_123456789
+} // namespace GameManager_318835816_211314471

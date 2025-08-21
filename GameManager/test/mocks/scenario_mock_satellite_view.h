@@ -7,7 +7,7 @@
 #include "common/SatelliteView.h"
 #include "utils/point.h"
 
-namespace GameManager_098765432_123456789 {
+namespace GameManager_318835816_211314471 {
 
 using namespace UserCommon_098765432_123456789;
 
@@ -164,4 +164,4 @@ private:
     size_t m_height;
 };
 
-} // namespace GameManager_098765432_123456789 
+} // namespace GameManager_318835816_211314471 
