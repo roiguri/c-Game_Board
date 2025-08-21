@@ -135,15 +135,31 @@ class SimulatorUI {
 
     updateConfigurationSummary() {
         const config = this.buildConfiguration();
-        let command = `../Simulator/simulator_318835816_211314471 -${config.mode}`;
+        let commandParts = [`../Simulator/simulator_318835816_211314471 -${config.mode}`];
+
+        // Map JavaScript config keys to actual command-line parameter names
+        const paramMapping = {
+            'gameMap': 'game_map',
+            'gameManager': 'game_manager',
+            'algorithm1': 'algorithm1',
+            'algorithm2': 'algorithm2',
+            'gameManagersFolder': 'game_managers_folder',
+            'gameMapsFolder': 'game_maps_folder',
+            'algorithmsFolder': 'algorithms_folder',
+            'numThreads': 'num_threads'
+        };
 
         Object.entries(config).forEach(([key, value]) => {
             if (key !== 'mode' && key !== 'verbose' && value) {
-                command += ` ${key}="${value}"`;
+                const paramName = paramMapping[key] || key;
+                // Remove unnecessary quotes - only add them if the value contains spaces
+                const formattedValue = value.toString().includes(' ') ? `"${value}"` : value;
+                commandParts.push(`${paramName}=${formattedValue}`);
             }
         });
         
-        if (config.verbose) command += ' -verbose';
+        if (config.verbose) commandParts.push('-verbose');
+        const command = commandParts.join(' \\\n');
         
         this.configText.textContent = command;
         this.configSummary.style.display = 'block';
@@ -782,7 +798,11 @@ class SimulatorUI {
             
             // Look for game end reasons
             if (line.includes('all tanks destroyed') || line.includes('maximum steps reached') || line.includes('no shells remaining') || line.includes('Reason:')) {
-                result.reason = line;
+                // Extract the reason text, removing any existing "Reason:" prefix
+                result.reason = line.replace(/^.*Reason:\s*/i, '').trim();
+                if (!result.reason) {
+                    result.reason = line.trim(); // Fallback to full line if no reason prefix found
+                }
             }
             
             // Look for round count
