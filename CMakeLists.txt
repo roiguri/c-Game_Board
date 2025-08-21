@@ -8,10 +8,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Add required compiler flags for shared libraries
-add_compile_options(-Wall -Wextra -Werror -pedantic -fPIC) # TODO: check if we need -fPIC
+add_compile_options(-Wall -Wextra -Werror -pedantic -fPIC)
 
 # Build configuration options
-option(ENABLE_TESTING "Build tests" ON)
+option(ENABLE_TESTING "Build tests" OFF)
 option(ENABLE_VISUALIZATION "Enable visualization features" OFF)
 option(ENABLE_UI "Build web UI server" OFF)
 
@@ -22,17 +22,19 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
 # Create a common tests directory for all test executables
 set(CMAKE_TESTS_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/tests")
 
-# TODO: make this conditional - only download if not already downloaded
 # Download and configure external dependencies
 include(FetchContent)
 
-# Google Test for testing
-FetchContent_Declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG release-1.12.1
-)
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+# Google Test for testing (only when ENABLE_TESTING is ON)
+if(ENABLE_TESTING)
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG release-1.12.1
+    )
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+endif()
 
 # UI dependencies (only when ENABLE_UI is ON)
 if(ENABLE_UI)
@@ -52,8 +54,6 @@ if(ENABLE_UI)
     
     FetchContent_MakeAvailable(httplib reproc)
 endif()
-
-FetchContent_MakeAvailable(googletest)
 
 # Create UserCommon static library
 file(GLOB_RECURSE USERCOMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon/*.cpp")
