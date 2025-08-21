@@ -13,6 +13,7 @@ GameResult GameRunner::runSingleGame(
 ) {
     // 1. Extract board information
     if (!boardInfo.satelliteView) {
+        // Should not happen
         throw std::runtime_error("Invalid board info: null satellite view");
     }
     
@@ -26,7 +27,7 @@ GameResult GameRunner::runSingleGame(
     auto& gameManagerRegistrar = GameManagerRegistrar::getGameManagerRegistrar();
     const auto* gameManagerEntry = gameManagerRegistrar.findByName(gameManagerName);
     if (!gameManagerEntry) {
-        // TODO: decide what to do when fails to load game manager
+        // Should not happen
         throw std::runtime_error("GameManager not found: " + gameManagerName);
     }
     
@@ -47,20 +48,20 @@ GameResult GameRunner::runSingleGame(
     }
     
     if (algo1It == algorithmRegistrar.end()) {
-        // TODO: decide what to do when fails to load algorithm
+        // Should not happen
         throw std::runtime_error("Algorithm not found: " + algorithm1Name);
     }
     if (algo2It == algorithmRegistrar.end()) {
-        // TODO: decide what to do when fails to load algorithm
+        // Should not happen
         throw std::runtime_error("Algorithm not found: " + algorithm2Name);
     }
     
     if (!algo1It->isComplete()) {
-        // TODO: decide what to do when fails to load algorithm
+        // Should not happen
         throw std::runtime_error("Algorithm incomplete: " + algorithm1Name);
     }
     if (!algo2It->isComplete()) {
-        // TODO: decide what to do when fails to load algorithm
+        // Should not happen
         throw std::runtime_error("Algorithm incomplete: " + algorithm2Name);
     }
     
