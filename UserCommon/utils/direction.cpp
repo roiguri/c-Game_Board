@@ -1,6 +1,6 @@
 #include "direction.h"
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 std::string directionToString(Direction direction) {
     switch (direction) {
@@ -80,4 +80,4 @@ std::ostream& operator<<(std::ostream& os, Direction dir) {
   return os;
 }
 
-} // namespace UserCommon_098765432_123456789
+} // namespace UserCommon_318835816_211314471

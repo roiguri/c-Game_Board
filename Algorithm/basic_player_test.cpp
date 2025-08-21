@@ -6,7 +6,7 @@
 #include "utils/point.h"
 #include <vector>
 
-using namespace UserCommon_098765432_123456789;
+using namespace UserCommon_318835816_211314471;
 
 namespace Algorithm_318835816_211314471 {
 

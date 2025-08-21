@@ -10,7 +10,7 @@
 
 namespace GameManager_318835816_211314471 {
 
-using namespace UserCommon_098765432_123456789;
+using namespace UserCommon_318835816_211314471;
 
 /**
  * @brief Builder class for constructing game test scenarios with fluent interface

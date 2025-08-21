@@ -2,7 +2,7 @@
 
 #include "game_object.h"
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 /**
  * @class Shell
@@ -33,4 +33,4 @@ class Shell : public GameObject {
       Point getNextPosition() const;
   };
 
-} // namespace UserCommon_098765432_123456789
+} // namespace UserCommon_318835816_211314471

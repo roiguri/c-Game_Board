@@ -18,7 +18,7 @@
 
 namespace GameManager_318835816_211314471 {
 
-using namespace UserCommon_098765432_123456789;
+using namespace UserCommon_318835816_211314471;
 
 MyGameManager_318835816_211314471::MyGameManager_318835816_211314471(bool verbose)
     : m_currentStep(0),

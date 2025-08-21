@@ -5,7 +5,7 @@
 
 #include "bonus/logger/logger_config.h"
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 bool LoggerConfig::configure(const CliParser& parser) { 
     bool enableLogging = parser.isEnableLogging();
@@ -74,4 +74,4 @@ Logger::Level LoggerConfig::stringToLevel(const std::string& levelStr) {
     return Logger::Level::INFO;
 }
 
-} // namespace UserCommon_098765432_123456789
+} // namespace UserCommon_318835816_211314471

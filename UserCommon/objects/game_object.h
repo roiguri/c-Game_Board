@@ -3,7 +3,7 @@
 #include "utils/direction.h"
 #include "utils/point.h"
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 /**
  * @class GameObject
@@ -90,4 +90,4 @@ protected:
     bool m_destroyed;
 };
 
-} // namespace UserCommon_098765432_123456789
+} // namespace UserCommon_318835816_211314471

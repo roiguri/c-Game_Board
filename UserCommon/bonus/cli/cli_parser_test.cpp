@@ -8,7 +8,7 @@
 
 #include "bonus/cli/cli_parser.h"
 
-using namespace UserCommon_098765432_123456789;
+using namespace UserCommon_318835816_211314471;
 
 namespace { // Anonymous namespace for helpers
     void createArgs(const std::vector<std::string>& arg_strs, int& argc, char**& argv) {

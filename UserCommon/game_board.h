@@ -6,7 +6,7 @@
 
 #include "utils/point.h"
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 /**
  * @class GameBoard
@@ -201,4 +201,4 @@ private:
     size_t m_height;
 };
 
-} // namespace UserCommon_098765432_123456789
+} // namespace UserCommon_318835816_211314471

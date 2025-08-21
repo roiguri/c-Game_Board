@@ -14,7 +14,7 @@
 
 namespace TestGameManager_Predictable_098765432_123456789 {
 
-using namespace UserCommon_098765432_123456789;
+using namespace UserCommon_318835816_211314471;
 
 PredictableGameManager::PredictableGameManager(bool verbose) 
     : m_verbose(verbose) {

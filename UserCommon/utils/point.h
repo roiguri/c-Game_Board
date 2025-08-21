@@ -4,7 +4,7 @@
 #include <ostream>
 #include <string>
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 /**
  * @class Point
@@ -63,4 +63,4 @@ private:
   int m_y;
 };
 
-} // namespace UserCommon_098765432_123456789
+} // namespace UserCommon_318835816_211314471

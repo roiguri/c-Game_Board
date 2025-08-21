@@ -2,7 +2,7 @@
 
 #include "midpoint.h"
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 MidPoint::MidPoint() : Point(), m_halfX(false), m_halfY(false) {}
 
@@ -139,4 +139,4 @@ std::ostream& operator<<(std::ostream& os, const MidPoint& mp) {
     return os;
 }
 
-} // namespace UserCommon_098765432_123456789
+} // namespace UserCommon_318835816_211314471

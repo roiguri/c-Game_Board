@@ -1,7 +1,7 @@
 #include "tank.h"
 #include "utils/direction.h"
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 int Tank::INITIAL_SHELLS = 16;
 void Tank::setInitialShells(int shells) {
@@ -150,4 +150,4 @@ void Tank::doNothing() {
   isInBackwardMovement();
 }
 
-} // namespace UserCommon_098765432_123456789
+} // namespace UserCommon_318835816_211314471

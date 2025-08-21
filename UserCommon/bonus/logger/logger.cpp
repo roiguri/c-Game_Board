@@ -6,7 +6,7 @@
 
 #include "bonus/logger/logger.h"
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 Logger::Logger()
     : m_level(Level::INFO),
@@ -178,4 +178,4 @@ bool Logger::isInitializedAndEnabled() const {
     return m_initialized && m_enabled;
 }
 
-} // namespace UserCommon_098765432_123456789
+} // namespace UserCommon_318835816_211314471

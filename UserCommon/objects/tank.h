@@ -2,7 +2,7 @@
 
 #include "game_object.h"
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 /**
  * @class Tank
@@ -186,4 +186,4 @@ private:
     Point m_backwardPosition;
 };
 
-} // namespace UserCommon_098765432_123456789
+} // namespace UserCommon_318835816_211314471

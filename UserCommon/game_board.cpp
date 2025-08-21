@@ -3,7 +3,7 @@
 
 #include "game_board.h"
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 GameBoard::GameBoard() : m_width(0), m_height(0) {}
 
@@ -230,4 +230,4 @@ int GameBoard::stepDistance(const Point& a, const Point& b, size_t width, size_t
     return std::max(dx, dy);
 }
 
-} // namespace UserCommon_098765432_123456789
+} // namespace UserCommon_318835816_211314471

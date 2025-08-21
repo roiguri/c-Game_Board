@@ -8,7 +8,7 @@
 #include "utils/point.h"
 #include "SatelliteView.h"
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 /**
  * @class SatelliteViewImpl
@@ -69,4 +69,4 @@ private:
     size_t m_height;
 };
 
-} // namespace UserCommon_098765432_123456789 
+} // namespace UserCommon_318835816_211314471 

@@ -3,7 +3,7 @@
 #include "utils/point.h"
 #include "utils/direction.h"
 
-using namespace UserCommon_098765432_123456789;
+using namespace UserCommon_318835816_211314471;
 
 class ShellTest : public ::testing::Test {
   protected:

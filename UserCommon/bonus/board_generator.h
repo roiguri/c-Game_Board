@@ -7,7 +7,7 @@
 
 #include "game_board.h"
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 /**
  * @brief Configuration for board generation
@@ -128,4 +128,4 @@ private:
     void placeTank(int x, int y, int player);
 };
 
-} // namespace UserCommon_098765432_123456789
+} // namespace UserCommon_318835816_211314471

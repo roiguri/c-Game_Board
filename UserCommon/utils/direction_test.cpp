@@ -2,7 +2,7 @@
 #include "utils/direction.h"
 #include "utils/point.h"
 
-using namespace UserCommon_098765432_123456789;
+using namespace UserCommon_318835816_211314471;
 
 TEST(DirectionTest, DirectionToString) {
     EXPECT_EQ(directionToString(Direction::Up), "Up");

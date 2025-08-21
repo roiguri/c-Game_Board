@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 class CliParser {
 public:
@@ -53,4 +53,4 @@ private:
     bool logLevelSet_ = false;
 };
 
-} // namespace UserCommon_098765432_123456789
+} // namespace UserCommon_318835816_211314471

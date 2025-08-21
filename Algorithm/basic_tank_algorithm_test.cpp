@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 
-using namespace UserCommon_098765432_123456789;
+using namespace UserCommon_318835816_211314471;
 using ::testing::UnorderedElementsAreArray;
 
 namespace Algorithm_318835816_211314471 {

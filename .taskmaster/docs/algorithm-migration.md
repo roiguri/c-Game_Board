@@ -20,7 +20,7 @@ Adapt the existing OffensivePlayer and OffensiveTankAlgorithm classes to meet As
 #include "Algorithm/players/basic/basic_player.h"
 #include "Algorithm/players/offensive/offensive_battle_info.h"
 
-using namespace UserCommon_098765432_123456789;
+using namespace UserCommon_318835816_211314471;
 
 namespace Algorithm_098765432_123456789 {
 
@@ -88,7 +88,7 @@ protected:
 
 #include "Algorithm/players/offensive/offensive_player.h"
 
-using namespace UserCommon_098765432_123456789;
+using namespace UserCommon_318835816_211314471;
 
 namespace Algorithm_098765432_123456789 {
 
@@ -177,7 +177,7 @@ REGISTER_PLAYER(Player_098765432_123456789_A);
 #include "Algorithm/players/basic/basic_tank_algorithm.h"
 #include "Algorithm/players/offensive/offensive_battle_info.h"
 
-using namespace UserCommon_098765432_123456789;
+using namespace UserCommon_318835816_211314471;
 
 namespace Algorithm_098765432_123456789 {
 
@@ -259,7 +259,7 @@ private:
 
 #include "Algorithm/players/offensive/offensive_tank_algorithm.h"
 
-using namespace UserCommon_098765432_123456789;
+using namespace UserCommon_318835816_211314471;
 
 namespace Algorithm_098765432_123456789 {
 
@@ -367,7 +367,7 @@ make
 - **BasicPlayer and BasicTankAlgorithm**: Keep original names (they're helper classes)
 - **OffensiveBattleInfo**: Keep original name (helper class)
 - **Only rename**: Final classes that get registered
-- **UserCommon namespace**: Use `using namespace UserCommon_098765432_123456789;`
+- **UserCommon namespace**: Use `using namespace UserCommon_318835816_211314471;`
 - **Registration**: Must be at global scope, outside any namespace
 
 ## **Total Time Estimate: ~40 minutes**

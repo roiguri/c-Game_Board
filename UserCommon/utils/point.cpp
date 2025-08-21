@@ -2,7 +2,7 @@
 
 #include "point.h"
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 Point::Point() : m_x(0), m_y(0) {}
 Point::Point(int x, int y) : m_x(x), m_y(y) {}
@@ -43,4 +43,4 @@ double Point::euclideanDistance(const Point& a, const Point& b) {
   return std::sqrt(std::pow(a.m_x - b.m_x, 2) + std::pow(a.m_y - b.m_y, 2));
 }
 
-} // namespace UserCommon_098765432_123456789
+} // namespace UserCommon_318835816_211314471

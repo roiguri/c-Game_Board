@@ -7,7 +7,7 @@
 
 #include "bonus/board_generator.h"
 
-using namespace UserCommon_098765432_123456789;
+using namespace UserCommon_318835816_211314471;
 
 class BoardGeneratorTest : public ::testing::Test {
 protected:

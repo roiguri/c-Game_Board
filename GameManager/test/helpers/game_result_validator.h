@@ -11,7 +11,7 @@
 
 namespace GameManager_318835816_211314471 {
 
-using namespace UserCommon_098765432_123456789;
+using namespace UserCommon_318835816_211314471;
 
 /**
  * @brief Helper class for validating GameResult structures in tests

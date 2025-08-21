@@ -127,9 +127,9 @@ Root CMake
 ```
 
 ### Namespace Strategy
-- **UserCommon code**: Must remain in `UserCommon_098765432_123456789` namespace
+- **UserCommon code**: Must remain in `UserCommon_318835816_211314471` namespace
 - **GameManager code**: Must be in `GameManager_098765432_123456789` namespace
-- **GameManager usage**: Use `using namespace UserCommon_098765432_123456789;` or explicit using declarations
+- **GameManager usage**: Use `using namespace UserCommon_318835816_211314471;` or explicit using declarations
 
 ### Include Path Conventions
 ```cpp

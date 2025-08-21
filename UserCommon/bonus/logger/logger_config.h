@@ -5,7 +5,7 @@
 #include "bonus/cli/cli_parser.h"
 #include "bonus/logger/logger.h"
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 /**
  * @brief Simple logger configuration from command line
@@ -27,4 +27,4 @@ private:
     static Logger::Level stringToLevel(const std::string& levelStr);
 };
 
-} // namespace UserCommon_098765432_123456789
+} // namespace UserCommon_318835816_211314471

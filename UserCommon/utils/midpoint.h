@@ -3,7 +3,7 @@
 
 #include "point.h"
 
-namespace UserCommon_098765432_123456789 {
+namespace UserCommon_318835816_211314471 {
 
 /**
  * @class MidPoint
@@ -150,4 +150,4 @@ private:
     bool m_halfY;
 };
 
-} // namespace UserCommon_098765432_123456789
+} // namespace UserCommon_318835816_211314471

@@ -18,7 +18,7 @@
 
 namespace GameManager_318835816_211314471 { 
 
-using namespace UserCommon_098765432_123456789;
+using namespace UserCommon_318835816_211314471;
 
 // Test fixture for GameManager
 class GameManagerTest : public ::testing::Test {
