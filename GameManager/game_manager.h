@@ -33,26 +33,26 @@ using namespace UserCommon_098765432_123456789;
  * - Handling movement, collisions, and game rules
  * - Tracking game history and saving results
  */
-class GameManager : public AbstractGameManager {
+class MyGameManager_318835816_211314471 : public AbstractGameManager {
 public:
     /** Default number of steps allowed when tanks run out of shells */
     static constexpr int DEFAULT_NO_SHELLS_STEPS = 40;
 
     /**
-     * @brief Construct a new Game Manager object with default state
+     * @brief Construct a new MyGameManager_318835816_211314471 object with default state
      * @param verbose Whether to generate output files (default: false)
      */
-    GameManager(bool verbose = false);
+    MyGameManager_318835816_211314471(bool verbose = false);
     
     /**
-     * @brief Destroy the Game Manager object and free resources
+     * @brief Destroy the MyGameManager_318835816_211314471 object and free resources
      */
-    ~GameManager();
+    ~MyGameManager_318835816_211314471();
 
-    GameManager(const GameManager&) = delete;
-    GameManager& operator=(const GameManager&) = delete;
-    GameManager(GameManager&&) = default;
-    GameManager& operator=(GameManager&&) = default;
+    MyGameManager_318835816_211314471(const MyGameManager_318835816_211314471&) = delete;
+    MyGameManager_318835816_211314471& operator=(const MyGameManager_318835816_211314471&) = delete;
+    MyGameManager_318835816_211314471(MyGameManager_318835816_211314471&&) = default;
+    MyGameManager_318835816_211314471& operator=(MyGameManager_318835816_211314471&&) = default;
 
     /**
      * @brief Initialize the game with SatelliteView input and provided players

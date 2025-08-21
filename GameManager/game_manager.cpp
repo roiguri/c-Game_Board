@@ -20,7 +20,7 @@ namespace GameManager_098765432_123456789 {
 
 using namespace UserCommon_098765432_123456789;
 
-GameManager::GameManager(bool verbose)
+MyGameManager_318835816_211314471::MyGameManager_318835816_211314471(bool verbose)
     : m_currentStep(0),
       m_gameOver(false),
       m_remaining_steps(DEFAULT_NO_SHELLS_STEPS),
@@ -36,13 +36,13 @@ GameManager::GameManager(bool verbose)
 }
 
 
-GameManager::~GameManager() {
+MyGameManager_318835816_211314471::~MyGameManager_318835816_211314471() {
     #ifdef ENABLE_VISUALIZATION
     m_visualizationManager.reset();
     #endif
 }
 
-bool GameManager::readBoard(const SatelliteView& satellite_view, size_t map_width, size_t map_height, 
+bool MyGameManager_318835816_211314471::readBoard(const SatelliteView& satellite_view, size_t map_width, size_t map_height, 
                            size_t max_steps, size_t num_shells,
                            TankAlgorithmFactory player1_factory, TankAlgorithmFactory player2_factory) {
     std::vector<std::string> boardLines = 
@@ -69,7 +69,7 @@ bool GameManager::readBoard(const SatelliteView& satellite_view, size_t map_widt
     return true;
 }
 
-GameResult GameManager::run(
+GameResult MyGameManager_318835816_211314471::run(
         size_t map_width, size_t map_height,
         const SatelliteView& map, // <= assume it is a snapshot, NOT updated
         string map_name,
@@ -168,7 +168,7 @@ GameResult GameManager::run(
     return std::move(m_finalGameResult);
 }
 
-bool GameManager::saveResults() {
+bool MyGameManager_318835816_211314471::saveResults() {
     std::string player1Name = cleanFilename(m_player1Name);
     std::string player2Name = cleanFilename(m_player2Name);
     
@@ -207,7 +207,7 @@ bool GameManager::saveResults() {
     return true;
 }
 
-void GameManager::processStep() {
+void MyGameManager_318835816_211314471::processStep() {
   m_currentBoard = m_board;
   m_currentTanks = m_tanks;
   m_currentShells = m_shells;
@@ -276,7 +276,7 @@ void GameManager::processStep() {
   #endif
 }
 
-void GameManager::applyAction(TankWithAlgorithm& controller) {
+void MyGameManager_318835816_211314471::applyAction(TankWithAlgorithm& controller) {
   if (controller.tank.isDestroyed()) {
       return;
   }
@@ -368,7 +368,7 @@ void GameManager::applyAction(TankWithAlgorithm& controller) {
   controller.actionSuccess = actionResult;
 }
 
-void GameManager::moveShellsOnce() {
+void MyGameManager_318835816_211314471::moveShellsOnce() {
   for (auto& shell : m_shells) {
       if (shell.isDestroyed()) {
           continue;
@@ -382,7 +382,7 @@ void GameManager::moveShellsOnce() {
   }
 }
 
-bool GameManager::checkGameOver() {
+bool MyGameManager_318835816_211314471::checkGameOver() {
     std::set<int> playerIds;
     // Count alive tanks per player
     std::unordered_map<int, int> playersAlive;
@@ -445,7 +445,7 @@ bool GameManager::checkGameOver() {
     return false;
 }
 
-void GameManager::populateGameResult(int winner, GameResult::Reason reason, const std::vector<size_t>& remainingTanks) {
+void MyGameManager_318835816_211314471::populateGameResult(int winner, GameResult::Reason reason, const std::vector<size_t>& remainingTanks) {
     m_finalGameResult.winner = winner;
     m_finalGameResult.reason = reason;
     m_finalGameResult.remaining_tanks = remainingTanks;
@@ -453,7 +453,7 @@ void GameManager::populateGameResult(int winner, GameResult::Reason reason, cons
     m_finalGameResult.gameState = std::make_unique<SatelliteViewImpl>(m_board, m_tanks, m_shells);
 }
 
-std::string GameManager::logAction() {
+std::string MyGameManager_318835816_211314471::logAction() {
     std::vector<std::string> stepActions;
     for (auto& controller : m_tankControllers) {
         std::string actionStr;
@@ -494,7 +494,7 @@ std::string GameManager::logAction() {
     return turnLog;
 }
 
-std::string GameManager::actionToString(ActionRequest action) {
+std::string MyGameManager_318835816_211314471::actionToString(ActionRequest action) {
     switch (action) {
         case ActionRequest::MoveForward: return "MoveForward";
         case ActionRequest::MoveBackward: return "MoveBackward";
@@ -509,7 +509,7 @@ std::string GameManager::actionToString(ActionRequest action) {
     }
 }
 
-Direction GameManager::getInitialDirection(int playerId) {
+Direction MyGameManager_318835816_211314471::getInitialDirection(int playerId) {
     // Only support 2 players
     if (playerId == 1) {
         return Direction::Left;
@@ -519,7 +519,7 @@ Direction GameManager::getInitialDirection(int playerId) {
     return Direction::Left; // Default fallback
 }
 
-void GameManager::createTanks(const std::vector<std::pair<int, Point>>& tankPositions) {
+void MyGameManager_318835816_211314471::createTanks(const std::vector<std::pair<int, Point>>& tankPositions) {
     LOG_INFO("Creating tanks");
     m_tanks.clear();
     for (const auto& [playerId, position] : tankPositions) {
@@ -529,7 +529,7 @@ void GameManager::createTanks(const std::vector<std::pair<int, Point>>& tankPosi
     LOG_INFO("Tanks created");
 }
 
-void GameManager::removeDestroyedShells() {
+void MyGameManager_318835816_211314471::removeDestroyedShells() {
   m_shells.erase(
       std::remove_if(m_shells.begin(), m_shells.end(),
           [](const Shell& shell) { return shell.isDestroyed(); }),
@@ -537,7 +537,7 @@ void GameManager::removeDestroyedShells() {
   );
 }
 
-void GameManager::createTankAlgorithms(TankAlgorithmFactory player1_factory, TankAlgorithmFactory player2_factory) {
+void MyGameManager_318835816_211314471::createTankAlgorithms(TankAlgorithmFactory player1_factory, TankAlgorithmFactory player2_factory) {
     LOG_INFO("Creating tank algorithms");
     // Map from playerId to current tank index for that player
     std::unordered_map<int, int> playerTankCounts;
@@ -558,7 +558,7 @@ void GameManager::createTankAlgorithms(TankAlgorithmFactory player1_factory, Tan
     LOG_INFO("Tank algorithms created");
 }
 
-std::string GameManager::generateOutputFilePath(const std::string& player1Name, const std::string& player2Name) {
+std::string MyGameManager_318835816_211314471::generateOutputFilePath(const std::string& player1Name, const std::string& player2Name) {
     using namespace std::chrono;
     auto now = system_clock::now();
     duration<double> ts = now.time_since_epoch();
@@ -572,7 +572,7 @@ std::string GameManager::generateOutputFilePath(const std::string& player1Name, 
     return "game_" + player1Name + "_vs_" + player2Name + "_" + cleanMapName + "_" + uniqueId + ".txt";
 }
 
-std::string GameManager::cleanFilename(const std::string& name) {
+std::string MyGameManager_318835816_211314471::cleanFilename(const std::string& name) {
     std::string cleaned = name;
     
     // Replace characters that are invalid in filenames with underscores
@@ -586,14 +586,14 @@ std::string GameManager::cleanFilename(const std::string& name) {
     return cleaned;
 }
 
-std::string GameManager::extractBaseName(const std::string& fullPath) {
+std::string MyGameManager_318835816_211314471::extractBaseName(const std::string& fullPath) {
     std::filesystem::path path(fullPath);
     std::string fileName = path.filename().string();
     
     return cleanFilename(fileName);
 }
 
-std::vector<std::string> GameManager::readSatelliteView(const SatelliteView& satellite_view, 
+std::vector<std::string> MyGameManager_318835816_211314471::readSatelliteView(const SatelliteView& satellite_view, 
                                                        size_t map_width, 
                                                        size_t map_height) const {
     std::vector<std::string> boardLines;
@@ -616,8 +616,7 @@ std::vector<std::string> GameManager::readSatelliteView(const SatelliteView& sat
 
 } // namespace GameManager_098765432_123456789
 
-// TODO: change game manager class name (disabled for testing)
 #ifndef DISABLE_STATIC_REGISTRATION
 using namespace GameManager_098765432_123456789;
-REGISTER_GAME_MANAGER(GameManager);
+REGISTER_GAME_MANAGER(MyGameManager_318835816_211314471);
 #endif

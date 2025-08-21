@@ -23,7 +23,7 @@ using namespace UserCommon_098765432_123456789;
 // Test fixture for GameManager
 class GameManagerTest : public ::testing::Test {
 protected:
-    std::unique_ptr<GameManager> manager;
+    std::unique_ptr<MyGameManager_318835816_211314471> manager;
     std::unique_ptr<FileTestHelper> fileHelper;
 
     // ==================== GAMEMANAGER MEMBER ACCESS (SETTERS/GETTERS) ====================
@@ -34,7 +34,7 @@ protected:
     std::vector<Tank>& GetTanks() {
         return manager->m_tanks;
     }
-    std::vector<GameManager::TankWithAlgorithm>& GetTankControllers() {
+    std::vector<MyGameManager_318835816_211314471::TankWithAlgorithm>& GetTankControllers() {
         return manager->m_tankControllers;
     }
     GameBoard& GetBoard() {
@@ -79,7 +79,7 @@ protected:
         }
         manager->createTankAlgorithms(factory1, factory2);
     }
-    void ApplyAction(GameManager::TankWithAlgorithm& controller) {
+    void ApplyAction(MyGameManager_318835816_211314471::TankWithAlgorithm& controller) {
         manager->applyAction(controller);
     }
     void MoveShellsOnce() {
@@ -121,7 +121,7 @@ protected:
     }
 
     void SetUp() override {
-        manager = std::make_unique<GameManager>(/*verbose=*/false);
+        manager = std::make_unique<MyGameManager_318835816_211314471>(/*verbose=*/false);
         fileHelper = std::make_unique<FileTestHelper>();
         // Initialize the board to a 5x5 empty board
         GetBoard() = GameBoard(5, 5);
@@ -209,12 +209,12 @@ TEST_F(GameManagerTest, ReadSatelliteViewZeroDimensions) {
 // ===================================================================== //
 
 TEST_F(GameManagerTest, Constructor_VerboseFlagTrue) {
-    manager = std::make_unique<GameManager>(true);
+    manager = std::make_unique<MyGameManager_318835816_211314471>(true);
     EXPECT_TRUE(GetVerbose());
 }
 
 TEST_F(GameManagerTest, Constructor_VerboseFlagFalse) {
-    manager = std::make_unique<GameManager>(false);
+    manager = std::make_unique<MyGameManager_318835816_211314471>(false);
     EXPECT_FALSE(GetVerbose());
 }
 
@@ -867,7 +867,7 @@ TEST_F(GameManagerTest, CheckGameOver_TieZeroShellsForExactly40Steps) {
     
     // Assert: Game should end with tie message mentioning exactly 40 steps
     EXPECT_TRUE(over);
-    EXPECT_EQ(GetGameResult(), "Tie, both players have zero shells for " + std::to_string(GameManager::DEFAULT_NO_SHELLS_STEPS) + " steps");
+    EXPECT_EQ(GetGameResult(), "Tie, both players have zero shells for " + std::to_string(MyGameManager_318835816_211314471::DEFAULT_NO_SHELLS_STEPS) + " steps");
 }
 
 TEST_F(GameManagerTest, CheckGameOver_ZeroShellsButStillRemaining39Steps) {
@@ -1396,7 +1396,7 @@ TEST_F(GameManagerTest, Run_TieAfter40StepsWithZeroShells_Integration) {
 
 TEST_F(GameManagerTest, Run_VerboseFalse_NoFileOutput) {
     // Arrange: Create verbose=false manager
-    manager = std::make_unique<GameManager>(false);
+    manager = std::make_unique<MyGameManager_318835816_211314471>(false);
     EXPECT_FALSE(GetVerbose());
     
     auto [satelliteView, player1, player2, width, height, maxSteps, numShells] = 
@@ -1430,7 +1430,7 @@ TEST_F(GameManagerTest, Run_VerboseFalse_NoFileOutput) {
 
 TEST_F(GameManagerTest, Run_VerboseTrue_CreatesFileOutput) {
     // Arrange: Create verbose=true manager  
-    manager = std::make_unique<GameManager>(true);
+    manager = std::make_unique<MyGameManager_318835816_211314471>(true);
     EXPECT_TRUE(GetVerbose());
     
     auto [satelliteView, player1, player2, width, height, maxSteps, numShells] = 

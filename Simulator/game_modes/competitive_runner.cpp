@@ -189,7 +189,6 @@ bool CompetitiveRunner::loadMapsImpl(const CompetitiveParameters& params) {
     }
 }
 
-// TODO: consider storing parameters safely instead of passing as arguments in all methods
 GameResult CompetitiveRunner::executeGameLogic(const BaseParameters& params) {
     const CompetitiveParameters* competitiveParams = dynamic_cast<const CompetitiveParameters*>(&params);
     

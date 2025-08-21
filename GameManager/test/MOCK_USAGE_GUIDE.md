@@ -649,7 +649,7 @@ TEST_F(InterfaceComplianceTest, CompleteScenarioWithGameObjectUtilities) {
 class MyGameManagerTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        gameManager = std::make_unique<GameManager>(false);
+        gameManager = std::make_unique<MyGameManager_318835816_211314471>(false);
         MockFactoryConfigurer::resetAll(); // Always reset factory state
     }
 
@@ -657,7 +657,7 @@ protected:
         MockFactoryConfigurer::resetAll(); // Clean up after test
     }
 
-    std::unique_ptr<GameManager> gameManager;
+    std::unique_ptr<MyGameManager_318835816_211314471> gameManager;
 };
 ```
 
