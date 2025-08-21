@@ -68,6 +68,10 @@ list(REMOVE_ITEM USERCOMMON_SOURCES ${VIZ_SOURCES})
 file(GLOB_RECURSE VIZ_TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon/bonus/visualization/*_test.cpp")
 list(REMOVE_ITEM USERCOMMON_TEST_SOURCES ${VIZ_TEST_SOURCES})
 
+# Remove ui_server sources (they have their own build target)
+file(GLOB_RECURSE UI_SERVER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/UserCommon/bonus/ui_server/*.cpp")
+list(REMOVE_ITEM USERCOMMON_SOURCES ${UI_SERVER_SOURCES})
+
 # Create UserCommon static library
 add_library(UserCommon STATIC ${USERCOMMON_SOURCES})
 
@@ -119,7 +123,7 @@ add_subdirectory(Simulator)
 
 # Add UI server subdirectory (only when ENABLE_UI is ON)
 if(ENABLE_UI)
-    add_subdirectory(ui_server)
+    add_subdirectory(UserCommon/bonus/ui_server)
 endif()
 
 # Global convenience targets

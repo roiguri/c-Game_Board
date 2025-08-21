@@ -587,7 +587,7 @@ class SimulatorUI {
         
         try {
             // Convert relative path to server-accessible path
-            const serverPath = mapPath.replace('../ui_server/', '');
+            const serverPath = mapPath.replace('../UserCommon/bonus/ui_server/', '');
             const response = await fetch(`/${serverPath}`);
             const mapContent = await response.text();
             

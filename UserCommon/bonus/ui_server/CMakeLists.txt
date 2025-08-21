@@ -15,19 +15,21 @@ set_target_properties(tank_simulator_ui PROPERTIES
 
 # Set output directory
 set_target_properties(tank_simulator_ui PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../build"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build"
 )
 
 # Include directories
 target_include_directories(tank_simulator_ui PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/../common"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../third_party"
+    "${CMAKE_SOURCE_DIR}/common"
+    "${CMAKE_SOURCE_DIR}/"
+    "${CMAKE_SOURCE_DIR}/third_party"
+    "${CMAKE_SOURCE_DIR}/UserCommon"
 )
 
 # Link required libraries
 target_link_libraries(tank_simulator_ui PRIVATE
     httplib::httplib
+    UserCommon
 )
 
 # Add compiler flags
