@@ -14,48 +14,6 @@ std::vector<std::string> FileEnumerator::enumerateMapFiles(const std::string& di
     return enumerateFiles(directory, ".txt", true);
 }
 
-FileEnumerator::FileInfo FileEnumerator::validateFile(const std::string& filePath) {
-    FileInfo info(filePath);
-    
-    try {
-        if (filePath.empty()) {
-            info.error = "File path is empty";
-            return info;
-        }
-        
-        std::filesystem::path fsPath(filePath);
-        
-        if (!std::filesystem::exists(fsPath)) {
-            info.error = "File does not exist: " + filePath;
-            return info;
-        }
-        
-        if (!std::filesystem::is_regular_file(fsPath)) {
-            info.error = "Path is not a regular file: " + filePath;
-            return info;
-        }
-        
-        // TODO: consider how to handle file validation
-        // Check if file is readable by attempting to get file size
-        std::error_code ec;
-        [[maybe_unused]] auto fileSize = std::filesystem::file_size(fsPath, ec);
-        if (ec) {
-            info.error = "Cannot access file (permission denied?): " + filePath;
-            return info;
-        }
-        
-        info.isValid = true;
-        info.error.clear();
-        
-    } catch (const std::filesystem::filesystem_error& e) {
-        info.error = "Filesystem error validating file " + filePath + ": " + e.what();
-    } catch (const std::exception& e) {
-        info.error = "Exception validating file " + filePath + ": " + e.what();
-    }
-    
-    return info;
-}
-
 bool FileEnumerator::isValidDirectory(const std::string& directory) {
     try {
         if (directory.empty()) {

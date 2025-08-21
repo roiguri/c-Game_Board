@@ -89,45 +89,6 @@ TEST_F(FileEnumeratorTest, EnumerateMapFiles_ValidDirectory) {
     EXPECT_TRUE(std::is_sorted(mapFiles.begin(), mapFiles.end()));
 }
 
-TEST_F(FileEnumeratorTest, ValidateFile_ValidFile) {
-    std::string testFile = testDir + "/lib1.so";
-    auto fileInfo = FileEnumerator::validateFile(testFile);
-    
-    EXPECT_TRUE(fileInfo.isValid);
-    EXPECT_EQ(fileInfo.path, testFile);
-    EXPECT_EQ(fileInfo.name, "lib1");
-    EXPECT_EQ(fileInfo.extension, ".so");
-    EXPECT_TRUE(fileInfo.error.empty());
-}
-
-TEST_F(FileEnumeratorTest, ValidateFile_NonexistentFile) {
-    auto fileInfo = FileEnumerator::validateFile("nonexistent.so");
-    
-    EXPECT_FALSE(fileInfo.isValid);
-    EXPECT_EQ(fileInfo.path, "nonexistent.so");
-    EXPECT_EQ(fileInfo.name, "nonexistent");
-    EXPECT_EQ(fileInfo.extension, ".so");
-    EXPECT_FALSE(fileInfo.error.empty());
-}
-
-TEST_F(FileEnumeratorTest, ValidateFile_EmptyPath) {
-    auto fileInfo = FileEnumerator::validateFile("");
-    
-    EXPECT_FALSE(fileInfo.isValid);
-    EXPECT_TRUE(fileInfo.path.empty());
-    EXPECT_TRUE(fileInfo.name.empty());
-    EXPECT_TRUE(fileInfo.extension.empty());
-    EXPECT_FALSE(fileInfo.error.empty());
-}
-
-TEST_F(FileEnumeratorTest, ValidateFile_DirectoryAsFile) {
-    auto fileInfo = FileEnumerator::validateFile(testDir);
-    
-    EXPECT_FALSE(fileInfo.isValid);
-    EXPECT_EQ(fileInfo.path, testDir);
-    EXPECT_FALSE(fileInfo.error.empty());
-}
-
 TEST_F(FileEnumeratorTest, IsValidDirectory_ValidDirectory) {
     EXPECT_TRUE(FileEnumerator::isValidDirectory(testDir));
     EXPECT_TRUE(FileEnumerator::getLastError().empty());
@@ -160,22 +121,6 @@ TEST_F(FileEnumeratorTest, ErrorHandling_ThreadLocal) {
     EXPECT_FALSE(error1.empty());
     EXPECT_FALSE(error2.empty());
     EXPECT_NE(error1, error2);
-}
-
-TEST_F(FileEnumeratorTest, FileInfo_Constructor) {
-    // Test default constructor
-    FileEnumerator::FileInfo defaultInfo;
-    EXPECT_FALSE(defaultInfo.isValid);
-    EXPECT_TRUE(defaultInfo.path.empty());
-    EXPECT_TRUE(defaultInfo.name.empty());
-    EXPECT_TRUE(defaultInfo.extension.empty());
-    
-    // Test path constructor
-    FileEnumerator::FileInfo pathInfo("/path/to/file.so");
-    EXPECT_FALSE(pathInfo.isValid); // Not validated yet
-    EXPECT_EQ(pathInfo.path, "/path/to/file.so");
-    EXPECT_EQ(pathInfo.name, "file");
-    EXPECT_EQ(pathInfo.extension, ".so");
 }
 
 TEST_F(FileEnumeratorTest, EnumerateFiles_DoesNotIncludeNestedDirectories) {

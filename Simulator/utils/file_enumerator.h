@@ -10,26 +10,6 @@
 class FileEnumerator {
 public:
     /**
-     * @brief Structure containing file validation information
-     */
-    struct FileInfo {
-        std::string path;
-        std::string name;
-        std::string extension;
-        bool isValid;
-        std::string error;
-        
-        FileInfo() : isValid(false) {}
-        FileInfo(const std::string& filePath) : path(filePath), isValid(false) {
-            if (!filePath.empty()) {
-                std::filesystem::path fsPath(filePath);
-                name = fsPath.stem().string();
-                extension = fsPath.extension().string();
-            }
-        }
-    };
-
-    /**
      * @brief Enumerate all .so (shared object) files in the specified directory
      * 
      * Scans the given directory for files with .so extension and returns them
@@ -50,17 +30,6 @@ public:
      * @return Vector of .txt map file paths sorted alphabetically
      */
     static std::vector<std::string> enumerateMapFiles(const std::string& directory);
-
-    /**
-     * @brief Validate a specific file and return detailed information
-     * 
-     * Checks if the file exists, is readable, and extracts metadata.
-     * Useful for validating individual files before processing.
-     * 
-     * @param filePath Path to file to validate
-     * @return FileInfo struct with validation results and metadata
-     */
-    static FileInfo validateFile(const std::string& filePath);
 
     /**
      * @brief Check if a directory path is valid and accessible
