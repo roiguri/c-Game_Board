@@ -135,7 +135,7 @@ class SimulatorUI {
 
     updateConfigurationSummary() {
         const config = this.buildConfiguration();
-        let command = `./bin/tanks_game -${config.mode}`;
+        let command = `../Simulator/simulator_318835816_211314471 -${config.mode}`;
 
         Object.entries(config).forEach(([key, value]) => {
             if (key !== 'mode' && key !== 'verbose' && value) {
@@ -761,7 +761,7 @@ class SimulatorUI {
             const line = lines[i].trim();
             
             // Extract configuration from command line
-            if (line.includes('tanks_game') && line.includes('-basic')) {
+            if (line.includes('simulator_318835816_211314471') && line.includes('-basic')) {
                 const configMatch = line.match(/game_map="([^"]*)".*game_manager="([^"]*)".*algorithm1="([^"]*)".*algorithm2="([^"]*)"/);
                 if (configMatch) {
                     result.config.gameMap = configMatch[1];

@@ -42,19 +42,19 @@ set(REGISTRATION_SOURCES
 )
 
 # Create main executable with registration files
-add_executable(tanks_game main.cpp ${REGISTRATION_SOURCES})
+add_executable(simulator_318835816_211314471 main.cpp ${REGISTRATION_SOURCES})
 
 # Set executable properties
-set_target_properties(tanks_game PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build/bin"
+set_target_properties(simulator_318835816_211314471 PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Simulator"
 )
 
 # Link main executable with Simulator library and enable dynamic symbol export
-target_link_libraries(tanks_game PRIVATE Simulator_lib pthread)
-target_link_options(tanks_game PRIVATE -rdynamic)
+target_link_libraries(simulator_318835816_211314471 PRIVATE Simulator_lib pthread)
+target_link_options(simulator_318835816_211314471 PRIVATE -rdynamic)
 
 # Create alias target for convenience (using custom target since ALIAS doesn't work with custom targets)
-add_custom_target(simulator DEPENDS Simulator_lib tanks_game)
+add_custom_target(simulator DEPENDS Simulator_lib simulator_318835816_211314471)
 
 # Testing configuration
 if(ENABLE_TESTING)

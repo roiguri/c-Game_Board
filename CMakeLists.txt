@@ -125,12 +125,12 @@ endif()
 # Global convenience targets
 if(ENABLE_UI)
     add_custom_target(all_projects
-        DEPENDS Algorithm_098765432_123456789 gamemanager simulator tank_simulator_ui
+        DEPENDS Algorithm_318835816_211314471 gamemanager simulator tank_simulator_ui
         COMMENT "Building all project libraries and executables (including UI)"
     )
 else()
     add_custom_target(all_projects
-        DEPENDS Algorithm_098765432_123456789 gamemanager simulator
+        DEPENDS Algorithm_318835816_211314471 gamemanager simulator
         COMMENT "Building all project libraries and executables"
     )
 endif()

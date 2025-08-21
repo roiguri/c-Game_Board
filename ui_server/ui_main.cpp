@@ -54,7 +54,7 @@ public:
     }
 
     static std::vector<std::string> buildCommandArgs(const json& config) {
-        std::vector<std::string> args = {"./bin/tanks_game"};
+        std::vector<std::string> args = {"../Simulator/simulator_318835816_211314471"};
         
         std::string mode = config["mode"];
         args.push_back("-" + mode);
@@ -330,9 +330,9 @@ public:
                 if (config["mode"] == "basic") {
                     std::vector<std::string> missingFiles;
                     
-                    // Check tanks_game executable
-                    if (!std::filesystem::exists("./bin/tanks_game")) {
-                        missingFiles.push_back("tanks_game executable");
+                    // Check simulator executable
+                    if (!std::filesystem::exists("../Simulator/simulator_318835816_211314471")) {
+                        missingFiles.push_back("simulator_318835816_211314471 executable");
                     }
                     
                     // Check game files

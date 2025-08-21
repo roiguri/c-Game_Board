@@ -88,7 +88,7 @@ This plan breaks down the development into manageable milestones.
 1. **Implement Process Execution:** ✅  
    * ✅ In ui\_main.cpp, create the POST /api/simulate/run endpoint.  
    * ✅ Used simplified popen() approach instead of reproc for better stability - eliminated threading race conditions.  
-   * ✅ Hardcoded tanks_game command with proper -basic flag and library paths.  
+   * ✅ Hardcoded simulator_318835816_211314471 command with proper -basic flag and library paths.  
 2. **Implement Real-time Output Streaming:** ✅  
    * ✅ Created GET /api/output endpoint for polling-based output retrieval (more stable than SSE).  
    * ✅ Process execution captures both stdout and stderr with proper error handling.  
