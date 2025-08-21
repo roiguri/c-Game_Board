@@ -13,6 +13,10 @@
 #include "registration/GameManagerRegistrar.h"
 #include "registration/AlgorithmRegistrar.h"
 
+namespace {
+    constexpr int DEFAULT_NO_SHELLS_STEPS = 40;
+}
+
 ComparativeRunner::ComparativeRunner() : BaseGameMode() {
 }
 
@@ -429,25 +433,28 @@ void ComparativeRunner::printResultGroup(std::ostream& output, const std::vector
     }
     output << std::endl;
     
-    // TODO: make sure game result message is correct
-    if (representative->gameResult.winner == 0) {
-        output << "Tie";
-    } else {
-        output << "Player " << representative->gameResult.winner << " wins";
+    std::string gameResult;
+    const auto& result = representative->gameResult;
+    
+    if (result.reason == GameResult::ALL_TANKS_DEAD) {
+        if (result.winner == 0) {
+            gameResult = "Tie, both players have zero tanks";
+        } else {
+            size_t winnerTanks = result.remaining_tanks[result.winner - 1];
+            gameResult = "Player " + std::to_string(result.winner) + " won with " + std::to_string(winnerTanks) + " tanks still alive";
+        }
+    } else if (result.reason == GameResult::ZERO_SHELLS) {
+        gameResult = "Tie, both players have zero shells for " + std::to_string(DEFAULT_NO_SHELLS_STEPS) + " steps";
+    } else if (result.reason == GameResult::MAX_STEPS) {
+        // Get tank counts for both players
+        size_t player1Tanks = result.remaining_tanks.size() >= 1 ? result.remaining_tanks[0] : 0;
+        size_t player2Tanks = result.remaining_tanks.size() >= 2 ? result.remaining_tanks[1] : 0;
+        gameResult = "Tie, reached max steps = " + std::to_string(result.rounds) + 
+                    ", player 1 has " + std::to_string(player1Tanks) + 
+                    " tanks, player 2 has " + std::to_string(player2Tanks) + " tanks";
     }
-    output << " - ";
-    switch (representative->gameResult.reason) {
-        case GameResult::ALL_TANKS_DEAD:
-            output << "all tanks destroyed";
-            break;
-        case GameResult::MAX_STEPS:
-            output << "maximum steps reached";
-            break;
-        case GameResult::ZERO_SHELLS:
-            output << "no shells remaining";
-            break;
-    }
-    output << std::endl;
+    
+    output << gameResult << std::endl;
     
     output << representative->gameResult.rounds << std::endl;
     
@@ -459,7 +466,7 @@ void ComparativeRunner::printResultGroup(std::ostream& output, const std::vector
 
 std::string ComparativeRunner::gameStateToString(const SatelliteView& gameState, int rows, int cols) {
     std::string result;
-    result.reserve(rows * cols + rows); // Pre-allocate for efficiency
+    result.reserve(rows * cols + rows);
     
     for (int y = 0; y < rows; ++y) {
         for (int x = 0; x < cols; ++x) {
