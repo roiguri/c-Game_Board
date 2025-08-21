@@ -146,13 +146,6 @@ private:
     bool loadLibrariesImpl(const CompetitiveParameters& params);
     bool loadMapsImpl(const CompetitiveParameters& params);
     
-    /**
-     * Extract map name from file path for error reporting
-     * @param filePath Full path to map file
-     * @return Map name (filename without path)
-     */
-    std::string extractMapName(const std::string& filePath);
-    
     // Store parameters for later use in displayResults
     std::unique_ptr<CompetitiveParameters> m_currentParams;
 

@@ -110,7 +110,6 @@ std::string ErrorCollector::formatAlgorithmError(const std::string& algorithmPat
     return "[Error] Algorithm '" + extractFilename(algorithmPath) + "': " + error;
 }
 
-// TODO: test that filename extraction works
 std::string ErrorCollector::extractFilename(const std::string& filePath) const {
     size_t lastSlash = filePath.find_last_of("/\\");
     if (lastSlash != std::string::npos) {

@@ -108,7 +108,7 @@ bool CompetitiveRunner::loadLibrariesImpl(const CompetitiveParameters& params) {
                 // Create algorithm info for tracking
                 AlgorithmInfo info;
                 info.path = file;
-                info.name = std::filesystem::path(file).stem().string();
+                info.name = extractFileName(file);
                 info.loaded = true;
                 m_discoveredAlgorithms.push_back(std::move(info));
                 
@@ -261,7 +261,7 @@ void CompetitiveRunner::displayResults(const GameResult& /* result */) {
 CompetitiveRunner::MapInfo CompetitiveRunner::loadMapFile(const std::string& mapPath) {
     MapInfo info;
     info.path = mapPath;
-    info.name = std::filesystem::path(mapPath).stem().string();
+    info.name = extractFileName(mapPath);
     info.loaded = false;
     
     // Load map using FileSatelliteView validation
@@ -470,10 +470,9 @@ void CompetitiveRunner::generateOutput(const std::vector<AlgorithmScore>& scores
     
     // Write header according to instructions format
     *output << "game_maps_folder=" << params.gameMapsFolder << std::endl;
-    *output << "game_manager=" << params.gameManagerLib << std::endl;
+    *output << "game_manager=" << extractFileName(params.gameManagerLib) << std::endl;
     *output << std::endl; // Empty line after header
     
-    // TODO: make sure algorithm names are correct
     // Write sorted algorithm scores
     // Format: <algorithm name> <total score>
     for (const auto& score : scores) {
@@ -501,8 +500,4 @@ std::vector<CompetitiveRunner::AlgorithmScore> CompetitiveRunner::sortByScore(co
         });
     
     return sortedScores;
-}
-
-std::string CompetitiveRunner::extractMapName(const std::string& filePath) {
-    return std::filesystem::path(filePath).filename().string();
 }

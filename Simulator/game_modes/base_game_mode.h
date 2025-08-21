@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <filesystem>
 #include "common/GameResult.h"
 #include "utils/file_loader.h"
 #include "utils/library_manager.h"
@@ -174,6 +175,17 @@ protected:
      * @return True if content was written successfully
      */
     bool writeToFile(const std::string& filePath, const std::string& content, bool fallbackToConsole = true) const;
+
+    /**
+     * @brief Extract filename without path and extension
+     * 
+     * Provides consistent filename extraction across all game modes.
+     * Removes both directory path and file extension (e.g., "/path/file.so" -> "file").
+     * 
+     * @param filePath Full path to file
+     * @return Filename without path and extension (stem)
+     */
+    std::string extractFileName(const std::string& filePath) const;
 
     // Protected member variables accessible to subclasses
 

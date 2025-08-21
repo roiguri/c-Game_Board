@@ -83,3 +83,7 @@ GameResult BaseGameMode::createErrorResult() const {
 bool BaseGameMode::writeToFile(const std::string& filePath, const std::string& content, bool fallbackToConsole) const {
     return OutputGenerator::writeToFile(filePath, content, fallbackToConsole);
 }
+
+std::string BaseGameMode::extractFileName(const std::string& filePath) const {
+    return std::filesystem::path(filePath).stem().string();
+}

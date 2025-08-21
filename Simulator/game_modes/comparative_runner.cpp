@@ -342,10 +342,9 @@ void ComparativeRunner::generateOutput(const std::vector<ComparativeResult>& res
     
     std::ostream& output = useConsole ? std::cout : outFile;
     
-    // TODO: make sure algorithm names are correct
-    output << "game_map=" << params.mapFile << std::endl;
-    output << "algorithm1=" << params.algorithm1Lib << std::endl;
-    output << "algorithm2=" << params.algorithm2Lib << std::endl;
+    output << "game_map=" << extractFileName(params.mapFile) << std::endl;
+    output << "algorithm1=" << extractFileName(params.algorithm1Lib) << std::endl;
+    output << "algorithm2=" << extractFileName(params.algorithm2Lib) << std::endl;
     output << std::endl;
     
     // Group all GameManagers by identical results
@@ -422,11 +421,10 @@ std::vector<std::pair<std::vector<std::string>, const ComparativeRunner::Compara
 }
 
 void ComparativeRunner::printResultGroup(std::ostream& output, const std::vector<std::string>& gameManagerNames, const ComparativeResult* representative) {
-    // TODO: make sure algorithm names are correct
     bool first = true;
     for (const auto& name : gameManagerNames) {
         if (!first) output << ",";
-        output << name;
+        output << extractFileName(name);
         first = false;
     }
     output << std::endl;
