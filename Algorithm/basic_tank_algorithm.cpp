@@ -3,7 +3,6 @@
 
 #include "basic_tank_algorithm.h"
 #include "UserCommon/objects/tank.h"
-#include "UserCommon/bonus/logger/logger.h"
 #include "UserCommon/utils/direction.h"
 #include "UserCommon/utils/point.h"
 
@@ -47,13 +46,6 @@ ActionRequest BasicTankAlgorithm::getAction() {
     else if (canShootEnemy()) {
         action = ActionRequest::Shoot;
     }
-    
-    // Debug log with position, direction, and requested action
-    std::string debugInfo = "P" + std::to_string(m_playerId) + 
-                           "-T" + std::to_string(m_tankIndex) + 
-                           " @Tracked Before Update: (" + std::to_string(m_trackedPosition.getX()) + "," + std::to_string(m_trackedPosition.getY()) + ")" +
-                           "-" + directionToString(m_trackedDirection);
-    LOG_DEBUG(debugInfo);
     
     updateState(action);
     return action;

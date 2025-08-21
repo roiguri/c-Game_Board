@@ -13,7 +13,6 @@
 #include "collision_handler.h"
 #include "game_manager.h"
 #include "satellite_view_impl.h"
-#include "bonus/logger/logger.h"
 #include "common/GameManagerRegistration.h"
 
 namespace GameManager_318835816_211314471 {
@@ -118,11 +117,8 @@ GameResult MyGameManager_318835816_211314471::run(
         );
     }
     #endif
-
-    LOG_INFO("Starting game loop");
     
     while (!m_gameOver) {
-        LOG_DEBUG("Processing step " + std::to_string(m_currentStep));
         processStep();
         
         bool tanksOutOfShells = true;
@@ -144,8 +140,6 @@ GameResult MyGameManager_318835816_211314471::run(
         "Game ended after " + std::to_string(m_currentStep-1) + " steps"
     );
     m_gameLog.push_back("Result: " + m_gameResult);
-    LOG_INFO("Game ended after " + std::to_string(m_currentStep) + " steps");
-    LOG_INFO("Result: " + m_gameResult);
 
     #ifdef ENABLE_VISUALIZATION
     if (m_visualizationManager) {
@@ -196,12 +190,8 @@ bool MyGameManager_318835816_211314471::saveResults() {
         }
         visualizationPath += "_visualization";
         
-        if (m_visualizationManager->generateOutputs(visualizationPath)) {
-            LOG_INFO("Visualization generated at " + visualizationPath + ".html");
-        } else {
-            LOG_ERROR("Failed to generate visualization.");
-            return false;
-        }
+        m_visualizationManager->generateOutputs(visualizationPath);
+
     }
     #endif
     return true;
@@ -490,7 +480,6 @@ std::string MyGameManager_318835816_211314471::logAction() {
                      (controller.actionSuccess ? "" : " (ignored)") +
                      (controller.tank.isDestroyed() ? " (killed)" : "");
     }
-    LOG_DEBUG(debugInfo);
     return turnLog;
 }
 
@@ -520,13 +509,11 @@ Direction MyGameManager_318835816_211314471::getInitialDirection(int playerId) {
 }
 
 void MyGameManager_318835816_211314471::createTanks(const std::vector<std::pair<int, Point>>& tankPositions) {
-    LOG_INFO("Creating tanks");
     m_tanks.clear();
     for (const auto& [playerId, position] : tankPositions) {
         Direction dir = getInitialDirection(playerId);
         m_tanks.emplace_back(playerId, position, dir);
     }
-    LOG_INFO("Tanks created");
 }
 
 void MyGameManager_318835816_211314471::removeDestroyedShells() {
@@ -538,7 +525,6 @@ void MyGameManager_318835816_211314471::removeDestroyedShells() {
 }
 
 void MyGameManager_318835816_211314471::createTankAlgorithms(TankAlgorithmFactory player1_factory, TankAlgorithmFactory player2_factory) {
-    LOG_INFO("Creating tank algorithms");
     // Map from playerId to current tank index for that player
     std::unordered_map<int, int> playerTankCounts;
     for (auto& tank : m_tanks) {
@@ -555,7 +541,6 @@ void MyGameManager_318835816_211314471::createTankAlgorithms(TankAlgorithmFactor
         
         m_tankControllers.push_back(TankWithAlgorithm{tank, std::move(algo)});
     }
-    LOG_INFO("Tank algorithms created");
 }
 
 std::string MyGameManager_318835816_211314471::generateOutputFilePath(const std::string& player1Name, const std::string& player2Name) {

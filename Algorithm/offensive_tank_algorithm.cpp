@@ -6,7 +6,6 @@
 #include "offensive_battle_info.h"
 #include "offensive_tank_algorithm.h"
 #include "UserCommon/game_board.h"
-#include "UserCommon/bonus/logger/logger.h"
 #include "UserCommon/utils/direction.h"
 #include "common/TankAlgorithmRegistration.h"
 
@@ -55,14 +54,7 @@ ActionRequest TankAlgorithm_318835816_211314471_A::getAction() {
                 }
             }
         }
-    }
-    
-    // Debug log with position and direction
-    std::string debugInfo = "P" + std::to_string(m_playerId) + 
-                           "-T" + std::to_string(m_tankIndex) + 
-                           " @Tracked Before Update: (" + std::to_string(m_trackedPosition.getX()) + "," + std::to_string(m_trackedPosition.getY()) + ")" +
-                           "-" + directionToString(m_trackedDirection);
-    LOG_DEBUG(debugInfo);
+    }   
     
     updateState(action);
     return action;
