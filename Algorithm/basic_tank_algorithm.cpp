@@ -9,7 +9,7 @@
 
 using namespace UserCommon_098765432_123456789;
 
-namespace Algorithm_098765432_123456789 {
+namespace Algorithm_318835816_211314471 {
 
 BasicTankAlgorithm::BasicTankAlgorithm(int playerId, int tankIndex)
     : m_playerId(playerId), m_tankIndex(tankIndex), m_gameBoard(5, 5) {
@@ -299,4 +299,4 @@ void BasicTankAlgorithm::updateState(ActionRequest lastAction) {
     if (m_trackedCooldown < 0) m_trackedCooldown = 0;
 }
 
-} // namespace Algorithm_098765432_123456789 
+} // namespace Algorithm_318835816_211314471 

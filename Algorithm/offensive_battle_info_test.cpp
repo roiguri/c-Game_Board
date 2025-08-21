@@ -4,7 +4,7 @@
 
 using namespace UserCommon_098765432_123456789;
 
-namespace Algorithm_098765432_123456789 {
+namespace Algorithm_318835816_211314471 {
 
 TEST(OffensiveBattleInfoTest, ConstructorInitializesBase) {
     OffensiveBattleInfo info(5, 6);
@@ -28,4 +28,4 @@ TEST(OffensiveBattleInfoTest, DefaultTargetTankPositionIsNullopt) {
     EXPECT_FALSE(info.getTargetTankPosition().has_value());
 }
 
-} // namespace Algorithm_098765432_123456789 
+} // namespace Algorithm_318835816_211314471 

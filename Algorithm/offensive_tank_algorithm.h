@@ -8,10 +8,10 @@
 
 using namespace UserCommon_098765432_123456789;
 
-namespace Algorithm_098765432_123456789 {
+namespace Algorithm_318835816_211314471 {
 
 /**
- * @class TankAlgorithm_098765432_123456789_A
+ * @class TankAlgorithm_318835816_211314471_A
  * @brief Tank algorithm that chases and attacks a designated target tank.
  *
  * Priorities:
@@ -21,10 +21,10 @@ namespace Algorithm_098765432_123456789 {
  *   4. Turn to shoot if in line of sight
  *   5. Chase using BFS
  */
-class TankAlgorithm_098765432_123456789_A : public BasicTankAlgorithm {
+class TankAlgorithm_318835816_211314471_A : public BasicTankAlgorithm {
 public:
-    TankAlgorithm_098765432_123456789_A(int playerId, int tankIndex);
-    ~TankAlgorithm_098765432_123456789_A() override;
+    TankAlgorithm_318835816_211314471_A(int playerId, int tankIndex);
+    ~TankAlgorithm_318835816_211314471_A() override;
 
     void updateBattleInfo(BattleInfo& info) override;
     ActionRequest getAction() override;
@@ -71,4 +71,4 @@ private:
     friend class OffensiveTankAlgorithmTest;
 };
 
-} // namespace Algorithm_098765432_123456789
+} // namespace Algorithm_318835816_211314471

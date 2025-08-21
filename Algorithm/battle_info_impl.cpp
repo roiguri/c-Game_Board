@@ -2,7 +2,7 @@
 
 using namespace UserCommon_098765432_123456789;
 
-namespace Algorithm_098765432_123456789 {
+namespace Algorithm_318835816_211314471 {
 
 BattleInfoImpl::BattleInfoImpl(int boardWidth, int boardHeight)
     : m_boardWidth(boardWidth), m_boardHeight(boardHeight), m_gameBoard(boardWidth, boardHeight) {}
@@ -64,4 +64,4 @@ const Point& BattleInfoImpl::getOwnTankPosition() const {
     return m_ownTankPosition;
 }
 
-} // namespace Algorithm_098765432_123456789 
+} // namespace Algorithm_318835816_211314471 

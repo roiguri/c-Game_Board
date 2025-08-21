@@ -8,7 +8,7 @@
 
 using namespace UserCommon_098765432_123456789;
 
-namespace Algorithm_098765432_123456789 {
+namespace Algorithm_318835816_211314471 {
 
 /**
 * @class BasicPlayer
@@ -94,4 +94,4 @@ protected:
    friend class BasicPlayerTest;
 };
 
-} // namespace Algorithm_098765432_123456789
+} // namespace Algorithm_318835816_211314471

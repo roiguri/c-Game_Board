@@ -6,17 +6,17 @@
 
 using namespace UserCommon_098765432_123456789;
 
-namespace Algorithm_098765432_123456789 {
+namespace Algorithm_318835816_211314471 {
 #include <memory>
 #include <vector>
 
 class OffensiveTankAlgorithmTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        algo = std::make_unique<TankAlgorithm_098765432_123456789_A>(1, 0);
+        algo = std::make_unique<TankAlgorithm_318835816_211314471_A>(1, 0);
         setTankState(Point(2,2), Direction::Up);
     }
-    std::unique_ptr<TankAlgorithm_098765432_123456789_A> algo;
+    std::unique_ptr<TankAlgorithm_318835816_211314471_A> algo;
     // Helper to set tank state
     void setTankState(const Point& pos, Direction dir) {
         setTrackedPosition(pos);
@@ -192,4 +192,4 @@ TEST_F(OffensiveTankAlgorithmTest, GetAction_Priority5_ChaseWithBFS) {
     EXPECT_TRUE(action == ActionRequest::MoveForward || action == ActionRequest::RotateRight90 || action == ActionRequest::RotateLeft90);
 }
 
-} // namespace Algorithm_098765432_123456789 
+} // namespace Algorithm_318835816_211314471 

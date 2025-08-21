@@ -12,17 +12,17 @@ file(GLOB ALGORITHM_TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*_test.cpp")
 list(REMOVE_ITEM ALGORITHM_SOURCES ${ALGORITHM_TEST_SOURCES})
 
 # Create shared library with Assignment 3 naming convention
-add_library(Algorithm_098765432_123456789 SHARED 
+add_library(Algorithm_318835816_211314471 SHARED 
     ${ALGORITHM_SOURCES}
 )
 
-set_target_properties(Algorithm_098765432_123456789 PROPERTIES PREFIX "")
+set_target_properties(Algorithm_318835816_211314471 PROPERTIES PREFIX "")
 
 # Link UserCommon library
-target_link_libraries(Algorithm_098765432_123456789 PRIVATE UserCommon)
+target_link_libraries(Algorithm_318835816_211314471 PRIVATE UserCommon)
 
 # Include directories
-target_include_directories(Algorithm_098765432_123456789 PRIVATE
+target_include_directories(Algorithm_318835816_211314471 PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 

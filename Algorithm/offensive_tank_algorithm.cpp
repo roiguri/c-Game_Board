@@ -12,14 +12,14 @@
 
 using namespace UserCommon_098765432_123456789;
 
-namespace Algorithm_098765432_123456789 {
+namespace Algorithm_318835816_211314471 {
 
-TankAlgorithm_098765432_123456789_A::TankAlgorithm_098765432_123456789_A(int playerId, int tankIndex)
+TankAlgorithm_318835816_211314471_A::TankAlgorithm_318835816_211314471_A(int playerId, int tankIndex)
     : BasicTankAlgorithm(playerId, tankIndex) {}
 
-TankAlgorithm_098765432_123456789_A::~TankAlgorithm_098765432_123456789_A() = default;
+TankAlgorithm_318835816_211314471_A::~TankAlgorithm_318835816_211314471_A() = default;
 
-void TankAlgorithm_098765432_123456789_A::updateBattleInfo(BattleInfo& info) {
+void TankAlgorithm_318835816_211314471_A::updateBattleInfo(BattleInfo& info) {
     // Downcast to OffensiveBattleInfo
     auto* offensiveInfo = dynamic_cast<OffensiveBattleInfo*>(&info);
     if (offensiveInfo && offensiveInfo->getTargetTankPosition().has_value()) {
@@ -31,7 +31,7 @@ void TankAlgorithm_098765432_123456789_A::updateBattleInfo(BattleInfo& info) {
     BasicTankAlgorithm::updateBattleInfo(info);
 }
 
-ActionRequest TankAlgorithm_098765432_123456789_A::getAction() {
+ActionRequest TankAlgorithm_318835816_211314471_A::getAction() {
     ActionRequest action = ActionRequest::GetBattleInfo;
     // 1. Update battle info if necessary
     m_turnsSinceLastUpdate++;
@@ -68,7 +68,7 @@ ActionRequest TankAlgorithm_098765432_123456789_A::getAction() {
     return action;
 }
 
-std::optional<ActionRequest> TankAlgorithm_098765432_123456789_A::turnToShootAction() const {
+std::optional<ActionRequest> TankAlgorithm_318835816_211314471_A::turnToShootAction() const {
     if (!m_targetPosition) return std::nullopt;
     auto dirOpt = getLineOfSightDirection(m_trackedPosition, m_targetPosition.value());
     if (dirOpt.has_value() && dirOpt.value() != m_trackedDirection) {
@@ -78,7 +78,7 @@ std::optional<ActionRequest> TankAlgorithm_098765432_123456789_A::turnToShootAct
     return std::nullopt;
 }
 
-void TankAlgorithm_098765432_123456789_A::updatePathToTarget() {
+void TankAlgorithm_318835816_211314471_A::updatePathToTarget() {
     // Check if we've reached the target
     if (m_trackedPosition == m_targetPosition.value()) {
         m_currentPath.clear();
@@ -110,7 +110,7 @@ void TankAlgorithm_098765432_123456789_A::updatePathToTarget() {
     }
 }
 
-bool TankAlgorithm_098765432_123456789_A::isTankOffPath() const {
+bool TankAlgorithm_318835816_211314471_A::isTankOffPath() const {
     if (m_currentPath.empty()) return false;
     
     // Tank is on path if current position is at the first point of path,
@@ -120,14 +120,14 @@ bool TankAlgorithm_098765432_123456789_A::isTankOffPath() const {
     return !dirOpt.has_value(); // If not adjacent, tank is off path
 }
 
-bool TankAlgorithm_098765432_123456789_A::isFirstStepValid() const {
+bool TankAlgorithm_318835816_211314471_A::isFirstStepValid() const {
     if (m_currentPath.empty()) return false;
     
     Point nextPoint = m_currentPath.front();
     return isPositionSafe(nextPoint);
 }
 
-std::optional<ActionRequest> TankAlgorithm_098765432_123456789_A::followCurrentPath() {
+std::optional<ActionRequest> TankAlgorithm_318835816_211314471_A::followCurrentPath() {
     if (!m_currentPath.empty() && m_trackedPosition == m_currentPath.front()) {
         m_currentPath.erase(m_currentPath.begin());
     }
@@ -147,7 +147,7 @@ std::optional<ActionRequest> TankAlgorithm_098765432_123456789_A::followCurrentP
     return ActionRequest::MoveForward;
 }
 
-std::vector<Point> TankAlgorithm_098765432_123456789_A::findPathBFS(const Point& start, const Point& target) const {
+std::vector<Point> TankAlgorithm_318835816_211314471_A::findPathBFS(const Point& start, const Point& target) const {
     if (start == target) return {};
     std::queue<Point> q;
     std::map<Point, Point> cameFrom;
@@ -192,11 +192,11 @@ std::vector<Point> TankAlgorithm_098765432_123456789_A::findPathBFS(const Point&
     return {};
 }
 
-} // namespace Algorithm_098765432_123456789
+} // namespace Algorithm_318835816_211314471
 
 // Registration at global scope (disabled for testing)
 #ifndef DISABLE_STATIC_REGISTRATION
-using namespace Algorithm_098765432_123456789;
-REGISTER_TANK_ALGORITHM(TankAlgorithm_098765432_123456789_A);
+using namespace Algorithm_318835816_211314471;
+REGISTER_TANK_ALGORITHM(TankAlgorithm_318835816_211314471_A);
 #endif
 

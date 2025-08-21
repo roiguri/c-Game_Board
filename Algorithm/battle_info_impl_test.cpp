@@ -5,7 +5,7 @@
 
 using namespace UserCommon_098765432_123456789;
 
-namespace Algorithm_098765432_123456789 {
+namespace Algorithm_318835816_211314471 {
 #include <string>
 #include <vector>
 
@@ -96,4 +96,4 @@ TEST_F(BattleInfoImplTest, OwnTankPositionPersistsAfterClear) {
     EXPECT_EQ(info->getOwnTankPosition(), pos);
 }
 
-} // namespace Algorithm_098765432_123456789 
+} // namespace Algorithm_318835816_211314471 

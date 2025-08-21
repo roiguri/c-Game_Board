@@ -304,7 +304,7 @@ public:
                         {"gameMap", "../ui_server/examples/game_maps/input_a.txt"},
                         {"gameManager", "../ui_server/examples/game_managers/RealGameManager_318835816_211314471.so"},
                         {"algorithm1", "../ui_server/examples/algorithms/TestAlgorithm_098765432_123456789.so"},
-                        {"algorithm2", "../ui_server/examples/algorithms/Offensive_Algorithm_098765432_123456789.so"},
+                        {"algorithm2", "../ui_server/examples/algorithms/RealAlgorithm_318835816_211314471.so"},
                         {"verbose", true}
                     };
                 }

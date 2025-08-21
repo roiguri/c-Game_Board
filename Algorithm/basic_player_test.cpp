@@ -8,7 +8,7 @@
 
 using namespace UserCommon_098765432_123456789;
 
-namespace Algorithm_098765432_123456789 {
+namespace Algorithm_318835816_211314471 {
 
 // Mock SatelliteView
 class MockSatelliteView : public SatelliteView {
@@ -121,4 +121,4 @@ TEST_F(BasicPlayerTest, NoOwnTankPositionIfNotPresent) {
     EXPECT_EQ(info.getOwnTankPosition(), Point(0, 0));
 }
 
-} // namespace Algorithm_098765432_123456789
+} // namespace Algorithm_318835816_211314471

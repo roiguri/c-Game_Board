@@ -12,7 +12,7 @@
 
 using namespace UserCommon_098765432_123456789;
 
-namespace Algorithm_098765432_123456789 {
+namespace Algorithm_318835816_211314471 {
 
 /**
  * @class BasicTankAlgorithm
@@ -199,4 +199,4 @@ protected:
     friend class BasicTankAlgorithmTest;
 };
 
-} // namespace Algorithm_098765432_123456789 
+} // namespace Algorithm_318835816_211314471 

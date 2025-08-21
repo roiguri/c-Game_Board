@@ -7,20 +7,20 @@
 
 using namespace UserCommon_098765432_123456789;
 
-namespace Algorithm_098765432_123456789 {
+namespace Algorithm_318835816_211314471 {
 
 /**
- * @class Player_098765432_123456789_A
+ * @class Player_318835816_211314471_A
  * @brief Player that coordinates all tanks to target a single enemy tank.
  *
  * Inherits from BasicPlayer and uses OffensiveBattleInfo to communicate
  * target information to all tanks. If the current target is destroyed, selects
  * the closest enemy tank to the last known target position.
  */
-class Player_098765432_123456789_A : public BasicPlayer {
+class Player_318835816_211314471_A : public BasicPlayer {
 public:
-    Player_098765432_123456789_A(int playerIndex, size_t x, size_t y, size_t maxSteps, size_t numShells);
-    ~Player_098765432_123456789_A() override;
+    Player_318835816_211314471_A(int playerIndex, size_t x, size_t y, size_t maxSteps, size_t numShells);
+    ~Player_318835816_211314471_A() override;
 
     void updateTankWithBattleInfo(TankAlgorithm& tank, SatelliteView& satelliteView) override;
 
@@ -57,4 +57,4 @@ protected:
     OffensiveBattleInfo m_offensiveBattleInfo;
 };
 
-} // namespace Algorithm_098765432_123456789
+} // namespace Algorithm_318835816_211314471

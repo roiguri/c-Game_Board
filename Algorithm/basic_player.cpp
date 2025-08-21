@@ -6,7 +6,7 @@
 
 using namespace UserCommon_098765432_123456789;
 
-namespace Algorithm_098765432_123456789 {
+namespace Algorithm_318835816_211314471 {
 
 BasicPlayer::BasicPlayer(int playerIndex, size_t x, size_t y, size_t maxSteps, size_t numShells)
     : m_playerIndex(playerIndex),
@@ -74,4 +74,4 @@ void BasicPlayer::parseSatelliteViewToBattleInfo(BattleInfoImpl& battleInfo,
     }
 }
 
-} // namespace Algorithm_098765432_123456789
+} // namespace Algorithm_318835816_211314471

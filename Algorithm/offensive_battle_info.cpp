@@ -2,7 +2,7 @@
 
 using namespace UserCommon_098765432_123456789;
 
-namespace Algorithm_098765432_123456789 {
+namespace Algorithm_318835816_211314471 {
 
 // --- Target Information Implementation ---
 
@@ -18,4 +18,4 @@ std::optional<Point> OffensiveBattleInfo::getTargetTankPosition() const {
     return m_target_tank_position;
 }
 
-} // namespace Algorithm_098765432_123456789
+} // namespace Algorithm_318835816_211314471

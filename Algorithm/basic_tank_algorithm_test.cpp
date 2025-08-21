@@ -11,7 +11,7 @@
 using namespace UserCommon_098765432_123456789;
 using ::testing::UnorderedElementsAreArray;
 
-namespace Algorithm_098765432_123456789 {
+namespace Algorithm_318835816_211314471 {
 
 class BasicTankAlgorithmTest : public ::testing::Test {
 protected:
@@ -808,5 +808,5 @@ TEST_F(BasicTankAlgorithmTest, IsInDangerFromShells_Point_ShellBlockedByTank) {
     EXPECT_FALSE(isInDangerFromShells(Point(1, 1)));
 }
 
-} // namespace Algorithm_098765432_123456789
+} // namespace Algorithm_318835816_211314471
 
