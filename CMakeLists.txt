@@ -51,6 +51,13 @@ if(ENABLE_UI)
         GIT_REPOSITORY https://github.com/DaanDeMeyer/reproc.git
         GIT_TAG v14.2.1
     )
+
+    # nlohmann/json for JSON handling
+    FetchContent_Declare(
+        nlohmann_json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG v3.11.3
+    )
     
     FetchContent_MakeAvailable(httplib reproc)
 endif()

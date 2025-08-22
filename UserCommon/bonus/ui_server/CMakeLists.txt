@@ -29,6 +29,7 @@ target_include_directories(tank_simulator_ui PRIVATE
 # Link required libraries
 target_link_libraries(tank_simulator_ui PRIVATE
     httplib::httplib
+    nlohmann_json::nlohmann_json
     UserCommon
 )
 
