@@ -59,7 +59,7 @@ if(ENABLE_UI)
         GIT_TAG v3.11.3
     )
     
-    FetchContent_MakeAvailable(httplib reproc)
+    FetchContent_MakeAvailable(httplib reproc nlohmann_json)
 endif()
 
 # Create UserCommon static library
