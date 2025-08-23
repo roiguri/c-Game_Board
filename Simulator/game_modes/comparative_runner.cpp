@@ -420,6 +420,12 @@ std::vector<std::pair<std::vector<std::string>, const ComparativeRunner::Compara
         allGroups.emplace_back(group.second, representativeResults[group.first]);
     }
     
+    // Sort groups by size (most common results first)
+    std::sort(allGroups.begin(), allGroups.end(), 
+        [](const auto& a, const auto& b) {
+            return a.first.size() > b.first.size();
+        });
+    
     return allGroups;
 }
 
