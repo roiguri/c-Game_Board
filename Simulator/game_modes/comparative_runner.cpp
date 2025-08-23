@@ -465,7 +465,7 @@ void ComparativeRunner::printResultGroup(std::ostream& output, const std::vector
     
     if (representative->gameResult.gameState) {
         std::string gameStateStr = gameStateToString(*representative->gameResult.gameState, representative->mapRows, representative->mapCols);
-        output << gameStateStr;
+        output << gameStateStr << std::endl;
     }
 }
 
