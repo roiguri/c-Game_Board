@@ -105,7 +105,7 @@ make
 
 **Available Build Options:**
 - `DENABLE_TESTING=ON`: Builds unit tests using Google Test framework
-- `DENABLE_VISUALIZATION=ON`: Enables HTML visualization generation  
+- `DENABLE_VISUALIZATION=ON`: Enables HTML visualization generation
 - `DENABLE_UI=ON`: Builds the web-based UI server
 
 ### Running the Game
@@ -219,18 +219,15 @@ HTML-based game visualization with step-by-step replay capabilities.
 # Build with visualization enabled
 cmake -DENABLE_VISUALIZATION=ON ..
 make
-
-# For web UI with visualization support
-cmake -DENABLE_UI=ON -DENABLE_VISUALIZATION=ON ..
-make tank_simulator_ui
 ```
 
 **Usage:**
 ```bash
 # Command-line usage (requires -verbose flag for visualization generation)
+# Game manager should be compiled with -DENABLE_VISUALIZATION=ON
 ./simulator_318835816_211314471 -basic \
   game_map=<input_file.txt> \
-  game_manager=<game_manager.so> \
+  game_manager=<game_manager.so> \  
   algorithm1=<algorithm1.so> \
   algorithm2=<algorithm2.so> \
   -verbose
