@@ -152,14 +152,12 @@ class SimulatorUI {
         Object.entries(config).forEach(([key, value]) => {
             if (key !== 'mode' && key !== 'verbose' && value) {
                 const paramName = paramMapping[key] || key;
-                // Remove unnecessary quotes - only add them if the value contains spaces
-                const formattedValue = value.toString().includes(' ') ? `"${value}"` : value;
-                commandParts.push(`${paramName}=${formattedValue}`);
+                commandParts.push(`${paramName}=${value}`);
             }
         });
         
         if (config.verbose) commandParts.push('-verbose');
-        const command = commandParts.join(' \\\n');
+        const command = commandParts.join(' ');
         
         this.configText.textContent = command;
         this.configSummary.style.display = 'block';

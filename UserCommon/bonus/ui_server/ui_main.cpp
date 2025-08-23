@@ -162,10 +162,9 @@ public:
         
         running.store(true);
         
-        // Build command string with proper escaping
         std::string command = args[0];
         for (size_t i = 1; i < args.size(); ++i) {
-            command += " \"" + args[i] + "\"";  // Quote arguments to handle spaces
+            command += " " + args[i];
         }
         command += " 2>&1";  // Redirect stderr to stdout
         
@@ -377,12 +376,8 @@ public:
                 std::string commandString;
                 for (size_t i = 0; i < args.size(); ++i) {
                     if (i > 0) commandString += " ";
-                    // Quote arguments that contain spaces or special characters
-                    if (args[i].find(' ') != std::string::npos || args[i].find('=') != std::string::npos) {
-                        commandString += "\"" + args[i] + "\"";
-                    } else {
-                        commandString += args[i];
-                    }
+                    // No quotes - keep it simple and consistent
+                    commandString += args[i];
                 }
                 
                 std::cout << "🔍 Built command: " << commandString << std::endl;
