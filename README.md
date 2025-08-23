@@ -137,7 +137,7 @@ Compare multiple game managers with the same algorithms on a single map.
 
 **Command:**
 ```bash
-./simulator_318835816_211314471 -comparative \
+../Simulator/simulator_318835816_211314471 -comparative \
   game_map=<input_file.txt> \
   game_managers_folder=<path_to_gm_folder> \
   algorithm1=<algorithm1.so> \
@@ -160,7 +160,7 @@ Tournament between multiple algorithms across multiple maps.
 
 **Command:**
 ```bash
-./simulator_318835816_211314471 -competition \
+../Simulator/simulator_318835816_211314471 -competition \
   game_maps_folder=<maps_folder> \
   game_manager=<game_manager.so> \
   algorithms_folder=<algorithms_folder> \
@@ -188,7 +188,7 @@ Tournament between multiple algorithms across multiple maps.
 
 ## Bonus Features
 
-The project includes several advanced features beyond the basic requirements. For complete technical details, see `docs/bonus.txt`.
+The project includes several advanced features beyond the basic requirements. For complete technical details, see `bonus.txt`.
 
 ### 1. Web-Based UI Server 🌐
 
@@ -240,7 +240,7 @@ make
 ```bash
 # Command-line usage (requires -verbose flag for visualization generation)
 # Game manager should be compiled with -DENABLE_VISUALIZATION=ON
-./simulator_318835816_211314471 -basic \
+../Simulator/simulator_318835816_211314471 -basic \
   game_map=<input_file.txt> \
   game_manager=<game_manager.so> \  
   algorithm1=<algorithm1.so> \
@@ -270,9 +270,9 @@ Unit testing using Google Test with extensive coverage:
 cmake -DENABLE_TESTING=ON ..
 make
 
-# Run all tests
-./build/tests/usercommon_tests        # UserCommon library tests
-./build/tests/algorithm_tests         # Algorithm implementation tests  
-./build/tests/GameManager_tests       # Game manager tests
-./build/tests/Simulator_tests         # Simulator engine tests
+# Run all tests (from build directory)
+./tests/usercommon_tests        # UserCommon library tests
+./tests/algorithm_tests         # Algorithm implementation tests  
+./tests/GameManager_tests       # Game manager tests
+./tests/Simulator_tests         # Simulator engine tests
 ```
