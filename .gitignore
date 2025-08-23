@@ -43,6 +43,10 @@ CTestTestfile.cmake
 # Exception: Allow example .so files for UI server
 !UserCommon/bonus/ui_server/examples/**/*.so
 
+# Exception: Allow .so files in other algorithm and game manager directories
+!other_algo/*.so
+!other_gm/*.so
+
 # Compiled Static libraries
 *.lai
 *.la
