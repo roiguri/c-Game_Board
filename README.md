@@ -117,12 +117,17 @@ Single game between two algorithms using one game manager.
 
 **Command:**
 ```bash
-./simulator_318835816_211314471 -basic \
+../Simulator/simulator_318835816_211314471 -basic \
   game_map=<input_file.txt> \
-  game_manager=../GameManager/GameManager_318835816_211314471.so \
-  algorithm1=../Algorithm/Algorithm_318835816_211314471.so \
+  game_manager=<path_to_game_manager.so> \
+  algorithm1=<path_to_first_algorithm.so> \
   algorithm2=<path_to_second_algorithm.so> \
   [-verbose]
+```
+
+**Example:**
+```bash
+../Simulator/simulator_318835816_211314471 -basic game_map=../UserCommon/bonus/ui_server/examples/game_maps/input_a.txt game_manager=../UserCommon/bonus/ui_server/examples/game_managers/RealGameManager_318835816_211314471.so algorithm1=../UserCommon/bonus/ui_server/examples/algorithms/TestAlgorithm_098765432_123456789.so algorithm2=../UserCommon/bonus/ui_server/examples/algorithms/RealAlgorithm_318835816_211314471.so
 ```
 
 **Output:** Game results printed to console, full game log if verbose flag is set.
@@ -140,6 +145,11 @@ Compare multiple game managers with the same algorithms on a single map.
   [num_threads=<num>] [-verbose]
 ```
 
+**Example:**
+```bash
+../Simulator/simulator_318835816_211314471 -comparative game_map=../UserCommon/bonus/ui_server/examples/game_maps/input_a.txt game_managers_folder=../UserCommon/bonus/ui_server/examples/game_managers algorithm1=../UserCommon/bonus/ui_server/examples/algorithms/TestAlgorithm_098765432_123456789.so algorithm2=../UserCommon/bonus/ui_server/examples/algorithms/RealAlgorithm_318835816_211314471.so num_threads=4
+```
+
 **Output:** `comparative_results_<timestamp>.txt` in the game managers folder, containing:
 - Input parameters (map, algorithms)  
 - Results grouped by identical outcomes
@@ -155,6 +165,11 @@ Tournament between multiple algorithms across multiple maps.
   game_manager=<game_manager.so> \
   algorithms_folder=<algorithms_folder> \
   [num_threads=<num>] [-verbose]
+```
+
+**Example:**
+```bash
+../Simulator/simulator_318835816_211314471 -competition game_maps_folder=../UserCommon/bonus/ui_server/examples/game_maps game_manager=../UserCommon/bonus/ui_server/examples/game_managers/RealGameManager_318835816_211314471.so algorithms_folder=../UserCommon/bonus/ui_server/examples/algorithms num_threads=4
 ```
 
 **Output:** `competition_<timestamp>.txt` in the algorithms folder, containing:
