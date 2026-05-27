@@ -1,3 +1,5 @@
+> **Status:** Coursework project for Tel Aviv University's Advanced Programming course. Not maintained — provided as-is for reference.
+
 # 💥 Tank Battle Game 💥
 
 ## Overview
